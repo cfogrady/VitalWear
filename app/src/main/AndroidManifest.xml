@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.github.cfogrady.vitalwear">
+
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <uses-feature android:name="android.hardware.type.watch" />
+
+    <application
+        android:name=".VitalWearApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.DeviceDefault">
+        <uses-library
+            android:name="com.google.android.wearable"
+            android:required="true" />
+
+        <!--
+               Set to true if your app is Standalone, that is, it does not require the handheld
+               app to run.
+        -->
+        <meta-data
+            android:name="com.google.android.wearable.standalone"
+            android:value="true" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".character.activity.CharacterSelectActivity"/>
+        <activity android:name=".character.activity.NewCardActivity"/>
+        <activity android:name=".StorageSelectorActivity"/>
+        <service
+            android:name=".PetTileService"
+            android:label="VitalWear"
+            android:description="@string/tile_description"
+            android:exported="true"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+
+            <meta-data android:name="androidx.wear.tiles.PREVIEW"
+                android:value="VitalWear"/>
+                <!--android:resource="@drawable/tile_preview"-->
+
+        </service>
+        <service
+            android:name=".PartnerComplicationService"
+            android:exported="true"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SMALL_IMAGE" />
+
+            <!--
+            When your complication data provider is active, UPDATE_PERIOD_SECONDS specifies how
+            often you want the system to check for updates to the data. A zero value means you
+            will manually trigger updates.
+            In general, you want to manually trigger updates only when your complication data
+            actually changes via ProviderUpdateRequester (check
+            ComplicationTapBroadcastReceiver.java for an example).
+            If you do decide to use UPDATE_PERIOD_SECONDS, set the interval in the order of minutes.
+            A good value might be 600 seconds (10 minutes) if you need updates pulled often.
+            Also, remember that this is only a guidance for the system. Android Wear may update less
+            frequently.
+            -->
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="0" />
+        </service>
+
+        <receiver android:name=".PartnerComplicationReceiver" />
+    </application>
+
+</manifest>
