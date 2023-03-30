@@ -31,4 +31,11 @@ data class CharacterEntity (
     @ColumnInfo(name = "current_phase_wins") var currentPhaseWins: Int,
     @ColumnInfo(name = "mood") var mood: Int,
     @ColumnInfo(name = "dead") var dead: Boolean,
-)
+) {
+    fun currentPhaseWinRatio(): Int {
+        if(currentPhaseBattles == 0) {
+            return 0
+        }
+        return (100 * currentPhaseWins) / currentPhaseBattles
+    }
+}
