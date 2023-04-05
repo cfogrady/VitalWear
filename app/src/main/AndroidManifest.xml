@@ -25,6 +25,19 @@
             android:name="com.google.android.wearable.standalone"
             android:value="true" />
 
+        <provider
+            xmlns:tools="http://schemas.android.com/tools"
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <!-- If you are using androidx.startup to initialize other components -->
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -54,7 +67,7 @@
 
         </service>
         <service
-            android:name=".PartnerComplicationService"
+            android:name=".complications.PartnerComplicationService"
             android:exported="true"
             android:icon="@drawable/complication_preview"
             android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
@@ -82,7 +95,7 @@
                 android:value="0" />
         </service>
 
-        <receiver android:name=".PartnerComplicationReceiver" />
+        <receiver android:name=".complications.PartnerComplicationReceiver" />
     </application>
 
 </manifest>

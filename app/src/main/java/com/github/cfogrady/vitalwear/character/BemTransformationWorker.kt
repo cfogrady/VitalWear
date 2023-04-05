@@ -1,16 +1,19 @@
 package com.github.cfogrady.vitalwear.character
 
 import android.content.Context
+import android.util.Log
 import androidx.work.WorkerParameters
 import androidx.work.Worker
-import com.github.cfogrady.vitalwear.VitalWearApp
-import com.github.cfogrady.vitalwear.character.data.Character
 
-class BemTransformationWorker (val context: Context, val workerParams: WorkerParameters) : Worker(context, workerParams) {
+class BemTransformationWorker (private val characterManager: CharacterManager, val context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
+    val TAG = "BemTransformationWorker"
     override fun doWork(): Result {
-        context.
-        characterManager.prepCharacterTransformation(characterManager.activePartner)
-        characterManager.doCharacterTransformation()
+        Log.i(TAG, "Transforming!")
+        val activeCharacterLiveData = characterManager.getActiveCharacter()
+        activeCharacterLiveData.ifPresent { character ->
+            character.value?.prepCharacterTransformation()
+            characterManager.doActiveCharacterTransformation()
+        }
         return Result.success()
     }
 }
