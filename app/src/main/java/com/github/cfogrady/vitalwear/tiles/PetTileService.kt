@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear
+package com.github.cfogrady.vitalwear.tiles
 
 import androidx.wear.tiles.*
 import androidx.wear.tiles.ColorBuilders.argb

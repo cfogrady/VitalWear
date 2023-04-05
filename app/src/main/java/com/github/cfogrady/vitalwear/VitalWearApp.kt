@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.room.Room
 import androidx.work.Configuration
 import com.github.cfogrady.vitalwear.character.BEMUpdater
-import com.github.cfogrady.vitalwear.character.BEMWorkerFactory
 import com.github.cfogrady.vitalwear.data.CardLoader
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
@@ -33,6 +32,6 @@ class VitalWearApp : Application(), Configuration.Provider {
 
     override fun getWorkManagerConfiguration(): Configuration {
         //characterManager = CharacterManager()
-        return Configuration.Builder().setWorkerFactory(BEMWorkerFactory(characterManager)).build()
+        return Configuration.Builder().setWorkerFactory(VitalWearWorkerFactory(characterManager)).build()
     }
 }

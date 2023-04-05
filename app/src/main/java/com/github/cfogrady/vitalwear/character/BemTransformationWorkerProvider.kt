@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.character.data
+package com.github.cfogrady.vitalwear.character
 
 import android.content.Context
 import androidx.work.Worker
