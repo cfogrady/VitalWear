@@ -39,7 +39,7 @@
         </provider>
 
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
@@ -50,9 +50,9 @@
         </activity>
         <activity android:name=".character.activity.CharacterSelectActivity"/>
         <activity android:name=".character.activity.NewCardActivity"/>
-        <activity android:name=".StorageSelectorActivity"/>
+        <activity android:name=".activity.StorageSelectorActivity"/>
         <service
-            android:name=".PetTileService"
+            android:name=".tiles.PetTileService"
             android:label="VitalWear"
             android:description="@string/tile_description"
             android:exported="true"

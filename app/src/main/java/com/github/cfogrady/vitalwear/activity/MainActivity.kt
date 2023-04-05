@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear
+package com.github.cfogrady.vitalwear.activity
 
 import android.app.Activity
 import android.content.Intent
@@ -8,6 +8,7 @@ import android.provider.DocumentsContract
 import android.util.Log
 import android.view.View
 import com.github.cfogrady.vb.dim.card.DimReader
+import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.activity.CharacterSelectActivity
 import com.github.cfogrady.vitalwear.data.FirmwareManager
 import com.github.cfogrady.vitalwear.databinding.ActivityMainBinding

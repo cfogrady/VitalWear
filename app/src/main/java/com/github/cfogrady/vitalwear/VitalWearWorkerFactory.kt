@@ -1,16 +1,18 @@
-package com.github.cfogrady.vitalwear.character
+package com.github.cfogrady.vitalwear
 
 import android.content.Context
-import android.util.Log
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
-import com.github.cfogrady.vitalwear.character.data.BemTransformationWorkerProvider
+import com.github.cfogrady.vitalwear.character.*
+import com.github.cfogrady.vitalwear.character.BemTransformationWorkerProvider
 
-class BEMWorkerFactory(
+class VitalWearWorkerFactory(
     private val characterManager: CharacterManager,
-    private val workerProviders: Map<String?, BemTransformationWorkerProvider> =
-    mapOf(Pair(BemTransformationWorker::class.qualifiedName, BemTransformationWorkerProvider()))
+    private val workerProviders: Map<String?, WorkerProvider> =
+    mapOf(Pair(BemTransformationWorker::class.qualifiedName, BemTransformationWorkerProvider()),
+        Pair(CharacterUpdateWorker::class.qualifiedName, CharacterUpdateWorkerProvider())
+    )
 ) : WorkerFactory() {
     private val TAG: String = "BEMWorkerFactory"
 
