@@ -11,12 +11,12 @@ import kotlin.math.min
 class CharacterUpdateWorker  (val characterManager: CharacterManager, context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
     val bemMoodUpdater = BEMMoodUpdater()
     override fun doWork(): Result {
-        val maybeCharacter = characterManager.getActiveCharacter()
-        if(!maybeCharacter.isPresent) {
+        val liveCharacter = characterManager.getActiveCharacter()
+        if(liveCharacter.value == null) {
             // no character to update
             return Result.success()
         }
-        val character = maybeCharacter.get().value!!
+        val character = liveCharacter.value!!
         bemMoodUpdater.updateMood(character)
         val now = LocalDateTime.now()
         val elapsedTimeInSecondsSinceLastUpdate = Duration.between(character.characterStats.lastUpdate, now).seconds

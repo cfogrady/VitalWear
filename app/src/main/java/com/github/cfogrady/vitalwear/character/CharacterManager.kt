@@ -21,10 +21,10 @@ const val TAG = "CharacterRepository"
  * Manage the character loading and updating
  */
 class CharacterManager() {
+    private val activeCharacter = MutableLiveData<BEMCharacter>()
     private lateinit var characterDao: CharacterDao
     private lateinit var cardLoader: CardLoader
     private lateinit var bemUpdater: BEMUpdater
-    private lateinit var activeCharacter: MutableLiveData<BEMCharacter>
 
     fun init(characterDao: CharacterDao,
              cardLoader: CardLoader,
@@ -35,24 +35,20 @@ class CharacterManager() {
     }
 
     @Synchronized
-    fun getActiveCharacter() : Optional<LiveData<BEMCharacter>> {
-        if(!isActiveCharacterInitialized()) {
-            val optionalCharacter = loadActiveCharacter()
-            if(!optionalCharacter.isPresent) {
-                return Optional.empty()
-            } else {
-                activeCharacter = MutableLiveData(optionalCharacter.get())
-                bemUpdater.initializeBEMUpdates(optionalCharacter.get())
-            }
+    fun getActiveCharacter() : LiveData<BEMCharacter> {
+        if(!activeCharacterIsPresent()) {
+            val character = loadActiveCharacter()
+            activeCharacter.postValue(character)
+            bemUpdater.initializeBEMUpdates(character)
         }
-        return Optional.of(activeCharacter)
+        return activeCharacter
     }
 
-    fun isActiveCharacterInitialized() : Boolean {
-        return this::activeCharacter.isInitialized
+    fun activeCharacterIsPresent() : Boolean {
+        return activeCharacter.value != null
     }
 
-    private fun loadActiveCharacter() : Optional<BEMCharacter> {
+    private fun loadActiveCharacter() : BEMCharacter {
         // replace this with a table for activePartner and fetch by character id
         val activeCharacterStats = characterDao.getCharactersByNotState(CharacterState.BACKUP)
         if(!activeCharacterStats.isEmpty()) {
@@ -63,14 +59,14 @@ class CharacterManager() {
                 val timeToTransform = largestTransformationTimeSeconds(card, characterStats.slotId)
                 val transformationOptions = transformationOptions(card, characterStats.slotId)
                 val speciesStats = card.characterStats.characterEntries.get(characterStats.slotId)
-                Optional.of(BEMCharacter(bitmaps, characterStats, speciesStats, timeToTransform, transformationOptions))
+                BEMCharacter(bitmaps, characterStats, speciesStats, timeToTransform, transformationOptions)
             } catch (e: Exception) {
                 Log.e(TAG, "Unable to load card! Act as if empty", e)
-                Optional.empty()
+                BEMCharacter.DEFAULT_CHARACTER
             }
 
         }
-        return Optional.empty()
+        return BEMCharacter.DEFAULT_CHARACTER
     }
 
     private fun largestTransformationTimeSeconds(card: Card<*, *, *, *, *, *>, slotId: Int) : Long {
@@ -124,13 +120,10 @@ class CharacterManager() {
             actualCharacter.characterStats.trainedPP = 0
             actualCharacter.characterStats.vitals = 0
             updateCharacter(actualCharacter.characterStats)
-            GlobalScope.launch {
-                withContext(Dispatchers.Main) {
-                    bemUpdater.cancel()
-                    activeCharacter.value = BEMCharacter(bitmaps, actualCharacter.characterStats, newSpeciesStats, transformationTime, transformationOptions)
-                    bemUpdater.initializeBEMUpdates(activeCharacter.value!!)
-                }
-            }
+            bemUpdater.cancel()
+            val transformedCharacter = BEMCharacter(bitmaps, actualCharacter.characterStats, newSpeciesStats, transformationTime, transformationOptions)
+            activeCharacter.postValue(transformedCharacter)
+            bemUpdater.initializeBEMUpdates(transformedCharacter)
         }
     }
 
@@ -140,24 +133,16 @@ class CharacterManager() {
 
     fun createNewCharacter(file: File) {
         val card = cardLoader.loadCard(file)
-        val character = newCharacter(file.name, card, 0)
-        if(this::activeCharacter.isInitialized) {
-            val actualCharacter = activeCharacter.value!!
-            actualCharacter.characterStats.state = CharacterState.BACKUP
-            updateCharacter(actualCharacter.characterStats)
-            insertCharacter(character.characterStats)
-            GlobalScope.launch {
-                withContext(Dispatchers.Main) {
-                    activeCharacter.value = character
-                    bemUpdater.cancel()
-                    bemUpdater.initializeBEMUpdates(character)
-                }
-            }
-        } else {
-            insertCharacter(character.characterStats)
-            activeCharacter = MutableLiveData(character)
-            bemUpdater.initializeBEMUpdates(character)
+        if(activeCharacterIsPresent()) {
+            val currentCharacter = activeCharacter.value!!
+            currentCharacter.characterStats.state = CharacterState.BACKUP
+            updateCharacter(currentCharacter.characterStats)
+            bemUpdater.cancel()
         }
+        val character = newCharacter(file.name, card, 0)
+        insertCharacter(character.characterStats)
+        activeCharacter.postValue(character)
+        bemUpdater.initializeBEMUpdates(character)
     }
 
     private fun newCharacter(file: String, card: Card<*, *, *, *, *, *>, slotId: Int) : BEMCharacter {
@@ -202,35 +187,31 @@ class CharacterManager() {
         character.id = characterDao.insert(character).toInt()
     }
 
-    fun swapToCharacter(selectedCharacter : CharacterPreview) {
+    fun swapToCharacter(selectedCharacterPreview : CharacterPreview) {
         GlobalScope.launch {
-            val characterStats = characterDao.getCharacterById(selectedCharacter.characterId).get(0)
-            val card = cardLoader.loadCard(selectedCharacter.cardName)
-            val speciesStats = card.characterStats.characterEntries.get(selectedCharacter.slotId)
-            val bitmaps = cardLoader.bitmapsFromCard(card, selectedCharacter.slotId)
-            val transformationTime = largestTransformationTimeSeconds(card, selectedCharacter.slotId)
-            val transformationOptions = transformationOptions(card, selectedCharacter.slotId)
-            val fullSelectedCharacter = BEMCharacter(bitmaps, characterStats, speciesStats, transformationTime, transformationOptions)
-            if(::activeCharacter.isInitialized) {
-                val actualCharacter = activeCharacter.value!!
-                actualCharacter.characterStats.state = CharacterState.BACKUP
-                updateCharacter(actualCharacter.characterStats)
+            val characterStats = characterDao.getCharacterById(selectedCharacterPreview.characterId).get(0)
+            val card = cardLoader.loadCard(selectedCharacterPreview.cardName)
+            val speciesStats = card.characterStats.characterEntries.get(selectedCharacterPreview.slotId)
+            val bitmaps = cardLoader.bitmapsFromCard(card, selectedCharacterPreview.slotId)
+            val transformationTime = largestTransformationTimeSeconds(card, selectedCharacterPreview.slotId)
+            val transformationOptions = transformationOptions(card, selectedCharacterPreview.slotId)
+            val selectedCharacter = BEMCharacter(bitmaps, characterStats, speciesStats, transformationTime, transformationOptions)
+            if(activeCharacterIsPresent()) {
+                val currentCharacter = activeCharacter.value!!
+                currentCharacter.characterStats.state = CharacterState.BACKUP
+                updateCharacter(currentCharacter.characterStats)
                 bemUpdater.cancel()
-            } else {
-                activeCharacter = MutableLiveData()
             }
             characterStats.state = CharacterState.SYNCED
             updateCharacter(characterStats)
-            withContext(Dispatchers.Main) {
-                activeCharacter.value = fullSelectedCharacter
-                bemUpdater.initializeBEMUpdates(fullSelectedCharacter)
-            }
+            activeCharacter.postValue(selectedCharacter)
+            bemUpdater.initializeBEMUpdates(selectedCharacter)
         }
     }
 
     fun deleteCharacter(characterPreview: CharacterPreview) {
-        val character = getActiveCharacter()
-        if(character.isPresent && character.get().value!!.characterStats.id == characterPreview.characterId) {
+        val character = getActiveCharacter() //force a load of the active character
+        if(character.value != null && character.value!!.characterStats.id == characterPreview.characterId) {
             Log.e(TAG, "Cannot delete active character")
         } else {
             characterDao.deleteById(characterPreview.characterId)

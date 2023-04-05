@@ -9,9 +9,10 @@ class BemTransformationWorker (private val characterManager: CharacterManager, v
     val TAG = "BemTransformationWorker"
     override fun doWork(): Result {
         Log.i(TAG, "Transforming!")
-        val activeCharacterLiveData = characterManager.getActiveCharacter()
-        activeCharacterLiveData.ifPresent { character ->
-            character.value?.prepCharacterTransformation()
+        val liveCharacter = characterManager.getActiveCharacter()
+        if(liveCharacter.value != null) {
+            val character = liveCharacter.value!!
+            character.prepCharacterTransformation()
             characterManager.doActiveCharacterTransformation()
         }
         return Result.success()
