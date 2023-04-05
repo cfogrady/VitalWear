@@ -17,6 +17,10 @@ import androidx.wear.compose.material.items
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.data.CardLoader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 
@@ -53,7 +57,11 @@ class NewCardActivity : ComponentActivity() {
             ) {
                 items(items = files) { file ->
                     Button(onClick = {
-                        characterManager.createNewCharacter(file)
+                        GlobalScope.launch {
+                            withContext(Dispatchers.Default) {
+                                characterManager.createNewCharacter(file)
+                            }
+                        }
                         val intent = Intent()
                         intent.putExtra(NEW_CHARACTER_SELECTED_FLAG, true)
                         setResult(0, intent)

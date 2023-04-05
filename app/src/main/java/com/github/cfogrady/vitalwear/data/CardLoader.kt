@@ -10,6 +10,7 @@ import com.github.cfogrady.vb.dim.card.DimReader
 import com.github.cfogrady.vb.dim.sprite.SpriteData
 import java.io.File
 import java.io.FileInputStream
+import java.io.InputStream
 
 class CardLoader(val applicationContext: Context, val spriteBitmapConverter: SpriteBitmapConverter) {
     private val TAG = "CardLoader"
@@ -47,16 +48,42 @@ class CardLoader(val applicationContext: Context, val spriteBitmapConverter: Spr
     fun loadBitmapsForSlots(requestedSlotsByCardName : Map<String, out Collection<Int>>, spriteId: Int) : Map<String, SparseArray<Bitmap>> {
         val resultMap = HashMap<String, SparseArray<Bitmap>>()
         for(entry in requestedSlotsByCardName.entries) {
+            Log.i(TAG, "Reading card $entry")
+            //TODO: 2+ seconds per card. That's a long potential load time...
             val card = loadCard(entry.key)
+            Log.i(TAG, "Card read.")
             val cardSlots = SparseArray<Bitmap>()
             for(slotId in entry.value) {
+                Log.i(TAG, "Fetching sprites for slot $slotId")
                 val sprites = bemCharacterSprites(card.spriteData.sprites, slotId)
+                Log.i(TAG, "Converting spriteId to bitmap.")
                 val bitmap = spriteBitmapConverter.getBitmap(sprites.get(spriteId))
+                Log.i(TAG, "Done.")
                 cardSlots.put(slotId, bitmap)
             }
             resultMap.put(entry.key, cardSlots)
         }
+        Log.i(TAG, "BitmapsForSlots Built")
         return resultMap
+    }
+
+    fun loadSpritesFromCard(cardName: String, slotIds: Collection<Int>) {
+        val file = File(applicationContext.filesDir, "$LIBRARY_DIR/$cardName")
+        try {
+            FileInputStream(file).use { fileInput ->
+
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Unable to load Card", e)
+            throw e
+        }
+    }
+
+    fun readAndDiscardNBytes(n: Int, instr: InputStream) {
+        val bytes = ByteArray(1024)
+        while(n > 0) {
+            bytes.get(1024)
+        }
     }
 
     fun bitmapsFromCard(cardName: String, slotId: Int) : List<Bitmap> {
@@ -67,6 +94,11 @@ class CardLoader(val applicationContext: Context, val spriteBitmapConverter: Spr
     fun bitmapsFromCard(card: Card<*, *, *, *, *, *>, slotId: Int) : List<Bitmap> {
         val sprites = spritesFromCard(card, slotId)
         return spriteBitmapConverter.getBitmaps(sprites)
+    }
+
+    fun bitmapFromCard(card: Card<*, *, *, *, *, *>, slotId: Int, characterSpriteIdx: Int) : Bitmap {
+        val sprite = spritesFromCard(card, slotId).get(characterSpriteIdx)
+        return spriteBitmapConverter.getBitmap(sprite)
     }
 
     fun spritesFromCard(card: Card<*, *, *, *, *, *>, slotId: Int) : List<SpriteData.Sprite> {

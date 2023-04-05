@@ -1,20 +1,24 @@
 package com.github.cfogrady.vitalwear
 
 import android.app.Application
-import androidx.lifecycle.ProcessLifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
+import androidx.work.Configuration
+import com.github.cfogrady.vitalwear.character.BEMUpdater
+import com.github.cfogrady.vitalwear.character.BEMWorkerFactory
 import com.github.cfogrady.vitalwear.data.CardLoader
 import com.github.cfogrady.vitalwear.character.CharacterManager
+import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
+import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
 import com.github.cfogrady.vitalwear.data.*
-import kotlinx.coroutines.launch
 
-class VitalWearApp : Application() {
-    val firmwareManager = FirmwareManager()
+class VitalWearApp : Application(), Configuration.Provider {
     val spriteBitmapConverter = SpriteBitmapConverter()
+    val firmwareManager = FirmwareManager(spriteBitmapConverter)
+    val partnerComplicationState = PartnerComplicationState()
     lateinit var cardLoader : CardLoader
     lateinit var database : AppDatabase
-    lateinit var characterManager : CharacterManager
+    lateinit var characterManager: CharacterManager
+    lateinit var previewCharacterManager: PreviewCharacterManager
 
     override fun onCreate() {
         super.onCreate()
@@ -22,10 +26,13 @@ class VitalWearApp : Application() {
         database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "VitalWear").allowMainThreadQueries().build()
         firmwareManager.loadFirmware(applicationContext)
         cardLoader = CardLoader(applicationContext, spriteBitmapConverter)
-        characterManager = CharacterManager(database.characterDao(), cardLoader)
-        characterManager.loadActive()
-//        ProcessLifecycleOwner.get().lifecycleScope.launch {
-//
-//        }
+        characterManager = CharacterManager()
+        characterManager.init(database.characterDao(), cardLoader, BEMUpdater(applicationContext))
+        previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardLoader)
+    }
+
+    override fun getWorkManagerConfiguration(): Configuration {
+        //characterManager = CharacterManager()
+        return Configuration.Builder().setWorkerFactory(BEMWorkerFactory(characterManager)).build()
     }
 }

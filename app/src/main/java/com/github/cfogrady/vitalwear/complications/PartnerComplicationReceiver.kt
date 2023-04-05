@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear
+package com.github.cfogrady.vitalwear.complications
 
 import android.content.BroadcastReceiver
 import android.content.Context

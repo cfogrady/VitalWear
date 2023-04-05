@@ -22,6 +22,8 @@ import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.CharacterPreview
+import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -31,9 +33,11 @@ const val LOADING_TEXT = "Loading..."
 class CharacterSelectActivity : ComponentActivity() {
 
     lateinit var characterManager : CharacterManager
+    lateinit var previewCharacterManager: PreviewCharacterManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         characterManager = (application as VitalWearApp).characterManager
+        previewCharacterManager = (application as VitalWearApp).previewCharacterManager
         val intent = Intent(applicationContext, NewCardActivity::class.java)
         val contract = ActivityResultContracts.StartActivityForResult()
         contract.createIntent(applicationContext, intent)
@@ -55,7 +59,7 @@ class CharacterSelectActivity : ComponentActivity() {
         var characters by remember { mutableStateOf(ArrayList<File>() as List<CharacterPreview>) }
         if(!loaded) {
             Loading() {
-                characters = characterManager.previewCharacters()
+                characters = previewCharacterManager.previewCharacters()
                 loaded = true
             }
         } else {

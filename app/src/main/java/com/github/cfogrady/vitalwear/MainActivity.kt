@@ -20,9 +20,6 @@ class MainActivity : Activity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         firmwareManager = (application as VitalWearApp).firmwareManager
-        if(firmwareManager.firmware == null) {
-            //Add firmware activity
-        }
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.loadButton.setOnClickListener(this)

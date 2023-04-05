@@ -37,7 +37,6 @@ class StorageSelectorActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         firmwareManager = (application as VitalWearApp).firmwareManager
         spriteBitmapConverter = (application as VitalWearApp).spriteBitmapConverter
-        var partner = (application as VitalWearApp).characterManager.activePartner
         var file = applicationContext.filesDir
         Log.i("VitalWear", file.absolutePath)
         var testFile = File(file, "test.txt")
@@ -53,9 +52,6 @@ class StorageSelectorActivity : ComponentActivity() {
                     var firmware = firmwareManager.firmware
                     var sprite = firmware.spriteData.get(287)
                     Image(bitmap = spriteBitmapConverter.getBitmap(sprite).asImageBitmap(), contentDescription = "Icon")
-                }
-                item {
-                    Image(bitmap = partner.sprites.get(1).asImageBitmap(), contentDescription = "Partner")
                 }
                 if(file.isDirectory) {
                     Log.i("VitalWear", "directory")
