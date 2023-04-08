@@ -8,6 +8,8 @@ class Firmware constructor(val spriteData: List<SpriteData.Sprite>,
                            val insertCardIcon: Bitmap,
                            val defaultBackground: Bitmap,
                            val characterSelectorIcon: Bitmap,
+                           val stepsIcon: Bitmap,
+                           val vitalsIcon: Bitmap,
 ) {
 
 }

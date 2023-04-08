@@ -3,6 +3,7 @@ package com.github.cfogrady.vitalwear
 import android.app.Application
 import androidx.room.Room
 import androidx.work.Configuration
+import com.github.cfogrady.vitalwear.activity.ImageScaler
 import com.github.cfogrady.vitalwear.activity.MainScreenComposable
 import com.github.cfogrady.vitalwear.character.BEMUpdater
 import com.github.cfogrady.vitalwear.data.CardLoader
@@ -15,6 +16,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     val spriteBitmapConverter = SpriteBitmapConverter()
     val firmwareManager = FirmwareManager(spriteBitmapConverter)
     val partnerComplicationState = PartnerComplicationState()
+    lateinit var imageScaler : ImageScaler
     lateinit var cardLoader : CardLoader
     lateinit var database : AppDatabase
     lateinit var characterManager: CharacterManager
@@ -31,7 +33,8 @@ class VitalWearApp : Application(), Configuration.Provider {
         characterManager = CharacterManager()
         characterManager.init(database.characterDao(), cardLoader, BEMUpdater(applicationContext))
         backgroundManager = BackgroundManager(cardLoader, firmwareManager)
-        mainScreenComposable = MainScreenComposable(characterManager, firmwareManager, backgroundManager)
+        val imageScaler = ImageScaler(applicationContext.resources.displayMetrics, applicationContext.resources.configuration.isScreenRound)
+        mainScreenComposable = MainScreenComposable(characterManager, firmwareManager, backgroundManager, imageScaler)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardLoader)
     }
 

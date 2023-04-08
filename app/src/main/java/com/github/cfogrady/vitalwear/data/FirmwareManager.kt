@@ -23,6 +23,8 @@ const val TIMER_ICON = 81
 const val INSERT_CARD_ICON = 38
 const val DEFAULT_BACKGROUND = 0
 const val CHARACTER_SELECTOR_ICON = 267
+const val STEPS_ICON = 55
+const val VITALS_ICON = 54
 
 class FirmwareManager(
     val spriteBitmapConverter: SpriteBitmapConverter
@@ -58,7 +60,10 @@ class FirmwareManager(
                 val inserCardIcon = spriteBitmapConverter.getBitmap(sprites[INSERT_CARD_ICON])
                 val defaultBackground = spriteBitmapConverter.getBitmap(sprites[DEFAULT_BACKGROUND])
                 val characterSelectorIcon = spriteBitmapConverter.getBitmap(sprites[CHARACTER_SELECTOR_ICON])
-                firmware.value = Firmware(sprites, loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon)
+                val stepsIcon = spriteBitmapConverter.getBitmap(sprites[STEPS_ICON])
+                val vitalsIcon = spriteBitmapConverter.getBitmap(sprites[VITALS_ICON])
+                val loadedFirmware = Firmware(sprites, loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, stepsIcon, vitalsIcon)
+                firmware.postValue(loadedFirmware)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Unable to load firmware", e)
