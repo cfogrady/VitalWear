@@ -10,6 +10,7 @@ class Firmware constructor(val spriteData: List<SpriteData.Sprite>,
                            val characterSelectorIcon: Bitmap,
                            val stepsIcon: Bitmap,
                            val vitalsIcon: Bitmap,
+                           val battleIcon: Bitmap,
 ) {
 
 }

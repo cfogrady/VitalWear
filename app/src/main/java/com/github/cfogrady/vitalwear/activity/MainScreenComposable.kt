@@ -3,7 +3,6 @@ package com.github.cfogrady.vitalwear.activity
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.VerticalPager
@@ -11,7 +10,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.github.cfogrady.vitalwear.BackgroundManager
@@ -34,7 +32,7 @@ class MainScreenComposable(
         val TAG = "MainScreenComposable"
     }
     @Composable
-    fun mainScreen(characterSelectorLauncher: () -> Unit) {
+    fun mainScreen(activityLaunchers: ActivityLaunchers) {
         var loaded by remember { mutableStateOf(false) }
         var activeCharacter by remember { mutableStateOf(MutableLiveData<BEMCharacter>() as LiveData<BEMCharacter>) }
         var firmware by remember { mutableStateOf(MutableLiveData<Firmware>() as LiveData<Firmware>) }
@@ -49,11 +47,11 @@ class MainScreenComposable(
                 loaded = true
             }
         }
-        everythingLoadedScreen(firmwareData = firmware, activeCharacterData = activeCharacter, background, characterSelectorLauncher)
+        everythingLoadedScreen(firmwareData = firmware, activeCharacterData = activeCharacter, background, activityLaunchers)
     }
 
     @Composable
-    fun everythingLoadedScreen(firmwareData: LiveData<Firmware>, activeCharacterData: LiveData<BEMCharacter>, backgroundData: LiveData<Bitmap>, characterSelectorLauncher: () -> Unit) {
+    fun everythingLoadedScreen(firmwareData: LiveData<Firmware>, activeCharacterData: LiveData<BEMCharacter>, backgroundData: LiveData<Bitmap>, activityLaunchers: ActivityLaunchers) {
         val firmware by firmwareData.observeAsState()
         val character by activeCharacterData.observeAsState()
         val background by backgroundData.observeAsState()
@@ -67,15 +65,15 @@ class MainScreenComposable(
                 backgroundManager.loadDefault()
             }
         } else if(character!!.characterStats.id == BEMCharacter.DEFAULT_CHARACTER.characterStats.id) {
-            characterSelectorLauncher.invoke()
+            activityLaunchers.characterSelectionLauncher.invoke()
         } else {
-            dailyScreen(firmware!!, character = character!!, background!!, characterSelectorLauncher)
+            dailyScreen(firmware!!, character = character!!, background!!, activityLaunchers)
         }
     }
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun dailyScreen(firmware: Firmware, character: BEMCharacter, background: Bitmap, characterSelectorLauncher: () -> Unit) {
+    fun dailyScreen(firmware: Firmware, character: BEMCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
         val padding = imageScaler.getPadding()
         Box(modifier = Modifier
             .padding(padding)
@@ -92,7 +90,14 @@ class MainScreenComposable(
                     1 -> {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             bitmapScaler.ScaledBitmap(bitmap = firmware.characterSelectorIcon, contentDescription = "Character", modifier = Modifier.clickable {
-                                characterSelectorLauncher.invoke()
+                                activityLaunchers.characterSelectionLauncher.invoke()
+                            })
+                        }
+                    }
+                    2 -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            bitmapScaler.ScaledBitmap(bitmap = firmware.battleIcon, contentDescription = "Battle", modifier = Modifier.clickable {
+                                activityLaunchers.battleLauncher.invoke()
                             })
                         }
                     }

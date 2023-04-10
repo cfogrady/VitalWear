@@ -25,6 +25,7 @@ const val DEFAULT_BACKGROUND = 0
 const val CHARACTER_SELECTOR_ICON = 267
 const val STEPS_ICON = 55
 const val VITALS_ICON = 54
+const val BATTLE_ICON = 260
 
 class FirmwareManager(
     val spriteBitmapConverter: SpriteBitmapConverter
@@ -62,7 +63,8 @@ class FirmwareManager(
                 val characterSelectorIcon = spriteBitmapConverter.getBitmap(sprites[CHARACTER_SELECTOR_ICON])
                 val stepsIcon = spriteBitmapConverter.getBitmap(sprites[STEPS_ICON])
                 val vitalsIcon = spriteBitmapConverter.getBitmap(sprites[VITALS_ICON])
-                val loadedFirmware = Firmware(sprites, loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, stepsIcon, vitalsIcon)
+                val battleIcon = spriteBitmapConverter.getBitmap(sprites[BATTLE_ICON])
+                val loadedFirmware = Firmware(sprites, loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, stepsIcon, vitalsIcon, battleIcon)
                 firmware.postValue(loadedFirmware)
             }
         } catch (e: Exception) {
