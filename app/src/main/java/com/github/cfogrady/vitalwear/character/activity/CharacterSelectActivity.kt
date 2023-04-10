@@ -59,6 +59,11 @@ class CharacterSelectActivity : ComponentActivity() {
         var characters by remember { mutableStateOf(ArrayList<File>() as List<CharacterPreview>) }
         if(!loaded) {
             Loading() {
+                /* TODO: Changes this to just be a database call.
+                   Do card load into a cache for images on each individual item.
+                   This should keep somebody with 100+ backups from 100+ card images from having
+                   a ridiculously long load just to see the backups
+                 */
                 characters = previewCharacterManager.previewCharacters()
                 loaded = true
             }

@@ -1,38 +1,37 @@
 package com.github.cfogrady.vitalwear.activity
 
+import android.content.Context
 import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.SensorManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.CharacterManager
-import com.github.cfogrady.vitalwear.character.activity.NewCardActivity
+import com.github.cfogrady.vitalwear.character.activity.CharacterSelectActivity
 import com.github.cfogrady.vitalwear.data.FirmwareManager
 
 
 class MainActivity : ComponentActivity() {
-    private lateinit var firmwareManager: FirmwareManager
-    private lateinit var characterManager: CharacterManager
+    companion object {
+        val TAG = "MainActivity"
+    }
+
     private lateinit var mainScreenComposable: MainScreenComposable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        characterManager = (application as VitalWearApp).characterManager
-        firmwareManager = (application as VitalWearApp).firmwareManager
         mainScreenComposable = (application as VitalWearApp).mainScreenComposable
-        val intent = Intent(applicationContext, NewCardActivity::class.java)
-        val contract = ActivityResultContracts.StartActivityForResult()
-        contract.createIntent(applicationContext, intent)
-        val newCharacterLauncher = registerForActivityResult(contract) {result ->
-            //if(newCharacterWasSelected(result)) {
-            finish()
-            //}
+        val intent = Intent(applicationContext, CharacterSelectActivity::class.java)
+        val characterSelector = {
+            startActivity(intent)
         }
+//        val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+//        val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         setContent {
-            mainScreenComposable.mainScreen {
-                newCharacterLauncher.launch(intent)
-            }
+            mainScreenComposable.mainScreen(characterSelector)
         }
     }
 }

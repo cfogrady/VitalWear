@@ -4,16 +4,17 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.wear.compose.material.Button
 import com.github.cfogrady.vitalwear.BackgroundManager
 import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.character.CharacterManager
@@ -30,7 +31,7 @@ class MainScreenComposable(val characterManager: CharacterManager, val firmwareM
     val bitmapScaler = BitmapScaler(imageScaler)
     val partnerScreenComposable = PartnerScreenComposable(bitmapScaler)
     @Composable
-    fun mainScreen(newCharacterLauncher: () -> Unit) {
+    fun mainScreen(characterSelectorLauncher: () -> Unit) {
         var loaded by remember { mutableStateOf(false) }
         var activeCharacter by remember { mutableStateOf(MutableLiveData<BEMCharacter>() as LiveData<BEMCharacter>) }
         var firmware by remember { mutableStateOf(MutableLiveData<Firmware>() as LiveData<Firmware>) }
@@ -45,11 +46,11 @@ class MainScreenComposable(val characterManager: CharacterManager, val firmwareM
                 loaded = true
             }
         }
-        everythingLoadedScreen(firmwareData = firmware, activeCharacterData = activeCharacter, background, newCharacterLauncher)
+        everythingLoadedScreen(firmwareData = firmware, activeCharacterData = activeCharacter, background, characterSelectorLauncher)
     }
 
     @Composable
-    fun everythingLoadedScreen(firmwareData: LiveData<Firmware>, activeCharacterData: LiveData<BEMCharacter>, backgroundData: LiveData<Bitmap>, newCharacterLauncher: () -> Unit) {
+    fun everythingLoadedScreen(firmwareData: LiveData<Firmware>, activeCharacterData: LiveData<BEMCharacter>, backgroundData: LiveData<Bitmap>, characterSelectorLauncher: () -> Unit) {
         val firmware by firmwareData.observeAsState()
         val character by activeCharacterData.observeAsState()
         val background by backgroundData.observeAsState()
@@ -63,15 +64,15 @@ class MainScreenComposable(val characterManager: CharacterManager, val firmwareM
                 backgroundManager.loadDefault()
             }
         } else if(character!!.characterStats.id == BEMCharacter.DEFAULT_CHARACTER.characterStats.id) {
-            newCharacterLauncher.invoke()
+            characterSelectorLauncher.invoke()
         } else {
-            dailyScreen(firmware!!, character = character!!, background!!)
+            dailyScreen(firmware!!, character = character!!, background!!, characterSelectorLauncher)
         }
     }
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun dailyScreen(firmware: Firmware, character: BEMCharacter, background: Bitmap) {
+    fun dailyScreen(firmware: Firmware, character: BEMCharacter, background: Bitmap, characterSelectorLauncher: () -> Unit) {
         val scale = imageScaler.getScaling()
         val padding = imageScaler.getPadding()
         Log.i(TAG, "Scale: $scale, Padding: $padding")
@@ -81,17 +82,19 @@ class MainScreenComposable(val characterManager: CharacterManager, val firmwareM
             val backgroundHeight = imageScaler.scaledDpValueFromPixels(background.height)
             Image(bitmap = background.asImageBitmap(), contentDescription = "Background", modifier = Modifier.size(backgroundHeight))
             VerticalPager(pageCount = 2) {page ->
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-                    when(page) {
-                        0 -> {
-                            partnerScreenComposable.PartnerScreen(
-                                character = character,
-                                firmware = firmware,
-                                backgroundHeight = backgroundHeight
-                            )
-                        }
-                        1 -> {
-                            Image(bitmap = character.sprites[character.activityIdx].asImageBitmap(), contentDescription = "Character", alignment = Alignment.Center, modifier = Modifier.scale(scale))
+                when(page) {
+                    0 -> {
+                        partnerScreenComposable.PartnerScreen(
+                            character = character,
+                            firmware = firmware,
+                            backgroundHeight = backgroundHeight
+                        )
+                    }
+                    1 -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            bitmapScaler.ScaledBitmap(bitmap = firmware.characterSelectorIcon, contentDescription = "Character", modifier = Modifier.clickable {
+                                characterSelectorLauncher.invoke()
+                            })
                         }
                     }
                 }
