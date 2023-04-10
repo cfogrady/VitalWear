@@ -7,8 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
-import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
@@ -37,31 +35,6 @@ class PartnerScreenComposable(val bitmapScaler: BitmapScaler, val backgroundHeig
                 Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                     bitmapScaler.ScaledBitmap(bitmap = firmware.stepsIcon, contentDescription = "Steps Icon")
                     Text(text = formatWithDigits(dailyStepCount, 5), color = Color.White)
-                }
-                Row(Modifier.height(emojiHeight)) {
-                }
-                bitmapScaler.AnimatedScaledBitmap(bitmaps = character.sprites, startIdx = character.activityIdx, frames = 2, contentDescription = "Character", alignment = Alignment.BottomCenter)
-            }
-        }
-    }
-
-    @Composable
-    fun GlancePartnerScreen(character: BEMCharacter, firmware: Firmware) {
-        val emojiHeight = 5.dp //imageScaler
-        val now = LocalDateTime.now()
-        val dailyStepCount = 0;
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-            Column(verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
-                .fillMaxWidth()
-                .offset(y = backgroundHeight.times(-.05f))) {
-                androidx.glance.text.Text(text="${formatWithDigits(now.hour, 2)}:${formatWithDigits(now.minute, 2)}", style = TextStyle(color = ColorProvider(color = Color.White), fontSize = 4.em, fontWeight = androidx.glance.text.FontWeight.Bold))
-                Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                    bitmapScaler.ScaledBitmap(bitmap = firmware.vitalsIcon, contentDescription = "Vitals Icon")
-                    androidx.glance.text.Text(text = formatWithDigits(character.characterStats.vitals, 4), style = TextStyle(color = ColorProvider(color = Color.White)))
-                }
-                Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                    bitmapScaler.ScaledBitmap(bitmap = firmware.stepsIcon, contentDescription = "Steps Icon")
-                    androidx.glance.text.Text(text = formatWithDigits(dailyStepCount, 5), style = TextStyle(color = ColorProvider(color = Color.White)))
                 }
                 Row(Modifier.height(emojiHeight)) {
                 }
