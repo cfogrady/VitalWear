@@ -12,6 +12,7 @@ import androidx.wear.watchface.complications.datasource.ComplicationDataSourceUp
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import com.github.cfogrady.vitalwear.R
 import com.github.cfogrady.vitalwear.VitalWearApp
+import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -50,23 +51,23 @@ class PartnerComplicationService : ComplicationDataSourceService() {
         val characterManager = (application as VitalWearApp).characterManager
         val maybeFirmware = (application as VitalWearApp).firmwareManager.getFirmware()
         val state = (application as VitalWearApp).partnerComplicationState
-        if(!characterManager.isActiveCharacterInitialized()) {
+        if(!characterManager.activeCharacterIsPresent()) {
             GlobalScope.launch {
                 characterManager.getActiveCharacter()
             }
-            if(!maybeFirmware.isPresent) {
+            if(maybeFirmware.value == null) {
                 return displayUninitializedFirmwareComplication()
             }
-            bitmap = maybeFirmware.get().loadingIcon
+            bitmap = maybeFirmware.value!!.loadingIcon
         } else {
             val maybeCharacter = characterManager.getActiveCharacter()
-            if(!maybeCharacter.isPresent) {
-                if(!maybeFirmware.isPresent) {
+            if(maybeCharacter.value!!.characterStats.id == BEMCharacter.DEFAULT_CHARACTER.characterStats.id) {
+                if(maybeFirmware.value == null) {
                     return displayUninitializedFirmwareComplication()
                 }
-                bitmap = maybeFirmware.get().insertCardIcon
+                bitmap = maybeFirmware.value!!.insertCardIcon
             } else {
-                val character = maybeCharacter.get().value!!
+                val character = maybeCharacter.value!!
                 bitmap = character.sprites.get(character.activityIdx + state.spriteIndex)
             }
         }

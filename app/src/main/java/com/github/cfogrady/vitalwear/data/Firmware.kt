@@ -5,7 +5,11 @@ import com.github.cfogrady.vb.dim.sprite.SpriteData
 
 class Firmware constructor(val spriteData: List<SpriteData.Sprite>,
                            val loadingIcon : Bitmap,
-                           val insertCardIcon: Bitmap
+                           val insertCardIcon: Bitmap,
+                           val defaultBackground: Bitmap,
+                           val characterSelectorIcon: Bitmap,
+                           val stepsIcon: Bitmap,
+                           val vitalsIcon: Bitmap,
 ) {
 
 }

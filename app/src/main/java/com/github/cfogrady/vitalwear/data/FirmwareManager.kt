@@ -3,6 +3,8 @@ package com.github.cfogrady.vitalwear.data
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
 import com.github.cfogrady.vb.dim.util.RelativeByteOffsetInputStream
 import kotlinx.coroutines.*
@@ -19,13 +21,17 @@ const val SPRITE_PACKAGE_LOCATION = 0x80000
 
 const val TIMER_ICON = 81
 const val INSERT_CARD_ICON = 38
+const val DEFAULT_BACKGROUND = 0
+const val CHARACTER_SELECTOR_ICON = 267
+const val STEPS_ICON = 55
+const val VITALS_ICON = 54
 
 class FirmwareManager(
     val spriteBitmapConverter: SpriteBitmapConverter
 ) {
     private val bemSpriteReader = BemSpriteReader()
     private val TAG = "FirmwareManager"
-    lateinit var firmware : Firmware
+    private val firmware = MutableLiveData<Firmware>()
 
     fun loadFirmware(applicationContext: Context) {
         GlobalScope.launch {
@@ -33,11 +39,8 @@ class FirmwareManager(
         }
     }
 
-    fun getFirmware() : Optional<Firmware> {
-        if(this::firmware.isInitialized) {
-            return Optional.of(firmware)
-        }
-        return Optional.empty()
+    fun getFirmware() : LiveData<Firmware> {
+        return firmware
     }
 
     private fun internalLoadFirmware(applicationContext: Context) {
@@ -55,7 +58,12 @@ class FirmwareManager(
                 Log.i(TAG, "Time to initialize firmware: ${System.currentTimeMillis() - startFirmwareRead}")
                 val loadingIcon = spriteBitmapConverter.getBitmap(sprites[TIMER_ICON])
                 val inserCardIcon = spriteBitmapConverter.getBitmap(sprites[INSERT_CARD_ICON])
-                firmware = Firmware(sprites, loadingIcon, inserCardIcon)
+                val defaultBackground = spriteBitmapConverter.getBitmap(sprites[DEFAULT_BACKGROUND])
+                val characterSelectorIcon = spriteBitmapConverter.getBitmap(sprites[CHARACTER_SELECTOR_ICON])
+                val stepsIcon = spriteBitmapConverter.getBitmap(sprites[STEPS_ICON])
+                val vitalsIcon = spriteBitmapConverter.getBitmap(sprites[VITALS_ICON])
+                val loadedFirmware = Firmware(sprites, loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, stepsIcon, vitalsIcon)
+                firmware.postValue(loadedFirmware)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Unable to load firmware", e)

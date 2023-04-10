@@ -3,21 +3,30 @@ package com.github.cfogrady.vitalwear
 import android.app.Application
 import androidx.room.Room
 import androidx.work.Configuration
+import com.github.cfogrady.vitalwear.activity.ImageScaler
+import com.github.cfogrady.vitalwear.activity.MainScreenComposable
+import com.github.cfogrady.vitalwear.activity.PartnerScreenComposable
 import com.github.cfogrady.vitalwear.character.BEMUpdater
 import com.github.cfogrady.vitalwear.data.CardLoader
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
 import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
+import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.data.*
 
 class VitalWearApp : Application(), Configuration.Provider {
     val spriteBitmapConverter = SpriteBitmapConverter()
     val firmwareManager = FirmwareManager(spriteBitmapConverter)
     val partnerComplicationState = PartnerComplicationState()
+    lateinit var imageScaler : ImageScaler
+    lateinit var bitmapScaler: BitmapScaler
     lateinit var cardLoader : CardLoader
     lateinit var database : AppDatabase
     lateinit var characterManager: CharacterManager
     lateinit var previewCharacterManager: PreviewCharacterManager
+    lateinit var backgroundManager: BackgroundManager
+    lateinit var partnerScreenComposable: PartnerScreenComposable
+    lateinit var mainScreenComposable: MainScreenComposable
 
     override fun onCreate() {
         super.onCreate()
@@ -27,6 +36,11 @@ class VitalWearApp : Application(), Configuration.Provider {
         cardLoader = CardLoader(applicationContext, spriteBitmapConverter)
         characterManager = CharacterManager()
         characterManager.init(database.characterDao(), cardLoader, BEMUpdater(applicationContext))
+        backgroundManager = BackgroundManager(cardLoader, firmwareManager)
+        imageScaler = ImageScaler(applicationContext.resources.displayMetrics, applicationContext.resources.configuration.isScreenRound)
+        bitmapScaler = BitmapScaler(imageScaler)
+        partnerScreenComposable = PartnerScreenComposable(bitmapScaler, imageScaler.convertPixelsToDp(ImageScaler.VB_HEIGHT.toInt()))
+        mainScreenComposable = MainScreenComposable(characterManager, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardLoader)
     }
 
