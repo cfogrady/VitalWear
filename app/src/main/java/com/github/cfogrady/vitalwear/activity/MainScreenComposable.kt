@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.wear.compose.material.Button
 import com.github.cfogrady.vitalwear.BackgroundManager
 import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.character.CharacterManager
@@ -23,13 +22,17 @@ import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.data.Firmware
 import com.github.cfogrady.vitalwear.data.FirmwareManager
 
-class MainScreenComposable(val characterManager: CharacterManager, val firmwareManager: FirmwareManager, val backgroundManager: BackgroundManager, val imageScaler: ImageScaler) {
+class MainScreenComposable(
+    val characterManager: CharacterManager,
+    val firmwareManager: FirmwareManager,
+    val backgroundManager: BackgroundManager,
+    val imageScaler: ImageScaler,
+    val bitmapScaler: BitmapScaler,
+    val partnerScreenComposable: PartnerScreenComposable
+) {
     companion object {
         val TAG = "MainScreenComposable"
     }
-
-    val bitmapScaler = BitmapScaler(imageScaler)
-    val partnerScreenComposable = PartnerScreenComposable(bitmapScaler)
     @Composable
     fun mainScreen(characterSelectorLauncher: () -> Unit) {
         var loaded by remember { mutableStateOf(false) }
@@ -73,21 +76,17 @@ class MainScreenComposable(val characterManager: CharacterManager, val firmwareM
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun dailyScreen(firmware: Firmware, character: BEMCharacter, background: Bitmap, characterSelectorLauncher: () -> Unit) {
-        val scale = imageScaler.getScaling()
         val padding = imageScaler.getPadding()
-        Log.i(TAG, "Scale: $scale, Padding: $padding")
         Box(modifier = Modifier
             .padding(padding)
             .fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-            val backgroundHeight = imageScaler.scaledDpValueFromPixels(background.height)
-            Image(bitmap = background.asImageBitmap(), contentDescription = "Background", modifier = Modifier.size(backgroundHeight))
+            bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
             VerticalPager(pageCount = 2) {page ->
                 when(page) {
                     0 -> {
                         partnerScreenComposable.PartnerScreen(
                             character = character,
-                            firmware = firmware,
-                            backgroundHeight = backgroundHeight
+                            firmware = firmware
                         )
                     }
                     1 -> {
