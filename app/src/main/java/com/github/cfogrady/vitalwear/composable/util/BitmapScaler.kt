@@ -9,6 +9,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.glance.GlanceModifier
+import androidx.glance.ImageProvider
+import androidx.glance.layout.size
 import com.github.cfogrady.vitalwear.activity.ImageScaler
 
 class BitmapScaler(val imageScaler: ImageScaler) {
@@ -19,6 +22,11 @@ class BitmapScaler(val imageScaler: ImageScaler) {
             modifier = modifier.size(imageScaler.scaledDpValueFromPixels(bitmap.height)),
             alignment = alignment
         )
+    }
+
+    @Composable
+    fun ScaledBitmapGlance(bitmap: Bitmap, contentDescription: String, modifier: GlanceModifier = GlanceModifier, alignment: Alignment = Alignment.TopStart) {
+        androidx.glance.Image(provider = ImageProvider(bitmap), contentDescription = contentDescription, modifier = modifier.size(imageScaler.scaledDpValueFromPixels(bitmap.height)))
     }
 
     @Composable

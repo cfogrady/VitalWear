@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.glance.GlanceComposable
 import androidx.wear.compose.material.Text
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -18,6 +19,7 @@ import coil.decode.ImageDecoderDecoder
 const val LOADING_TEXT = "Loading..."
 
 @Composable
+@GlanceComposable
 fun Loading(work: () -> Unit) {
     val imageLoader = ImageLoader.Builder(LocalContext.current).components {
         add(ImageDecoderDecoder.Factory())
