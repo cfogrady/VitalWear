@@ -11,7 +11,6 @@ import com.github.cfogrady.vitalwear.data.CardLoader
 import kotlinx.coroutines.*
 import java.io.File
 import java.time.LocalDateTime
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.max
 
@@ -131,6 +130,11 @@ class CharacterManager() {
         characterDao.update(character)
     }
 
+    fun updateCharacterStats(character: CharacterEntity, now: LocalDateTime) {
+        character.updateTimeStamps(now)
+        characterDao.update(character)
+    }
+
     fun createNewCharacter(file: File) {
         val card = cardLoader.loadCard(file)
         if(activeCharacterIsPresent()) {
@@ -189,7 +193,7 @@ class CharacterManager() {
 
     fun swapToCharacter(selectedCharacterPreview : CharacterPreview) {
         GlobalScope.launch {
-            val characterStats = characterDao.getCharacterById(selectedCharacterPreview.characterId).get(0)
+            val characterStats = characterDao.getCharacterById(selectedCharacterPreview.characterId)[0]
             val card = cardLoader.loadCard(selectedCharacterPreview.cardName)
             val speciesStats = card.characterStats.characterEntries.get(selectedCharacterPreview.slotId)
             val bitmaps = cardLoader.bitmapsFromCard(card, selectedCharacterPreview.slotId)

@@ -3,6 +3,7 @@ package com.github.cfogrady.vitalwear.character.data
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.Duration
 import java.time.LocalDateTime
 
 @Entity(tableName = "character")
@@ -37,5 +38,12 @@ data class CharacterEntity (
             return 0
         }
         return (100 * currentPhaseWins) / currentPhaseBattles
+    }
+
+    fun updateTimeStamps(now: LocalDateTime) {
+        val deltaTimeInSeconds = Duration.between(lastUpdate, now).seconds
+        trainingTimeRemainingInSeconds -= deltaTimeInSeconds
+        timeUntilNextTransformation -= deltaTimeInSeconds
+        lastUpdate = now
     }
 }

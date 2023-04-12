@@ -13,11 +13,15 @@ import java.io.FileInputStream
 import java.io.InputStream
 
 class CardLoader(val applicationContext: Context, val spriteBitmapConverter: SpriteBitmapConverter) {
-    private val TAG = "CardLoader"
-    private val BEM_FIRST_CHARACTER_SPRITE_INDEX = 54
-    private val BEM_SPRITES_PER_CHARACTER = 14
-    private val CARD_FILE = "imperialdramon+Favs.bin"
-    private val LIBRARY_DIR = "library"
+    companion object {
+        private const val TAG = "CardLoader"
+        private const val BEM_FIRST_CHARACTER_SPRITE_INDEX = 54
+        private const val BEM_SPRITES_PER_CHARACTER = 14
+        private const val CARD_FILE = "imperialdramon+Favs.bin"
+        private const val LIBRARY_DIR = "library"
+
+        const val BEM_BATTLE_BACKGROUND_IDX = 10
+    }
 
     private val dimReader = DimReader()
 
@@ -67,28 +71,8 @@ class CardLoader(val applicationContext: Context, val spriteBitmapConverter: Spr
         return resultMap
     }
 
-    fun loadSpritesFromCard(cardName: String, slotIds: Collection<Int>) {
-        val file = File(applicationContext.filesDir, "$LIBRARY_DIR/$cardName")
-        try {
-            FileInputStream(file).use { fileInput ->
-
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Unable to load Card", e)
-            throw e
-        }
-    }
-
-    fun readAndDiscardNBytes(n: Int, instr: InputStream) {
-        val bytes = ByteArray(1024)
-        while(n > 0) {
-            bytes.get(1024)
-        }
-    }
-
-    fun bitmapsFromCard(cardName: String, slotId: Int) : List<Bitmap> {
-        val card = loadCard(cardName)
-        return bitmapsFromCard(card, slotId)
+    fun bitmapFromCardByIndex(card: Card<*, *, *, *, *, *>, index: Int) : Bitmap {
+        return  spriteBitmapConverter.getBitmap(card.spriteData.sprites[index])
     }
 
     fun bitmapsFromCard(card: Card<*, *, *, *, *, *>, slotId: Int) : List<Bitmap> {
@@ -101,7 +85,7 @@ class CardLoader(val applicationContext: Context, val spriteBitmapConverter: Spr
         return spriteBitmapConverter.getBitmap(sprite)
     }
 
-    fun spritesFromCard(card: Card<*, *, *, *, *, *>, slotId: Int) : List<SpriteData.Sprite> {
+    private fun spritesFromCard(card: Card<*, *, *, *, *, *>, slotId: Int) : List<SpriteData.Sprite> {
         if(card is BemCard) {
             return bemCharacterSprites(card.spriteData.sprites, slotId)
         } else {
