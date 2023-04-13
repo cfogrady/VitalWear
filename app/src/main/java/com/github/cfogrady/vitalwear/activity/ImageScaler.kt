@@ -7,6 +7,7 @@ import androidx.compose.ui.unit.dp
 
 class ImageScaler(val displayMetrics: DisplayMetrics, val screenIsRound: Boolean) {
     companion object {
+        const val VB_WIDTH = 80f
         const val VB_HEIGHT = 160f
         private const val TAG = "ImageScaler"
         private val SQRT_OF_TWO = Math.sqrt(2.0)

@@ -56,7 +56,7 @@
         </activity>
         <activity android:name=".character.activity.CharacterSelectActivity"/>
         <activity android:name=".character.activity.NewCardActivity"/>
-        <activity android:name=".activity.StorageSelectorActivity"/>
+        <activity android:name=".battle.BattleActivity"/>
         <service
             android:name=".tiles.PetTileService"
             android:label="VitalWear"

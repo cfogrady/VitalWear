@@ -6,12 +6,17 @@ import androidx.work.Configuration
 import com.github.cfogrady.vitalwear.activity.ImageScaler
 import com.github.cfogrady.vitalwear.activity.MainScreenComposable
 import com.github.cfogrady.vitalwear.activity.PartnerScreenComposable
+import com.github.cfogrady.vitalwear.battle.BattleManager
+import com.github.cfogrady.vitalwear.battle.composable.FightTargetFactory
+import com.github.cfogrady.vitalwear.battle.composable.OpponentNameScreenFactory
+import com.github.cfogrady.vitalwear.battle.composable.OpponentSplashFactory
 import com.github.cfogrady.vitalwear.character.BEMUpdater
 import com.github.cfogrady.vitalwear.data.CardLoader
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
 import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
+import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.*
 
 class VitalWearApp : Application(), Configuration.Provider {
@@ -25,8 +30,10 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var characterManager: CharacterManager
     lateinit var previewCharacterManager: PreviewCharacterManager
     lateinit var backgroundManager: BackgroundManager
+    lateinit var battleManager: BattleManager
     lateinit var partnerScreenComposable: PartnerScreenComposable
     lateinit var mainScreenComposable: MainScreenComposable
+    lateinit var fightTargetFactory: FightTargetFactory
 
     override fun onCreate() {
         super.onCreate()
@@ -37,9 +44,15 @@ class VitalWearApp : Application(), Configuration.Provider {
         characterManager = CharacterManager()
         characterManager.init(database.characterDao(), cardLoader, BEMUpdater(applicationContext))
         backgroundManager = BackgroundManager(cardLoader, firmwareManager)
+        battleManager = BattleManager(cardLoader, characterManager, firmwareManager)
         imageScaler = ImageScaler(applicationContext.resources.displayMetrics, applicationContext.resources.configuration.isScreenRound)
+        val backgroundHeight = imageScaler.convertPixelsToDp(ImageScaler.VB_HEIGHT.toInt())
         bitmapScaler = BitmapScaler(imageScaler)
-        partnerScreenComposable = PartnerScreenComposable(bitmapScaler, imageScaler.convertPixelsToDp(ImageScaler.VB_HEIGHT.toInt()))
+        val vitalBoxFactory = VitalBoxFactory(imageScaler, ImageScaler.VB_WIDTH.toInt(), ImageScaler.VB_HEIGHT.toInt())
+        val opponentSplashFactory = OpponentSplashFactory(bitmapScaler)
+        val opponentNameScreenFactory = OpponentNameScreenFactory(bitmapScaler, imageScaler, vitalBoxFactory, backgroundHeight)
+        fightTargetFactory = FightTargetFactory(imageScaler, battleManager, vitalBoxFactory, opponentSplashFactory, opponentNameScreenFactory)
+        partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight)
         mainScreenComposable = MainScreenComposable(characterManager, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardLoader)
     }

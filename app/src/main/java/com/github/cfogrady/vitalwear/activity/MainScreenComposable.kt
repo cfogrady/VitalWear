@@ -79,7 +79,7 @@ class MainScreenComposable(
             .padding(padding)
             .fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
-            VerticalPager(pageCount = 2) {page ->
+            VerticalPager(pageCount = 3) {page ->
                 when(page) {
                     0 -> {
                         partnerScreenComposable.PartnerScreen(
@@ -98,7 +98,7 @@ class MainScreenComposable(
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             bitmapScaler.ScaledBitmap(bitmap = firmware.battleIcon, contentDescription = "Battle", modifier = Modifier.clickable {
                                 activityLaunchers.battleLauncher.invoke()
-                            })
+                            }, alignment = Alignment.Center)
                         }
                     }
                 }
