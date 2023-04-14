@@ -31,6 +31,8 @@ const val SMALL_ATTACK_START_IDX = 310
 const val SMALL_ATTACK_END_IDX = 350
 const val BIG_ATTACK_START_IDX = 288
 const val BIG_ATTACK_END_IDX = 310
+const val READY_IDX = 167
+const val GO_IDX = 168
 
 class FirmwareManager(
     val spriteBitmapConverter: SpriteBitmapConverter
@@ -74,7 +76,9 @@ class FirmwareManager(
                     SMALL_ATTACK_START_IDX, SMALL_ATTACK_END_IDX))
                 val largeAttackSprites= spriteBitmapConverter.getBitmaps(sprites.subList(
                     BIG_ATTACK_START_IDX, BIG_ATTACK_END_IDX))
-                val loadedFirmware = Firmware(loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, stepsIcon, vitalsIcon, battleIcon, attackSprites, largeAttackSprites, battleBackground)
+                val readyIcon = spriteBitmapConverter.getBitmap(sprites[READY_IDX])
+                val goIcon = spriteBitmapConverter.getBitmap(sprites[GO_IDX])
+                val loadedFirmware = Firmware(loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, stepsIcon, vitalsIcon, battleIcon, attackSprites, largeAttackSprites, battleBackground, readyIcon, goIcon)
                 firmware.postValue(loadedFirmware)
             }
         } catch (e: Exception) {

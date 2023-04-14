@@ -21,6 +21,8 @@ class CardLoader(val applicationContext: Context, val spriteBitmapConverter: Spr
         private const val LIBRARY_DIR = "library"
 
         const val BEM_BATTLE_BACKGROUND_IDX = 10
+        const val BEM_READY_ICON_IDX = 11
+        const val BEM_GO_ICON_IDX = 12
     }
 
     private val dimReader = DimReader()

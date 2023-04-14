@@ -13,6 +13,8 @@ class Firmware constructor(val loadingIcon : Bitmap,
                            val attackSprites: List<Bitmap>,
                            val largeAttackSprites: List<Bitmap>,
                            val battleBackground: Bitmap,
+                           val readyIcon: Bitmap,
+                           val goIcon: Bitmap,
 ) {
 
 }

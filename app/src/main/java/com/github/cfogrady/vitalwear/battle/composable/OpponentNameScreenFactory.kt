@@ -1,6 +1,5 @@
 package com.github.cfogrady.vitalwear.battle.composable
 
-import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -19,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import com.github.cfogrady.vitalwear.battle.BattleCharacter
+import com.github.cfogrady.vitalwear.battle.BattleModel
 import com.github.cfogrady.vitalwear.battle.BattleState
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.google.common.collect.Lists
@@ -29,8 +29,9 @@ class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private 
     }
 
     @Composable
-    fun OpponentNameScreen(battleCharacter: BattleCharacter, background: Bitmap, stateUpdater: (BattleState) -> Unit) {
+    fun OpponentNameScreen(battleModel: BattleModel, stateUpdater: (BattleState) -> Unit) {
         var leftScreenEarly = remember { false }
+        val battleCharacter = battleModel.opponent
         var characterFrames = remember {Lists.newArrayList(
             battleCharacter.battleSprites.idleBitmaps[0],
             battleCharacter.battleSprites.attackBitmap)}
@@ -39,7 +40,7 @@ class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private 
             stateUpdater.invoke(BattleState.END_FIGHT)
         }
         bitmapScaler.ScaledBitmap(
-            bitmap = background,
+            bitmap = battleModel.background,
             contentDescription = "Background",
             alignment = Alignment.BottomCenter,
             modifier = Modifier.clickable {
