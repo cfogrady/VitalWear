@@ -1,22 +1,19 @@
 package com.github.cfogrady.vitalwear.battle.composable
 
 import android.graphics.Bitmap
-import android.os.Handler
-import android.os.Looper
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.github.cfogrady.vitalwear.activity.ImageScaler
 import com.github.cfogrady.vitalwear.battle.BattleCharacter
 import com.github.cfogrady.vitalwear.battle.BattleState
@@ -60,16 +57,14 @@ class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private 
     
     @Composable
     private fun NameBox(battleCharacter: BattleCharacter) {
-        var animation by remember { mutableStateOf(0.dp) }
-        var scaledWidth = remember { imageScaler.scaledDpValueFromPixels((imageScaler.getScaling() * 80).toInt()) }
+        val state = rememberScrollState()
+        // Seems like there is probably a better way to do this, but this will work for now.
+        LaunchedEffect(Unit) { state.animateScrollTo(240, tween(durationMillis = 3000, delayMillis = 500, easing = LinearEasing)) }
         Box(modifier = Modifier.fillMaxSize().padding(vertical =backgroundHeight.times(.1f)), contentAlignment = Alignment.TopCenter) {
             bitmapScaler.ScaledBitmap(
                 bitmap = battleCharacter.battleSprites.nameBitmap,
                 contentDescription = "OpponentName",
-                modifier = Modifier.offset(x = animation))
+                modifier = Modifier.horizontalScroll(state).background(color = Color.Black))
         }
-        Handler(Looper.getMainLooper()!!).postDelayed({
-            animation -= 5.dp
-        }, 100)
     }
 }
