@@ -52,7 +52,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val vitalBoxFactory = VitalBoxFactory(imageScaler, ImageScaler.VB_WIDTH.toInt(), ImageScaler.VB_HEIGHT.toInt())
         val opponentSplashFactory = OpponentSplashFactory(bitmapScaler)
         val opponentNameScreenFactory = OpponentNameScreenFactory(bitmapScaler, backgroundHeight)
-        val readyScreenFactory = ReadyScreenFactory()
+        val readyScreenFactory = ReadyScreenFactory(bitmapScaler, backgroundHeight)
         fightTargetFactory = FightTargetFactory(vitalBoxFactory, opponentSplashFactory, opponentNameScreenFactory, readyScreenFactory)
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight)
         mainScreenComposable = MainScreenComposable(characterManager, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable)

@@ -31,11 +31,12 @@ class FightTargetFactory(
                     readyScreenFactory.ReadyScreen(battleModel, stateUpdater)
                 }
                 FightTargetState.GO -> {
-                    battle = remember {battleModel.performBattle()}
-                    BackHandler {
-                        battleConclusion = battle.battleResult
-                        state = FightTargetState.END_FIGHT
-                    }
+                    activityFinished.invoke()
+//                    battle = remember {battleModel.performBattle()}
+//                    BackHandler {
+//                        battleConclusion = battle.battleResult
+//                        state = FightTargetState.END_FIGHT
+//                    }
                 }
                 FightTargetState.ATTACKING -> {
                     BackHandler {
