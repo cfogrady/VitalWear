@@ -1,10 +1,14 @@
 package com.github.cfogrady.vitalwear.battle.composable
 
 import android.graphics.Bitmap
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -14,14 +18,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
-import com.github.cfogrady.vitalwear.activity.ImageScaler
 import com.github.cfogrady.vitalwear.battle.BattleCharacter
 import com.github.cfogrady.vitalwear.battle.BattleState
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
-import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.google.common.collect.Lists
 
-class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private val imageScaler: ImageScaler, vitalBoxFactory: VitalBoxFactory, private val backgroundHeight: Dp) {
+class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp) {
+    companion object {
+        const val TAG = "OpponentNameScreenFactory"
+    }
+
     @Composable
     fun OpponentNameScreen(battleCharacter: BattleCharacter, background: Bitmap, stateUpdater: (BattleState) -> Unit) {
         var leftScreenEarly = remember { false }
@@ -35,7 +41,12 @@ class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private 
         bitmapScaler.ScaledBitmap(
             bitmap = background,
             contentDescription = "Background",
-            alignment = Alignment.BottomCenter
+            alignment = Alignment.BottomCenter,
+            modifier = Modifier.clickable {
+                Log.i(TAG, "Continuing")
+                leftScreenEarly = true
+                stateUpdater.invoke(BattleState.READY)
+            }
         )
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             bitmapScaler.AnimatedScaledBitmap(
@@ -48,11 +59,11 @@ class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private 
             )
         }
         NameBox(battleCharacter = battleCharacter)
-//        Handler(Looper.getMainLooper()!!).postDelayed({
-//            if(!leftScreenEarly) {
-//                stateUpdater.invoke(BattleState.READY)
-//            }
-//        }, 5000)
+        Handler(Looper.getMainLooper()!!).postDelayed({
+            if(!leftScreenEarly) {
+                stateUpdater.invoke(BattleState.READY)
+            }
+        }, 5000)
     }
     
     @Composable
