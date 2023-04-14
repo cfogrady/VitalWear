@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.battle
+package com.github.cfogrady.vitalwear.battle.data
 
 enum class BattleResult {
     WIN,

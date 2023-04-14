@@ -6,7 +6,7 @@ import androidx.work.Configuration
 import com.github.cfogrady.vitalwear.activity.ImageScaler
 import com.github.cfogrady.vitalwear.activity.MainScreenComposable
 import com.github.cfogrady.vitalwear.activity.PartnerScreenComposable
-import com.github.cfogrady.vitalwear.battle.BattleModelFactory
+import com.github.cfogrady.vitalwear.battle.data.BattleModelFactory
 import com.github.cfogrady.vitalwear.battle.composable.FightTargetFactory
 import com.github.cfogrady.vitalwear.battle.composable.OpponentNameScreenFactory
 import com.github.cfogrady.vitalwear.battle.composable.OpponentSplashFactory

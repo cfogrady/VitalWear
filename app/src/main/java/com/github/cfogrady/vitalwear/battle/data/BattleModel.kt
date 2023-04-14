@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.battle
+package com.github.cfogrady.vitalwear.battle.data
 
 import android.graphics.Bitmap
 import com.github.cfogrady.vitalwear.character.CharacterManager

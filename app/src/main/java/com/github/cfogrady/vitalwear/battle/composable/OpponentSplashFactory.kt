@@ -8,18 +8,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.github.cfogrady.vitalwear.battle.BattleModel
-import com.github.cfogrady.vitalwear.battle.BattleState
+import com.github.cfogrady.vitalwear.battle.data.BattleModel
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 
 class OpponentSplashFactory(private val bitmapScaler: BitmapScaler) {
 
     @Composable
-    fun OpponentSplash(battleModel: BattleModel, stateUpdater: (BattleState) -> Unit) {
+    fun OpponentSplash(battleModel: BattleModel, stateUpdater: (FightTargetState) -> Unit) {
         var leftScreenEarly = remember { false }
         BackHandler {
             leftScreenEarly = true
-            stateUpdater.invoke(BattleState.END_FIGHT)
+            stateUpdater.invoke(FightTargetState.END_FIGHT)
         }
         bitmapScaler.ScaledBitmap(
             bitmap = battleModel.background,
@@ -30,11 +29,11 @@ class OpponentSplashFactory(private val bitmapScaler: BitmapScaler) {
         bitmapScaler.ScaledBitmap(bitmap = battleCharacter.battleSprites.splashBitmap, contentDescription = "Opponent", alignment = Alignment.BottomCenter,
             modifier = Modifier.clickable {
                 leftScreenEarly = true
-                stateUpdater.invoke(BattleState.READY)
+                stateUpdater.invoke(FightTargetState.READY)
             })
         Handler(Looper.getMainLooper()!!).postDelayed({
             if(!leftScreenEarly) {
-                stateUpdater.invoke(BattleState.OPPONENT_NAME)
+                stateUpdater.invoke(FightTargetState.OPPONENT_NAME)
             }
         }, 1000)
     }

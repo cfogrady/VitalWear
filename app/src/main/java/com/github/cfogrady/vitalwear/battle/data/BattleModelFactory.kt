@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.battle
+package com.github.cfogrady.vitalwear.battle.data
 
 import android.graphics.Bitmap
 import android.util.Log
@@ -7,6 +7,7 @@ import com.github.cfogrady.vb.dim.card.Card
 import com.github.cfogrady.vb.dim.card.DimReader
 import com.github.cfogrady.vb.dim.character.BemCharacterStats
 import com.github.cfogrady.vb.dim.character.CharacterStats
+import com.github.cfogrady.vitalwear.battle.BattleActivity
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.data.CardLoader

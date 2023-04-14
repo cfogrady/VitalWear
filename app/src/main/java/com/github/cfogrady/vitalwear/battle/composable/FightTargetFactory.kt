@@ -2,7 +2,9 @@ package com.github.cfogrady.vitalwear.battle.composable
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.*
-import com.github.cfogrady.vitalwear.battle.*
+import com.github.cfogrady.vitalwear.battle.data.Battle
+import com.github.cfogrady.vitalwear.battle.data.BattleModel
+import com.github.cfogrady.vitalwear.battle.data.BattleResult
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 
 class FightTargetFactory(
@@ -13,44 +15,44 @@ class FightTargetFactory(
     ) {
     @Composable
     fun FightTarget(battleModel: BattleModel, activityFinished: () -> Unit) {
-        var state by remember { mutableStateOf(BattleState.OPPONENT_SPLASH) }
+        var state by remember { mutableStateOf(FightTargetState.OPPONENT_SPLASH) }
         var battleConclusion by remember { mutableStateOf(BattleResult.RETREAT) }
         lateinit var battle: Battle
-        val stateUpdater = {newState: BattleState -> state = newState}
+        val stateUpdater = {newState: FightTargetState -> state = newState}
         vitalBoxFactory.VitalBox {
             when(state) {
-                BattleState.OPPONENT_SPLASH -> {
+                FightTargetState.OPPONENT_SPLASH -> {
                     opponentSplashFactory.OpponentSplash(battleModel, stateUpdater = stateUpdater)
                 }
-                BattleState.OPPONENT_NAME -> {
+                FightTargetState.OPPONENT_NAME -> {
                     opponentNameScreenFactory.OpponentNameScreen(battleModel, stateUpdater)
                 }
-                BattleState.READY -> {
+                FightTargetState.READY -> {
                     readyScreenFactory.ReadyScreen(battleModel, stateUpdater)
                 }
-                BattleState.GO -> {
+                FightTargetState.GO -> {
                     battle = remember {battleModel.performBattle()}
                     BackHandler {
                         battleConclusion = battle.battleResult
-                        state = BattleState.END_FIGHT
+                        state = FightTargetState.END_FIGHT
                     }
                 }
-                BattleState.ATTACKING -> {
+                FightTargetState.ATTACKING -> {
                     BackHandler {
                         battleConclusion = battle.battleResult
-                        state = BattleState.END_FIGHT
+                        state = FightTargetState.END_FIGHT
                     }
                 }
-                BattleState.HP_COMPARE -> {
+                FightTargetState.HP_COMPARE -> {
                     BackHandler {
                         battleConclusion = battle.battleResult
-                        state = BattleState.END_FIGHT
+                        state = FightTargetState.END_FIGHT
                     }
                 }
-                BattleState.END_FIGHT -> {
+                FightTargetState.END_FIGHT -> {
                     activityFinished.invoke()
                 }
-                BattleState.VITALS -> TODO()
+                FightTargetState.VITALS -> TODO()
             }
         }
     }

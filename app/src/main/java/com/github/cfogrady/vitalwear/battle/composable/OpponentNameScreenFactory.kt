@@ -17,9 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
-import com.github.cfogrady.vitalwear.battle.BattleCharacter
-import com.github.cfogrady.vitalwear.battle.BattleModel
-import com.github.cfogrady.vitalwear.battle.BattleState
+import com.github.cfogrady.vitalwear.battle.data.BattleCharacter
+import com.github.cfogrady.vitalwear.battle.data.BattleModel
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.google.common.collect.Lists
 
@@ -29,7 +28,7 @@ class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private 
     }
 
     @Composable
-    fun OpponentNameScreen(battleModel: BattleModel, stateUpdater: (BattleState) -> Unit) {
+    fun OpponentNameScreen(battleModel: BattleModel, stateUpdater: (FightTargetState) -> Unit) {
         var leftScreenEarly = remember { false }
         val battleCharacter = battleModel.opponent
         var characterFrames = remember {Lists.newArrayList(
@@ -37,7 +36,7 @@ class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private 
             battleCharacter.battleSprites.attackBitmap)}
         BackHandler {
             leftScreenEarly = true
-            stateUpdater.invoke(BattleState.END_FIGHT)
+            stateUpdater.invoke(FightTargetState.END_FIGHT)
         }
         bitmapScaler.ScaledBitmap(
             bitmap = battleModel.background,
@@ -46,7 +45,7 @@ class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private 
             modifier = Modifier.clickable {
                 Log.i(TAG, "Continuing")
                 leftScreenEarly = true
-                stateUpdater.invoke(BattleState.READY)
+                stateUpdater.invoke(FightTargetState.READY)
             }
         )
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
@@ -62,7 +61,7 @@ class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private 
         NameBox(battleCharacter = battleCharacter)
         Handler(Looper.getMainLooper()!!).postDelayed({
             if(!leftScreenEarly) {
-                stateUpdater.invoke(BattleState.READY)
+                stateUpdater.invoke(FightTargetState.READY)
             }
         }, 5000)
     }

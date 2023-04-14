@@ -8,6 +8,8 @@ import androidx.compose.runtime.*
 import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.battle.composable.FightTargetFactory
+import com.github.cfogrady.vitalwear.battle.data.BattleModel
+import com.github.cfogrady.vitalwear.battle.data.BattleModelFactory
 import java.util.*
 
 class BattleActivity : ComponentActivity() {

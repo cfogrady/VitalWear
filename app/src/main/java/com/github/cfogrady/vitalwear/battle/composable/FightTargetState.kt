@@ -1,6 +1,6 @@
-package com.github.cfogrady.vitalwear.battle
+package com.github.cfogrady.vitalwear.battle.composable
 
-enum class BattleState {
+enum class FightTargetState {
     OPPONENT_SPLASH,
     OPPONENT_NAME,
     READY,
