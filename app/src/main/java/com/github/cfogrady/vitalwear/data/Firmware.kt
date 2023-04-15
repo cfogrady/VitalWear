@@ -15,6 +15,8 @@ class Firmware constructor(val loadingIcon : Bitmap,
                            val battleBackground: Bitmap,
                            val readyIcon: Bitmap,
                            val goIcon: Bitmap,
+                           val partnerHpIcons: List<Bitmap>,
+                           val opponentHpIcons: List<Bitmap>,
 ) {
 
 }

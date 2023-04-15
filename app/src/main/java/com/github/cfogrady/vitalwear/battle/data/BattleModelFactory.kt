@@ -36,6 +36,8 @@ class BattleModelFactory(private val cardLoader: CardLoader,
             getBackground(card, firmware),
             getReadyIcon(card, firmware),
             getGoIcon(card, firmware),
+            firmware.partnerHpIcons,
+            firmware.opponentHpIcons,
             random
         )
     }

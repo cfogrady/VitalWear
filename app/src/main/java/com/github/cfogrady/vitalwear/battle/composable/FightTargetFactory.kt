@@ -11,14 +11,17 @@ class FightTargetFactory(
     private val vitalBoxFactory: VitalBoxFactory,
     private val opponentSplashFactory: OpponentSplashFactory,
     private val opponentNameScreenFactory: OpponentNameScreenFactory,
-    private val readyScreenFactory: ReadyScreenFactory
+    private val readyScreenFactory: ReadyScreenFactory,
+    private val goScreenFactory: GoScreenFactory,
+    private val attackScreenFactory: AttackScreenFactory
     ) {
     @Composable
     fun FightTarget(battleModel: BattleModel, activityFinished: () -> Unit) {
         var state by remember { mutableStateOf(FightTargetState.OPPONENT_SPLASH) }
-        var battleConclusion by remember { mutableStateOf(BattleResult.RETREAT) }
+        var battleConclusion = remember { BattleResult.RETREAT }
         lateinit var battle: Battle
         val stateUpdater = {newState: FightTargetState -> state = newState}
+        val battleConclusionUpdater = {newConclusion: BattleResult -> battleConclusion = newConclusion}
         vitalBoxFactory.VitalBox {
             when(state) {
                 FightTargetState.OPPONENT_SPLASH -> {
@@ -31,20 +34,17 @@ class FightTargetFactory(
                     readyScreenFactory.ReadyScreen(battleModel, stateUpdater)
                 }
                 FightTargetState.GO -> {
-                    activityFinished.invoke()
-//                    battle = remember {battleModel.performBattle()}
-//                    BackHandler {
-//                        battleConclusion = battle.battleResult
-//                        state = FightTargetState.END_FIGHT
-//                    }
+                    goScreenFactory.GoScreen(battleModel = battleModel, stateUpdater = stateUpdater)
                 }
                 FightTargetState.ATTACKING -> {
-                    BackHandler {
-                        battleConclusion = battle.battleResult
-                        state = FightTargetState.END_FIGHT
-                    }
+                    attackScreenFactory.AttackScreen(
+                        battleModel = battleModel,
+                        stateUpdater = stateUpdater,
+                        conclusionUpdater = battleConclusionUpdater
+                    )
                 }
                 FightTargetState.HP_COMPARE -> {
+                    activityFinished.invoke()
                     BackHandler {
                         battleConclusion = battle.battleResult
                         state = FightTargetState.END_FIGHT

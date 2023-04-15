@@ -36,12 +36,12 @@ class ReadyScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: D
                 if(!leftScreenEarly) {
                     stateUpdater.invoke(FightTargetState.GO)
                 }
-            }, 2000)
+            }, 2500)
         }
     }
 
     @Composable
-    fun ReadyEnemy(battleModel: BattleModel) {
+    private fun ReadyEnemy(battleModel: BattleModel) {
         var characterFrames = remember {
             Lists.newArrayList(
                 battleModel.opponent.battleSprites.idleBitmaps[0],
@@ -69,7 +69,7 @@ class ReadyScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: D
     }
 
     @Composable
-    fun ReadyPartner(battleModel: BattleModel) {
+    private fun ReadyPartner(battleModel: BattleModel) {
         var characterFrames = remember {
             Lists.newArrayList(
                 battleModel.partnerCharacter.sprites[1],

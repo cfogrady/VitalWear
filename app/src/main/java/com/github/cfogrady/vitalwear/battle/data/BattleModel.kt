@@ -19,13 +19,24 @@ class BattleModel(private val characterManager: CharacterManager,
                   val background: Bitmap,
                   val readySprite: Bitmap,
                   val goSprite: Bitmap,
+                  val partnerRemainingHpSprites: List<Bitmap>,
+                  val opponentRemainingHpSprites: List<Bitmap>,
                   val random: Random) {
 
-    fun performBattle(): Battle {
+    lateinit var battle: Battle
+    var startingPartnerHp = 0
+    var startingOpponentHp = 0
+
+    fun performBattle() {
+        if(this::battle.isInitialized) {
+            return
+        }
         var playerHp = (partnerCharacter.totalHp() * getVitalBonusPercent(partnerCharacter.characterStats.vitals)).toInt()
+        startingPartnerHp = playerHp
         val playerAp = (partnerCharacter.totalAp() * getMoodBonusPercent(partnerCharacter.mood())).toInt()
         val playerHitRateChance = (100 * partnerCharacter.totalBp() / (partnerCharacter.totalBp() + opponent.battleStats.bp)) + getTypeHitrateAdjustment(partnerCharacter.speciesStats.attribute, opponent.battleStats.attribute)
         var opponentHp = opponent.battleStats.hp
+        startingOpponentHp = opponentHp
         val opponentAp = (opponent.battleStats.ap * getMoodBonusPercent(opponent.battleStats.mood)).toInt()
         var round = 0
         val playerRounds = ArrayList<BattleRound>(5)
@@ -60,7 +71,7 @@ class BattleModel(private val characterManager: CharacterManager,
         GlobalScope.launch(Dispatchers.Default) {
             characterManager.updateCharacterStats(partnerCharacter.characterStats, LocalDateTime.now())
         }
-        return Battle(result, playerRounds, opponentRounds)
+        battle = Battle(result, playerRounds, opponentRounds)
     }
 
     private fun getVitalBonusPercent(vitals: Int): Float {

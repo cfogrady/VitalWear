@@ -6,11 +6,8 @@ import androidx.work.Configuration
 import com.github.cfogrady.vitalwear.activity.ImageScaler
 import com.github.cfogrady.vitalwear.activity.MainScreenComposable
 import com.github.cfogrady.vitalwear.activity.PartnerScreenComposable
+import com.github.cfogrady.vitalwear.battle.composable.*
 import com.github.cfogrady.vitalwear.battle.data.BattleModelFactory
-import com.github.cfogrady.vitalwear.battle.composable.FightTargetFactory
-import com.github.cfogrady.vitalwear.battle.composable.OpponentNameScreenFactory
-import com.github.cfogrady.vitalwear.battle.composable.OpponentSplashFactory
-import com.github.cfogrady.vitalwear.battle.composable.ReadyScreenFactory
 import com.github.cfogrady.vitalwear.character.BEMUpdater
 import com.github.cfogrady.vitalwear.data.CardLoader
 import com.github.cfogrady.vitalwear.character.CharacterManager
@@ -53,7 +50,9 @@ class VitalWearApp : Application(), Configuration.Provider {
         val opponentSplashFactory = OpponentSplashFactory(bitmapScaler)
         val opponentNameScreenFactory = OpponentNameScreenFactory(bitmapScaler, backgroundHeight)
         val readyScreenFactory = ReadyScreenFactory(bitmapScaler, backgroundHeight)
-        fightTargetFactory = FightTargetFactory(vitalBoxFactory, opponentSplashFactory, opponentNameScreenFactory, readyScreenFactory)
+        val goScreenFactory = GoScreenFactory(bitmapScaler, backgroundHeight)
+        val attackScreenFactory = AttackScreenFactory(bitmapScaler, backgroundHeight)
+        fightTargetFactory = FightTargetFactory(vitalBoxFactory, opponentSplashFactory, opponentNameScreenFactory, readyScreenFactory, goScreenFactory, attackScreenFactory)
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight)
         mainScreenComposable = MainScreenComposable(characterManager, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardLoader)

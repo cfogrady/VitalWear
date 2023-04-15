@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
 import com.github.cfogrady.vb.dim.util.RelativeByteOffsetInputStream
+import com.google.common.collect.Lists
 import kotlinx.coroutines.*
 import java.io.File
 import java.io.FileInputStream
@@ -33,6 +34,11 @@ const val BIG_ATTACK_START_IDX = 288
 const val BIG_ATTACK_END_IDX = 310
 const val READY_IDX = 167
 const val GO_IDX = 168
+const val EMPTY_HP_IDX = 360
+const val PARTNER_HP_START_IDX = 361
+const val PARTNER_HP_END_IDX = 367
+const val OPPONENT_HP_START_IDX = 354
+const val OPPONENT_HP_END_IDX = 360
 
 class FirmwareManager(
     val spriteBitmapConverter: SpriteBitmapConverter
@@ -78,7 +84,14 @@ class FirmwareManager(
                     BIG_ATTACK_START_IDX, BIG_ATTACK_END_IDX))
                 val readyIcon = spriteBitmapConverter.getBitmap(sprites[READY_IDX])
                 val goIcon = spriteBitmapConverter.getBitmap(sprites[GO_IDX])
-                val loadedFirmware = Firmware(loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, stepsIcon, vitalsIcon, battleIcon, attackSprites, largeAttackSprites, battleBackground, readyIcon, goIcon)
+                val emptyHP = spriteBitmapConverter.getBitmap(sprites[EMPTY_HP_IDX])
+                val partnerHPIcons = Lists.newArrayList(emptyHP)
+                partnerHPIcons.addAll(spriteBitmapConverter.getBitmaps(sprites.subList(
+                    PARTNER_HP_START_IDX, PARTNER_HP_END_IDX)))
+                val opponentHPIcons = Lists.newArrayList(emptyHP)
+                opponentHPIcons.addAll(spriteBitmapConverter.getBitmaps(sprites.subList(
+                    OPPONENT_HP_START_IDX, OPPONENT_HP_END_IDX)))
+                val loadedFirmware = Firmware(loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, stepsIcon, vitalsIcon, battleIcon, attackSprites, largeAttackSprites, battleBackground, readyIcon, goIcon, partnerHPIcons, opponentHPIcons)
                 firmware.postValue(loadedFirmware)
             }
         } catch (e: Exception) {
