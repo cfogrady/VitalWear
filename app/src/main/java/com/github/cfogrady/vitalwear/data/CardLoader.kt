@@ -77,6 +77,10 @@ class CardLoader(val applicationContext: Context, val spriteBitmapConverter: Spr
         return  spriteBitmapConverter.getBitmap(card.spriteData.sprites[index])
     }
 
+    fun bitmapsFromCardByIndexes(card: Card<*, *, *, *, *, *>, startIdx: Int, endIdx: Int) : List<Bitmap> {
+        return  spriteBitmapConverter.getBitmaps(card.spriteData.sprites.subList(startIdx, endIdx))
+    }
+
     fun bitmapsFromCard(card: Card<*, *, *, *, *, *>, slotId: Int) : List<Bitmap> {
         val sprites = spritesFromCard(card, slotId)
         return spriteBitmapConverter.getBitmaps(sprites)

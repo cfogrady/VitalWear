@@ -1,7 +1,6 @@
 package com.github.cfogrady.vitalwear.data
 
 import android.graphics.Bitmap
-import com.github.cfogrady.vb.dim.sprite.SpriteData
 
 class Firmware constructor(val loadingIcon : Bitmap,
                            val insertCardIcon: Bitmap,
@@ -17,6 +16,7 @@ class Firmware constructor(val loadingIcon : Bitmap,
                            val goIcon: Bitmap,
                            val partnerHpIcons: List<Bitmap>,
                            val opponentHpIcons: List<Bitmap>,
+                           val hitIcons: List<Bitmap>,
 ) {
 
 }

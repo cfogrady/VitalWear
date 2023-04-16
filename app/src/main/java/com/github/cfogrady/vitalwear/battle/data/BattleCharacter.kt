@@ -22,6 +22,7 @@ class BattleSprites(
     val splashBitmap: Bitmap,
     val projectileBitmap: Bitmap,
     val strongProjectileBitmap: Bitmap,
+    val hits: List<Bitmap>,
 )
 
 class BattleCharacter(

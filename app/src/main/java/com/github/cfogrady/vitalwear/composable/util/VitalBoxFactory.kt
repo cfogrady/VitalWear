@@ -8,6 +8,7 @@ import androidx.compose.ui.draw.clipToBounds
 import com.github.cfogrady.vitalwear.activity.ImageScaler
 
 class VitalBoxFactory(private val imageScaler: ImageScaler, private val width: Int, private val height: Int) {
+
     @Composable
     fun VitalBox(content: @Composable BoxScope.()-> Unit) {
         val scaledWidth = imageScaler.scaledDpValueFromPixels(width)

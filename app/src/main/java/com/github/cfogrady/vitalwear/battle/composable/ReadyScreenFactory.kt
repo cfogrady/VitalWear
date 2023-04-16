@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import com.github.cfogrady.vitalwear.battle.data.BattleModel
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
+import com.github.cfogrady.vitalwear.composable.util.PositionOffsetRatios
 import com.google.common.collect.Lists
 
 class ReadyScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: Dp) {
@@ -54,7 +55,7 @@ class ReadyScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: D
                 contentDescription = "Opponent",
                 alignment = Alignment.BottomCenter,
                 modifier = Modifier
-                    .offset(y = backgroundHeight.times(-.05f))
+                    .offset(y = backgroundHeight.times(PositionOffsetRatios.CHARACTER_OFFSET_FROM_BOTTOM))
                     .graphicsLayer(scaleX = -1.0f)
             )
         }
@@ -82,7 +83,7 @@ class ReadyScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: D
                 contentDescription = "Opponent",
                 alignment = Alignment.BottomCenter,
                 modifier = Modifier
-                    .offset(y = backgroundHeight.times(-.05f))
+                    .offset(y = backgroundHeight.times(PositionOffsetRatios.CHARACTER_OFFSET_FROM_BOTTOM))
             )
         }
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {

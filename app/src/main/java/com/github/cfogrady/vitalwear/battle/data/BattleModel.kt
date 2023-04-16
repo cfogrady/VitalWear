@@ -15,6 +15,9 @@ import java.util.*
  */
 class BattleModel(private val characterManager: CharacterManager,
                   val partnerCharacter: BEMCharacter,
+                  val partnerAttack: Bitmap,
+                  val partnerLargeAttack: Bitmap,
+                  val partnerHits: List<Bitmap>,
                   val opponent: BattleCharacter,
                   val background: Bitmap,
                   val readySprite: Bitmap,

@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.Dp
 import com.github.cfogrady.vitalwear.battle.data.BattleCharacter
 import com.github.cfogrady.vitalwear.battle.data.BattleModel
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
+import com.github.cfogrady.vitalwear.composable.util.PositionOffsetRatios
 import com.google.common.collect.Lists
 
 class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp) {
@@ -55,7 +56,7 @@ class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private 
                 frames = 2,
                 contentDescription = "Opponent",
                 alignment = Alignment.BottomCenter,
-                modifier = Modifier.offset(y = backgroundHeight.times(-.05f)).graphicsLayer(scaleX = -1.0f)
+                modifier = Modifier.offset(y = backgroundHeight.times(PositionOffsetRatios.CHARACTER_OFFSET_FROM_BOTTOM)).graphicsLayer(scaleX = -1.0f)
             )
         }
         NameBox(battleCharacter = battleCharacter)

@@ -22,16 +22,26 @@ class BattleModelFactory(private val cardLoader: CardLoader,
                          private val characterManager: CharacterManager,
                          private val firmwareManager: FirmwareManager
 ) {
+    companion object {
+        const val CARD_HIT_START_IDX = 15
+        const val CARD_HIT_END_IDX = 18
+    }
+
     val random = Random()
 
     fun createBattleModel(): BattleModel {
         val partnerCharacter = characterManager.getActiveCharacter().value!!
         val card = cardLoader.loadCard(partnerCharacter.characterStats.cardFile)
         val firmware = firmwareManager.getFirmware().value!!
+        val partnerSmallAttack = getSmallAttackSprite(card, firmware, partnerCharacter.speciesStats.smallAttackId)
+        val partnerLargeAttack = getLargeAttackSprite(card, firmware, partnerCharacter.speciesStats.bigAttackId)
         val randomOpponent = loadRandomTarget(card)
         return BattleModel(
             characterManager,
             partnerCharacter,
+            partnerSmallAttack,
+            partnerLargeAttack,
+            getHitSprite(card, firmware),
             randomOpponent,
             getBackground(card, firmware),
             getReadyIcon(card, firmware),
@@ -58,8 +68,8 @@ class BattleModelFactory(private val cardLoader: CardLoader,
         val firmware = firmwareManager.getFirmware().value!!
         val smallAttackId = characterStats.smallAttackId
         val largeAttackId = characterStats.bigAttackId
-        val projectileSprite = firmware.attackSprites[smallAttackId]
-        val largeProjectileSprite = firmware.largeAttackSprites[largeAttackId]
+        val projectileSprite = getSmallAttackSprite(card, firmware, smallAttackId)
+        val largeProjectileSprite = getLargeAttackSprite(card, firmware, largeAttackId)
         return BattleSprites(
             characterSprites[0],
             characterSprites.subList(1, 3),
@@ -69,7 +79,32 @@ class BattleModelFactory(private val cardLoader: CardLoader,
             characterSprites[10],
             characterSprites[13],
             projectileSprite,
-            largeProjectileSprite)
+            largeProjectileSprite,
+            getHitSprite(card, firmware)
+        )
+    }
+
+    private fun getSmallAttackSprite(card: Card<*, *, *, *, *, *>, firmware: Firmware, smallAttackId: Int) : Bitmap {
+        if(smallAttackId < 40) {
+            return firmware.attackSprites[smallAttackId]
+        }
+        val cardSpriteIdx = (smallAttackId - 40) + 34
+        return cardLoader.bitmapFromCardByIndex(card, cardSpriteIdx)
+    }
+
+    private fun getLargeAttackSprite(card: Card<*, *, *, *, *, *>, firmware: Firmware, largeAttackId: Int) : Bitmap {
+        if(largeAttackId < 22) {
+            return firmware.largeAttackSprites[largeAttackId]
+        }
+        val cardSpriteIdx = (largeAttackId - 22) + 44
+        return cardLoader.bitmapFromCardByIndex(card, cardSpriteIdx)
+    }
+
+    private fun getHitSprite(card: Card<*, *, *, *, *, *>, firmware: Firmware): List<Bitmap> {
+        if(card is BemCard) {
+            return cardLoader.bitmapsFromCardByIndexes(card, CARD_HIT_START_IDX, CARD_HIT_END_IDX)
+        }
+        return firmware.hitIcons
     }
 
     private fun loadRandomTarget(card: Card<*, *, *, *, *, *>): BattleCharacter {

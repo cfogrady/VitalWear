@@ -39,6 +39,8 @@ const val PARTNER_HP_START_IDX = 361
 const val PARTNER_HP_END_IDX = 367
 const val OPPONENT_HP_START_IDX = 354
 const val OPPONENT_HP_END_IDX = 360
+const val HIT_START_IDX = 351
+const val HIT_END_IDX = 354
 
 class FirmwareManager(
     val spriteBitmapConverter: SpriteBitmapConverter
@@ -91,7 +93,8 @@ class FirmwareManager(
                 val opponentHPIcons = Lists.newArrayList(emptyHP)
                 opponentHPIcons.addAll(spriteBitmapConverter.getBitmaps(sprites.subList(
                     OPPONENT_HP_START_IDX, OPPONENT_HP_END_IDX)))
-                val loadedFirmware = Firmware(loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, stepsIcon, vitalsIcon, battleIcon, attackSprites, largeAttackSprites, battleBackground, readyIcon, goIcon, partnerHPIcons, opponentHPIcons)
+                val hitSprites = spriteBitmapConverter.getBitmaps(sprites.subList(HIT_START_IDX, HIT_END_IDX))
+                val loadedFirmware = Firmware(loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, stepsIcon, vitalsIcon, battleIcon, attackSprites, largeAttackSprites, battleBackground, readyIcon, goIcon, partnerHPIcons, opponentHPIcons, hitSprites)
                 firmware.postValue(loadedFirmware)
             }
         } catch (e: Exception) {

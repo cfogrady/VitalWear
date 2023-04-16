@@ -13,11 +13,11 @@ class Battle(
         return enemyHits[round].remainingHp
     }
 
-    fun partnerHitOnRound(round: Int): Boolean {
+    fun partnerLandedHitOnRound(round: Int): Boolean {
         return partnerHits[round].landedHit
     }
 
-    fun enemyHitOnRound(round: Int): Boolean {
+    fun enemyLandedHitOnRound(round: Int): Boolean {
         return enemyHits[round].landedHit
     }
 }
