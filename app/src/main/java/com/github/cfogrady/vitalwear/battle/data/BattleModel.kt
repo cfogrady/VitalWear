@@ -1,6 +1,7 @@
 package com.github.cfogrady.vitalwear.battle.data
 
 import android.graphics.Bitmap
+import android.util.Log
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
@@ -26,10 +27,17 @@ class BattleModel(private val characterManager: CharacterManager,
                   val opponentRemainingHpSprites: List<Bitmap>,
                   val random: Random) {
 
+    companion object {
+        const val TAG = "BattleModel"
+    }
+
     lateinit var battle: Battle
     var startingPartnerHp = 0
     var startingOpponentHp = 0
 
+    // This honestly probably shouldn't be in the battle model...
+    // There should probably be a PreBattleModel and a PostBattleModel with the BattleModelFactory
+    // or new BattleService performing the actual battle and converstion
     fun performBattle() {
         if(this::battle.isInitialized) {
             return
@@ -47,22 +55,21 @@ class BattleModel(private val characterManager: CharacterManager,
         while(round < 5 && playerHp > 0 && opponentHp > 0) {
             val hitRoll = random.nextInt(100)
             if(hitRoll <= playerHitRateChance) {
-                if(round == partnerCharacter.speciesStats.type) {
-                    opponentHp -= (playerAp*2)
-                } else {
-                    opponentHp -= playerAp
-                }
+                val critical = round == partnerCharacter.speciesStats.type
+                val damage = if(critical) playerAp * 2 else playerAp
+                Log.d(TAG, "Play hit on round $round. AP: $playerAp. Critical: $critical. OpponentHp Before $opponentHp and After ${opponentHp - damage}")
+                opponentHp -= damage
                 playerRounds.add(BattleRound(true, playerHp))
                 opponentRounds.add(BattleRound(false, opponentHp))
             } else {
-                if(round == opponent.battleStats.type) {
-                    playerHp -= (opponentAp * 2)
-                } else {
-                    playerHp -= opponentAp
-                }
+                val critical = round == opponent.battleStats.type
+                val damage = if(critical) opponentAp * 2 else opponentAp
+                Log.d(TAG, "Opponent hit on round $round. AP: $opponentAp. Critical: $critical. OpponentHp Before $playerHp and After ${playerHp - damage}")
+                playerHp -= damage
                 playerRounds.add(BattleRound(false, playerHp))
                 opponentRounds.add(BattleRound(true, opponentHp))
             }
+            round++
         }
         val result = if(playerHp >= opponentHp) BattleResult.WIN else BattleResult.LOSE
         partnerCharacter.characterStats.totalBattles++
@@ -103,5 +110,19 @@ class BattleModel(private val characterManager: CharacterManager,
             3 -> if(opponentAttribute == 1) 5f else if(opponentAttribute == 2) -5f else 0f
             else -> 0f
         }
+    }
+
+    fun opponentHpSprite(round: Int): Bitmap {
+        val hp = battle.enmemyHpAfterRound(round)
+        val hpPercent = hp.toFloat() / startingOpponentHp
+        val hpSpriteIdx = if(hpPercent == 0.0f) 0 else 1 + (hpPercent*5).toInt()
+        return opponentRemainingHpSprites[hpSpriteIdx]
+    }
+
+    fun partnerHpSprite(round: Int): Bitmap {
+        val hp = battle.partnerHpAfterRound(round)
+        val hpPercent = hp.toFloat() / startingPartnerHp
+        val hpSpriteIdx = if(hpPercent == 0.0f) 0 else 1 + (hpPercent*5).toInt()
+        return partnerRemainingHpSprites[hpSpriteIdx]
     }
 }

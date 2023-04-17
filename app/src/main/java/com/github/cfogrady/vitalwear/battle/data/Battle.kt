@@ -6,11 +6,11 @@ class Battle(
     private val enemyHits: List<BattleRound>
 ) {
     fun partnerHpAfterRound(round: Int): Int {
-        return partnerHits[round].remainingHp
+        return partnerHits[round].remainingHp.coerceAtLeast(0)
     }
 
     fun enmemyHpAfterRound(round: Int): Int {
-        return enemyHits[round].remainingHp
+        return enemyHits[round].remainingHp.coerceAtLeast(0)
     }
 
     fun partnerLandedHitOnRound(round: Int): Boolean {
@@ -19,5 +19,9 @@ class Battle(
 
     fun enemyLandedHitOnRound(round: Int): Boolean {
         return enemyHits[round].landedHit
+    }
+
+    fun finalRound(): Int {
+        return partnerHits.size - 1
     }
 }

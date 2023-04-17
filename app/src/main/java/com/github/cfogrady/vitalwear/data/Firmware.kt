@@ -17,6 +17,10 @@ class Firmware constructor(val loadingIcon : Bitmap,
                            val partnerHpIcons: List<Bitmap>,
                            val opponentHpIcons: List<Bitmap>,
                            val hitIcons: List<Bitmap>,
+                           val happyEmote: List<Bitmap>,
+                           val loseEmote: List<Bitmap>,
+                           val sweatEmote: Bitmap,
+                           val injuredEmote: List<Bitmap>,
 ) {
 
 }

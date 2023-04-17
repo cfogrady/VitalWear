@@ -3,6 +3,7 @@ package com.github.cfogrady.vitalwear.battle.composable
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -20,6 +21,7 @@ import com.github.cfogrady.vitalwear.battle.data.BattleModel
 import com.github.cfogrady.vitalwear.battle.data.BattleResult
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.PositionOffsetRatios
+import com.google.common.collect.Lists
 
 class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: Dp) {
 
@@ -34,6 +36,7 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
         enum class AttackPhase {
             SHOW_HP,
             JUMP_BACK,
+            CUT_IN,
             ATTACK,
             OPPONENT_RECEIVES_ATTACK,
             OPPONENT_HP
@@ -51,14 +54,20 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
         }
         var attacker by remember { mutableStateOf(Attacker.PLAYER) }
         val attackChanger = {newAttacker: Attacker -> attacker = newAttacker}
-        var round = remember {0}
+        var round by remember { mutableStateOf(0) }
         bitmapScaler.ScaledBitmap(bitmap = battleModel.background, contentDescription = "Background")
+        //TODO: Converter to create a BattleCharacter from the partnerCharacter and consolidate PartnerAttack and OpponentAttack into single method
         if(attacker == Attacker.PLAYER) {
             PartnerAttack(battleModel, round, attackChanger)
         } else if(attacker == Attacker.OPPONENT) {
-
-        } else {
-            stateUpdater.invoke(FightTargetState.HP_COMPARE)
+            OpponentAttack(battleModel = battleModel, round = round) {
+                if(round == battleModel.battle.finalRound()) {
+                    stateUpdater.invoke(FightTargetState.HP_COMPARE)
+                } else {
+                    round++;
+                    attacker = Attacker.PLAYER
+                }
+            }
         }
     }
 
@@ -67,13 +76,13 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
         var phase by remember { mutableStateOf(AttackPhase.SHOW_HP) }
         val phaseUpdater = { newPhase: AttackPhase -> phase = newPhase}
         val direction = 1.0f
+        val critical = round == battleModel.partnerCharacter.speciesStats.type
         when(phase) {
             AttackPhase.SHOW_HP -> {
-                val remainingHpPercent = if(round == 0) 1.0f else battleModel.battle.partnerHpAfterRound(round-1).toFloat()/battleModel.startingPartnerHp
+                val remainingHpSprite = if(round == 0) battleModel.partnerRemainingHpSprites[6] else battleModel.partnerHpSprite(round-1)
                 ShowHP(
                     characterImg = battleModel.partnerCharacter.sprites[1],
-                    remainingHpPercent = remainingHpPercent,
-                    hpRemainingSprites = battleModel.partnerRemainingHpSprites,
+                    hpRemainingSprite = remainingHpSprite,
                     direction = direction,
                     phaseUpdater = phaseUpdater
                 )
@@ -81,16 +90,20 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
             AttackPhase.JUMP_BACK -> {
                 JumpBack(
                     characterAttackImg = battleModel.partnerCharacter.sprites[11],
-                    direction = 1.0f,
+                    direction = direction,
+                    critical = critical,
                     phaseUpdater = phaseUpdater
                 )
+            }
+            AttackPhase.CUT_IN -> {
+                CutIn(cutIn = battleModel.partnerCharacter.sprites[13], phaseUpdater = phaseUpdater)
             }
             AttackPhase.ATTACK -> {
                 Attack(
                     characterIdleImg = battleModel.partnerCharacter.sprites[1],
                     characterAttackImg = battleModel.partnerCharacter.sprites[11],
-                    attack = if(round == battleModel.partnerCharacter.speciesStats.type) battleModel.partnerLargeAttack else battleModel.partnerAttack ,
-                    direction = 1.0f,
+                    attack = if(critical) battleModel.partnerLargeAttack else battleModel.partnerAttack ,
+                    direction = direction,
                     phaseUpdater = phaseUpdater
                 )
             }
@@ -98,22 +111,89 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
                 OpponentReceivesAttack(
                     characterIdleSprite = battleModel.opponent.battleSprites.idleBitmaps[0],
                     characterDodgeSprite = battleModel.opponent.battleSprites.dodgeBitmap,
-                    attackSprite = if(round == battleModel.partnerCharacter.speciesStats.type) battleModel.partnerLargeAttack else battleModel.partnerAttack ,
+                    attackSprite = if(critical) battleModel.partnerLargeAttack else battleModel.partnerAttack ,
                     hitSprites = battleModel.opponent.battleSprites.hits,
                     wasHit = battleModel.battle.partnerLandedHitOnRound(round),
-                    direction = -1.0f,
+                    direction = direction*-1,
                     phaseUpdater = phaseUpdater,
                 )
             }
             AttackPhase.OPPONENT_HP -> {
-                Text(text = "TODO")
+                val oldHpSprite = if(round == 0) battleModel.opponentRemainingHpSprites[6] else battleModel.opponentHpSprite(round-1)
+                val newHpSprite = battleModel.opponentHpSprite(round)
+                OpponentHp(characterSprite = battleModel.opponent.battleSprites.idleBitmaps[0],
+                    oldHpSprite = oldHpSprite,
+                    newHpSprite = newHpSprite,
+                    wasHit = battleModel.battle.partnerLandedHitOnRound(round),
+                    direction = direction*-1) {
+                    attackChanger.invoke(Attacker.OPPONENT)
+                }
             }
         }
     }
 
     @Composable
-    fun ShowHP(characterImg: Bitmap, remainingHpPercent: Float, hpRemainingSprites: List<Bitmap>, direction: Float, phaseUpdater: (AttackPhase) -> Unit) {
-        val hpImgIndex = if(remainingHpPercent == 0.0f) 0 else 1 + (remainingHpPercent*5).toInt()
+    private fun OpponentAttack(battleModel: BattleModel, round: Int, roundFinished: () -> Unit) {
+        var phase by remember { mutableStateOf(AttackPhase.SHOW_HP) }
+        val phaseUpdater = { newPhase: AttackPhase -> phase = newPhase}
+        val direction = -1.0f
+        val critical = round == battleModel.opponent.battleStats.type
+        when(phase) {
+            AttackPhase.SHOW_HP -> {
+                ShowHP(
+                    characterImg = battleModel.opponent.battleSprites.idleBitmaps[0],
+                    hpRemainingSprite = battleModel.opponentHpSprite(round),
+                    direction = direction,
+                    phaseUpdater = phaseUpdater
+                )
+            }
+            AttackPhase.JUMP_BACK -> {
+                JumpBack(
+                    characterAttackImg = battleModel.opponent.battleSprites.attackBitmap,
+                    direction = direction,
+                    critical = critical,
+                    phaseUpdater = phaseUpdater
+                )
+            }
+            AttackPhase.CUT_IN -> {
+                CutIn(cutIn = battleModel.opponent.battleSprites.splashBitmap, phaseUpdater = phaseUpdater)
+            }
+            AttackPhase.ATTACK -> {
+                Attack(
+                    characterIdleImg = battleModel.opponent.battleSprites.idleBitmaps[0],
+                    characterAttackImg = battleModel.opponent.battleSprites.attackBitmap,
+                    attack = if(critical) battleModel.opponent.battleSprites.strongProjectileBitmap else battleModel.opponent.battleSprites.projectileBitmap,
+                    direction = direction,
+                    phaseUpdater = phaseUpdater
+                )
+            }
+            AttackPhase.OPPONENT_RECEIVES_ATTACK -> {
+                OpponentReceivesAttack(
+                    characterIdleSprite = battleModel.partnerCharacter.sprites[1],
+                    characterDodgeSprite = battleModel.partnerCharacter.sprites[12],
+                    attackSprite = if(critical) battleModel.opponent.battleSprites.strongProjectileBitmap else battleModel.opponent.battleSprites.projectileBitmap,
+                    hitSprites = battleModel.partnerHits,
+                    wasHit = battleModel.battle.enemyLandedHitOnRound(round),
+                    direction = direction*-1,
+                    phaseUpdater = phaseUpdater,
+                )
+            }
+            AttackPhase.OPPONENT_HP -> {
+                val oldHpSprite = if(round == 0) battleModel.partnerRemainingHpSprites[6] else battleModel.partnerHpSprite(round-1)
+                val newHpSprite = battleModel.partnerHpSprite(round)
+                OpponentHp(characterSprite = battleModel.partnerCharacter.sprites[1],
+                    oldHpSprite = oldHpSprite,
+                    newHpSprite = newHpSprite,
+                    wasHit = battleModel.battle.enemyLandedHitOnRound(round),
+                    direction = direction*-1) {
+                    roundFinished.invoke()
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun ShowHP(characterImg: Bitmap, hpRemainingSprite: Bitmap, direction: Float, phaseUpdater: (AttackPhase) -> Unit) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             bitmapScaler.ScaledBitmap(
                 bitmap = characterImg,
@@ -127,10 +207,10 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
 
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             bitmapScaler.ScaledBitmap(
-                bitmap = hpRemainingSprites[hpImgIndex],
+                bitmap = hpRemainingSprite,
                 contentDescription = "Remaining HP",
                 alignment = Alignment.TopCenter,
-                modifier = Modifier.offset(y = backgroundHeight.times(.1f)))
+                modifier = Modifier.offset(y = backgroundHeight.times(PositionOffsetRatios.HEALTH_OFFSET_FROM_TOP)))
         }
         Handler(Looper.getMainLooper()!!).postDelayed({
             phaseUpdater.invoke(AttackPhase.JUMP_BACK)
@@ -138,7 +218,7 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
     }
 
     @Composable
-    fun JumpBack(characterAttackImg: Bitmap, direction: Float, phaseUpdater: (AttackPhase) -> Unit) {
+    fun JumpBack(characterAttackImg: Bitmap, direction: Float, critical: Boolean ,phaseUpdater: (AttackPhase) -> Unit) {
         var verticalTarget by remember { mutableStateOf(0f)}
         var horizontalTarget by remember { mutableStateOf(0f) }
         val verticalOffset by animateFloatAsState(
@@ -168,8 +248,20 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
             )
         }
         Handler(Looper.getMainLooper()!!).postDelayed({
-            phaseUpdater.invoke(AttackPhase.ATTACK)
+            if(critical) {
+                phaseUpdater.invoke(AttackPhase.CUT_IN)
+            } else {
+                phaseUpdater.invoke(AttackPhase.ATTACK)
+            }
         }, 1300)
+    }
+
+    @Composable
+    fun CutIn(cutIn: Bitmap, phaseUpdater: (AttackPhase) -> Unit) {
+        Handler(Looper.getMainLooper()!!).postDelayed({
+            phaseUpdater.invoke(AttackPhase.ATTACK)
+        }, 1000)
+        bitmapScaler.ScaledBitmap(bitmap = cutIn, contentDescription = "Cut In")
     }
 
     @Composable
@@ -247,8 +339,8 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
                 if(wasHit) {
-                    attackSpeed = 500
-                    targetAttackOffset = -0.2f
+                    attackSpeed = 750
+                    targetAttackOffset = 0f
                 } else {
                     attackSpeed = 1500
                     targetAttackOffset = 0.6f
@@ -259,26 +351,50 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
         }
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             if(!attackHitting) {
-                bitmapScaler.ScaledBitmap(
-                    bitmap = attackSprite,
-                    contentDescription = "attack",
-                    modifier = Modifier
-                        .offset(
-                            y = backgroundHeight.times(PositionOffsetRatios.ATTACK_OFFSET_FROM_BOTTOM),
-                            x = backgroundHeight.times(direction * attackOffset)
-                        )
-                        .graphicsLayer(scaleX = direction * -1.0f)
-                )
-                bitmapScaler.ScaledBitmap(
-                    bitmap = if(dodging) characterDodgeSprite else characterIdleSprite,
-                    contentDescription = "AttackReceiver",
-                    alignment = Alignment.BottomCenter,
-                    modifier = Modifier
-                        .offset(
-                            y = backgroundHeight.times(dodgeOffset),
-                        )
-                        .graphicsLayer(scaleX = direction)
-                )
+                if(wasHit) {
+                    bitmapScaler.ScaledBitmap(
+                        bitmap = if(dodging) characterDodgeSprite else characterIdleSprite,
+                        contentDescription = "AttackReceiver",
+                        alignment = Alignment.BottomCenter,
+                        modifier = Modifier
+                            .offset(
+                                y = backgroundHeight.times(dodgeOffset),
+                            )
+                            .graphicsLayer(scaleX = direction)
+                    )
+                    bitmapScaler.ScaledBitmap(
+                        bitmap = attackSprite,
+                        contentDescription = "attack",
+                        modifier = Modifier
+                            .offset(
+                                y = backgroundHeight.times(PositionOffsetRatios.ATTACK_OFFSET_FROM_BOTTOM),
+                                x = backgroundHeight.times(direction * attackOffset)
+                            )
+                            .graphicsLayer(scaleX = direction * -1.0f)
+                    )
+                } else {
+                    bitmapScaler.ScaledBitmap(
+                        bitmap = attackSprite,
+                        contentDescription = "attack",
+                        modifier = Modifier
+                            .offset(
+                                y = backgroundHeight.times(PositionOffsetRatios.ATTACK_OFFSET_FROM_BOTTOM),
+                                x = backgroundHeight.times(direction * attackOffset)
+                            )
+                            .graphicsLayer(scaleX = direction * -1.0f)
+                    )
+                    bitmapScaler.ScaledBitmap(
+                        bitmap = if(dodging) characterDodgeSprite else characterIdleSprite,
+                        contentDescription = "AttackReceiver",
+                        alignment = Alignment.BottomCenter,
+                        modifier = Modifier
+                            .offset(
+                                y = backgroundHeight.times(dodgeOffset),
+                            )
+                            .graphicsLayer(scaleX = direction)
+                    )
+                }
+
             } else {
                 Handler(Looper.getMainLooper()!!).postDelayed({
                     phaseUpdater.invoke(AttackPhase.OPPONENT_HP)
@@ -293,4 +409,39 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
             }
         }
     }
+
+    @Composable
+    fun OpponentHp(characterSprite: Bitmap, wasHit: Boolean, oldHpSprite: Bitmap, newHpSprite: Bitmap, direction: Float, roundEnd: () -> Unit) {
+        val attacks = remember { Lists.newArrayList(oldHpSprite, newHpSprite) }
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+            bitmapScaler.ScaledBitmap(
+                bitmap = characterSprite,
+                contentDescription = "Attacker",
+                alignment = Alignment.BottomCenter,
+                modifier = Modifier
+                    .offset(y = backgroundHeight.times(PositionOffsetRatios.CHARACTER_OFFSET_FROM_BOTTOM))
+                    .graphicsLayer(scaleX = direction)
+            )
+        }
+
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+            if(wasHit) {
+                bitmapScaler.AnimatedScaledBitmap(
+                    bitmaps = attacks,
+                    startIdx = 0,
+                    frames = 2,
+                    contentDescription = "Remaining HP",
+                    msPerFrame = 500,
+                    modifier = Modifier.offset(y = backgroundHeight.times(PositionOffsetRatios.HEALTH_OFFSET_FROM_TOP))
+                )
+            } else {
+                bitmapScaler.ScaledBitmap(bitmap = oldHpSprite, contentDescription = "Remaining HP",
+                modifier = Modifier.offset(y = backgroundHeight.times(.1f)))
+            }
+        }
+        Handler(Looper.getMainLooper()!!).postDelayed({
+            roundEnd.invoke()
+        }, if(wasHit) 1500 else 500)
+    }
+
 }

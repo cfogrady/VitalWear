@@ -41,6 +41,13 @@ const val OPPONENT_HP_START_IDX = 354
 const val OPPONENT_HP_END_IDX = 360
 const val HIT_START_IDX = 351
 const val HIT_END_IDX = 354
+const val HAPPY_EMOTE_START_IDX = 23 //also win
+const val HAPPY_EMOTE_END_IDX = 25
+const val LOSE_EMOTE_START_IDX = 25
+const val LOSE_EMOTE_END_IDX = 27
+const val SWEAT_EMOTE_IDX = 29
+const val INJURED_EMOTE_START_IDX = 30
+const val INJURED_EMOTE_END_IDX = 32
 
 class FirmwareManager(
     val spriteBitmapConverter: SpriteBitmapConverter
@@ -94,7 +101,14 @@ class FirmwareManager(
                 opponentHPIcons.addAll(spriteBitmapConverter.getBitmaps(sprites.subList(
                     OPPONENT_HP_START_IDX, OPPONENT_HP_END_IDX)))
                 val hitSprites = spriteBitmapConverter.getBitmaps(sprites.subList(HIT_START_IDX, HIT_END_IDX))
-                val loadedFirmware = Firmware(loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, stepsIcon, vitalsIcon, battleIcon, attackSprites, largeAttackSprites, battleBackground, readyIcon, goIcon, partnerHPIcons, opponentHPIcons, hitSprites)
+                val happyEmote = spriteBitmapConverter.getBitmaps(sprites.subList(
+                    HAPPY_EMOTE_START_IDX, HAPPY_EMOTE_END_IDX))
+                val loseEmote = spriteBitmapConverter.getBitmaps(sprites.subList(
+                    LOSE_EMOTE_START_IDX, LOSE_EMOTE_END_IDX))
+                val sweatEmote = spriteBitmapConverter.getBitmap(sprites[SWEAT_EMOTE_IDX])
+                val injuredEmote = spriteBitmapConverter.getBitmaps(sprites.subList(
+                    INJURED_EMOTE_START_IDX, INJURED_EMOTE_END_IDX))
+                val loadedFirmware = Firmware(loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, stepsIcon, vitalsIcon, battleIcon, attackSprites, largeAttackSprites, battleBackground, readyIcon, goIcon, partnerHPIcons, opponentHPIcons, hitSprites, happyEmote, loseEmote, sweatEmote, injuredEmote)
                 firmware.postValue(loadedFirmware)
             }
         } catch (e: Exception) {

@@ -2,6 +2,7 @@ package com.github.cfogrady.vitalwear.battle.composable
 
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +23,7 @@ class ReadyScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: D
         var leftScreenEarly = remember { false }
         var onOpponent by remember { mutableStateOf(true) }
         BackHandler {
+            Log.i("ReadyScreenFactory", "BackHandler Triggered")
             leftScreenEarly = true
             stateUpdater.invoke(FightTargetState.END_FIGHT)
         }
