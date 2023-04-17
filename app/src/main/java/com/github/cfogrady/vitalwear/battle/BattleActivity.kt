@@ -10,6 +10,7 @@ import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.battle.composable.FightTargetFactory
 import com.github.cfogrady.vitalwear.battle.data.BattleModel
 import com.github.cfogrady.vitalwear.battle.data.BattleModelFactory
+import com.github.cfogrady.vitalwear.composable.util.KeepScreenOn
 import java.util.*
 
 class BattleActivity : ComponentActivity() {
@@ -27,8 +28,10 @@ class BattleActivity : ComponentActivity() {
         battleModelFactory = (application as VitalWearApp).battleModelFactory
         fightTargetFactory = (application as VitalWearApp).fightTargetFactory
         val preselectedTarget = intent.getBooleanExtra(PRE_SELECTED_TARGET, false)
+
         setContent {
             Log.i(TAG, "Fighting Random Target Set Content")
+            KeepScreenOn()
             FightRandomTarget()
         }
     }
