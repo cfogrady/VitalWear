@@ -28,6 +28,7 @@ class FightTargetFactory(
         val stateUpdater = {newState: FightTargetState -> state = newState}
         vitalBoxFactory.VitalBox {
             when(state) {
+                //TODO: Add Battle splash screen
                 FightTargetState.OPPONENT_SPLASH -> {
                     opponentSplashFactory.OpponentSplash(battleModel, stateUpdater = stateUpdater)
                 }

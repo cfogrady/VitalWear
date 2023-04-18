@@ -27,6 +27,7 @@ class CardLoader(val applicationContext: Context, val spriteBitmapConverter: Spr
 
     private val dimReader = DimReader()
 
+    //TODO: The slowness comes almost entirely from sprite loading (1.5s). Refactor library to allow partial loads of sprites and other elements
     fun loadCard(file: File = File(applicationContext.filesDir,
         "$LIBRARY_DIR/$CARD_FILE"
     )): Card<*, *, *, *, *, *> {
