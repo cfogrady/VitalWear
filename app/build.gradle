@@ -77,8 +77,12 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.wear:wear:1.1.0'
     implementation 'androidx.wear.tiles:tiles:1.1.0'
-    implementation 'com.github.cfogrady:vb-dim-reader:2.0.0.2-4b6cd48'
     debugImplementation 'androidx.wear.tiles:tiles-renderer:1.1.0'
+
+    //VB-DIM-Reader and SLF4J logging
+    implementation 'com.github.cfogrady:vb-dim-reader:2.0.0.2-4b6cd48'
+    runtimeOnly 'org.slf4j:slf4j-android:1.7.26'
+
 
     def room_version = "2.5.1"
 
