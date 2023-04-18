@@ -1,6 +1,8 @@
 package com.github.cfogrady.vitalwear.complications
 
+import android.app.PendingIntent
 import android.content.ComponentName
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Icon
 import android.os.Handler
@@ -12,6 +14,7 @@ import androidx.wear.watchface.complications.datasource.ComplicationDataSourceUp
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import com.github.cfogrady.vitalwear.R
 import com.github.cfogrady.vitalwear.VitalWearApp
+import com.github.cfogrady.vitalwear.activity.MainActivity
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -47,6 +50,8 @@ class PartnerComplicationService : ComplicationDataSourceService() {
     }
 
     fun complicationResult() : ComplicationData {
+        val goToAppIntent = Intent(applicationContext, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(applicationContext, 0, goToAppIntent, PendingIntent.FLAG_CANCEL_CURRENT.and(PendingIntent.FLAG_ONE_SHOT))
         lateinit var bitmap: Bitmap
         val characterManager = (application as VitalWearApp).characterManager
         val maybeFirmware = (application as VitalWearApp).firmwareManager.getFirmware()
@@ -74,7 +79,7 @@ class PartnerComplicationService : ComplicationDataSourceService() {
         var iconImage = Icon.createWithBitmap(bitmap)
         var image = SmallImage.Builder(iconImage, SmallImageType.PHOTO).build()
         var text = PlainComplicationText.Builder("Partner").build()
-        return SmallImageComplicationData.Builder(image, text).build()
+        return SmallImageComplicationData.Builder(image, text).setTapAction(pendingIntent).build()
     }
 
     fun refreshComplication(complicationId: Int) {
