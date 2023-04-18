@@ -8,13 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.github.cfogrady.vitalwear.battle.data.BattleModel
+import com.github.cfogrady.vitalwear.battle.data.PreBattleModel
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 
 class OpponentSplashFactory(private val bitmapScaler: BitmapScaler) {
 
     @Composable
-    fun OpponentSplash(battleModel: BattleModel, stateUpdater: (FightTargetState) -> Unit) {
+    fun OpponentSplash(battleModel: PreBattleModel, stateUpdater: (FightTargetState) -> Unit) {
         var leftScreenEarly = remember { false }
         BackHandler {
             leftScreenEarly = true

@@ -3,8 +3,6 @@ package com.github.cfogrady.vitalwear.battle.composable
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -16,9 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
-import androidx.wear.compose.material.Text
-import com.github.cfogrady.vitalwear.battle.data.BattleModel
-import com.github.cfogrady.vitalwear.battle.data.BattleResult
+import com.github.cfogrady.vitalwear.battle.data.PostBattleModel
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.PositionOffsetRatios
 import com.google.common.collect.Lists
@@ -44,25 +40,18 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
     }
 
     @Composable
-    fun AttackScreen(battleModel: BattleModel, stateUpdater: (FightTargetState) -> Unit, conclusionUpdater: (BattleResult) -> Unit) {
-        BackHandler {
-            stateUpdater.invoke(FightTargetState.END_FIGHT)
-        }
-        LaunchedEffect(true) {
-            battleModel.performBattle()
-            conclusionUpdater.invoke(battleModel.battle.battleResult)
-        }
+    fun AttackScreen(battleModel: PostBattleModel, finished: () -> Unit) {
         var attacker by remember { mutableStateOf(Attacker.PLAYER) }
-        val attackChanger = {newAttacker: Attacker -> attacker = newAttacker}
         var round by remember { mutableStateOf(0) }
         bitmapScaler.ScaledBitmap(bitmap = battleModel.background, contentDescription = "Background")
-        //TODO: Converter to create a BattleCharacter from the partnerCharacter and consolidate PartnerAttack and OpponentAttack into single method
         if(attacker == Attacker.PLAYER) {
-            PartnerAttack(battleModel, round, attackChanger)
+            Attack(battleModel, true, round) {
+                attacker = Attacker.OPPONENT
+            }
         } else if(attacker == Attacker.OPPONENT) {
-            OpponentAttack(battleModel = battleModel, round = round) {
+            Attack(battleModel = battleModel, isPartnerAttacking = false, round = round) {
                 if(round == battleModel.battle.finalRound()) {
-                    stateUpdater.invoke(FightTargetState.HP_COMPARE)
+                    finished.invoke()
                 } else {
                     round++;
                     attacker = Attacker.PLAYER
@@ -72,16 +61,19 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
     }
 
     @Composable
-    private fun PartnerAttack(battleModel: BattleModel, round: Int, attackChanger: (Attacker) -> Unit) {
+    private fun Attack(battleModel: PostBattleModel, isPartnerAttacking: Boolean, round: Int, finisher: () -> Unit) {
         var phase by remember { mutableStateOf(AttackPhase.SHOW_HP) }
         val phaseUpdater = { newPhase: AttackPhase -> phase = newPhase}
-        val direction = 1.0f
-        val critical = round == battleModel.partnerCharacter.speciesStats.type
+        val direction = if(isPartnerAttacking) 1.0f else -1.0f
+        val attackingCharacter = if(isPartnerAttacking) battleModel.partnerCharacter else battleModel.opponent
+        val defendingCharacter = if(isPartnerAttacking) battleModel.opponent else battleModel.partnerCharacter
+        val critical = round == attackingCharacter.battleStats.type
+        val attackHit = if(isPartnerAttacking) battleModel.battle.partnerLandedHitOnRound(round) else battleModel.battle.enemyLandedHitOnRound(round)
         when(phase) {
             AttackPhase.SHOW_HP -> {
-                val remainingHpSprite = if(round == 0) battleModel.partnerRemainingHpSprites[6] else battleModel.partnerHpSprite(round-1)
+                val remainingHpSprite = attackerHpRemainingSprite(battleModel, isPartnerAttacking, round)
                 ShowHP(
-                    characterImg = battleModel.partnerCharacter.sprites[1],
+                    characterImg = attackingCharacter.battleSprites.idleBitmap,
                     hpRemainingSprite = remainingHpSprite,
                     direction = direction,
                     phaseUpdater = phaseUpdater
@@ -89,106 +81,70 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
             }
             AttackPhase.JUMP_BACK -> {
                 JumpBack(
-                    characterAttackImg = battleModel.partnerCharacter.sprites[11],
+                    characterAttackImg = attackingCharacter.battleSprites.attackBitmap,
                     direction = direction,
                     critical = critical,
                     phaseUpdater = phaseUpdater
                 )
             }
             AttackPhase.CUT_IN -> {
-                CutIn(cutIn = battleModel.partnerCharacter.sprites[13], phaseUpdater = phaseUpdater)
+                CutIn(cutIn = attackingCharacter.battleSprites.splashBitmap, phaseUpdater = phaseUpdater)
             }
             AttackPhase.ATTACK -> {
                 Attack(
-                    characterIdleImg = battleModel.partnerCharacter.sprites[1],
-                    characterAttackImg = battleModel.partnerCharacter.sprites[11],
-                    attack = if(critical) battleModel.partnerLargeAttack else battleModel.partnerAttack ,
+                    characterIdleImg = attackingCharacter.battleSprites.idleBitmap,
+                    characterAttackImg = attackingCharacter.battleSprites.attackBitmap,
+                    attack = if(critical) attackingCharacter.battleSprites.strongProjectileBitmap else attackingCharacter.battleSprites.projectileBitmap ,
                     direction = direction,
                     phaseUpdater = phaseUpdater
                 )
             }
             AttackPhase.OPPONENT_RECEIVES_ATTACK -> {
                 OpponentReceivesAttack(
-                    characterIdleSprite = battleModel.opponent.battleSprites.idleBitmaps[0],
-                    characterDodgeSprite = battleModel.opponent.battleSprites.dodgeBitmap,
-                    attackSprite = if(critical) battleModel.partnerLargeAttack else battleModel.partnerAttack ,
-                    hitSprites = battleModel.opponent.battleSprites.hits,
-                    wasHit = battleModel.battle.partnerLandedHitOnRound(round),
+                    characterIdleSprite = defendingCharacter.battleSprites.idleBitmap,
+                    characterDodgeSprite = defendingCharacter.battleSprites.dodgeBitmap,
+                    attackSprite = if(critical) attackingCharacter.battleSprites.strongProjectileBitmap else attackingCharacter.battleSprites.projectileBitmap ,
+                    hitSprites = defendingCharacter.battleSprites.hits,
+                    wasHit = attackHit,
                     direction = direction*-1,
                     phaseUpdater = phaseUpdater,
                 )
             }
             AttackPhase.OPPONENT_HP -> {
-                val oldHpSprite = if(round == 0) battleModel.opponentRemainingHpSprites[6] else battleModel.opponentHpSprite(round-1)
-                val newHpSprite = battleModel.opponentHpSprite(round)
-                OpponentHp(characterSprite = battleModel.opponent.battleSprites.idleBitmaps[0],
+                val oldHpSprite = if(round == 0) fullHpSprite(battleModel, !isPartnerAttacking) else defenderHpRemainingSprite(battleModel, isPartnerAttacking, round-1)
+                val newHpSprite = defenderHpRemainingSprite(battleModel, isPartnerAttacking, round)
+                OpponentHp(characterSprite = defendingCharacter.battleSprites.idleBitmap,
                     oldHpSprite = oldHpSprite,
                     newHpSprite = newHpSprite,
-                    wasHit = battleModel.battle.partnerLandedHitOnRound(round),
+                    wasHit = attackHit,
                     direction = direction*-1) {
-                    attackChanger.invoke(Attacker.OPPONENT)
+                    finisher.invoke()
                 }
             }
         }
     }
 
-    @Composable
-    private fun OpponentAttack(battleModel: BattleModel, round: Int, roundFinished: () -> Unit) {
-        var phase by remember { mutableStateOf(AttackPhase.SHOW_HP) }
-        val phaseUpdater = { newPhase: AttackPhase -> phase = newPhase}
-        val direction = -1.0f
-        val critical = round == battleModel.opponent.battleStats.type
-        when(phase) {
-            AttackPhase.SHOW_HP -> {
-                ShowHP(
-                    characterImg = battleModel.opponent.battleSprites.idleBitmaps[0],
-                    hpRemainingSprite = battleModel.opponentHpSprite(round),
-                    direction = direction,
-                    phaseUpdater = phaseUpdater
-                )
-            }
-            AttackPhase.JUMP_BACK -> {
-                JumpBack(
-                    characterAttackImg = battleModel.opponent.battleSprites.attackBitmap,
-                    direction = direction,
-                    critical = critical,
-                    phaseUpdater = phaseUpdater
-                )
-            }
-            AttackPhase.CUT_IN -> {
-                CutIn(cutIn = battleModel.opponent.battleSprites.splashBitmap, phaseUpdater = phaseUpdater)
-            }
-            AttackPhase.ATTACK -> {
-                Attack(
-                    characterIdleImg = battleModel.opponent.battleSprites.idleBitmaps[0],
-                    characterAttackImg = battleModel.opponent.battleSprites.attackBitmap,
-                    attack = if(critical) battleModel.opponent.battleSprites.strongProjectileBitmap else battleModel.opponent.battleSprites.projectileBitmap,
-                    direction = direction,
-                    phaseUpdater = phaseUpdater
-                )
-            }
-            AttackPhase.OPPONENT_RECEIVES_ATTACK -> {
-                OpponentReceivesAttack(
-                    characterIdleSprite = battleModel.partnerCharacter.sprites[1],
-                    characterDodgeSprite = battleModel.partnerCharacter.sprites[12],
-                    attackSprite = if(critical) battleModel.opponent.battleSprites.strongProjectileBitmap else battleModel.opponent.battleSprites.projectileBitmap,
-                    hitSprites = battleModel.partnerHits,
-                    wasHit = battleModel.battle.enemyLandedHitOnRound(round),
-                    direction = direction*-1,
-                    phaseUpdater = phaseUpdater,
-                )
-            }
-            AttackPhase.OPPONENT_HP -> {
-                val oldHpSprite = if(round == 0) battleModel.partnerRemainingHpSprites[6] else battleModel.partnerHpSprite(round-1)
-                val newHpSprite = battleModel.partnerHpSprite(round)
-                OpponentHp(characterSprite = battleModel.partnerCharacter.sprites[1],
-                    oldHpSprite = oldHpSprite,
-                    newHpSprite = newHpSprite,
-                    wasHit = battleModel.battle.enemyLandedHitOnRound(round),
-                    direction = direction*-1) {
-                    roundFinished.invoke()
-                }
-            }
+    private fun attackerHpRemainingSprite(battleModel: PostBattleModel, isPartnerAttacking: Boolean, round: Int): Bitmap {
+        if(isPartnerAttacking) {
+            return if(round == 0) battleModel.partnerRemainingHpSprites[6] else battleModel.partnerHpSprite(round-1)
+        } else {
+            return battleModel.opponentHpSprite(round)
+        }
+    }
+
+    private fun defenderHpRemainingSprite(battleModel: PostBattleModel, isPartnerAttacking: Boolean, round: Int): Bitmap {
+        if(isPartnerAttacking) {
+            return battleModel.opponentHpSprite(round)
+        } else {
+            return battleModel.partnerHpSprite(round)
+        }
+    }
+
+    private fun fullHpSprite(battleModel: PostBattleModel, isPartner: Boolean): Bitmap {
+        if(isPartner) {
+            return battleModel.partnerRemainingHpSprites[6]
+        } else {
+            return battleModel.opponentRemainingHpSprites[6]
         }
     }
 

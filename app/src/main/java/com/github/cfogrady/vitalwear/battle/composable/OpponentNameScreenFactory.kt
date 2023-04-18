@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import com.github.cfogrady.vitalwear.battle.data.BattleCharacter
-import com.github.cfogrady.vitalwear.battle.data.BattleModel
+import com.github.cfogrady.vitalwear.battle.data.PreBattleModel
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.PositionOffsetRatios
 import com.google.common.collect.Lists
@@ -29,11 +29,11 @@ class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private 
     }
 
     @Composable
-    fun OpponentNameScreen(battleModel: BattleModel, stateUpdater: (FightTargetState) -> Unit) {
+    fun OpponentNameScreen(battleModel: PreBattleModel, stateUpdater: (FightTargetState) -> Unit) {
         var leftScreenEarly = remember { false }
         val battleCharacter = battleModel.opponent
         var characterFrames = remember {Lists.newArrayList(
-            battleCharacter.battleSprites.idleBitmaps[0],
+            battleCharacter.battleSprites.idleBitmap,
             battleCharacter.battleSprites.attackBitmap)}
         BackHandler {
             leftScreenEarly = true

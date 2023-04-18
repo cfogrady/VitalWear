@@ -3,6 +3,7 @@ package com.github.cfogrady.vitalwear.activity
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.VerticalPager
@@ -10,13 +11,20 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.em
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.BackgroundManager
 import com.github.cfogrady.vitalwear.Loading
+import com.github.cfogrady.vitalwear.R
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
+import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.Firmware
 import com.github.cfogrady.vitalwear.data.FirmwareManager
 
@@ -26,7 +34,8 @@ class MainScreenComposable(
     val backgroundManager: BackgroundManager,
     val imageScaler: ImageScaler,
     val bitmapScaler: BitmapScaler,
-    val partnerScreenComposable: PartnerScreenComposable
+    val partnerScreenComposable: PartnerScreenComposable,
+    val vitalBoxFactory: VitalBoxFactory,
 ) {
     companion object {
         val TAG = "MainScreenComposable"
@@ -95,10 +104,13 @@ class MainScreenComposable(
                         }
                     }
                     2 -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            bitmapScaler.ScaledBitmap(bitmap = firmware.battleIcon, contentDescription = "Battle", modifier = Modifier.clickable {
-                                activityLaunchers.battleLauncher.invoke()
-                            }, alignment = Alignment.Center)
+                        vitalBoxFactory.VitalBox {
+                            Box(modifier = Modifier.fillMaxSize().clickable { activityLaunchers.battleLauncher.invoke() }, contentAlignment = Alignment.Center) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Image(painter = painterResource(id = R.drawable.fight_icon), contentDescription = "Battle")
+                                    Text(text = "BATTLE",  fontWeight = FontWeight.Bold, fontSize = 3.em)
+                                }
+                            }
                         }
                     }
                 }

@@ -2,11 +2,15 @@ package com.github.cfogrady.vitalwear.battle.composable
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.*
-import com.github.cfogrady.vitalwear.battle.data.BattleModel
+import com.github.cfogrady.vitalwear.battle.data.PostBattleModel
 import com.github.cfogrady.vitalwear.battle.data.BattleResult
+import com.github.cfogrady.vitalwear.battle.data.BattleService
+import com.github.cfogrady.vitalwear.battle.data.PreBattleModel
+import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 
 class FightTargetFactory(
+    private val battleService: BattleService,
     private val vitalBoxFactory: VitalBoxFactory,
     private val opponentSplashFactory: OpponentSplashFactory,
     private val opponentNameScreenFactory: OpponentNameScreenFactory,
@@ -17,11 +21,11 @@ class FightTargetFactory(
     private val endFightReactionFactory: EndFightReactionFactory,
     ) {
     @Composable
-    fun FightTarget(battleModel: BattleModel, activityFinished: () -> Unit) {
+    fun FightTarget(battleModel: PreBattleModel, activityFinished: () -> Unit) {
         var state by remember { mutableStateOf(FightTargetState.OPPONENT_SPLASH) }
         var battleConclusion by remember { mutableStateOf(BattleResult.RETREAT) }
+        var postBattle by remember { mutableStateOf(null as PostBattleModel?) }
         val stateUpdater = {newState: FightTargetState -> state = newState}
-        val battleConclusionUpdater = {newConclusion: BattleResult -> battleConclusion = newConclusion}
         vitalBoxFactory.VitalBox {
             when(state) {
                 FightTargetState.OPPONENT_SPLASH -> {
@@ -34,29 +38,41 @@ class FightTargetFactory(
                     readyScreenFactory.ReadyScreen(battleModel, stateUpdater)
                 }
                 FightTargetState.GO -> {
-                    goScreenFactory.GoScreen(battleModel = battleModel, stateUpdater = stateUpdater)
+                    BackHandler {
+                        stateUpdater.invoke(FightTargetState.END_FIGHT)
+                    }
+                    goScreenFactory.GoScreen(battleModel = battleModel) {
+                        state = FightTargetState.ATTACKING
+                        postBattle = battleService.performBattle(battleModel)
+                        battleConclusion = postBattle!!.battle.battleResult
+                    }
                 }
                 FightTargetState.ATTACKING -> {
+                    BackHandler {
+                        stateUpdater.invoke(FightTargetState.END_FIGHT)
+                    }
                     attackScreenFactory.AttackScreen(
-                        battleModel = battleModel,
-                        stateUpdater = stateUpdater,
-                        conclusionUpdater = battleConclusionUpdater
-                    )
+                        battleModel = postBattle!!
+                    ) {
+                        state = FightTargetState.HP_COMPARE
+                    }
                 }
                 FightTargetState.HP_COMPARE -> {
                     BackHandler {
                         state = FightTargetState.END_FIGHT
                     }
-                    hpCompareFactory.HPCompare(battleModel = battleModel) {
+                    hpCompareFactory.HPCompare(battleModel = postBattle!!) {
                         state = FightTargetState.END_FIGHT
                     }
                 }
                 FightTargetState.END_FIGHT -> {
-                    endFightReactionFactory.EndFightReaction(battleModel = battleModel, battleResult = battleConclusion) {
+                    //back to normal background
+                    endFightReactionFactory.EndFightReaction(battleResult = battleConclusion, battleModel.background) {
                         state = FightTargetState.VITALS
                     }
                 }
                 FightTargetState.VITALS -> {
+                    //back to normal background
                     activityFinished.invoke()
                 }
             }

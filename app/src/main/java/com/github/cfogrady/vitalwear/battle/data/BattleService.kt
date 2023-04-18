@@ -9,46 +9,66 @@ import com.github.cfogrady.vb.dim.character.BemCharacterStats
 import com.github.cfogrady.vb.dim.character.CharacterStats
 import com.github.cfogrady.vitalwear.battle.BattleActivity
 import com.github.cfogrady.vitalwear.character.CharacterManager
+import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.data.CardLoader
 import com.github.cfogrady.vitalwear.data.Firmware
 import com.github.cfogrady.vitalwear.data.FirmwareManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import java.util.*
 
 /**
  * This class is used to construct BattleModels for each instance of a battle
  */
-class BattleModelFactory(private val cardLoader: CardLoader,
-                         private val characterManager: CharacterManager,
-                         private val firmwareManager: FirmwareManager
+class BattleService(private val cardLoader: CardLoader,
+                    private val characterManager: CharacterManager,
+                    private val firmwareManager: FirmwareManager,
+                    private val battleLogic: BEMBattleLogic,
+                    private val random: Random,
 ) {
     companion object {
         const val CARD_HIT_START_IDX = 15
         const val CARD_HIT_END_IDX = 18
     }
 
-    val random = Random()
-
-    fun createBattleModel(): BattleModel {
+    fun createBattleModel(): PreBattleModel {
         val partnerCharacter = characterManager.getActiveCharacter().value!!
         val card = cardLoader.loadCard(partnerCharacter.characterStats.cardFile)
         val firmware = firmwareManager.getFirmware().value!!
-        val partnerSmallAttack = getSmallAttackSprite(card, firmware, partnerCharacter.speciesStats.smallAttackId)
-        val partnerLargeAttack = getLargeAttackSprite(card, firmware, partnerCharacter.speciesStats.bigAttackId)
+        val partnerBattleCharacter = battleCharacterFromBemCharacter(card, partnerCharacter)
         val randomOpponent = loadRandomTarget(card)
-        return BattleModel(
-            characterManager,
-            partnerCharacter,
-            partnerSmallAttack,
-            partnerLargeAttack,
-            getHitSprite(card, firmware),
+        return PreBattleModel(
+            partnerBattleCharacter,
             randomOpponent,
             getBackground(card, firmware),
             getReadyIcon(card, firmware),
             getGoIcon(card, firmware),
+        )
+    }
+
+    fun performBattle(preBattleModel: PreBattleModel): PostBattleModel {
+        val partnerCharacter = characterManager.getActiveCharacter().value!!
+        val firmware = firmwareManager.getFirmware().value!!
+        val battle = battleLogic.performBattle(preBattleModel)
+        partnerCharacter.characterStats.totalBattles++
+        partnerCharacter.characterStats.currentPhaseBattles++
+        if(battle.battleResult == BattleResult.WIN) {
+            partnerCharacter.characterStats.totalWins++
+            partnerCharacter.characterStats.currentPhaseWins++
+        }
+        GlobalScope.launch(Dispatchers.Default) {
+            characterManager.updateCharacterStats(partnerCharacter.characterStats, LocalDateTime.now())
+        }
+        return PostBattleModel(
+            preBattleModel.partnerCharacter,
+            preBattleModel.opponent,
+            battle,
+            preBattleModel.background,
             firmware.partnerHpIcons,
             firmware.opponentHpIcons,
-            random
         )
     }
 
@@ -60,7 +80,7 @@ class BattleModelFactory(private val cardLoader: CardLoader,
     }
 
     private fun loadBattleStats(characterStats: CharacterStats.CharacterStatsEntry, mood: Mood = Mood.NORMAL): BattleStats {
-        return BattleStats(characterStats.dp, characterStats.ap, characterStats.hp, characterStats.attribute, characterStats.type, mood)
+        return BattleStats(characterStats.dp, characterStats.ap, characterStats.hp, 0, characterStats.attribute, characterStats.type, mood)
     }
 
     private fun loadBattleSprites(card: Card<*, *, *, *, *, *>, characterStats: CharacterStats.CharacterStatsEntry, slotId: Int): BattleSprites {
@@ -72,7 +92,7 @@ class BattleModelFactory(private val cardLoader: CardLoader,
         val largeProjectileSprite = getLargeAttackSprite(card, firmware, largeAttackId)
         return BattleSprites(
             characterSprites[0],
-            characterSprites.subList(1, 3),
+            characterSprites[1],
             characterSprites[11],
             characterSprites[12],
             characterSprites[9],
@@ -82,6 +102,36 @@ class BattleModelFactory(private val cardLoader: CardLoader,
             largeProjectileSprite,
             getHitSprite(card, firmware)
         )
+    }
+
+    private fun battleCharacterFromBemCharacter(card: Card<*, *, *, *, *, *>, character: BEMCharacter): BattleCharacter {
+        val firmware = firmwareManager.getFirmware().value!!
+        val smallAttackId = character.speciesStats.smallAttackId
+        val largeAttackId = character.speciesStats.bigAttackId
+        val projectileSprite = getSmallAttackSprite(card, firmware, smallAttackId)
+        val largeProjectileSprite = getLargeAttackSprite(card, firmware, largeAttackId)
+        val battleStats = BattleStats(
+            character.totalBp(),
+            character.totalAp(),
+            character.totalHp(),
+            character.characterStats.vitals,
+            character.speciesStats.attribute,
+            character.speciesStats.type,
+            character.mood(),
+        )
+        val battleSprites = BattleSprites(
+            character.sprites[0],
+            character.sprites[1],
+            character.sprites[11],
+            character.sprites[12],
+            character.sprites[9],
+            character.sprites[10],
+            character.sprites[13],
+            projectileSprite,
+            largeProjectileSprite,
+            getHitSprite(card, firmware)
+        )
+        return BattleCharacter(battleStats, battleSprites)
     }
 
     private fun getSmallAttackSprite(card: Card<*, *, *, *, *, *>, firmware: Firmware, smallAttackId: Int) : Bitmap {

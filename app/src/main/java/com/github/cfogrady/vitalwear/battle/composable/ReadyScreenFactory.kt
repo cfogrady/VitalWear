@@ -1,5 +1,6 @@
 package com.github.cfogrady.vitalwear.battle.composable
 
+import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -12,14 +13,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
-import com.github.cfogrady.vitalwear.battle.data.BattleModel
+import com.github.cfogrady.vitalwear.battle.data.BattleCharacter
+import com.github.cfogrady.vitalwear.battle.data.PreBattleModel
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.PositionOffsetRatios
 import com.google.common.collect.Lists
 
 class ReadyScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: Dp) {
     @Composable
-    fun ReadyScreen(battleModel: BattleModel, stateUpdater: (FightTargetState) -> Unit) {
+    fun ReadyScreen(battleModel: PreBattleModel, stateUpdater: (FightTargetState) -> Unit) {
         var leftScreenEarly = remember { false }
         var onOpponent by remember { mutableStateOf(true) }
         BackHandler {
@@ -29,12 +31,12 @@ class ReadyScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: D
         }
         bitmapScaler.ScaledBitmap(bitmap = battleModel.background, contentDescription = "Background")
         if(onOpponent) {
-            ReadyEnemy(battleModel)
+            Ready(battleModel.opponent, battleModel.readySprite, -1.0f)
             Handler(Looper.getMainLooper()!!).postDelayed({
                 onOpponent = false
             }, 2000)
         } else {
-            ReadyPartner(battleModel)
+            Ready(battleModel.partnerCharacter, battleModel.readySprite, 1.0f)
             Handler(Looper.getMainLooper()!!).postDelayed({
                 if(!leftScreenEarly) {
                     stateUpdater.invoke(FightTargetState.GO)
@@ -44,11 +46,11 @@ class ReadyScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: D
     }
 
     @Composable
-    private fun ReadyEnemy(battleModel: BattleModel) {
+    private fun Ready(battleCharacter: BattleCharacter, readyIcon: Bitmap, direction: Float = 1.0f) {
         var characterFrames = remember {
             Lists.newArrayList(
-                battleModel.opponent.battleSprites.idleBitmaps[0],
-                battleModel.opponent.battleSprites.attackBitmap)}
+                battleCharacter.battleSprites.idleBitmap,
+                battleCharacter.battleSprites.attackBitmap)}
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             bitmapScaler.AnimatedScaledBitmap(
                 bitmaps = characterFrames,
@@ -58,39 +60,12 @@ class ReadyScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: D
                 alignment = Alignment.BottomCenter,
                 modifier = Modifier
                     .offset(y = backgroundHeight.times(PositionOffsetRatios.CHARACTER_OFFSET_FROM_BOTTOM))
-                    .graphicsLayer(scaleX = -1.0f)
+                    .graphicsLayer(scaleX = direction)
             )
         }
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             bitmapScaler.ScaledBitmap(
-                bitmap = battleModel.readySprite,
-                contentDescription = "Ready",
-                alignment = Alignment.TopCenter,
-                modifier = Modifier.offset(y = backgroundHeight.times(.05f))
-            )
-        }
-    }
-
-    @Composable
-    private fun ReadyPartner(battleModel: BattleModel) {
-        var characterFrames = remember {
-            Lists.newArrayList(
-                battleModel.partnerCharacter.sprites[1],
-                battleModel.partnerCharacter.sprites[11])}
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-            bitmapScaler.AnimatedScaledBitmap(
-                bitmaps = characterFrames,
-                startIdx = 0,
-                frames = 2,
-                contentDescription = "Opponent",
-                alignment = Alignment.BottomCenter,
-                modifier = Modifier
-                    .offset(y = backgroundHeight.times(PositionOffsetRatios.CHARACTER_OFFSET_FROM_BOTTOM))
-            )
-        }
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-            bitmapScaler.ScaledBitmap(
-                bitmap = battleModel.readySprite,
+                bitmap = readyIcon,
                 contentDescription = "Ready",
                 alignment = Alignment.TopCenter,
                 modifier = Modifier.offset(y = backgroundHeight.times(.05f))

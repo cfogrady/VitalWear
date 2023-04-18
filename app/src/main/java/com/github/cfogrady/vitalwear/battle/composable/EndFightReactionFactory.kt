@@ -8,23 +8,22 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
-import com.github.cfogrady.vitalwear.battle.data.BattleModel
 import com.github.cfogrady.vitalwear.battle.data.BattleResult
-import com.github.cfogrady.vitalwear.character.data.BEMCharacter
+import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.PositionOffsetRatios
 import com.github.cfogrady.vitalwear.data.FirmwareManager
 import com.google.common.collect.Lists
 
-class EndFightReactionFactory(private val bitmapScaler: BitmapScaler, private val firmwareManager: FirmwareManager, private val backgroundHeight: Dp) {
+class EndFightReactionFactory(private val bitmapScaler: BitmapScaler, private val firmwareManager: FirmwareManager, private val characterManager: CharacterManager, private val backgroundHeight: Dp) {
     @Composable
-    fun EndFightReaction(battleModel: BattleModel, battleResult: BattleResult, finished: () -> Unit) {
-        val characterBitmaps = remember { characterBitmaps(battleResult, battleModel.partnerCharacter) }
+    fun EndFightReaction(battleResult: BattleResult, background: Bitmap, finished: () -> Unit) {
+        val characterBitmaps = remember { characterBitmaps(battleResult) }
         val emoteBitmaps = remember { emoteBitmaps(battleResult) }
         Handler(Looper.getMainLooper()!!).postDelayed({
             finished.invoke()
         }, 2000)
-        bitmapScaler.ScaledBitmap(bitmap = battleModel.background, contentDescription = "Background")
+        bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background")
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().offset(y = backgroundHeight.times(PositionOffsetRatios.CHARACTER_OFFSET_FROM_BOTTOM))) {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomEnd) {
@@ -55,7 +54,8 @@ class EndFightReactionFactory(private val bitmapScaler: BitmapScaler, private va
         }
     }
 
-    fun characterBitmaps(battleResult: BattleResult, character: BEMCharacter): List<Bitmap> {
+    private fun characterBitmaps(battleResult: BattleResult): List<Bitmap> {
+        val character = characterManager.getActiveCharacter().value!!
         return when(battleResult) {
             BattleResult.WIN -> {
                 Lists.newArrayList(character.sprites[1], character.sprites[9])

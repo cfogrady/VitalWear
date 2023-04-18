@@ -11,13 +11,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
-import com.github.cfogrady.vitalwear.battle.data.BattleModel
+import com.github.cfogrady.vitalwear.battle.data.PostBattleModel
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.PositionOffsetRatios
 
 class HPCompareFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: Dp) {
     @Composable
-    fun HPCompare(battleModel: BattleModel, finished: () -> Unit) {
+    fun HPCompare(battleModel: PostBattleModel, finished: () -> Unit) {
         var showPlayer by remember { mutableStateOf(true) }
         remember {
             Handler(Looper.getMainLooper()!!).postDelayed({
@@ -40,14 +40,14 @@ class HPCompareFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: Dp)
         }
     }
 
-    fun character(battleModel: BattleModel, player: Boolean): Bitmap {
+    private fun character(battleModel: PostBattleModel, player: Boolean): Bitmap {
         if(player) {
-            return battleModel.partnerCharacter.sprites[1]
+            return battleModel.partnerCharacter.battleSprites.idleBitmap
         }
-        return battleModel.opponent.battleSprites.idleBitmaps[0]
+        return battleModel.opponent.battleSprites.idleBitmap
     }
 
-    fun remainingHp(battleModel: BattleModel, player: Boolean): Bitmap {
+    private fun remainingHp(battleModel: PostBattleModel, player: Boolean): Bitmap {
         val finalRound = battleModel.battle.finalRound()
         if(player) {
             return battleModel.partnerHpSprite(finalRound)

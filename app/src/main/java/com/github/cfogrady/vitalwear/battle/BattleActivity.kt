@@ -8,8 +8,8 @@ import androidx.compose.runtime.*
 import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.battle.composable.FightTargetFactory
-import com.github.cfogrady.vitalwear.battle.data.BattleModel
-import com.github.cfogrady.vitalwear.battle.data.BattleModelFactory
+import com.github.cfogrady.vitalwear.battle.data.BattleService
+import com.github.cfogrady.vitalwear.battle.data.PreBattleModel
 import com.github.cfogrady.vitalwear.composable.util.KeepScreenOn
 import java.util.*
 
@@ -19,13 +19,13 @@ class BattleActivity : ComponentActivity() {
         const val TAG = "BattleActivity"
     }
 
-    lateinit var battleModelFactory: BattleModelFactory
+    lateinit var battleService: BattleService
     lateinit var fightTargetFactory: FightTargetFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.i(TAG, "Fighting Random Target onCreate")
-        battleModelFactory = (application as VitalWearApp).battleModelFactory
+        battleService = (application as VitalWearApp).battleService
         fightTargetFactory = (application as VitalWearApp).fightTargetFactory
         val preselectedTarget = intent.getBooleanExtra(PRE_SELECTED_TARGET, false)
 
@@ -38,12 +38,12 @@ class BattleActivity : ComponentActivity() {
 
     @Composable
     fun FightRandomTarget() {
-        var battleModel by remember { mutableStateOf(Optional.empty<BattleModel>()) }
+        var battleModel by remember { mutableStateOf(Optional.empty<PreBattleModel>()) }
         Log.i(TAG, "Fighting Random Target")
         if(!battleModel.isPresent) {
             Loading {
                 Log.i(TAG, "Fighting Random Target Loading")
-                battleModel = Optional.of(battleModelFactory.createBattleModel())
+                battleModel = Optional.of(battleService.createBattleModel())
             }
         } else {
             fightTargetFactory.FightTarget(battleModel.get()) { finish() }

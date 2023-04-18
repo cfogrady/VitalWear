@@ -10,32 +10,25 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
-import com.github.cfogrady.vitalwear.battle.data.BattleModel
+import com.github.cfogrady.vitalwear.battle.data.PreBattleModel
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.PositionOffsetRatios
 
 class GoScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: Dp) {
     @Composable
-    fun GoScreen(battleModel: BattleModel, stateUpdater: (FightTargetState) -> Unit) {
-        var leftScreenEarly = remember { false }
-        BackHandler {
-            leftScreenEarly = true
-            stateUpdater.invoke(FightTargetState.END_FIGHT)
-        }
+    fun GoScreen(battleModel: PreBattleModel, finished: () -> Unit) {
         bitmapScaler.ScaledBitmap(bitmap = battleModel.background, contentDescription = "Background")
         GoPartner(battleModel)
         Handler(Looper.getMainLooper()!!).postDelayed({
-            if(!leftScreenEarly) {
-                stateUpdater.invoke(FightTargetState.ATTACKING)
-            }
+            finished.invoke()
         }, 500)
     }
 
     @Composable
-    private fun GoPartner(battleModel: BattleModel) {
+    private fun GoPartner(battleModel: PreBattleModel) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             bitmapScaler.ScaledBitmap(
-                bitmap = battleModel.partnerCharacter.sprites[11],
+                bitmap = battleModel.partnerCharacter.battleSprites.attackBitmap,
                 contentDescription = "Opponent",
                 alignment = Alignment.BottomCenter,
                 modifier = Modifier

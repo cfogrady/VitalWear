@@ -14,6 +14,8 @@ data class CharacterEntity (
     @ColumnInfo(name = "state") var state: CharacterState,
     @ColumnInfo(name = "card_file") var cardFile: String,
     @ColumnInfo(name = "slot_id") var slotId: Int,
+    //franchise
+    //bem/dim
     @ColumnInfo(name = "last_update") var lastUpdate: LocalDateTime,
     @ColumnInfo(name = "vitals") var vitals: Int,
     @ColumnInfo(name = "training_time_remaining") var trainingTimeRemainingInSeconds: Long,

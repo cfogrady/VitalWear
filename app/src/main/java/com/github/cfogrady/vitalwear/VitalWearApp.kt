@@ -7,7 +7,8 @@ import com.github.cfogrady.vitalwear.activity.ImageScaler
 import com.github.cfogrady.vitalwear.activity.MainScreenComposable
 import com.github.cfogrady.vitalwear.activity.PartnerScreenComposable
 import com.github.cfogrady.vitalwear.battle.composable.*
-import com.github.cfogrady.vitalwear.battle.data.BattleModelFactory
+import com.github.cfogrady.vitalwear.battle.data.BEMBattleLogic
+import com.github.cfogrady.vitalwear.battle.data.BattleService
 import com.github.cfogrady.vitalwear.character.BEMUpdater
 import com.github.cfogrady.vitalwear.data.CardLoader
 import com.github.cfogrady.vitalwear.character.CharacterManager
@@ -16,6 +17,7 @@ import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.*
+import java.util.Random
 
 class VitalWearApp : Application(), Configuration.Provider {
     val spriteBitmapConverter = SpriteBitmapConverter()
@@ -28,7 +30,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var characterManager: CharacterManager
     lateinit var previewCharacterManager: PreviewCharacterManager
     lateinit var backgroundManager: BackgroundManager
-    lateinit var battleModelFactory: BattleModelFactory
+    lateinit var battleService: BattleService
     lateinit var partnerScreenComposable: PartnerScreenComposable
     lateinit var mainScreenComposable: MainScreenComposable
     lateinit var fightTargetFactory: FightTargetFactory
@@ -42,7 +44,9 @@ class VitalWearApp : Application(), Configuration.Provider {
         characterManager = CharacterManager()
         characterManager.init(database.characterDao(), cardLoader, BEMUpdater(applicationContext))
         backgroundManager = BackgroundManager(cardLoader, firmwareManager)
-        battleModelFactory = BattleModelFactory(cardLoader, characterManager, firmwareManager)
+        val random = Random()
+        val bemBattleLogic = BEMBattleLogic(random)
+        battleService = BattleService(cardLoader, characterManager, firmwareManager, bemBattleLogic, random)
         imageScaler = ImageScaler(applicationContext.resources.displayMetrics, applicationContext.resources.configuration.isScreenRound)
         val backgroundHeight = imageScaler.convertPixelsToDp(ImageScaler.VB_HEIGHT.toInt())
         bitmapScaler = BitmapScaler(imageScaler)
@@ -53,10 +57,10 @@ class VitalWearApp : Application(), Configuration.Provider {
         val goScreenFactory = GoScreenFactory(bitmapScaler, backgroundHeight)
         val attackScreenFactory = AttackScreenFactory(bitmapScaler, backgroundHeight)
         val hpCompareFactory = HPCompareFactory(bitmapScaler, backgroundHeight)
-        val endFightReactionFactory = EndFightReactionFactory(bitmapScaler, firmwareManager, backgroundHeight)
-        fightTargetFactory = FightTargetFactory(vitalBoxFactory, opponentSplashFactory, opponentNameScreenFactory, readyScreenFactory, goScreenFactory, attackScreenFactory, hpCompareFactory, endFightReactionFactory)
+        val endFightReactionFactory = EndFightReactionFactory(bitmapScaler, firmwareManager, characterManager, backgroundHeight)
+        fightTargetFactory = FightTargetFactory(battleService, vitalBoxFactory, opponentSplashFactory, opponentNameScreenFactory, readyScreenFactory, goScreenFactory, attackScreenFactory, hpCompareFactory, endFightReactionFactory)
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight)
-        mainScreenComposable = MainScreenComposable(characterManager, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable)
+        mainScreenComposable = MainScreenComposable(characterManager, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardLoader)
     }
 
