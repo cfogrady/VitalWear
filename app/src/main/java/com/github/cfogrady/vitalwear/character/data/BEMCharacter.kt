@@ -53,4 +53,25 @@ class BEMCharacter(
             characterStats.timeUntilNextTransformation = transformationWaitTimeSeconds
         }
     }
+
+    fun totalBp(): Int {
+        return speciesStats.dp + characterStats.trainedBp
+    }
+    fun totalAp(): Int {
+        return speciesStats.ap + characterStats.trainedAp
+    }
+    fun totalHp(): Int {
+        return speciesStats.hp + characterStats.trainedHp
+    }
+
+    fun mood(): Mood {
+        val mood = characterStats.mood
+        return if(mood < 30) {
+            Mood.GOOD
+        } else if(mood < 80) {
+            Mood.NORMAL
+        } else {
+            Mood.BAD
+        }
+    }
 }

@@ -4,7 +4,8 @@ import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -12,23 +13,29 @@ import androidx.compose.ui.graphics.asImageBitmap
 import com.github.cfogrady.vitalwear.activity.ImageScaler
 
 class BitmapScaler(val imageScaler: ImageScaler) {
+    companion object {
+        const val TAG = "BitmapScaler"
+    }
+
     @Composable
     fun ScaledBitmap(bitmap: Bitmap, contentDescription: String, modifier: Modifier = Modifier, alignment: Alignment = Alignment.TopStart) {
+        val scaledWidth = imageScaler.scaledDpValueFromPixels(bitmap.width)
+        val scaledHeight = imageScaler.scaledDpValueFromPixels(bitmap.height)
         Image(bitmap = bitmap.asImageBitmap(),
             contentDescription = contentDescription,
-            modifier = modifier.size(imageScaler.scaledDpValueFromPixels(bitmap.height)),
+            modifier = modifier.width(scaledWidth).height(scaledHeight),
             alignment = alignment
         )
     }
 
     @Composable
-    fun AnimatedScaledBitmap(bitmaps: List<Bitmap>, startIdx: Int, frames: Int, contentDescription: String, alignment: Alignment = Alignment.TopStart, modifier: Modifier = Modifier) {
+    fun AnimatedScaledBitmap(bitmaps: List<Bitmap>, startIdx: Int, frames: Int, contentDescription: String, alignment: Alignment = Alignment.TopStart, modifier: Modifier = Modifier, msPerFrame: Long = 500) {
         var spriteIdx by remember { mutableStateOf(0) }
-        animate({spriteIdx}, {x -> spriteIdx = x}, frames)
+        animate({spriteIdx}, {x -> spriteIdx = x}, frames, msPerFrame)
         ScaledBitmap(bitmap = bitmaps[startIdx + spriteIdx], contentDescription = contentDescription, alignment = alignment, modifier = modifier)
     }
 
-    fun animate(getter: () -> Int, setter: (Int) -> Unit, max: Int) {
+    fun animate(getter: () -> Int, setter: (Int) -> Unit, max: Int, msPerFrame: Long) {
         Handler(Looper.getMainLooper()!!).postDelayed({
             var value = getter.invoke()
             value++
@@ -36,6 +43,6 @@ class BitmapScaler(val imageScaler: ImageScaler) {
                 value = 0
             }
             setter.invoke(value)
-        }, 500)
+        }, msPerFrame)
     }
 }

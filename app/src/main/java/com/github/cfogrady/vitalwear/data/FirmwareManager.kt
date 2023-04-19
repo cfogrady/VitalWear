@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
 import com.github.cfogrady.vb.dim.util.RelativeByteOffsetInputStream
+import com.google.common.collect.Lists
 import kotlinx.coroutines.*
 import java.io.File
 import java.io.FileInputStream
@@ -25,6 +26,28 @@ const val DEFAULT_BACKGROUND = 0
 const val CHARACTER_SELECTOR_ICON = 267
 const val STEPS_ICON = 55
 const val VITALS_ICON = 54
+const val BATTLE_ICON = 370
+const val BATTLE_BACKGROUND = 350
+const val SMALL_ATTACK_START_IDX = 310
+const val SMALL_ATTACK_END_IDX = 350
+const val BIG_ATTACK_START_IDX = 288
+const val BIG_ATTACK_END_IDX = 310
+const val READY_IDX = 167
+const val GO_IDX = 168
+const val EMPTY_HP_IDX = 360
+const val PARTNER_HP_START_IDX = 361
+const val PARTNER_HP_END_IDX = 367
+const val OPPONENT_HP_START_IDX = 354
+const val OPPONENT_HP_END_IDX = 360
+const val HIT_START_IDX = 351
+const val HIT_END_IDX = 354
+const val HAPPY_EMOTE_START_IDX = 23 //also win
+const val HAPPY_EMOTE_END_IDX = 25
+const val LOSE_EMOTE_START_IDX = 25
+const val LOSE_EMOTE_END_IDX = 27
+const val SWEAT_EMOTE_IDX = 29
+const val INJURED_EMOTE_START_IDX = 30
+const val INJURED_EMOTE_END_IDX = 32
 
 class FirmwareManager(
     val spriteBitmapConverter: SpriteBitmapConverter
@@ -62,7 +85,30 @@ class FirmwareManager(
                 val characterSelectorIcon = spriteBitmapConverter.getBitmap(sprites[CHARACTER_SELECTOR_ICON])
                 val stepsIcon = spriteBitmapConverter.getBitmap(sprites[STEPS_ICON])
                 val vitalsIcon = spriteBitmapConverter.getBitmap(sprites[VITALS_ICON])
-                val loadedFirmware = Firmware(sprites, loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, stepsIcon, vitalsIcon)
+                val battleIcon = spriteBitmapConverter.getBitmap(sprites[BATTLE_ICON])
+                val battleBackground = spriteBitmapConverter.getBitmap(sprites[BATTLE_BACKGROUND])
+                val attackSprites = spriteBitmapConverter.getBitmaps(sprites.subList(
+                    SMALL_ATTACK_START_IDX, SMALL_ATTACK_END_IDX))
+                val largeAttackSprites= spriteBitmapConverter.getBitmaps(sprites.subList(
+                    BIG_ATTACK_START_IDX, BIG_ATTACK_END_IDX))
+                val readyIcon = spriteBitmapConverter.getBitmap(sprites[READY_IDX])
+                val goIcon = spriteBitmapConverter.getBitmap(sprites[GO_IDX])
+                val emptyHP = spriteBitmapConverter.getBitmap(sprites[EMPTY_HP_IDX])
+                val partnerHPIcons = Lists.newArrayList(emptyHP)
+                partnerHPIcons.addAll(spriteBitmapConverter.getBitmaps(sprites.subList(
+                    PARTNER_HP_START_IDX, PARTNER_HP_END_IDX)))
+                val opponentHPIcons = Lists.newArrayList(emptyHP)
+                opponentHPIcons.addAll(spriteBitmapConverter.getBitmaps(sprites.subList(
+                    OPPONENT_HP_START_IDX, OPPONENT_HP_END_IDX)))
+                val hitSprites = spriteBitmapConverter.getBitmaps(sprites.subList(HIT_START_IDX, HIT_END_IDX))
+                val happyEmote = spriteBitmapConverter.getBitmaps(sprites.subList(
+                    HAPPY_EMOTE_START_IDX, HAPPY_EMOTE_END_IDX))
+                val loseEmote = spriteBitmapConverter.getBitmaps(sprites.subList(
+                    LOSE_EMOTE_START_IDX, LOSE_EMOTE_END_IDX))
+                val sweatEmote = spriteBitmapConverter.getBitmap(sprites[SWEAT_EMOTE_IDX])
+                val injuredEmote = spriteBitmapConverter.getBitmaps(sprites.subList(
+                    INJURED_EMOTE_START_IDX, INJURED_EMOTE_END_IDX))
+                val loadedFirmware = Firmware(loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, stepsIcon, vitalsIcon, battleIcon, attackSprites, largeAttackSprites, battleBackground, readyIcon, goIcon, partnerHPIcons, opponentHPIcons, hitSprites, happyEmote, loseEmote, sweatEmote, injuredEmote)
                 firmware.postValue(loadedFirmware)
             }
         } catch (e: Exception) {
