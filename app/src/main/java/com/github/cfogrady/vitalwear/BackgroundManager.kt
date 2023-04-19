@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import com.github.cfogrady.vitalwear.data.CardLoader
 import com.github.cfogrady.vitalwear.data.FirmwareManager
 
-class BackgroundManager(val cardLoader: CardLoader, val firmwareManager: FirmwareManager) {
+class BackgroundManager(private val cardLoader: CardLoader, private val firmwareManager: FirmwareManager) {
     val TAG = "BackgroundManager"
     val selectedBackground = MutableLiveData<Bitmap>()
 

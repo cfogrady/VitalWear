@@ -24,6 +24,7 @@ const val TIMER_ICON = 81
 const val INSERT_CARD_ICON = 38
 const val DEFAULT_BACKGROUND = 0
 const val CHARACTER_SELECTOR_ICON = 267
+const val TRAINING_MENU_ICON = 265
 const val STEPS_ICON = 55
 const val VITALS_ICON = 54
 const val BATTLE_ICON = 370
@@ -48,6 +49,14 @@ const val LOSE_EMOTE_END_IDX = 27
 const val SWEAT_EMOTE_IDX = 29
 const val INJURED_EMOTE_START_IDX = 30
 const val INJURED_EMOTE_END_IDX = 32
+const val SQUAT_TEXT_IDX = 182
+const val SQUAT_ICON_IDX = 247
+const val CRUNCH_TEXT_IDX = 181
+const val CRUNCH_ICON_IDX = 246
+const val PUNCH_TEXT_IDX = 180
+const val PUNCH_ICON_IDX = 245
+const val DASH_TEXT_IDX = 183
+const val DASH_ICON_IDX = 249
 
 class FirmwareManager(
     val spriteBitmapConverter: SpriteBitmapConverter
@@ -83,6 +92,7 @@ class FirmwareManager(
                 val inserCardIcon = spriteBitmapConverter.getBitmap(sprites[INSERT_CARD_ICON])
                 val defaultBackground = spriteBitmapConverter.getBitmap(sprites[DEFAULT_BACKGROUND])
                 val characterSelectorIcon = spriteBitmapConverter.getBitmap(sprites[CHARACTER_SELECTOR_ICON])
+                val trainingMenuIcon = spriteBitmapConverter.getBitmap(sprites[TRAINING_MENU_ICON])
                 val stepsIcon = spriteBitmapConverter.getBitmap(sprites[STEPS_ICON])
                 val vitalsIcon = spriteBitmapConverter.getBitmap(sprites[VITALS_ICON])
                 val battleIcon = spriteBitmapConverter.getBitmap(sprites[BATTLE_ICON])
@@ -108,7 +118,15 @@ class FirmwareManager(
                 val sweatEmote = spriteBitmapConverter.getBitmap(sprites[SWEAT_EMOTE_IDX])
                 val injuredEmote = spriteBitmapConverter.getBitmaps(sprites.subList(
                     INJURED_EMOTE_START_IDX, INJURED_EMOTE_END_IDX))
-                val loadedFirmware = Firmware(loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, stepsIcon, vitalsIcon, battleIcon, attackSprites, largeAttackSprites, battleBackground, readyIcon, goIcon, partnerHPIcons, opponentHPIcons, hitSprites, happyEmote, loseEmote, sweatEmote, injuredEmote)
+                val squatText = spriteBitmapConverter.getBitmap(sprites[SQUAT_TEXT_IDX])
+                val squatIcon = spriteBitmapConverter.getBitmap(sprites[SQUAT_ICON_IDX])
+                val crunchText = spriteBitmapConverter.getBitmap(sprites[CRUNCH_TEXT_IDX])
+                val crunchIcon = spriteBitmapConverter.getBitmap(sprites[CRUNCH_ICON_IDX])
+                val punchText = spriteBitmapConverter.getBitmap(sprites[PUNCH_TEXT_IDX])
+                val punchIcon = spriteBitmapConverter.getBitmap(sprites[PUNCH_ICON_IDX])
+                val dashText = spriteBitmapConverter.getBitmap(sprites[DASH_TEXT_IDX])
+                val dashIcon = spriteBitmapConverter.getBitmap(sprites[DASH_ICON_IDX])
+                val loadedFirmware = Firmware(loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, trainingMenuIcon, stepsIcon, vitalsIcon, battleIcon, attackSprites, largeAttackSprites, battleBackground, readyIcon, goIcon, partnerHPIcons, opponentHPIcons, hitSprites, happyEmote, loseEmote, sweatEmote, injuredEmote, squatText, squatIcon, crunchText, crunchIcon, punchText, punchIcon, dashText, dashIcon)
                 firmware.postValue(loadedFirmware)
             }
         } catch (e: Exception) {

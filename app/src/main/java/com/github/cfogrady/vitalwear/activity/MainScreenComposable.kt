@@ -88,7 +88,7 @@ class MainScreenComposable(
             .padding(padding)
             .fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
-            VerticalPager(pageCount = 3) {page ->
+            VerticalPager(pageCount = 4) {page ->
                 when(page) {
                     0 -> {
                         partnerScreenComposable.PartnerScreen(
@@ -104,6 +104,15 @@ class MainScreenComposable(
                         }
                     }
                     2 -> {
+                        vitalBoxFactory.VitalBox {
+                            Box(modifier = Modifier.fillMaxSize().clickable { activityLaunchers.battleLauncher.invoke() }, contentAlignment = Alignment.Center) {
+                                bitmapScaler.ScaledBitmap(bitmap = firmware.trainingIcon, contentDescription = "Training", modifier = Modifier.clickable {
+                                    activityLaunchers.trainingMenuLauncher.invoke()
+                                })
+                            }
+                        }
+                    }
+                    3 -> {
                         vitalBoxFactory.VitalBox {
                             Box(modifier = Modifier.fillMaxSize().clickable { activityLaunchers.battleLauncher.invoke() }, contentAlignment = Alignment.Center) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {

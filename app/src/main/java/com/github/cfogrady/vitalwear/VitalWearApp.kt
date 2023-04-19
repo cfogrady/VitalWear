@@ -17,6 +17,7 @@ import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.*
+import com.github.cfogrady.vitalwear.training.ExerciseScreenFactory
 import java.util.Random
 
 class VitalWearApp : Application(), Configuration.Provider {
@@ -31,9 +32,11 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var previewCharacterManager: PreviewCharacterManager
     lateinit var backgroundManager: BackgroundManager
     lateinit var battleService: BattleService
+    lateinit var vitalBoxFactory: VitalBoxFactory
     lateinit var partnerScreenComposable: PartnerScreenComposable
     lateinit var mainScreenComposable: MainScreenComposable
     lateinit var fightTargetFactory: FightTargetFactory
+    lateinit var exerciseScreenFactory: ExerciseScreenFactory
 
     override fun onCreate() {
         super.onCreate()
@@ -50,7 +53,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         imageScaler = ImageScaler(applicationContext.resources.displayMetrics, applicationContext.resources.configuration.isScreenRound)
         val backgroundHeight = imageScaler.convertPixelsToDp(ImageScaler.VB_HEIGHT.toInt())
         bitmapScaler = BitmapScaler(imageScaler)
-        val vitalBoxFactory = VitalBoxFactory(imageScaler, ImageScaler.VB_WIDTH.toInt(), ImageScaler.VB_HEIGHT.toInt())
+        vitalBoxFactory = VitalBoxFactory(imageScaler, ImageScaler.VB_WIDTH.toInt(), ImageScaler.VB_HEIGHT.toInt())
         val opponentSplashFactory = OpponentSplashFactory(bitmapScaler)
         val opponentNameScreenFactory = OpponentNameScreenFactory(bitmapScaler, backgroundHeight)
         val readyScreenFactory = ReadyScreenFactory(bitmapScaler, backgroundHeight)
@@ -59,6 +62,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val hpCompareFactory = HPCompareFactory(bitmapScaler, backgroundHeight)
         val endFightReactionFactory = EndFightReactionFactory(bitmapScaler, firmwareManager, characterManager, backgroundHeight)
         fightTargetFactory = FightTargetFactory(battleService, vitalBoxFactory, opponentSplashFactory, opponentNameScreenFactory, readyScreenFactory, goScreenFactory, attackScreenFactory, hpCompareFactory, endFightReactionFactory)
+        exerciseScreenFactory = ExerciseScreenFactory(vitalBoxFactory, bitmapScaler, backgroundHeight)
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight)
         mainScreenComposable = MainScreenComposable(characterManager, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardLoader)
