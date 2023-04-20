@@ -12,8 +12,8 @@ import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.data.CardLoader
-import com.github.cfogrady.vitalwear.data.Firmware
-import com.github.cfogrady.vitalwear.data.FirmwareManager
+import com.github.cfogrady.vitalwear.firmware.Firmware
+import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -67,8 +67,8 @@ class BattleService(private val cardLoader: CardLoader,
             preBattleModel.opponent,
             battle,
             preBattleModel.background,
-            firmware.partnerHpIcons,
-            firmware.opponentHpIcons,
+            firmware.battleFirmwareSprites.partnerHpIcons,
+            firmware.battleFirmwareSprites.opponentHpIcons,
         )
     }
 
@@ -136,7 +136,7 @@ class BattleService(private val cardLoader: CardLoader,
 
     private fun getSmallAttackSprite(card: Card<*, *, *, *, *, *>, firmware: Firmware, smallAttackId: Int) : Bitmap {
         if(smallAttackId < 40) {
-            return firmware.attackSprites[smallAttackId]
+            return firmware.battleFirmwareSprites.attackSprites[smallAttackId]
         }
         val cardSpriteIdx = (smallAttackId - 40) + 34
         return cardLoader.bitmapFromCardByIndex(card, cardSpriteIdx)
@@ -144,7 +144,7 @@ class BattleService(private val cardLoader: CardLoader,
 
     private fun getLargeAttackSprite(card: Card<*, *, *, *, *, *>, firmware: Firmware, largeAttackId: Int) : Bitmap {
         if(largeAttackId < 22) {
-            return firmware.largeAttackSprites[largeAttackId]
+            return firmware.battleFirmwareSprites.largeAttackSprites[largeAttackId]
         }
         val cardSpriteIdx = (largeAttackId - 22) + 44
         return cardLoader.bitmapFromCardByIndex(card, cardSpriteIdx)
@@ -154,7 +154,7 @@ class BattleService(private val cardLoader: CardLoader,
         if(card is BemCard) {
             return cardLoader.bitmapsFromCardByIndexes(card, CARD_HIT_START_IDX, CARD_HIT_END_IDX)
         }
-        return firmware.hitIcons
+        return firmware.battleFirmwareSprites.hitIcons
     }
 
     private fun loadRandomTarget(card: Card<*, *, *, *, *, *>): BattleCharacter {
@@ -195,7 +195,7 @@ class BattleService(private val cardLoader: CardLoader,
         if(card is BemCard) {
             return cardLoader.bitmapFromCardByIndex(card, CardLoader.BEM_BATTLE_BACKGROUND_IDX)
         }
-        return firmware.battleBackground
+        return firmware.battleFirmwareSprites.battleBackground
     }
 
     private fun getReadyIcon(card: Card<*, *, *, *, *, *>, firmware: Firmware): Bitmap {

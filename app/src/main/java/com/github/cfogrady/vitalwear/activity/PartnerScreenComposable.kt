@@ -9,8 +9,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
+import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
-import com.github.cfogrady.vitalwear.data.Firmware
+import com.github.cfogrady.vitalwear.composable.util.formatNumber
+import com.github.cfogrady.vitalwear.firmware.Firmware
+import com.github.cfogrady.vitalwear.menu.MenuFirmwareSprites
 import java.time.LocalDateTime
 
 class PartnerScreenComposable(val bitmapScaler: BitmapScaler, val backgroundHeight: Dp) {
@@ -19,7 +22,7 @@ class PartnerScreenComposable(val bitmapScaler: BitmapScaler, val backgroundHeig
     }
 
     @Composable
-    fun PartnerScreen(character: BEMCharacter, firmware: Firmware) {
+    fun PartnerScreen(character: BEMCharacter, firmware: CharacterFirmwareSprites) {
         val emojiHeight = 5.dp //imageScaler
         val now = LocalDateTime.now()
         val dailyStepCount = 0;
@@ -27,31 +30,19 @@ class PartnerScreenComposable(val bitmapScaler: BitmapScaler, val backgroundHeig
             Column(verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
                 .fillMaxWidth()
                 .offset(y = backgroundHeight.times(-.05f))) {
-                Text(text="${formatWithDigits(now.hour, 2)}:${formatWithDigits(now.minute, 2)}", fontWeight = FontWeight.Bold, fontSize = 4.em)
+                Text(text="${formatNumber(now.hour, 2)}:${formatNumber(now.minute, 2)}", fontWeight = FontWeight.Bold, fontSize = 4.em)
                 Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                     bitmapScaler.ScaledBitmap(bitmap = firmware.vitalsIcon, contentDescription = "Vitals Icon")
-                    Text(text = formatWithDigits(character.characterStats.vitals, 4), color = Color.White)
+                    Text(text = formatNumber(character.characterStats.vitals, 4), color = Color.White)
                 }
                 Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                     bitmapScaler.ScaledBitmap(bitmap = firmware.stepsIcon, contentDescription = "Steps Icon")
-                    Text(text = formatWithDigits(dailyStepCount, 5), color = Color.White)
+                    Text(text = formatNumber(dailyStepCount, 5), color = Color.White)
                 }
                 Row(Modifier.height(emojiHeight)) {
                 }
                 bitmapScaler.AnimatedScaledBitmap(bitmaps = character.sprites, startIdx = character.activityIdx, frames = 2, contentDescription = "Character", alignment = Alignment.BottomCenter)
             }
         }
-    }
-
-    private fun formatWithDigits(value: Int, digits: Int): String {
-        var str = value.toString()
-        if(str.length < digits) {
-            val zeroesBuilder = StringBuilder()
-            for(i in 1..(digits - str.length)) {
-                zeroesBuilder.append("0")
-            }
-            str = zeroesBuilder.append(str).toString()
-        }
-        return str
     }
 }

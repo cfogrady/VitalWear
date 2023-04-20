@@ -57,6 +57,8 @@
         </activity>
         <activity android:name=".character.activity.CharacterSelectActivity"/>
         <activity android:name=".character.activity.NewCardActivity"/>
+        <activity android:name=".training.TrainingMenuActivity"/>
+        <activity android:name=".training.TrainingActivity"/>
         <activity android:name=".battle.BattleActivity"/>
         <service
             android:name=".tiles.PetTileService"
