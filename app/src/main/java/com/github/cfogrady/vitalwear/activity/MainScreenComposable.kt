@@ -92,12 +92,12 @@ class MainScreenComposable(
                     0 -> {
                         partnerScreenComposable.PartnerScreen(
                             character = character,
-                            firmware = firmware
+                            firmware = firmware.characterFirmwareSprites
                         )
                     }
                     1 -> {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            bitmapScaler.ScaledBitmap(bitmap = firmware.characterSelectorIcon, contentDescription = "Character", modifier = Modifier.clickable {
+                            bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.characterSelectorIcon, contentDescription = "Character", modifier = Modifier.clickable {
                                 activityLaunchers.characterSelectionLauncher.invoke()
                             })
                         }
@@ -105,7 +105,7 @@ class MainScreenComposable(
                     2 -> {
                         vitalBoxFactory.VitalBox {
                             Box(modifier = Modifier.fillMaxSize().clickable { activityLaunchers.battleLauncher.invoke() }, contentAlignment = Alignment.Center) {
-                                bitmapScaler.ScaledBitmap(bitmap = firmware.trainingIcon, contentDescription = "Training", modifier = Modifier.clickable {
+                                bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.trainingIcon, contentDescription = "Training", modifier = Modifier.clickable {
                                     activityLaunchers.trainingMenuLauncher.invoke()
                                 })
                             }

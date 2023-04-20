@@ -73,7 +73,7 @@ class EndFightReactionFactory(private val bitmapScaler: BitmapScaler, private va
     }
 
     fun emoteBitmaps(battleResult: BattleResult): List<Bitmap> {
-        val firmware = firmwareManager.getFirmware().value!!
+        val firmware = firmwareManager.getFirmware().value!!.emoteFirmwareSprites
         return when(battleResult) {
             BattleResult.WIN -> {
                 firmware.happyEmote

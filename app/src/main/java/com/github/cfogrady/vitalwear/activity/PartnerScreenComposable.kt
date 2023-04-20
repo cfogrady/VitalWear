@@ -9,8 +9,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
+import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.firmware.Firmware
+import com.github.cfogrady.vitalwear.menu.MenuFirmwareSprites
 import java.time.LocalDateTime
 
 class PartnerScreenComposable(val bitmapScaler: BitmapScaler, val backgroundHeight: Dp) {
@@ -19,7 +21,7 @@ class PartnerScreenComposable(val bitmapScaler: BitmapScaler, val backgroundHeig
     }
 
     @Composable
-    fun PartnerScreen(character: BEMCharacter, firmware: Firmware) {
+    fun PartnerScreen(character: BEMCharacter, firmware: CharacterFirmwareSprites) {
         val emojiHeight = 5.dp //imageScaler
         val now = LocalDateTime.now()
         val dailyStepCount = 0;

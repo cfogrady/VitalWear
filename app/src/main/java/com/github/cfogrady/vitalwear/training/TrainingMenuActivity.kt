@@ -23,19 +23,18 @@ import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.BackgroundManager
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
-import com.github.cfogrady.vitalwear.firmware.Firmware
 
 class TrainingMenuActivity : ComponentActivity() {
 
     lateinit var bitmapScaler: BitmapScaler
-    lateinit var firmware: Firmware
+    lateinit var firmware: TrainingFirmwareSprites
     lateinit var backgroundManager: BackgroundManager
 
     @OptIn(ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         bitmapScaler = (application as VitalWearApp).bitmapScaler
-        firmware = (application as VitalWearApp).firmwareManager.getFirmware().value!!
+        firmware = (application as VitalWearApp).firmwareManager.getFirmware().value!!.trainingFirmwareSprites
         backgroundManager = (application as VitalWearApp).backgroundManager
         val vitalBoxFactory = (application as VitalWearApp).vitalBoxFactory
         setContent {
