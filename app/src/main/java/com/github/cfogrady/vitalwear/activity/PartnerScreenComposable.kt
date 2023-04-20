@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.*
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
-import com.github.cfogrady.vitalwear.data.Firmware
+import com.github.cfogrady.vitalwear.firmware.Firmware
 import java.time.LocalDateTime
 
 class PartnerScreenComposable(val bitmapScaler: BitmapScaler, val backgroundHeight: Dp) {

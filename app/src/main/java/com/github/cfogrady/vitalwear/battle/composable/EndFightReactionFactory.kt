@@ -12,7 +12,7 @@ import com.github.cfogrady.vitalwear.battle.data.BattleResult
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.PositionOffsetRatios
-import com.github.cfogrady.vitalwear.data.FirmwareManager
+import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.google.common.collect.Lists
 
 class EndFightReactionFactory(private val bitmapScaler: BitmapScaler, private val firmwareManager: FirmwareManager, private val characterManager: CharacterManager, private val backgroundHeight: Dp) {

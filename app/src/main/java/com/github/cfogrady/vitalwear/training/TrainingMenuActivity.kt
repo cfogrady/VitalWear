@@ -23,7 +23,7 @@ import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.BackgroundManager
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
-import com.github.cfogrady.vitalwear.data.Firmware
+import com.github.cfogrady.vitalwear.firmware.Firmware
 
 class TrainingMenuActivity : ComponentActivity() {
 

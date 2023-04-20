@@ -11,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.em
@@ -25,8 +24,8 @@ import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
-import com.github.cfogrady.vitalwear.data.Firmware
-import com.github.cfogrady.vitalwear.data.FirmwareManager
+import com.github.cfogrady.vitalwear.firmware.Firmware
+import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 
 class MainScreenComposable(
     val characterManager: CharacterManager,

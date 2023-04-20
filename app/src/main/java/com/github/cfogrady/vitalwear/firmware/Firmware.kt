@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.data
+package com.github.cfogrady.vitalwear.firmware
 
 import android.graphics.Bitmap
 

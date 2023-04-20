@@ -12,8 +12,8 @@ import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.data.CardLoader
-import com.github.cfogrady.vitalwear.data.Firmware
-import com.github.cfogrady.vitalwear.data.FirmwareManager
+import com.github.cfogrady.vitalwear.firmware.Firmware
+import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

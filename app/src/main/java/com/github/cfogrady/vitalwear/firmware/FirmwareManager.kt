@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.data
+package com.github.cfogrady.vitalwear.firmware
 
 import android.content.Context
 import android.util.Log
@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
 import com.github.cfogrady.vb.dim.util.RelativeByteOffsetInputStream
+import com.github.cfogrady.vitalwear.data.SpriteBitmapConverter
 import com.google.common.collect.Lists
 import kotlinx.coroutines.*
 import java.io.File
@@ -98,26 +99,33 @@ class FirmwareManager(
                 val battleIcon = spriteBitmapConverter.getBitmap(sprites[BATTLE_ICON])
                 val battleBackground = spriteBitmapConverter.getBitmap(sprites[BATTLE_BACKGROUND])
                 val attackSprites = spriteBitmapConverter.getBitmaps(sprites.subList(
-                    SMALL_ATTACK_START_IDX, SMALL_ATTACK_END_IDX))
+                    SMALL_ATTACK_START_IDX, SMALL_ATTACK_END_IDX
+                ))
                 val largeAttackSprites= spriteBitmapConverter.getBitmaps(sprites.subList(
-                    BIG_ATTACK_START_IDX, BIG_ATTACK_END_IDX))
+                    BIG_ATTACK_START_IDX, BIG_ATTACK_END_IDX
+                ))
                 val readyIcon = spriteBitmapConverter.getBitmap(sprites[READY_IDX])
                 val goIcon = spriteBitmapConverter.getBitmap(sprites[GO_IDX])
                 val emptyHP = spriteBitmapConverter.getBitmap(sprites[EMPTY_HP_IDX])
                 val partnerHPIcons = Lists.newArrayList(emptyHP)
                 partnerHPIcons.addAll(spriteBitmapConverter.getBitmaps(sprites.subList(
-                    PARTNER_HP_START_IDX, PARTNER_HP_END_IDX)))
+                    PARTNER_HP_START_IDX, PARTNER_HP_END_IDX
+                )))
                 val opponentHPIcons = Lists.newArrayList(emptyHP)
                 opponentHPIcons.addAll(spriteBitmapConverter.getBitmaps(sprites.subList(
-                    OPPONENT_HP_START_IDX, OPPONENT_HP_END_IDX)))
+                    OPPONENT_HP_START_IDX, OPPONENT_HP_END_IDX
+                )))
                 val hitSprites = spriteBitmapConverter.getBitmaps(sprites.subList(HIT_START_IDX, HIT_END_IDX))
                 val happyEmote = spriteBitmapConverter.getBitmaps(sprites.subList(
-                    HAPPY_EMOTE_START_IDX, HAPPY_EMOTE_END_IDX))
+                    HAPPY_EMOTE_START_IDX, HAPPY_EMOTE_END_IDX
+                ))
                 val loseEmote = spriteBitmapConverter.getBitmaps(sprites.subList(
-                    LOSE_EMOTE_START_IDX, LOSE_EMOTE_END_IDX))
+                    LOSE_EMOTE_START_IDX, LOSE_EMOTE_END_IDX
+                ))
                 val sweatEmote = spriteBitmapConverter.getBitmap(sprites[SWEAT_EMOTE_IDX])
                 val injuredEmote = spriteBitmapConverter.getBitmaps(sprites.subList(
-                    INJURED_EMOTE_START_IDX, INJURED_EMOTE_END_IDX))
+                    INJURED_EMOTE_START_IDX, INJURED_EMOTE_END_IDX
+                ))
                 val squatText = spriteBitmapConverter.getBitmap(sprites[SQUAT_TEXT_IDX])
                 val squatIcon = spriteBitmapConverter.getBitmap(sprites[SQUAT_ICON_IDX])
                 val crunchText = spriteBitmapConverter.getBitmap(sprites[CRUNCH_TEXT_IDX])
@@ -127,7 +135,8 @@ class FirmwareManager(
                 val dashText = spriteBitmapConverter.getBitmap(sprites[DASH_TEXT_IDX])
                 val dashIcon = spriteBitmapConverter.getBitmap(sprites[DASH_ICON_IDX])
                 val trainingStateIcons = spriteBitmapConverter.getBitmaps(sprites.subList(
-                    TRAINING_STATE_START_IDX, TRAINING_STATE_END_IDX))
+                    TRAINING_STATE_START_IDX, TRAINING_STATE_END_IDX
+                ))
                 val clearIcon = spriteBitmapConverter.getBitmap(sprites[CLEAR_IDX])
                 val missionIcon = spriteBitmapConverter.getBitmap(sprites[MISSION_IDX])
                 val loadedFirmware = Firmware(loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, trainingMenuIcon, stepsIcon, vitalsIcon, battleIcon, attackSprites, largeAttackSprites, battleBackground, readyIcon, goIcon, partnerHPIcons, opponentHPIcons, hitSprites, happyEmote, loseEmote, sweatEmote, injuredEmote, squatText, squatIcon, crunchText, crunchIcon, punchText, punchIcon, dashText, dashIcon, trainingStateIcons, missionIcon, clearIcon)

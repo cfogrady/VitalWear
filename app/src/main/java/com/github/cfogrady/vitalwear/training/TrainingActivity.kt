@@ -6,7 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
-import com.github.cfogrady.vitalwear.data.Firmware
+import com.github.cfogrady.vitalwear.firmware.Firmware
 
 class TrainingActivity : ComponentActivity() {
     companion object {
