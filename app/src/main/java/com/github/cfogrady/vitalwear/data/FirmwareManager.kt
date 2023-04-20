@@ -2,7 +2,6 @@ package com.github.cfogrady.vitalwear.data
 
 import android.content.Context
 import android.util.Log
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
@@ -12,9 +11,6 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.io.FileInputStream
 import java.lang.Exception
-import java.util.Optional
-import kotlin.coroutines.CoroutineContext
-
 
 const val FIRMWARE_FILE = "VBBE_10B.vb2"
 const val SPRITE_DIMENSIONS_LOCATION = 0x90a4
@@ -57,6 +53,10 @@ const val PUNCH_TEXT_IDX = 180
 const val PUNCH_ICON_IDX = 245
 const val DASH_TEXT_IDX = 183
 const val DASH_ICON_IDX = 249
+const val TRAINING_STATE_START_IDX = 238
+const val TRAINING_STATE_END_IDX = 245
+const val CLEAR_IDX = 175
+const val MISSION_IDX = 205
 
 class FirmwareManager(
     val spriteBitmapConverter: SpriteBitmapConverter
@@ -126,7 +126,11 @@ class FirmwareManager(
                 val punchIcon = spriteBitmapConverter.getBitmap(sprites[PUNCH_ICON_IDX])
                 val dashText = spriteBitmapConverter.getBitmap(sprites[DASH_TEXT_IDX])
                 val dashIcon = spriteBitmapConverter.getBitmap(sprites[DASH_ICON_IDX])
-                val loadedFirmware = Firmware(loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, trainingMenuIcon, stepsIcon, vitalsIcon, battleIcon, attackSprites, largeAttackSprites, battleBackground, readyIcon, goIcon, partnerHPIcons, opponentHPIcons, hitSprites, happyEmote, loseEmote, sweatEmote, injuredEmote, squatText, squatIcon, crunchText, crunchIcon, punchText, punchIcon, dashText, dashIcon)
+                val trainingStateIcons = spriteBitmapConverter.getBitmaps(sprites.subList(
+                    TRAINING_STATE_START_IDX, TRAINING_STATE_END_IDX))
+                val clearIcon = spriteBitmapConverter.getBitmap(sprites[CLEAR_IDX])
+                val missionIcon = spriteBitmapConverter.getBitmap(sprites[MISSION_IDX])
+                val loadedFirmware = Firmware(loadingIcon, inserCardIcon, defaultBackground, characterSelectorIcon, trainingMenuIcon, stepsIcon, vitalsIcon, battleIcon, attackSprites, largeAttackSprites, battleBackground, readyIcon, goIcon, partnerHPIcons, opponentHPIcons, hitSprites, happyEmote, loseEmote, sweatEmote, injuredEmote, squatText, squatIcon, crunchText, crunchIcon, punchText, punchIcon, dashText, dashIcon, trainingStateIcons, missionIcon, clearIcon)
                 firmware.postValue(loadedFirmware)
             }
         } catch (e: Exception) {

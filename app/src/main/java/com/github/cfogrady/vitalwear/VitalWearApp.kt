@@ -62,7 +62,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val hpCompareFactory = HPCompareFactory(bitmapScaler, backgroundHeight)
         val endFightReactionFactory = EndFightReactionFactory(bitmapScaler, firmwareManager, characterManager, backgroundHeight)
         fightTargetFactory = FightTargetFactory(battleService, vitalBoxFactory, opponentSplashFactory, opponentNameScreenFactory, readyScreenFactory, goScreenFactory, attackScreenFactory, hpCompareFactory, endFightReactionFactory)
-        exerciseScreenFactory = ExerciseScreenFactory(vitalBoxFactory, bitmapScaler, backgroundHeight)
+        exerciseScreenFactory = ExerciseScreenFactory(characterManager, vitalBoxFactory, bitmapScaler, backgroundHeight)
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight)
         mainScreenComposable = MainScreenComposable(characterManager, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardLoader)

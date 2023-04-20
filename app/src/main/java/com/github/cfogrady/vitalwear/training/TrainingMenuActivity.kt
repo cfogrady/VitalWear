@@ -46,26 +46,30 @@ class TrainingMenuActivity : ComponentActivity() {
                 VerticalPager(pageCount = 4) { page ->
                     when (page) {
                         0 -> {
-                            menuItem(trainingIcon = firmware.squatIcon, trainingText = firmware.squatText, timeInSeconds = 20) {
-                                trainingIntent.putExtra(TrainingActivity.TRAINING_TYPE, TrainingType.SQUAT)
+                            val trainingType = TrainingType.SQUAT
+                            menuItem(trainingIcon = firmware.squatIcon, trainingText = firmware.squatText, timeInSeconds = trainingType.durationSeconds) {
+                                trainingIntent.putExtra(TrainingActivity.TRAINING_TYPE, trainingType)
                                 startActivity(trainingIntent)
                             }
                         }
                         1 -> {
-                            menuItem(trainingIcon = firmware.crunchIcon, trainingText = firmware.crunchText, timeInSeconds = 30) {
-                                trainingIntent.putExtra(TrainingActivity.TRAINING_TYPE, TrainingType.CRUNCH)
+                            val trainingType = TrainingType.CRUNCH
+                            menuItem(trainingIcon = firmware.crunchIcon, trainingText = firmware.crunchText, timeInSeconds = trainingType.durationSeconds) {
+                                trainingIntent.putExtra(TrainingActivity.TRAINING_TYPE, trainingType)
                                 startActivity(trainingIntent)
                             }
                         }
                         2 -> {
-                            menuItem(trainingIcon = firmware.punchIcon, trainingText = firmware.punchText, timeInSeconds = 20) {
-                                trainingIntent.putExtra(TrainingActivity.TRAINING_TYPE, TrainingType.PUNCH)
+                            val trainingType = TrainingType.PUNCH
+                            menuItem(trainingIcon = firmware.punchIcon, trainingText = firmware.punchText, timeInSeconds = trainingType.durationSeconds) {
+                                trainingIntent.putExtra(TrainingActivity.TRAINING_TYPE, trainingType)
                                 startActivity(trainingIntent)
                             }
                         }
                         3 -> {
-                            menuItem(trainingIcon = firmware.dashIcon, trainingText = firmware.dashText, timeInSeconds = 20) {
-                                trainingIntent.putExtra(TrainingActivity.TRAINING_TYPE, TrainingType.DASH)
+                            val trainingType = TrainingType.DASH
+                            menuItem(trainingIcon = firmware.dashIcon, trainingText = firmware.dashText, timeInSeconds = trainingType.durationSeconds) {
+                                trainingIntent.putExtra(TrainingActivity.TRAINING_TYPE, trainingType)
                                 startActivity(trainingIntent)
                             }
                         }

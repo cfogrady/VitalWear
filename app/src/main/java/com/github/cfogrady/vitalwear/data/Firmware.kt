@@ -2,6 +2,7 @@ package com.github.cfogrady.vitalwear.data
 
 import android.graphics.Bitmap
 
+//TODO: Break into smaller firmware components (training, battle, emotes, menus, etc.)
 class Firmware constructor(val loadingIcon : Bitmap,
                            val insertCardIcon: Bitmap,
                            val defaultBackground: Bitmap,
@@ -30,6 +31,9 @@ class Firmware constructor(val loadingIcon : Bitmap,
                            val punchIcon: Bitmap,
                            val dashText: Bitmap,
                            val dashIcon: Bitmap,
+                           val trainingState: List<Bitmap>,
+                           val mission: Bitmap,
+                           val clear: Bitmap,
 ) {
 
 }

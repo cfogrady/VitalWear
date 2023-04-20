@@ -26,7 +26,9 @@ class TrainingActivity : ComponentActivity() {
         background = (application as VitalWearApp).backgroundManager.selectedBackground.value!!
         exerciseScreenFactory = (application as VitalWearApp).exerciseScreenFactory
         setContent {
-            exerciseScreenFactory.exerciseScreen(partner, firmware, background, trainingType)
+            exerciseScreenFactory.exerciseScreen(partner, firmware, background, trainingType) {
+                finish()
+            }
         }
     }
 }
