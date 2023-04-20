@@ -239,7 +239,7 @@ class ExerciseScreenFactory(private val characterManager: CharacterManager, priv
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
                 finished.invoke()
-            }, 5000)
+            }, 1000)
         }
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
             Column(modifier = Modifier.offset(y = backgroundHeight.times(.3f)), horizontalAlignment = Alignment.CenterHorizontally) {
