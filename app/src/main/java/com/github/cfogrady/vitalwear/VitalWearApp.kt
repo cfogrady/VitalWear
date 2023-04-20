@@ -17,6 +17,7 @@ import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.*
+import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.training.ExerciseScreenFactory
 import java.util.Random
 

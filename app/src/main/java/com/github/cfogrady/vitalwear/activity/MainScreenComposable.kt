@@ -11,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.em
@@ -25,8 +24,8 @@ import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
-import com.github.cfogrady.vitalwear.data.Firmware
-import com.github.cfogrady.vitalwear.data.FirmwareManager
+import com.github.cfogrady.vitalwear.firmware.Firmware
+import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 
 class MainScreenComposable(
     val characterManager: CharacterManager,
@@ -93,12 +92,12 @@ class MainScreenComposable(
                     0 -> {
                         partnerScreenComposable.PartnerScreen(
                             character = character,
-                            firmware = firmware
+                            firmware = firmware.characterFirmwareSprites
                         )
                     }
                     1 -> {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            bitmapScaler.ScaledBitmap(bitmap = firmware.characterSelectorIcon, contentDescription = "Character", modifier = Modifier.clickable {
+                            bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.characterSelectorIcon, contentDescription = "Character", modifier = Modifier.clickable {
                                 activityLaunchers.characterSelectionLauncher.invoke()
                             })
                         }
@@ -106,7 +105,7 @@ class MainScreenComposable(
                     2 -> {
                         vitalBoxFactory.VitalBox {
                             Box(modifier = Modifier.fillMaxSize().clickable { activityLaunchers.battleLauncher.invoke() }, contentAlignment = Alignment.Center) {
-                                bitmapScaler.ScaledBitmap(bitmap = firmware.trainingIcon, contentDescription = "Training", modifier = Modifier.clickable {
+                                bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.trainingIcon, contentDescription = "Training", modifier = Modifier.clickable {
                                     activityLaunchers.trainingMenuLauncher.invoke()
                                 })
                             }
