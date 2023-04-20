@@ -16,10 +16,7 @@ import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterEntity
-import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
-import com.github.cfogrady.vitalwear.composable.util.KeepScreenOn
-import com.github.cfogrady.vitalwear.composable.util.PositionOffsetRatios
-import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
+import com.github.cfogrady.vitalwear.composable.util.*
 import com.github.cfogrady.vitalwear.data.CharacterSpriteLocations
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.google.common.collect.Lists
@@ -207,7 +204,7 @@ class ExerciseScreenFactory(private val characterManager: CharacterManager, priv
             }, 1000)
         }
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-            Column(modifier = Modifier.offset(y = backgroundHeight.times(.3f))) {
+            Column(modifier = Modifier.offset(y = backgroundHeight.times(.3f)), horizontalAlignment = Alignment.CenterHorizontally) {
                 bitmapScaler.ScaledBitmap(bitmap = firmware.mission, contentDescription = "mission")
                 bitmapScaler.ScaledBitmap(bitmap = firmware.clear, contentDescription = "clear")
             }
@@ -245,7 +242,7 @@ class ExerciseScreenFactory(private val characterManager: CharacterManager, priv
             }, 5000)
         }
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-            Column(modifier = Modifier.offset(y = backgroundHeight.times(.3f))) {
+            Column(modifier = Modifier.offset(y = backgroundHeight.times(.3f)), horizontalAlignment = Alignment.CenterHorizontally) {
                 bitmapScaler.ScaledBitmap(bitmap = resultIcon, contentDescription = "result")
                 resultTextRow(exerciseType = exerciseType, exerciseResult = exerciseResult, trainingFirmwareSprites = firmware.trainingFirmwareSprites)
             }
@@ -268,9 +265,9 @@ class ExerciseScreenFactory(private val characterManager: CharacterManager, priv
         val increase = remember {
             increaseBonus(exerciseType, exerciseResult == ExerciseResult.GREAT, true)
         }
-        Row() {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             bitmapScaler.ScaledBitmap(bitmap = typeIcon, contentDescription = "result")
-            Text(text = "+$increase", color = Color.Yellow, fontWeight = FontWeight.Bold, fontSize = 3.em)
+            Text(text = "+${formatNumber(increase, 2)}", color = Color.Yellow, fontWeight = FontWeight.Bold, fontSize = 3.em)
         }
     }
 
