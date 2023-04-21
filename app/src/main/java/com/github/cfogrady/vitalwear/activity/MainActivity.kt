@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.battle.BattleActivity
 import com.github.cfogrady.vitalwear.character.activity.CharacterSelectActivity
+import com.github.cfogrady.vitalwear.stats.StatsMenuActivity
 import com.github.cfogrady.vitalwear.training.TrainingMenuActivity
 
 class MainActivity : ComponentActivity() {
@@ -29,6 +30,7 @@ class MainActivity : ComponentActivity() {
 
     fun buildActivityLaunchers(): ActivityLaunchers {
         val trainingMenuIntent = Intent(applicationContext, TrainingMenuActivity::class.java)
+        val statsMenuIntent = Intent(applicationContext, StatsMenuActivity::class.java)
         val characterSelectorIntent = Intent(applicationContext, CharacterSelectActivity::class.java)
         val characterSelector = {
             startActivity(characterSelectorIntent)
@@ -37,6 +39,6 @@ class MainActivity : ComponentActivity() {
         val battle = {
             startActivity(battleIntent)
         }
-        return ActivityLaunchers({startActivity(trainingMenuIntent)}, characterSelector, battle)
+        return ActivityLaunchers({startActivity(statsMenuIntent)}, {startActivity(trainingMenuIntent)}, characterSelector, battle)
     }
 }

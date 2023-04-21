@@ -87,7 +87,7 @@ class MainScreenComposable(
             .padding(padding)
             .fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
-            VerticalPager(pageCount = 4) {page ->
+            VerticalPager(pageCount = 5) {page ->
                 when(page) {
                     0 -> {
                         partnerScreenComposable.PartnerScreen(
@@ -97,12 +97,19 @@ class MainScreenComposable(
                     }
                     1 -> {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.statsIcon, contentDescription = "stats", modifier = Modifier.clickable {
+                                activityLaunchers.statsMenuLauncher.invoke()
+                            })
+                        }
+                    }
+                    2 -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.characterSelectorIcon, contentDescription = "Character", modifier = Modifier.clickable {
                                 activityLaunchers.characterSelectionLauncher.invoke()
                             })
                         }
                     }
-                    2 -> {
+                    3 -> {
                         vitalBoxFactory.VitalBox {
                             Box(modifier = Modifier.fillMaxSize().clickable { activityLaunchers.battleLauncher.invoke() }, contentAlignment = Alignment.Center) {
                                 bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.trainingIcon, contentDescription = "Training", modifier = Modifier.clickable {
@@ -111,7 +118,7 @@ class MainScreenComposable(
                             }
                         }
                     }
-                    3 -> {
+                    4 -> {
                         vitalBoxFactory.VitalBox {
                             Box(modifier = Modifier.fillMaxSize().clickable { activityLaunchers.battleLauncher.invoke() }, contentAlignment = Alignment.Center) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {

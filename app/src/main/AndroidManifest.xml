@@ -59,6 +59,7 @@
         <activity android:name=".character.activity.NewCardActivity"/>
         <activity android:name=".training.TrainingMenuActivity"/>
         <activity android:name=".training.TrainingActivity"/>
+        <activity android:name=".stats.StatsMenuActivity"/>
         <activity android:name=".battle.BattleActivity"/>
         <service
             android:name=".tiles.PetTileService"

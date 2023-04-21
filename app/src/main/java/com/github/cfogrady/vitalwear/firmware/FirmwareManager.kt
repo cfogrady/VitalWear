@@ -26,8 +26,6 @@ const val SPRITE_PACKAGE_LOCATION = 0x80000
 const val TIMER_ICON = 81
 const val INSERT_CARD_ICON = 38
 const val DEFAULT_BACKGROUND = 0
-const val CHARACTER_SELECTOR_ICON = 267
-const val TRAINING_MENU_ICON = 265
 const val STEPS_ICON = 55
 const val VITALS_ICON = 54
 const val BATTLE_ICON = 370
@@ -116,7 +114,7 @@ class FirmwareManager(
 
                 val loadedFirmware = Firmware(
                     characterFirmwareSprites(sprites),
-                    menuFirmwareSprites(sprites),
+                    MenuFirmwareSprites.menuFirmwareSprites(spriteBitmapConverter, sprites),
                     battleFirmwareSprites(sprites),
                     emoteFirmwareSprites(sprites),
                     trainingFirmwareSprites(sprites),
@@ -134,12 +132,6 @@ class FirmwareManager(
         } catch (e: Exception) {
             Log.e(TAG, "Unable to load firmware", e)
         }
-    }
-
-    private fun menuFirmwareSprites(sprites: List<Sprite>): MenuFirmwareSprites {
-        val characterSelectorIcon = spriteBitmapConverter.getBitmap(sprites[CHARACTER_SELECTOR_ICON])
-        val trainingMenuIcon = spriteBitmapConverter.getBitmap(sprites[TRAINING_MENU_ICON])
-        return MenuFirmwareSprites(characterSelectorIcon, trainingMenuIcon)
     }
 
     private fun characterFirmwareSprites(sprites: List<Sprite>): CharacterFirmwareSprites {
