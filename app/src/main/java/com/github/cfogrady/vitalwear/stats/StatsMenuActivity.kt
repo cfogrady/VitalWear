@@ -46,7 +46,7 @@ class StatsMenuActivity : ComponentActivity() {
             VerticalPager(pageCount = 1) { page ->
                 when (page) {
                     0 -> {
-                        
+
                     }
                 }
             }
