@@ -6,12 +6,11 @@ import androidx.work.WorkerParameters
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import java.time.Duration
 import java.time.LocalDateTime
-import kotlin.math.min
 
 class CharacterUpdateWorker  (val characterManager: CharacterManager, context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
     val bemMoodUpdater = BEMMoodUpdater()
     override fun doWork(): Result {
-        val liveCharacter = characterManager.getActiveCharacter()
+        val liveCharacter = characterManager.getLiveCharacter()
         if(liveCharacter.value == null) {
             // no character to update
             return Result.success()

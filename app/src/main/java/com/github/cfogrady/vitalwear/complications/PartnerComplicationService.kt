@@ -58,14 +58,14 @@ class PartnerComplicationService : ComplicationDataSourceService() {
         val state = (application as VitalWearApp).partnerComplicationState
         if(!characterManager.activeCharacterIsPresent()) {
             GlobalScope.launch {
-                characterManager.getActiveCharacter()
+                characterManager.getLiveCharacter()
             }
             if(maybeFirmware.value == null) {
                 return displayUninitializedFirmwareComplication()
             }
             bitmap = maybeFirmware.value!!.loadingIcon
         } else {
-            val maybeCharacter = characterManager.getActiveCharacter()
+            val maybeCharacter = characterManager.getLiveCharacter()
             if(maybeCharacter.value!!.characterStats.id == BEMCharacter.DEFAULT_CHARACTER.characterStats.id) {
                 if(maybeFirmware.value == null) {
                     return displayUninitializedFirmwareComplication()

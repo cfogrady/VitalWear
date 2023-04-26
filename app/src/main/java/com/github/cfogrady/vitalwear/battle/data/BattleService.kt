@@ -35,7 +35,7 @@ class BattleService(private val cardLoader: CardLoader,
     }
 
     fun createBattleModel(): PreBattleModel {
-        val partnerCharacter = characterManager.getActiveCharacter().value!!
+        val partnerCharacter = characterManager.getLiveCharacter().value!!
         val card = cardLoader.loadCard(partnerCharacter.characterStats.cardFile)
         val firmware = firmwareManager.getFirmware().value!!
         val partnerBattleCharacter = battleCharacterFromBemCharacter(card, partnerCharacter)
@@ -50,7 +50,7 @@ class BattleService(private val cardLoader: CardLoader,
     }
 
     fun performBattle(preBattleModel: PreBattleModel): PostBattleModel {
-        val partnerCharacter = characterManager.getActiveCharacter().value!!
+        val partnerCharacter = characterManager.getLiveCharacter().value!!
         val firmware = firmwareManager.getFirmware().value!!
         val battle = battleLogic.performBattle(preBattleModel)
         partnerCharacter.characterStats.totalBattles++
@@ -158,7 +158,7 @@ class BattleService(private val cardLoader: CardLoader,
     }
 
     private fun loadRandomTarget(card: Card<*, *, *, *, *, *>): BattleCharacter {
-        val character = characterManager.getActiveCharacter().value!!
+        val character = characterManager.getLiveCharacter().value!!
         val opponentSpeciesIdx = assignRandomTargetFromCard(card, character.speciesStats.stage)
         return loadBattleCharacter(card, opponentSpeciesIdx)
     }

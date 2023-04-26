@@ -9,6 +9,10 @@ import com.github.cfogrady.vitalwear.battle.BattleActivity
 import com.github.cfogrady.vitalwear.character.activity.CharacterSelectActivity
 import com.github.cfogrady.vitalwear.stats.StatsMenuActivity
 import com.github.cfogrady.vitalwear.training.TrainingMenuActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     companion object {
@@ -20,12 +24,19 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainScreenComposable = (application as VitalWearApp).mainScreenComposable
+        (application as VitalWearApp).stepService.listenDailySteps(this)
         val activityLaunchers = buildActivityLaunchers()
-//        val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-//        val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         setContent {
             mainScreenComposable.mainScreen(activityLaunchers)
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
     }
 
     fun buildActivityLaunchers(): ActivityLaunchers {
