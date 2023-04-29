@@ -21,7 +21,7 @@ class TrainingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val trainingType = intent.getSerializableExtra(TRAINING_TYPE) as TrainingType
-        partner = (application as VitalWearApp).characterManager.getActiveCharacter().value!!
+        partner = (application as VitalWearApp).characterManager.getLiveCharacter().value!!
         firmware = (application as VitalWearApp).firmwareManager.getFirmware().value!!
         background = (application as VitalWearApp).backgroundManager.selectedBackground.value!!
         exerciseScreenFactory = (application as VitalWearApp).exerciseScreenFactory

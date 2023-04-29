@@ -2,9 +2,12 @@ package com.github.cfogrady.vitalwear.activity
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.wear.compose.material.Text
@@ -12,11 +15,10 @@ import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.formatNumber
-import com.github.cfogrady.vitalwear.firmware.Firmware
-import com.github.cfogrady.vitalwear.menu.MenuFirmwareSprites
+import com.github.cfogrady.vitalwear.steps.StepService
 import java.time.LocalDateTime
 
-class PartnerScreenComposable(val bitmapScaler: BitmapScaler, val backgroundHeight: Dp) {
+class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp, private val stepService: StepService) {
     companion object {
         val TAG = "PartnerScreenComposable"
     }
@@ -25,7 +27,7 @@ class PartnerScreenComposable(val bitmapScaler: BitmapScaler, val backgroundHeig
     fun PartnerScreen(character: BEMCharacter, firmware: CharacterFirmwareSprites) {
         val emojiHeight = 5.dp //imageScaler
         val now = LocalDateTime.now()
-        val dailyStepCount = 0;
+        val dailyStepCount by stepService.dailySteps.observeAsState()
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             Column(verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
                 .fillMaxWidth()
@@ -37,7 +39,7 @@ class PartnerScreenComposable(val bitmapScaler: BitmapScaler, val backgroundHeig
                 }
                 Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                     bitmapScaler.ScaledBitmap(bitmap = firmware.stepsIcon, contentDescription = "Steps Icon")
-                    Text(text = formatNumber(dailyStepCount, 5), color = Color.White)
+                    Text(text = formatNumber(dailyStepCount!!, 5), color = Color.White)
                 }
                 Row(Modifier.height(emojiHeight)) {
                 }

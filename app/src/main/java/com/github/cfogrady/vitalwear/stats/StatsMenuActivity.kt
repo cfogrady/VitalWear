@@ -36,7 +36,7 @@ class StatsMenuActivity : ComponentActivity() {
     @Composable
     private fun statsMenu() {
         val background = remember { backgroundManager.selectedBackground.value!! }
-        val partner = remember { characterManager.getActiveCharacter() }
+        val partner = remember { characterManager.getLiveCharacter() }
         vitalBoxFactory.VitalBox {
             bitmapScaler.ScaledBitmap(
                 bitmap = background,
@@ -46,7 +46,7 @@ class StatsMenuActivity : ComponentActivity() {
             VerticalPager(pageCount = 1) { page ->
                 when (page) {
                     0 -> {
-                        
+
                     }
                 }
             }

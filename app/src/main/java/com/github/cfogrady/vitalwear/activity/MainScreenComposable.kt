@@ -49,7 +49,7 @@ class MainScreenComposable(
         if(!loaded) {
             Log.i(TAG, "Loading in mainScreen")
             Loading() {
-                activeCharacter = characterManager.getActiveCharacter()
+                activeCharacter = characterManager.getLiveCharacter()
                 firmware = firmwareManager.getFirmware()
                 background = backgroundManager.selectedBackground
                 loaded = true

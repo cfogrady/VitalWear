@@ -1,6 +1,12 @@
 package com.github.cfogrady.vitalwear
 
 import android.app.Application
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.SharedPreferences
+import android.hardware.SensorManager
+import androidx.preference.PreferenceManager
 import androidx.room.Room
 import androidx.work.Configuration
 import com.github.cfogrady.vitalwear.activity.ImageScaler
@@ -18,14 +24,16 @@ import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.*
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
+import com.github.cfogrady.vitalwear.steps.SensorStepService
 import com.github.cfogrady.vitalwear.training.ExerciseScreenFactory
+import java.time.LocalDate
 import java.util.Random
 
 class VitalWearApp : Application(), Configuration.Provider {
-    val spriteBitmapConverter = SpriteBitmapConverter()
+    private val spriteBitmapConverter = SpriteBitmapConverter()
     val firmwareManager = FirmwareManager(spriteBitmapConverter)
     val partnerComplicationState = PartnerComplicationState()
-    lateinit var imageScaler : ImageScaler
+    private lateinit var imageScaler : ImageScaler
     lateinit var bitmapScaler: BitmapScaler
     lateinit var cardLoader : CardLoader
     lateinit var database : AppDatabase
@@ -38,15 +46,34 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var mainScreenComposable: MainScreenComposable
     lateinit var fightTargetFactory: FightTargetFactory
     lateinit var exerciseScreenFactory: ExerciseScreenFactory
+    lateinit var sharedPreferences: SharedPreferences
+    lateinit var stepService: SensorStepService
+    lateinit var shutdownReceiver: ShutdownReceiver
 
     override fun onCreate() {
         super.onCreate()
+        buildDependencies()
+        applicationContext.registerReceiver(shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN))
+        SensorStepService.setupDailyStepReset(this)
+        val appShutdownHandler = AppShutdownHandler(stepService, sharedPreferences)
+        stepService.handleBoot(LocalDate.now())
+        // This may be run on app shutdown by Android... but updating or killing via the IDE never triggers this.
+        Runtime.getRuntime().addShutdownHook(appShutdownHandler)
+    }
+
+    fun buildDependencies() {
         //TODO: Remove allowMainThread before release
         database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "VitalWear").allowMainThreadQueries().build()
-        firmwareManager.loadFirmware(applicationContext)
+        //TODO: Should replace sharedPreferences with datastore (see https://developer.android.com/training/data-storage/shared-preferences)
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         cardLoader = CardLoader(applicationContext, spriteBitmapConverter)
         characterManager = CharacterManager()
+        val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        stepService = SensorStepService(characterManager, sharedPreferences, sensorManager)
+        // BEMUpdater initializes the WorkManager, so all dependencies must have already been called.
+        // TODO: change BEMUpdater to get the WorkManager instance dynamically as needed instead of as a dependency
         characterManager.init(database.characterDao(), cardLoader, BEMUpdater(applicationContext))
+        firmwareManager.loadFirmware(applicationContext)
         backgroundManager = BackgroundManager(cardLoader, firmwareManager)
         val random = Random()
         val bemBattleLogic = BEMBattleLogic(random)
@@ -64,13 +91,14 @@ class VitalWearApp : Application(), Configuration.Provider {
         val endFightReactionFactory = EndFightReactionFactory(bitmapScaler, firmwareManager, characterManager, backgroundHeight)
         fightTargetFactory = FightTargetFactory(battleService, vitalBoxFactory, opponentSplashFactory, opponentNameScreenFactory, readyScreenFactory, goScreenFactory, attackScreenFactory, hpCompareFactory, endFightReactionFactory)
         exerciseScreenFactory = ExerciseScreenFactory(characterManager, vitalBoxFactory, bitmapScaler, backgroundHeight)
-        partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight)
+        partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService)
         mainScreenComposable = MainScreenComposable(characterManager, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardLoader)
+        shutdownReceiver = ShutdownReceiver(stepService)
     }
 
     override fun getWorkManagerConfiguration(): Configuration {
-        //characterManager = CharacterManager()
-        return Configuration.Builder().setWorkerFactory(VitalWearWorkerFactory(characterManager)).build()
+        // After we've setup the workManagerConfiguration, start the service
+        return Configuration.Builder().setWorkerFactory(VitalWearWorkerFactory(characterManager, stepService)).build()
     }
 }
