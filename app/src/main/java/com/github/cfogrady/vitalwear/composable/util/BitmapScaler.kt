@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.unit.Dp
 import com.github.cfogrady.vitalwear.activity.ImageScaler
 
 class BitmapScaler(val imageScaler: ImageScaler) {
@@ -26,6 +27,10 @@ class BitmapScaler(val imageScaler: ImageScaler) {
             modifier = modifier.width(scaledWidth).height(scaledHeight),
             alignment = alignment
         )
+    }
+
+    fun scaledDimension(x: Int): Dp {
+        return imageScaler.scaledDpValueFromPixels(x)
     }
 
     @Composable

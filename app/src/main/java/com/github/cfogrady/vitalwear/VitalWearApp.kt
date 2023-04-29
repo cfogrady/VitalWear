@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.hardware.SensorManager
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.preference.PreferenceManager
 import androidx.room.Room
 import androidx.work.Configuration
@@ -50,6 +52,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var stepService: SensorStepService
     lateinit var shutdownReceiver: ShutdownReceiver
     lateinit var shutdownManager: ShutdownManager
+    var backgroundHeight = 0.dp
 
     override fun onCreate() {
         super.onCreate()
@@ -80,7 +83,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val bemBattleLogic = BEMBattleLogic(random)
         battleService = BattleService(cardLoader, characterManager, firmwareManager, bemBattleLogic, random)
         imageScaler = ImageScaler(applicationContext.resources.displayMetrics, applicationContext.resources.configuration.isScreenRound)
-        val backgroundHeight = imageScaler.convertPixelsToDp(ImageScaler.VB_HEIGHT.toInt())
+        backgroundHeight = imageScaler.scaledDpValueFromPixels(ImageScaler.VB_HEIGHT.toInt())
         bitmapScaler = BitmapScaler(imageScaler)
         vitalBoxFactory = VitalBoxFactory(imageScaler, ImageScaler.VB_WIDTH.toInt(), ImageScaler.VB_HEIGHT.toInt())
         val opponentSplashFactory = OpponentSplashFactory(bitmapScaler)
