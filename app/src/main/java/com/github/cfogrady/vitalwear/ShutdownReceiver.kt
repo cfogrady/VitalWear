@@ -4,17 +4,16 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.github.cfogrady.vitalwear.steps.SensorStepService
-import java.time.LocalDate
+import java.time.LocalDateTime
 
-class ShutdownReceiver(private val sensorStepService: SensorStepService) :BroadcastReceiver() {
+class ShutdownReceiver(private val shutdownManager: ShutdownManager) :BroadcastReceiver() {
     companion object {
         const val TAG = "ShutdownReceiver"
     }
     override fun onReceive(context: Context?, intent: Intent?) {
         if(intent!!.action == Intent.ACTION_SHUTDOWN) {
             Log.i(TAG, "Shutting down the device")
-            sensorStepService.handleShutdown(LocalDate.now())
+            shutdownManager.shutdown(LocalDateTime.now())
         } else {
             Log.w(TAG, "Called for unexpected intent: ${intent!!.action}")
         }
