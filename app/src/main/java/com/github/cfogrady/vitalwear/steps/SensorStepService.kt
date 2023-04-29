@@ -12,9 +12,7 @@ import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
 import kotlinx.coroutines.*
-import java.time.Duration
-import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
 
@@ -29,6 +27,7 @@ import java.util.concurrent.Future
  * Special logic when the app starts up or is shutdown to handle stepcounter resets
  */
 class SensorStepService(
+    //TODO: In addition to on onBoot and onShutdown, we need onStart and onAppShutdown. This will preserve steps over application reboots
     private val characterManager: CharacterManager,
     private val sharedPreferences: SharedPreferences,
     private val sensorManager: SensorManager): StepService, DailyStepHandler {
@@ -37,7 +36,9 @@ class SensorStepService(
         const val STEPS_PER_VITAL = 50
         const val DAILY_STEPS_KEY = "DAILY_STEPS"
         const val DAY_OF_LAST_READ_KEY = "DAY_OF_LAST_READ"
+        const val STEP_COUNTER_KEY = "STEP_COUNTER_VALUE"
         private const val WORK_TAG = "StepsService"
+        const val LAST_MIDNIGHT_KEY = "LAST_MIDNIGHT"
 
         fun setupDailyStepReset(context: Context) {
             val now = LocalDateTime.now()
@@ -100,28 +101,32 @@ class SensorStepService(
         }
     }
 
-    override fun addStepsToVitals(): Future<Void> {
+    private fun getSingleSensorReading(onReading: (Int) -> Unit): Future<Void> {
         val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        // This relies on quickly receiving an event describing current value.
         var future = CompletableFuture<Void>()
         val listener = StepSensorListener(){ value ->
-            newSteps(value)
+            onReading.invoke(value)
             future.complete(null)
         }
-        //future.accept doesn't work unless something is waiting for that future
         val newFuture = future.thenAccept() {
             sensorManager.unregisterListener(listener)
             Log.i(TAG, "Unregistered Sensor Listener")
         }
+        //TODO: add handler thread (https://stackoverflow.com/questions/3286815/sensoreventlistener-in-separate-thread)
+        // Normally the sensor events come through on the main thread. This means we can't block the main thread and still receive events.
+        // We need to block the main thread for the shutdown, so that we can ensure everything is saved before the shutdown occurs;
+        // otherwise, there is a risk that the shutdown will occur before the other threads have finished.
         if(!sensorManager.registerListener(listener, stepSensor, SensorManager.SENSOR_DELAY_NORMAL)) {
             Log.e(TAG, "Failed to register sensor!")
-        } else {
-            Log.i(TAG, "Registered Sensor Listener")
         }
         return newFuture
     }
 
-    override fun listenDailySteps(lifecycleOwner: LifecycleOwner): LiveData<Int> {
+    override fun addStepsToVitals(): Future<Void> {
+        return getSingleSensorReading(this::newSteps)
+    }
+
+    override fun listenDailySteps(): StepListener {
         val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
         // This relies on quickly receiving an event describing current value.
@@ -133,65 +138,45 @@ class SensorStepService(
             Log.e(TAG, "Failed to register sensor!")
         } else {
             Log.i(TAG, "Registered Listener to sensor.")
-            val onStopObserver = OnDestroyLifecycleObserver() {
-                Log.i(TAG, "Unregistered to sensor.")
-                sensorManager.unregisterListener(listener)
-            }
-            lifecycleOwner.lifecycle.addObserver(onStopObserver)
         }
-        return dailySteps
+        return StepListener(dailySteps, sensorManager, listener)
     }
 
-    private fun logStartOfDaySteps(now: LocalDate) {
-        GlobalScope.launch {
-            withContext(Dispatchers.IO) {
-                sharedPreferences.edit().putInt(DAILY_STEPS_KEY, dailySteps.value!!)
-                sharedPreferences.edit().putLong(DAY_OF_LAST_READ_KEY, now.toEpochDay())
-            }
-        }
+    private fun saveStepData(now: LocalDate) {
+        sharedPreferences.edit().putInt(DAILY_STEPS_KEY, dailySteps.value!!)
+            .putInt(STEP_COUNTER_KEY, currentSteps)
+            .putLong(DAY_OF_LAST_READ_KEY, now.toEpochDay())
+            .putInt(DAILY_STEPS_KEY, dailySteps.value!!)
+            .commit()
+        Log.i(TAG, "Step data saved")
     }
 
     override fun handleDayTransition(newDay: LocalDate) {
         addStepsToVitals()
         startOfDaySteps = currentSteps
         dailySteps.postValue(0)
-        logStartOfDaySteps(newDay)
+        saveStepData(newDay)
+        sharedPreferences.edit().putInt(DAILY_STEPS_KEY, dailySteps.value!!)
+            .putLong(LAST_MIDNIGHT_KEY, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
+            .commit()
+    }
+
+    fun getLastMignight() : LocalDateTime {
+        val epochSeconds = sharedPreferences.getLong(LAST_MIDNIGHT_KEY, 0)
+        return LocalDateTime.ofEpochSecond(epochSeconds, 0, ZoneOffset.UTC)
     }
 
     fun handleBoot(today: LocalDate) {
-        val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        // This relies on quickly receiving an event describing current value.
-        val future = CompletableFuture<Void>()
-        val listener = StepSensorListener(){ value ->
-            stepsAtBoot(value, today)
-            future.complete(null)
-        }
-        future.thenAccept() {
-            sensorManager.unregisterListener(listener)
-            Log.i(TAG, "Unregistered sensor from handle boot successfully")
-        }
-        if(!sensorManager.registerListener(listener, stepSensor, SensorManager.SENSOR_DELAY_NORMAL)) {
-            Log.e(TAG, "Failed to register sensor!")
+        Log.i(TAG, "Handling startup")
+        getSingleSensorReading { newSteps ->
+            stepsAtBoot(newSteps, today)
         }
     }
 
     fun handleShutdown(today: LocalDate) {
-        val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        // This relies on quickly receiving an event describing current value.
-        val future = CompletableFuture<Void>()
-        val listener = StepSensorListener(){ value ->
+        getSingleSensorReading {value ->
             newSteps(value)
-            sharedPreferences.edit().putLong(DAY_OF_LAST_READ_KEY, today.toEpochDay())
-            sharedPreferences.edit().putInt(DAILY_STEPS_KEY, dailySteps.value!!)
-            future.complete(null)
-        }
-        //hope this complete before the shutdown finishes
-        future.thenAccept() {
-            sensorManager.unregisterListener(listener)
-            Log.i(TAG, "Unregistered sensor from handle boot successfully")
-        }
-        if(!sensorManager.registerListener(listener, stepSensor, SensorManager.SENSOR_DELAY_NORMAL)) {
-            Log.e(TAG, "Failed to register sensor!")
+            saveStepData(today)
         }
     }
 
@@ -199,18 +184,29 @@ class SensorStepService(
         GlobalScope.launch {
             withContext(Dispatchers.IO) {
                 val dailyStepsBeforeShutdown = sharedPreferences.getInt(DAILY_STEPS_KEY, 0)
+                val lastStepCounter = sharedPreferences.getInt(STEP_COUNTER_KEY, 0)
                 val timeSinceEpoch = sharedPreferences.getLong(DAY_OF_LAST_READ_KEY, 0)
                 val dateFromSave = LocalDate.ofEpochDay(timeSinceEpoch)
                 if(dateFromSave != today) {
+                    // we're on a different day than the last save, so reset everything
                     startOfDaySteps = steps
-                    sharedPreferences.edit().putLong(DAY_OF_LAST_READ_KEY, today.toEpochDay())
+                    currentSteps = steps
                     dailySteps.postValue(0)
-                } else {
-                    dailySteps.postValue(dailyStepsBeforeShutdown)
+                    saveStepData(today)
+                } else if(lastStepCounter < steps) {
+                    // we reset the step counter, so assume a reboot
                     startOfDaySteps = steps - dailyStepsBeforeShutdown
+                    currentSteps = lastStepCounter
+                    dailySteps.postValue(dailyStepsBeforeShutdown)
+                    saveStepData(today)
+                } else {
+                    // App shutdown and restarted. We're on the same day.
+                    currentSteps = lastStepCounter
+                    startOfDaySteps = steps - dailyStepsBeforeShutdown
+                    newSteps(steps)
                 }
-                currentSteps = steps
             }
         }
     }
+
 }

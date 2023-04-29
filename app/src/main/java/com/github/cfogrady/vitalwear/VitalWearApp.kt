@@ -26,6 +26,7 @@ import com.github.cfogrady.vitalwear.data.*
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.steps.SensorStepService
 import com.github.cfogrady.vitalwear.training.ExerciseScreenFactory
+import java.time.LocalDate
 import java.util.Random
 
 class VitalWearApp : Application(), Configuration.Provider {
@@ -54,11 +55,16 @@ class VitalWearApp : Application(), Configuration.Provider {
         buildDependencies()
         applicationContext.registerReceiver(shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN))
         SensorStepService.setupDailyStepReset(this)
+        val appShutdownHandler = AppShutdownHandler(stepService, sharedPreferences)
+        stepService.handleBoot(LocalDate.now())
+        // This may be run on app shutdown by Android... but updating or killing via the IDE never triggers this.
+        Runtime.getRuntime().addShutdownHook(appShutdownHandler)
     }
 
     fun buildDependencies() {
         //TODO: Remove allowMainThread before release
         database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "VitalWear").allowMainThreadQueries().build()
+        //TODO: Should replace sharedPreferences with datastore (see https://developer.android.com/training/data-storage/shared-preferences)
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         cardLoader = CardLoader(applicationContext, spriteBitmapConverter)
         characterManager = CharacterManager()

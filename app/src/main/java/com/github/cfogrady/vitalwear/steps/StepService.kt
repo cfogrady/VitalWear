@@ -8,5 +8,5 @@ import java.util.concurrent.Future
 interface StepService {
     val dailySteps: LiveData<Int>
     fun addStepsToVitals(): Future<Void>
-    fun listenDailySteps(lifecycleOwner: LifecycleOwner): LiveData<Int>
+    fun listenDailySteps(): StepListener
 }
