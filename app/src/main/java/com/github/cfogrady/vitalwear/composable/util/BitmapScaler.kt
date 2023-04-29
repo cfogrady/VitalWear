@@ -31,18 +31,15 @@ class BitmapScaler(val imageScaler: ImageScaler) {
     @Composable
     fun AnimatedScaledBitmap(bitmaps: List<Bitmap>, startIdx: Int = 0, frames: Int, contentDescription: String, alignment: Alignment = Alignment.TopStart, modifier: Modifier = Modifier, msPerFrame: Long = 500) {
         var spriteIdx by remember { mutableStateOf(0) }
-        animate({spriteIdx}, {x -> spriteIdx = x}, frames, msPerFrame)
+        // only run this when spriteIdx is changed
+        remember(spriteIdx) {
+            Handler(Looper.getMainLooper()!!).postDelayed({
+                spriteIdx++
+                if(spriteIdx >= frames) {
+                    spriteIdx = 0
+                }
+            }, msPerFrame)
+        }
         ScaledBitmap(bitmap = bitmaps[startIdx + spriteIdx], contentDescription = contentDescription, alignment = alignment, modifier = modifier)
-    }
-
-    fun animate(getter: () -> Int, setter: (Int) -> Unit, max: Int, msPerFrame: Long) {
-        Handler(Looper.getMainLooper()!!).postDelayed({
-            var value = getter.invoke()
-            value++
-            if(value >= max) {
-                value = 0
-            }
-            setter.invoke(value)
-        }, msPerFrame)
     }
 }
