@@ -49,13 +49,14 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var sharedPreferences: SharedPreferences
     lateinit var stepService: SensorStepService
     lateinit var shutdownReceiver: ShutdownReceiver
+    lateinit var shutdownManager: ShutdownManager
 
     override fun onCreate() {
         super.onCreate()
         buildDependencies()
         applicationContext.registerReceiver(shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN))
         SensorStepService.setupDailyStepReset(this)
-        val appShutdownHandler = AppShutdownHandler(stepService, sharedPreferences)
+        val appShutdownHandler = AppShutdownHandler(shutdownManager, sharedPreferences)
         stepService.handleBoot(LocalDate.now())
         // This may be run on app shutdown by Android... but updating or killing via the IDE never triggers this.
         Runtime.getRuntime().addShutdownHook(appShutdownHandler)
@@ -94,7 +95,8 @@ class VitalWearApp : Application(), Configuration.Provider {
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService)
         mainScreenComposable = MainScreenComposable(characterManager, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardLoader)
-        shutdownReceiver = ShutdownReceiver(stepService)
+        shutdownManager = ShutdownManager(stepService, characterManager)
+        shutdownReceiver = ShutdownReceiver(shutdownManager)
     }
 
     override fun getWorkManagerConfiguration(): Configuration {

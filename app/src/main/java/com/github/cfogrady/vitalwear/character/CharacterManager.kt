@@ -139,6 +139,12 @@ class CharacterManager() {
         characterDao.update(character)
     }
 
+    fun updateActiveCharacter(now: LocalDateTime) {
+        if(activeCharacterIsPresent()) {
+            updateCharacterStats(activeCharacter.value!!.characterStats, now)
+        }
+    }
+
     fun createNewCharacter(file: File) {
         val card = cardLoader.loadCard(file)
         if(activeCharacterIsPresent()) {
