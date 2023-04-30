@@ -20,7 +20,7 @@ const val TAG = "CharacterRepository"
  * Manage the character loading and updating
  */
 class CharacterManager() {
-    private val activeCharacter = MutableLiveData<BEMCharacter>()
+    private val activeCharacter = MutableLiveData<BEMCharacter>(BEMCharacter.DEFAULT_CHARACTER)
     private lateinit var characterDao: CharacterDao
     private lateinit var cardLoader: CardLoader
     private lateinit var bemUpdater: BEMUpdater
@@ -33,8 +33,12 @@ class CharacterManager() {
         this.bemUpdater = bemUpdater
     }
 
+    fun getCurrentCharacter() : BEMCharacter {
+        return activeCharacter.value!!
+    }
+
     @Synchronized
-    fun getActiveCharacter() : LiveData<BEMCharacter> {
+    fun getLiveCharacter() : LiveData<BEMCharacter> {
         if(!activeCharacterIsPresent()) {
             val character = loadActiveCharacter()
             activeCharacter.postValue(character)
@@ -44,7 +48,7 @@ class CharacterManager() {
     }
 
     fun activeCharacterIsPresent() : Boolean {
-        return activeCharacter.value != null
+        return activeCharacter.value != null && activeCharacter.value != BEMCharacter.DEFAULT_CHARACTER
     }
 
     private fun loadActiveCharacter() : BEMCharacter {
@@ -135,6 +139,12 @@ class CharacterManager() {
         characterDao.update(character)
     }
 
+    fun updateActiveCharacter(now: LocalDateTime) {
+        if(activeCharacterIsPresent()) {
+            updateCharacterStats(activeCharacter.value!!.characterStats, now)
+        }
+    }
+
     fun createNewCharacter(file: File) {
         val card = cardLoader.loadCard(file)
         if(activeCharacterIsPresent()) {
@@ -214,7 +224,7 @@ class CharacterManager() {
     }
 
     fun deleteCharacter(characterPreview: CharacterPreview) {
-        val character = getActiveCharacter() //force a load of the active character
+        val character = getLiveCharacter() //force a load of the active character
         if(character.value != null && character.value!!.characterStats.id == characterPreview.characterId) {
             Log.e(TAG, "Cannot delete active character")
         } else {
