@@ -1,9 +1,14 @@
 package com.github.cfogrady.vitalwear.heartrate
 
+import android.content.pm.PackageManager.PERMISSION_DENIED
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.util.Log
+import androidx.core.app.ActivityCompat.requestPermissions
+import androidx.core.content.ContextCompat.checkSelfPermission
+import com.github.cfogrady.vitalwear.Manifest
 import java.util.concurrent.CompletableFuture
+
 
 class HeartRateService(
     private val sensorManager: SensorManager
@@ -43,7 +48,11 @@ class HeartRateService(
     private fun exerciseLevelFromResult(heartRateResult: HeartRateResult, lastLevel: Int): Int {
         Log.i(TAG, "HeartRate: ${heartRateResult.heartRate}, Status: ${heartRateResult.heartRateError}")
         if(heartRateResult.heartRateError != HeartRateResult.Companion.HeartRateError.NONE) {
-            return 0
+            return if(lastLevel < 2) {
+                0
+            } else {
+                1
+            }
         } else {
             val current = heartRateResult.heartRate
             val resting = restingHeartRate()
@@ -52,7 +61,7 @@ class HeartRateService(
                 3
             } else if (delta > 10) {
                 2
-            } else if (lastLevel == 1) {
+            } else if (lastLevel < 2) {
                 0
             } else {
                 1

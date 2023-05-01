@@ -82,6 +82,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         // BEMUpdater initializes the WorkManager, so all dependencies must have already been called.
         // TODO: change BEMUpdater to get the WorkManager instance dynamically as needed instead of as a dependency
         characterManager.init(database.characterDao(), cardLoader, BEMUpdater(applicationContext))
+        shutdownManager = ShutdownManager(stepService, characterManager)
         firmwareManager.loadFirmware(applicationContext)
         backgroundManager = BackgroundManager(cardLoader, firmwareManager)
         val random = Random()
@@ -101,9 +102,9 @@ class VitalWearApp : Application(), Configuration.Provider {
         fightTargetFactory = FightTargetFactory(battleService, vitalBoxFactory, opponentSplashFactory, opponentNameScreenFactory, readyScreenFactory, goScreenFactory, attackScreenFactory, hpCompareFactory, endFightReactionFactory)
         exerciseScreenFactory = ExerciseScreenFactory(characterManager, vitalBoxFactory, bitmapScaler, backgroundHeight)
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService)
-        mainScreenComposable = MainScreenComposable(characterManager, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory)
+        mainScreenComposable = MainScreenComposable(characterManager, shutdownManager, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardLoader)
-        shutdownManager = ShutdownManager(stepService, characterManager)
+
         shutdownReceiver = ShutdownReceiver(shutdownManager)
     }
 

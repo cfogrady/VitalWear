@@ -36,11 +36,10 @@ class DebugActivity : ComponentActivity() {
         }
     }
 
-    fun getDebugItems(): List<Pair<String, String>> {
+    private fun getDebugItems(): List<Pair<String, String>> {
         val list = ArrayList<Pair<String, String>>()
         list.addAll((application as VitalWearApp).stepService.debug())
         list.addAll((application as VitalWearApp).characterManager.getCurrentCharacter().debug())
-        list.addAll()
         return list
     }
 }

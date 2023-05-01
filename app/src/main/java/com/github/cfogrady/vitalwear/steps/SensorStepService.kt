@@ -114,7 +114,7 @@ class SensorStepService(
         }
     }
 
-    private fun getSingleSensorReading(onReading: (Int) -> Unit): Future<Void> {
+    private fun getSingleSensorReading(onReading: (Int) -> Unit): CompletableFuture<Void> {
         val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         var future = CompletableFuture<Void>()
         val listener = StepSensorListener(){ value ->
@@ -186,8 +186,8 @@ class SensorStepService(
         }
     }
 
-    fun handleShutdown(today: LocalDate) {
-        getSingleSensorReading {value ->
+    fun handleShutdown(today: LocalDate): CompletableFuture<Void> {
+        return getSingleSensorReading {value ->
             newSteps(value)
             saveStepData(today)
         }

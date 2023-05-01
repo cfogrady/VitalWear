@@ -18,6 +18,7 @@ class MoodUpdateWorker  (private val characterManager: CharacterManager, private
     }
 
     override fun startWork(): ListenableFuture<Result> {
+        Log.i(TAG, "Starting Mood Update")
         val liveCharacter = characterManager.getLiveCharacter()
         if(liveCharacter.value == BEMCharacter.DEFAULT_CHARACTER) {
             // no character to update
