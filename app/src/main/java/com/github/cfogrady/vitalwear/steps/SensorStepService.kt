@@ -134,7 +134,7 @@ class SensorStepService(
             Log.i(TAG, "Steps triggered")
             newSteps(value)
         }
-        if(!sensorManager.registerListener(listener, stepSensor, SensorManager.SENSOR_DELAY_NORMAL)) {
+        if(!sensorManager.registerListener(listener, stepSensor, SensorManager.SENSOR_DELAY_UI)) {
             Log.e(TAG, "Failed to register sensor!")
         } else {
             Log.i(TAG, "Registered Listener to sensor.")

@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.hardware.SensorManager
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.preference.PreferenceManager
 import androidx.room.Room
@@ -21,13 +20,17 @@ import com.github.cfogrady.vitalwear.character.BEMUpdater
 import com.github.cfogrady.vitalwear.data.CardLoader
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
+import com.github.cfogrady.vitalwear.character.mood.BEMMoodUpdater
 import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.*
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
+import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.steps.SensorStepService
 import com.github.cfogrady.vitalwear.training.ExerciseScreenFactory
+import com.github.cfogrady.vitalwear.workmanager.VitalWearWorkerFactory
+import com.github.cfogrady.vitalwear.workmanager.WorkProviderDependencies
 import java.time.LocalDate
 import java.util.Random
 
@@ -52,6 +55,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var stepService: SensorStepService
     lateinit var shutdownReceiver: ShutdownReceiver
     lateinit var shutdownManager: ShutdownManager
+    lateinit var heartRateService : HeartRateService
     var backgroundHeight = 0.dp
 
     override fun onCreate() {
@@ -74,6 +78,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         characterManager = CharacterManager()
         val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         stepService = SensorStepService(characterManager, sharedPreferences, sensorManager)
+        heartRateService = HeartRateService(sensorManager)
         // BEMUpdater initializes the WorkManager, so all dependencies must have already been called.
         // TODO: change BEMUpdater to get the WorkManager instance dynamically as needed instead of as a dependency
         characterManager.init(database.characterDao(), cardLoader, BEMUpdater(applicationContext))
@@ -104,6 +109,11 @@ class VitalWearApp : Application(), Configuration.Provider {
 
     override fun getWorkManagerConfiguration(): Configuration {
         // After we've setup the workManagerConfiguration, start the service
-        return Configuration.Builder().setWorkerFactory(VitalWearWorkerFactory(characterManager, stepService)).build()
+        val workProviderDependencies = WorkProviderDependencies(
+            characterManager,
+            stepService,
+            BEMMoodUpdater(heartRateService),
+        )
+        return Configuration.Builder().setWorkerFactory(VitalWearWorkerFactory(workProviderDependencies)).build()
     }
 }

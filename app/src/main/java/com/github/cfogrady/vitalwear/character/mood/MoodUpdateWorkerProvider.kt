@@ -1,17 +1,20 @@
-package com.github.cfogrady.vitalwear.steps
+package com.github.cfogrady.vitalwear.character.mood
 
 import android.content.Context
 import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
+import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.workmanager.WorkerProvider
+import com.github.cfogrady.vitalwear.heartrate.HeartRateService
+import com.github.cfogrady.vitalwear.steps.DailyStepHandler
 import com.github.cfogrady.vitalwear.workmanager.WorkProviderDependencies
 
-class DailyStepsWorkerProvider : WorkerProvider {
+class MoodUpdateWorkerProvider : WorkerProvider {
     override fun createWorker(
         workProviderDependencies: WorkProviderDependencies,
         appContext: Context,
         workerParameters: WorkerParameters
     ): ListenableWorker {
-        return DailyStepWorker(appContext, workerParameters, workProviderDependencies.dailyStepHandler)
+        return MoodUpdateWorker(workProviderDependencies.characterManager, workProviderDependencies.bemMoodUpdater, appContext, workerParameters)
     }
 }

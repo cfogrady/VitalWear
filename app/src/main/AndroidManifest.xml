@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.github.cfogrady.vitalwear">
 
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!--
     This permission is required to access step counter for API level 29+
     Ideally, we split the code path based on device API level for this and
@@ -11,6 +10,7 @@
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
 
     <uses-feature android:name="android.hardware.type.watch" />
 

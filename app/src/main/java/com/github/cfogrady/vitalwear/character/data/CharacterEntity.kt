@@ -42,10 +42,17 @@ data class CharacterEntity (
         return (100 * currentPhaseWins) / currentPhaseBattles
     }
 
+    @Synchronized
     fun updateTimeStamps(now: LocalDateTime) {
         val deltaTimeInSeconds = Duration.between(lastUpdate, now).seconds
         trainingTimeRemainingInSeconds -= deltaTimeInSeconds
+        if(trainingTimeRemainingInSeconds < 0) {
+            trainingTimeRemainingInSeconds = 0
+        }
         timeUntilNextTransformation -= deltaTimeInSeconds
+        if(timeUntilNextTransformation < 0) {
+            timeUntilNextTransformation = 0
+        }
         lastUpdate = now
     }
 }

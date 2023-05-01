@@ -5,6 +5,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
+import com.github.cfogrady.vitalwear.character.mood.MoodUpdateWorker
 import java.time.Duration
 
 class BEMUpdater(val context: Context, val workManager: WorkManager = WorkManager.getInstance(context)) {
@@ -21,6 +22,11 @@ class BEMUpdater(val context: Context, val workManager: WorkManager = WorkManage
             .addTag(WORK_TAG)
             .build()
         workManager.enqueue(transformWorkRequest)
+
+        val moodUpdateWorkRequest = PeriodicWorkRequestBuilder<MoodUpdateWorker>(Duration.ofMinutes(5))
+            .addTag(WORK_TAG)
+            .build()
+        workManager.enqueue(moodUpdateWorkRequest)
     }
 
     fun cancel() {
