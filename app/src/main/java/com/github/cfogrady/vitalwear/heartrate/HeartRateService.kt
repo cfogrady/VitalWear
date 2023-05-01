@@ -41,6 +41,7 @@ class HeartRateService(
     }
 
     private fun exerciseLevelFromResult(heartRateResult: HeartRateResult, lastLevel: Int): Int {
+        Log.i(TAG, "HeartRate: ${heartRateResult.heartRate}, Status: ${heartRateResult.heartRateError}")
         if(heartRateResult.heartRateError != HeartRateResult.Companion.HeartRateError.NONE) {
             return 0
         } else {

@@ -57,8 +57,21 @@ class SensorStepService(
 
     private var currentSteps = 0
     private var remainingSteps = STEPS_PER_VITAL
-    var startOfDaySteps = 0
+    private var startOfDaySteps = 0
     override val dailySteps = MutableLiveData(0)
+
+    fun debug(): List<Pair<String, String>> {
+        return listOf(
+            Pair("currentSteps", "$currentSteps"),
+            Pair("remainingSteps", "$remainingSteps"),
+            Pair("startOfDaySteps", "$startOfDaySteps"),
+            Pair("dailySteps", "${dailySteps.value}"),
+            Pair(DAILY_STEPS_KEY, "${sharedPreferences.getInt(DAILY_STEPS_KEY, 0)}"),
+            Pair(DAY_OF_LAST_READ_KEY, "${LocalDateTime.ofEpochSecond(sharedPreferences.getLong(DAY_OF_LAST_READ_KEY, 0), 0, ZoneOffset.UTC)}"),
+            Pair(STEP_COUNTER_KEY, "${sharedPreferences.getInt(STEP_COUNTER_KEY, 0)}"),
+            Pair(LAST_MIDNIGHT_KEY, "${LocalDateTime.ofEpochSecond(sharedPreferences.getLong(LAST_MIDNIGHT_KEY, 0), 0, ZoneOffset.UTC)}"),
+        )
+    }
 
     private fun newSteps(newStepCount: Int) {
         Log.i(TAG, "StepCount: $newStepCount")

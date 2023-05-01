@@ -62,6 +62,7 @@
         <activity android:name=".training.TrainingActivity"/>
         <activity android:name=".stats.StatsMenuActivity"/>
         <activity android:name=".battle.BattleActivity"/>
+        <activity android:name=".debug.DebugActivity"/>
         <service
             android:name=".tiles.PetTileService"
             android:label="VitalWear"

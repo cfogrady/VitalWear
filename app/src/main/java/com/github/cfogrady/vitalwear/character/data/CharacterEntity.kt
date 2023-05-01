@@ -1,5 +1,6 @@
 package com.github.cfogrady.vitalwear.character.data
 
+import android.util.Log
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -35,6 +36,10 @@ data class CharacterEntity (
     @ColumnInfo(name = "mood") var mood: Int,
     @ColumnInfo(name = "dead") var dead: Boolean,
 ) {
+
+    companion object {
+        const val TAG = "CharacterEntity"
+    }
     fun currentPhaseWinRatio(): Int {
         if(currentPhaseBattles == 0) {
             return 0
@@ -45,6 +50,10 @@ data class CharacterEntity (
     @Synchronized
     fun updateTimeStamps(now: LocalDateTime) {
         val deltaTimeInSeconds = Duration.between(lastUpdate, now).seconds
+        if(deltaTimeInSeconds <= 0) {
+            Log.i(TAG, "Already updated to timestamp. Skipping update")
+            return
+        }
         trainingTimeRemainingInSeconds -= deltaTimeInSeconds
         if(trainingTimeRemainingInSeconds < 0) {
             trainingTimeRemainingInSeconds = 0

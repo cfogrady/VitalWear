@@ -8,8 +8,6 @@ import com.github.cfogrady.vitalwear.character.*
 import com.github.cfogrady.vitalwear.character.BemTransformationWorkerProvider
 import com.github.cfogrady.vitalwear.character.mood.MoodUpdateWorker
 import com.github.cfogrady.vitalwear.character.mood.MoodUpdateWorkerProvider
-import com.github.cfogrady.vitalwear.heartrate.HeartRateService
-import com.github.cfogrady.vitalwear.steps.DailyStepHandler
 import com.github.cfogrady.vitalwear.steps.DailyStepWorker
 import com.github.cfogrady.vitalwear.steps.DailyStepsWorkerProvider
 

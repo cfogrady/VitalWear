@@ -87,7 +87,7 @@ class MainScreenComposable(
             .padding(padding)
             .fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
-            VerticalPager(pageCount = 5) {page ->
+            VerticalPager(pageCount = 6) {page ->
                 when(page) {
                     0 -> {
                         partnerScreenComposable.PartnerScreen(
@@ -125,6 +125,13 @@ class MainScreenComposable(
                                     Image(painter = painterResource(id = R.drawable.fight_icon), contentDescription = "Battle")
                                     Text(text = "BATTLE",  fontWeight = FontWeight.Bold, fontSize = 3.em)
                                 }
+                            }
+                        }
+                    }
+                    5 -> {
+                        vitalBoxFactory.VitalBox {
+                            Box(modifier = Modifier.fillMaxSize().clickable { activityLaunchers.battleLauncher.invoke() }, contentAlignment = Alignment.Center) {
+                                Text(text = "DEBUG",  fontWeight = FontWeight.Bold, fontSize = 3.em)
                             }
                         }
                     }

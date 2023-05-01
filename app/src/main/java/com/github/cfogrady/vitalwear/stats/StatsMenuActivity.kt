@@ -33,6 +33,7 @@ import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.composable.util.formatNumber
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 class StatsMenuActivity : ComponentActivity() {
 
@@ -59,6 +60,9 @@ class StatsMenuActivity : ComponentActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun statsMenu() {
+        LaunchedEffect(true) {
+            characterManager.getLiveCharacter().value!!.characterStats.updateTimeStamps(LocalDateTime.now())
+        }
         val background = remember { backgroundManager.selectedBackground.value!! }
         val partner = remember { characterManager.getLiveCharacter().value!! }
         var state = remember {PagerState(0)}

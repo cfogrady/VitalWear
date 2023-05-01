@@ -9,14 +9,13 @@ import com.github.cfogrady.vitalwear.AppShutdownHandler
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.battle.BattleActivity
 import com.github.cfogrady.vitalwear.character.activity.CharacterSelectActivity
+import com.github.cfogrady.vitalwear.debug.DebugActivity
 import com.github.cfogrady.vitalwear.stats.StatsMenuActivity
 import com.github.cfogrady.vitalwear.steps.SensorStepService
 import com.github.cfogrady.vitalwear.steps.StepListener
 import com.github.cfogrady.vitalwear.training.TrainingMenuActivity
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
@@ -70,6 +69,9 @@ class MainActivity : ComponentActivity() {
         val battle = {
             startActivity(battleIntent)
         }
-        return ActivityLaunchers({startActivity(statsMenuIntent)}, {startActivity(trainingMenuIntent)}, characterSelector, battle)
+        val debugActivityLauncher = {
+            startActivity(Intent(applicationContext, DebugActivity::class.java))
+        }
+        return ActivityLaunchers({startActivity(statsMenuIntent)}, {startActivity(trainingMenuIntent)}, characterSelector, battle, debugActivityLauncher)
     }
 }

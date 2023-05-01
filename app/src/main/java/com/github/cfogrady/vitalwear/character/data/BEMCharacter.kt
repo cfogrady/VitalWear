@@ -10,8 +10,8 @@ import java.util.*
 class BEMCharacter(
     val sprites: List<Bitmap>,
     val characterStats: CharacterEntity,
-    val speciesStats : CharacterStats.CharacterStatsEntry,
-    val transformationWaitTimeSeconds: Long,
+    val speciesStats : CharacterStatsEntry,
+    private val transformationWaitTimeSeconds: Long,
     val transformationOptions: List<TransformationOption>,
     var readyToTransform: Optional<TransformationOption> = Optional.empty()) {
     var activityIdx : Int = 1
@@ -23,6 +23,14 @@ class BEMCharacter(
 
     fun isBEM() : Boolean {
         return speciesStats is BemCharacterStats.BemCharacterStatEntry
+    }
+
+    fun debug(): List<Pair<String, String>> {
+        return listOf(
+            Pair("MoodVal", "${characterStats.mood}"),
+            Pair("Mood", mood().name),
+            Pair("Vitals", "${characterStats.vitals}"),
+        )
     }
 
     fun hasValidTransformation(): Optional<TransformationOption> {
