@@ -67,7 +67,7 @@ class SensorStepService(
             Pair("startOfDaySteps", "$startOfDaySteps"),
             Pair("dailySteps", "${dailySteps.value}"),
             Pair(DAILY_STEPS_KEY, "${sharedPreferences.getInt(DAILY_STEPS_KEY, 0)}"),
-            Pair(DAY_OF_LAST_READ_KEY, "${LocalDateTime.ofEpochSecond(sharedPreferences.getLong(DAY_OF_LAST_READ_KEY, 0), 0, ZoneOffset.UTC)}"),
+            Pair(DAY_OF_LAST_READ_KEY, "${LocalDate.ofEpochDay(sharedPreferences.getLong(DAY_OF_LAST_READ_KEY, 0))}"),
             Pair(STEP_COUNTER_KEY, "${sharedPreferences.getInt(STEP_COUNTER_KEY, 0)}"),
             Pair(LAST_MIDNIGHT_KEY, "${LocalDateTime.ofEpochSecond(sharedPreferences.getLong(LAST_MIDNIGHT_KEY, 0), 0, ZoneOffset.UTC)}"),
         )

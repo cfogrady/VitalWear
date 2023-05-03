@@ -46,21 +46,16 @@ class MainScreenComposable(
     }
     @Composable
     fun mainScreen(activityLaunchers: ActivityLaunchers) {
-        var loaded by remember { mutableStateOf(false) }
-        var activeCharacter by remember { mutableStateOf(MutableLiveData<BEMCharacter>() as LiveData<BEMCharacter>) }
-        var firmware by remember { mutableStateOf(MutableLiveData<Firmware>() as LiveData<Firmware>) }
-        var background by remember { mutableStateOf(MutableLiveData<Bitmap>() as LiveData<Bitmap>) }
-        //var firmware by
-        if(!loaded) {
+        val characterManagerInitialized by characterManager.initialized.observeAsState()
+        if(!characterManagerInitialized!!) {
             Log.i(TAG, "Loading in mainScreen")
-            Loading() {
-                activeCharacter = characterManager.getLiveCharacter()
-                firmware = firmwareManager.getFirmware()
-                background = backgroundManager.selectedBackground
-                loaded = true
-            }
+            Loading() {}
+        } else {
+            val activeCharacter = characterManager.getLiveCharacter()
+            val firmware = firmwareManager.getFirmware()
+            val background = backgroundManager.selectedBackground
+            everythingLoadedScreen(firmwareData = firmware, activeCharacterData = activeCharacter, background, activityLaunchers)
         }
-        everythingLoadedScreen(firmwareData = firmware, activeCharacterData = activeCharacter, background, activityLaunchers)
     }
 
     @Composable

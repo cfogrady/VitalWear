@@ -9,6 +9,7 @@ import com.github.cfogrady.vb.dim.transformation.DimEvolutionRequirements
 import com.github.cfogrady.vitalwear.character.data.*
 import com.github.cfogrady.vitalwear.data.CardLoader
 import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope.coroutineContext
 import java.io.File
 import java.time.LocalDateTime
 import kotlin.collections.ArrayList
@@ -20,10 +21,11 @@ const val TAG = "CharacterRepository"
  * Manage the character loading and updating
  */
 class CharacterManager() {
-    private val activeCharacter = MutableLiveData<BEMCharacter>(BEMCharacter.DEFAULT_CHARACTER)
+    private val activeCharacter = MutableLiveData(BEMCharacter.DEFAULT_CHARACTER)
     private lateinit var characterDao: CharacterDao
     private lateinit var cardLoader: CardLoader
     private lateinit var bemUpdater: BEMUpdater
+    val initialized = MutableLiveData(false)
 
     fun init(characterDao: CharacterDao,
              cardLoader: CardLoader,
@@ -31,19 +33,23 @@ class CharacterManager() {
         this.characterDao = characterDao
         this.cardLoader = cardLoader
         this.bemUpdater = bemUpdater
+        GlobalScope.launch {
+            withContext(Dispatchers.IO) {
+                val character = loadActiveCharacter()
+                if(character != BEMCharacter.DEFAULT_CHARACTER) {
+                    activeCharacter.postValue(character)
+                    bemUpdater.initializeBEMUpdates(character)
+                    initialized.postValue(true)
+                }
+            }
+        }
     }
 
-    fun getCurrentCharacter() : BEMCharacter {
+    fun getCurrentCharacter(): BEMCharacter {
         return activeCharacter.value!!
     }
 
-    @Synchronized
     fun getLiveCharacter() : LiveData<BEMCharacter> {
-        if(!activeCharacterIsPresent()) {
-            val character = loadActiveCharacter()
-            activeCharacter.postValue(character)
-            bemUpdater.initializeBEMUpdates(character)
-        }
         return activeCharacter
     }
 
@@ -224,8 +230,8 @@ class CharacterManager() {
     }
 
     fun deleteCharacter(characterPreview: CharacterPreview) {
-        val character = getLiveCharacter() //force a load of the active character
-        if(character.value != null && character.value!!.characterStats.id == characterPreview.characterId) {
+        val character = getCurrentCharacter() //force a load of the active character
+        if(character.characterStats.id == characterPreview.characterId) {
             Log.e(TAG, "Cannot delete active character")
         } else {
             characterDao.deleteById(characterPreview.characterId)

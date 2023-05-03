@@ -16,8 +16,6 @@ import com.github.cfogrady.vitalwear.R
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.activity.MainActivity
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 
 class PartnerComplicationService : ComplicationDataSourceService() {
@@ -49,31 +47,27 @@ class PartnerComplicationService : ComplicationDataSourceService() {
         }, 500)
     }
 
-    fun complicationResult() : ComplicationData {
+    private fun complicationResult() : ComplicationData {
         val goToAppIntent = Intent(applicationContext, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(applicationContext, 0, goToAppIntent, PendingIntent.FLAG_CANCEL_CURRENT.and(PendingIntent.FLAG_ONE_SHOT))
         lateinit var bitmap: Bitmap
         val characterManager = (application as VitalWearApp).characterManager
         val maybeFirmware = (application as VitalWearApp).firmwareManager.getFirmware()
         val state = (application as VitalWearApp).partnerComplicationState
-        if(!characterManager.activeCharacterIsPresent()) {
-            GlobalScope.launch {
-                characterManager.getLiveCharacter()
-            }
+        if(!characterManager.initialized.value!! || !characterManager.activeCharacterIsPresent()) {
             if(maybeFirmware.value == null) {
                 return displayUninitializedFirmwareComplication()
             }
             bitmap = maybeFirmware.value!!.loadingIcon
         } else {
-            val maybeCharacter = characterManager.getLiveCharacter()
-            if(maybeCharacter.value!!.characterStats.id == BEMCharacter.DEFAULT_CHARACTER.characterStats.id) {
+            val character = characterManager.getCurrentCharacter()
+            bitmap = if(character == BEMCharacter.DEFAULT_CHARACTER) {
                 if(maybeFirmware.value == null) {
                     return displayUninitializedFirmwareComplication()
                 }
-                bitmap = maybeFirmware.value!!.insertCardIcon
+                maybeFirmware.value!!.insertCardIcon
             } else {
-                val character = maybeCharacter.value!!
-                bitmap = character.sprites.get(character.activityIdx + state.spriteIndex)
+                character.sprites[character.activityIdx + state.spriteIndex]
             }
         }
         var iconImage = Icon.createWithBitmap(bitmap)
@@ -82,7 +76,7 @@ class PartnerComplicationService : ComplicationDataSourceService() {
         return SmallImageComplicationData.Builder(image, text).setTapAction(pendingIntent).build()
     }
 
-    fun refreshComplication(complicationId: Int) {
+    private fun refreshComplication(complicationId: Int) {
         //Log.i(TAG, "refreshing complication")
         val state = (application as VitalWearApp).partnerComplicationState
         state.spriteIndex++

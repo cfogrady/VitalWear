@@ -38,9 +38,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
+        val stepService = (application as VitalWearApp).stepService
+        stepListener = stepService.listenDailySteps()
         GlobalScope.launch {
-            val stepService = (application as VitalWearApp).stepService
-            stepListener = stepService.listenDailySteps()
             val sharedPreferences = (application as VitalWearApp).sharedPreferences
             val dailyStepsBeforeShutdown = sharedPreferences.getInt(SensorStepService.DAILY_STEPS_KEY, 0)
             val timeSinceEpoch = sharedPreferences.getLong(SensorStepService.DAY_OF_LAST_READ_KEY, 0)

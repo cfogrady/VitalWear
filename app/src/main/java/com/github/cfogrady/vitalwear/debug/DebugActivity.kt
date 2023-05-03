@@ -25,13 +25,16 @@ class DebugActivity : ComponentActivity() {
     fun Debug() {
         var loaded by remember { mutableStateOf(false) }
         var debugItems by remember { mutableStateOf(ArrayList<Pair<String, String>>() as List<Pair<String, String>>) }
-        Loading {
-            debugItems = getDebugItems()
-            loaded = true
-        }
-        ScalingLazyColumn(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize(),) {
-            items(items = debugItems) {entry ->
-                Text(text = "${entry.first}:${entry.second}")
+        if(!loaded) {
+            Loading {
+                debugItems = getDebugItems()
+                loaded = true
+            }
+        } else {
+            ScalingLazyColumn(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize(),) {
+                items(items = debugItems) {entry ->
+                    Text(text = "${entry.first}:${entry.second}")
+                }
             }
         }
     }
@@ -40,6 +43,7 @@ class DebugActivity : ComponentActivity() {
         val list = ArrayList<Pair<String, String>>()
         list.addAll((application as VitalWearApp).stepService.debug())
         list.addAll((application as VitalWearApp).characterManager.getCurrentCharacter().debug())
+        list.addAll((application as VitalWearApp).heartRateService.debug())
         return list
     }
 }

@@ -17,7 +17,7 @@ class BEMCharacter(
     var activityIdx : Int = 1
 
     companion object {
-        private val DEFAULT_STATS = CharacterEntity(0, CharacterState.SYNCED, "NONE", 0, LocalDateTime.MIN, 0, 0, false, 0, 0, 0, 0, 0, false, 0, 0, 0, 0, 0, 0, 0, false)
+        private val DEFAULT_STATS = CharacterEntity(-1, CharacterState.SYNCED, "NONE", 0, LocalDateTime.MIN, 0, 0, false, 0, 0, 0, 0, 0, false, 0, 0, 0, 0, 0, 0, 0, false)
         val DEFAULT_CHARACTER = BEMCharacter(emptyList(), DEFAULT_STATS, CharacterStatsEntry.builder().build(), 0, emptyList())
     }
 
@@ -74,9 +74,9 @@ class BEMCharacter(
 
     fun mood(): Mood {
         val mood = characterStats.mood
-        return if(mood < 30) {
+        return if(mood > 70) {
             Mood.GOOD
-        } else if(mood < 80) {
+        } else if(mood > 20) {
             Mood.NORMAL
         } else {
             Mood.BAD

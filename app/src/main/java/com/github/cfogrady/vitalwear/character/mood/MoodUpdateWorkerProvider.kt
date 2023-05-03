@@ -15,6 +15,6 @@ class MoodUpdateWorkerProvider : WorkerProvider {
         appContext: Context,
         workerParameters: WorkerParameters
     ): ListenableWorker {
-        return MoodUpdateWorker(workProviderDependencies.characterManager, workProviderDependencies.bemMoodUpdater, appContext, workerParameters)
+        return MoodUpdateWorker(workProviderDependencies.characterManager, workProviderDependencies.bemMoodUpdater, workProviderDependencies.bemUpdater, appContext, workerParameters)
     }
 }

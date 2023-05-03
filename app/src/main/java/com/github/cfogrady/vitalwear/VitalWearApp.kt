@@ -56,11 +56,14 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var shutdownReceiver: ShutdownReceiver
     lateinit var shutdownManager: ShutdownManager
     lateinit var heartRateService : HeartRateService
+    private lateinit var bemUpdater: BEMUpdater
     var backgroundHeight = 0.dp
 
     override fun onCreate() {
         super.onCreate()
         buildDependencies()
+        // characterManager init will load WorkManager configuration
+        characterManager.init(database.characterDao(), cardLoader, bemUpdater)
         applicationContext.registerReceiver(shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN))
         SensorStepService.setupDailyStepReset(this)
         val appShutdownHandler = AppShutdownHandler(shutdownManager, sharedPreferences)
@@ -79,9 +82,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         stepService = SensorStepService(characterManager, sharedPreferences, sensorManager)
         heartRateService = HeartRateService(sensorManager)
-        // BEMUpdater initializes the WorkManager, so all dependencies must have already been called.
-        // TODO: change BEMUpdater to get the WorkManager instance dynamically as needed instead of as a dependency
-        characterManager.init(database.characterDao(), cardLoader, BEMUpdater(applicationContext))
+        bemUpdater = BEMUpdater(applicationContext)
         shutdownManager = ShutdownManager(stepService, characterManager)
         firmwareManager.loadFirmware(applicationContext)
         backgroundManager = BackgroundManager(cardLoader, firmwareManager)
@@ -114,6 +115,7 @@ class VitalWearApp : Application(), Configuration.Provider {
             characterManager,
             stepService,
             BEMMoodUpdater(heartRateService),
+            bemUpdater,
         )
         return Configuration.Builder().setWorkerFactory(VitalWearWorkerFactory(workProviderDependencies)).build()
     }
