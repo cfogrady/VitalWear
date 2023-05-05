@@ -76,11 +76,7 @@ class SensorStepService(
     private fun newSteps(newStepCount: Int) {
         Log.i(TAG, "StepCount: $newStepCount")
         val character = getCharacter()
-        if(character == BEMCharacter.DEFAULT_CHARACTER) {
-            Log.w(TAG, "No character set")
-            return
-        }
-        if(currentSteps != 0) {
+        if(currentSteps != 0 && character != BEMCharacter.DEFAULT_CHARACTER) {
             if(newStepCount - currentSteps >= remainingSteps) {
                 val stats = character.characterStats
                 currentSteps += remainingSteps
@@ -89,8 +85,8 @@ class SensorStepService(
                 stats.vitals += vitalGainModifier(newVitals)
                 remainingSteps = (newStepCount - currentSteps) % STEPS_PER_VITAL
             }
+            currentSteps = newStepCount
         }
-        currentSteps = newStepCount
         dailySteps.postValue(currentSteps - startOfDaySteps)
     }
 

@@ -82,7 +82,7 @@ class BattleService(private val cardLoader: CardLoader,
         )
     }
 
-    val vitalWinTable = arrayOf(
+    private val vitalWinTable = arrayOf(
         intArrayOf(200, 300, 600, 1200, 1800, 2400), //phase 3 (index 2)
         intArrayOf(100, 300, 450, 700, 1400, 2100), //phase 4 (index 3)
         intArrayOf(20, 150, 400, 600, 800, 1600), //phase 5 (index 4)
@@ -91,7 +91,7 @@ class BattleService(private val cardLoader: CardLoader,
         intArrayOf(20, 20, 20, 20, 600, 700), //phase 8 (index 7)
     )
 
-    val vitalLossTable = arrayOf(
+    private val vitalLossTable = arrayOf(
         intArrayOf(-160, -100, -20, -20, -20, -20), //phase 3 (index 2)
         intArrayOf(-300, -240, -150, -20, -20, -20), //phase 4 (index 3)
         intArrayOf(-600, -450, -320, -400, -20, -20), //phase 5 (index 4)
