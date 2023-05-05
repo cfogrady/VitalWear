@@ -8,6 +8,4 @@ import com.github.cfogrady.vitalwear.steps.DailyStepHandler
 class WorkProviderDependencies(
     val characterManager: CharacterManager,
     val dailyStepHandler: DailyStepHandler,
-    val bemMoodUpdater: BEMMoodUpdater,
-    val bemUpdater: BEMUpdater,
 )

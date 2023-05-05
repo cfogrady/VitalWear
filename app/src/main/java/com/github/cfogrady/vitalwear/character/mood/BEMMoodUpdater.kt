@@ -3,23 +3,31 @@ package com.github.cfogrady.vitalwear.character.mood
 import android.util.Log
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
+import com.github.cfogrady.vitalwear.steps.SensorStepService
 import java.time.LocalDateTime
 import java.util.concurrent.CompletableFuture
 
-class BEMMoodUpdater(private val heartRateService: HeartRateService) {
+class BEMMoodUpdater(private val heartRateService: HeartRateService, private val stepService: SensorStepService) {
     private var lastLevel : Int = 0
 
+    companion object {
+        const val TAG = "BEMMoodUpdater"
+    }
+
     fun updateMood(character: BEMCharacter, now: LocalDateTime) : CompletableFuture<Void> {
-        val currentExerciseLevelFuture = heartRateService.getExerciseLevel(lastLevel)
-        return currentExerciseLevelFuture.thenAccept { level: Int ->
+        // update steps first so that we populate vitals from steps using the previous mood level
+        val addStepsFuture = stepService.addStepsToVitals()
+        // get the exercise level
+        val exerciseLevelFuture = heartRateService.getExerciseLevel(lastLevel)
+        // once we have both of those, update the mood.
+        return addStepsFuture.thenAcceptBoth(exerciseLevelFuture) { _, level: Int ->
             updateFromExerciseLevel(character, level, now)
             lastLevel = level
-            Log.i(MoodUpdateWorker.TAG, "Mood updated successfully")
+            Log.i(TAG, "Mood updated successfully")
         }
     }
 
     private fun updateFromExerciseLevel(character: BEMCharacter, exerciseLevel: Int, now: LocalDateTime) {
-        //TODO: Double Check mechanics when I have internet
         when(exerciseLevel) {
             0 -> character.characterStats.mood -= 1
             2 -> character.characterStats.mood += 10

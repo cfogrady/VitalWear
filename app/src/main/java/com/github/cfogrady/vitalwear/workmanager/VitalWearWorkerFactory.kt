@@ -6,8 +6,6 @@ import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import com.github.cfogrady.vitalwear.character.*
 import com.github.cfogrady.vitalwear.character.BemTransformationWorkerProvider
-import com.github.cfogrady.vitalwear.character.mood.MoodUpdateWorker
-import com.github.cfogrady.vitalwear.character.mood.MoodUpdateWorkerProvider
 import com.github.cfogrady.vitalwear.steps.DailyStepWorker
 import com.github.cfogrady.vitalwear.steps.DailyStepsWorkerProvider
 
@@ -15,7 +13,6 @@ class VitalWearWorkerFactory(
     private val workProviderDependencies: WorkProviderDependencies,
     private val workerProviders: Map<String?, WorkerProvider> =
     mapOf(Pair(BemTransformationWorker::class.qualifiedName, BemTransformationWorkerProvider()),
-        Pair(MoodUpdateWorker::class.qualifiedName, MoodUpdateWorkerProvider()),
         Pair(DailyStepWorker::class.qualifiedName, DailyStepsWorkerProvider())
     )
 ) : WorkerFactory() {

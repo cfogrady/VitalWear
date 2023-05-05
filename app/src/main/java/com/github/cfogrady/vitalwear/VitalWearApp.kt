@@ -21,6 +21,7 @@ import com.github.cfogrady.vitalwear.data.CardLoader
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
 import com.github.cfogrady.vitalwear.character.mood.BEMMoodUpdater
+import com.github.cfogrady.vitalwear.character.mood.MoodBroadcastReceiver
 import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
@@ -56,6 +57,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var shutdownReceiver: ShutdownReceiver
     lateinit var shutdownManager: ShutdownManager
     lateinit var heartRateService : HeartRateService
+    lateinit var moodBroadcastReceiver: MoodBroadcastReceiver
     private lateinit var bemUpdater: BEMUpdater
     var backgroundHeight = 0.dp
 
@@ -65,6 +67,8 @@ class VitalWearApp : Application(), Configuration.Provider {
         // characterManager init will load WorkManager configuration
         characterManager.init(database.characterDao(), cardLoader, bemUpdater)
         applicationContext.registerReceiver(shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN))
+        applicationContext.registerReceiver(moodBroadcastReceiver, IntentFilter(MoodBroadcastReceiver.MOOD_UPDATE))
+        bemUpdater.scheduleExactMoodUpdates()
         SensorStepService.setupDailyStepReset(this)
         val appShutdownHandler = AppShutdownHandler(shutdownManager, sharedPreferences)
         stepService.handleBoot(LocalDate.now())
@@ -82,6 +86,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         stepService = SensorStepService(characterManager, sharedPreferences, sensorManager)
         heartRateService = HeartRateService(sensorManager)
+        moodBroadcastReceiver = MoodBroadcastReceiver(BEMMoodUpdater(heartRateService, stepService), characterManager)
         bemUpdater = BEMUpdater(applicationContext)
         shutdownManager = ShutdownManager(stepService, characterManager)
         firmwareManager.loadFirmware(applicationContext)
@@ -114,8 +119,6 @@ class VitalWearApp : Application(), Configuration.Provider {
         val workProviderDependencies = WorkProviderDependencies(
             characterManager,
             stepService,
-            BEMMoodUpdater(heartRateService),
-            bemUpdater,
         )
         return Configuration.Builder().setWorkerFactory(VitalWearWorkerFactory(workProviderDependencies)).build()
     }

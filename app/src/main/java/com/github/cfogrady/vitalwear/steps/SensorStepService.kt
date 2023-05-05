@@ -85,7 +85,7 @@ class SensorStepService(
                 val stats = character.characterStats
                 currentSteps += remainingSteps
                 stats.vitals += vitalGainModifier(4)
-                val newVitals = (newStepCount - currentSteps)/STEPS_PER_VITAL
+                val newVitals = 4 * ((newStepCount - currentSteps)/STEPS_PER_VITAL)
                 stats.vitals += vitalGainModifier(newVitals)
                 remainingSteps = (newStepCount - currentSteps) % STEPS_PER_VITAL
             }
@@ -135,7 +135,7 @@ class SensorStepService(
         return newFuture
     }
 
-    override fun addStepsToVitals(): Future<Void> {
+    override fun addStepsToVitals(): CompletableFuture<Void> {
         return getSingleSensorReading(this::newSteps)
     }
 
@@ -193,7 +193,7 @@ class SensorStepService(
         }
     }
 
-    private fun stepsAtBoot(steps: Int, today: LocalDate) {
+    private fun stepsAtBoot(curentStepCounter: Int, today: LocalDate) {
         GlobalScope.launch {
             withContext(Dispatchers.IO) {
                 val dailyStepsBeforeShutdown = sharedPreferences.getInt(DAILY_STEPS_KEY, 0)
@@ -202,21 +202,21 @@ class SensorStepService(
                 val dateFromSave = LocalDate.ofEpochDay(timeSinceEpoch)
                 if(dateFromSave != today) {
                     // we're on a different day than the last save, so reset everything
-                    startOfDaySteps = steps
-                    currentSteps = steps
+                    startOfDaySteps = curentStepCounter
+                    currentSteps = curentStepCounter
                     dailySteps.postValue(0)
                     saveStepData(today)
-                } else if(lastStepCounter < steps) {
+                } else if(lastStepCounter > curentStepCounter) {
                     // we reset the step counter, so assume a reboot
-                    startOfDaySteps = steps - dailyStepsBeforeShutdown
+                    startOfDaySteps = curentStepCounter - dailyStepsBeforeShutdown
                     currentSteps = lastStepCounter
                     dailySteps.postValue(dailyStepsBeforeShutdown)
                     saveStepData(today)
                 } else {
                     // App shutdown and restarted. We're on the same day.
                     currentSteps = lastStepCounter
-                    startOfDaySteps = steps - dailyStepsBeforeShutdown
-                    newSteps(steps)
+                    startOfDaySteps = curentStepCounter - dailyStepsBeforeShutdown
+                    newSteps(curentStepCounter)
                 }
             }
         }

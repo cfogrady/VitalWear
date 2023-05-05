@@ -1,12 +1,16 @@
 package com.github.cfogrady.vitalwear.character
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.Context
+import android.content.Intent
+import android.os.SystemClock
 import android.util.Log
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
-import com.github.cfogrady.vitalwear.character.mood.MoodUpdateWorker
+import com.github.cfogrady.vitalwear.character.mood.MoodBroadcastReceiver
 import java.time.Duration
 
 class BEMUpdater(val context: Context) {
@@ -23,19 +27,15 @@ class BEMUpdater(val context: Context) {
             .addTag(WORK_TAG)
             .build()
         workManager.enqueue(transformWorkRequest)
-
-        queueNextMoodUpdate(workManager)
     }
 
-    fun queueNextMoodUpdate(workManager: WorkManager = WorkManager.getInstance(context)) {
-        // Can't use periodic work request because minimum duraction is PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS
-        // which is 15 minutes... Instead do a OneTimeWorkRequest that reschedules itself every 5.
-        Log.i(WORK_TAG, "Queue Mood Update")
-        val moodUpdateWorkRequest = OneTimeWorkRequestBuilder<MoodUpdateWorker>()
-            .setInitialDelay(Duration.ofMinutes(5))
-            .addTag(WORK_TAG)
-            .build()
-        workManager.enqueue(moodUpdateWorkRequest)
+    fun scheduleExactMoodUpdates() {
+        val alarmManager = context.getSystemService(Service.ALARM_SERVICE) as AlarmManager
+        val now = SystemClock.elapsedRealtime()
+        val period = Duration.ofMinutes(5).toMillis()
+        val moodUpdateIntent = PendingIntent.getBroadcast(context, 0, Intent(MoodBroadcastReceiver.MOOD_UPDATE), 0)
+        alarmManager.cancel(moodUpdateIntent)
+        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, now + period, period, moodUpdateIntent)
     }
 
     fun cancel(workManager: WorkManager = WorkManager.getInstance(context)) {
