@@ -4,14 +4,14 @@ import android.content.Context
 import android.util.Log
 import androidx.work.WorkerParameters
 import androidx.work.Worker
+import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 
 class BemTransformationWorker (private val characterManager: CharacterManager, val context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
     val TAG = "BemTransformationWorker"
     override fun doWork(): Result {
         Log.i(TAG, "Transforming!")
-        val liveCharacter = characterManager.getLiveCharacter()
-        if(liveCharacter.value != null) {
-            val character = liveCharacter.value!!
+        val character = characterManager.getCurrentCharacter()
+        if(character != BEMCharacter.DEFAULT_CHARACTER) {
             character.prepCharacterTransformation()
             characterManager.doActiveCharacterTransformation()
         }

@@ -7,6 +7,8 @@ import java.time.LocalDateTime
 class ShutdownManager(private val stepService: SensorStepService, private val characterManager: CharacterManager) {
     fun shutdown(today: LocalDateTime) {
         stepService.handleShutdown(today.toLocalDate())
-        characterManager.updateActiveCharacter(today)
+            .thenRun {
+                characterManager.updateActiveCharacter(today)
+            }
     }
 }

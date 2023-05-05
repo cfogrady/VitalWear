@@ -1,19 +1,17 @@
 package com.github.cfogrady.vitalwear.steps
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
-import com.github.cfogrady.vitalwear.character.CharacterManager
-import com.github.cfogrady.vitalwear.character.WorkerProvider
+import com.github.cfogrady.vitalwear.workmanager.WorkerProvider
+import com.github.cfogrady.vitalwear.workmanager.WorkProviderDependencies
 
 class DailyStepsWorkerProvider : WorkerProvider {
     override fun createWorker(
-        characterManager: CharacterManager,
-        dailyStepHandler: DailyStepHandler,
+        workProviderDependencies: WorkProviderDependencies,
         appContext: Context,
         workerParameters: WorkerParameters
     ): ListenableWorker {
-        return DailyStepWorker(appContext, workerParameters, dailyStepHandler)
+        return DailyStepWorker(appContext, workerParameters, workProviderDependencies.dailyStepHandler)
     }
 }

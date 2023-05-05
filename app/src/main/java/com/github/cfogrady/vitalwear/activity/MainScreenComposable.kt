@@ -20,42 +20,42 @@ import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.BackgroundManager
 import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.R
+import com.github.cfogrady.vitalwear.ShutdownManager
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
+import com.github.cfogrady.vitalwear.steps.SensorStepService
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 class MainScreenComposable(
-    val characterManager: CharacterManager,
-    val firmwareManager: FirmwareManager,
-    val backgroundManager: BackgroundManager,
-    val imageScaler: ImageScaler,
-    val bitmapScaler: BitmapScaler,
-    val partnerScreenComposable: PartnerScreenComposable,
-    val vitalBoxFactory: VitalBoxFactory,
+    private val characterManager: CharacterManager,
+    private val shutdownManager: ShutdownManager,
+    private val firmwareManager: FirmwareManager,
+    private val backgroundManager: BackgroundManager,
+    private val imageScaler: ImageScaler,
+    private val bitmapScaler: BitmapScaler,
+    private val partnerScreenComposable: PartnerScreenComposable,
+    private val vitalBoxFactory: VitalBoxFactory,
 ) {
     companion object {
         val TAG = "MainScreenComposable"
     }
     @Composable
     fun mainScreen(activityLaunchers: ActivityLaunchers) {
-        var loaded by remember { mutableStateOf(false) }
-        var activeCharacter by remember { mutableStateOf(MutableLiveData<BEMCharacter>() as LiveData<BEMCharacter>) }
-        var firmware by remember { mutableStateOf(MutableLiveData<Firmware>() as LiveData<Firmware>) }
-        var background by remember { mutableStateOf(MutableLiveData<Bitmap>() as LiveData<Bitmap>) }
-        //var firmware by
-        if(!loaded) {
+        val characterManagerInitialized by characterManager.initialized.observeAsState()
+        if(!characterManagerInitialized!!) {
             Log.i(TAG, "Loading in mainScreen")
-            Loading() {
-                activeCharacter = characterManager.getLiveCharacter()
-                firmware = firmwareManager.getFirmware()
-                background = backgroundManager.selectedBackground
-                loaded = true
-            }
+            Loading() {}
+        } else {
+            val activeCharacter = characterManager.getLiveCharacter()
+            val firmware = firmwareManager.getFirmware()
+            val background = backgroundManager.selectedBackground
+            everythingLoadedScreen(firmwareData = firmware, activeCharacterData = activeCharacter, background, activityLaunchers)
         }
-        everythingLoadedScreen(firmwareData = firmware, activeCharacterData = activeCharacter, background, activityLaunchers)
     }
 
     @Composable
@@ -87,7 +87,7 @@ class MainScreenComposable(
             .padding(padding)
             .fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
-            VerticalPager(pageCount = 5) {page ->
+            VerticalPager(pageCount = 7) {page ->
                 when(page) {
                     0 -> {
                         partnerScreenComposable.PartnerScreen(
@@ -111,7 +111,9 @@ class MainScreenComposable(
                     }
                     3 -> {
                         vitalBoxFactory.VitalBox {
-                            Box(modifier = Modifier.fillMaxSize().clickable { activityLaunchers.battleLauncher.invoke() }, contentAlignment = Alignment.Center) {
+                            Box(modifier = Modifier
+                                .fillMaxSize()
+                                .clickable { activityLaunchers.battleLauncher.invoke() }, contentAlignment = Alignment.Center) {
                                 bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.trainingIcon, contentDescription = "Training", modifier = Modifier.clickable {
                                     activityLaunchers.trainingMenuLauncher.invoke()
                                 })
@@ -120,11 +122,33 @@ class MainScreenComposable(
                     }
                     4 -> {
                         vitalBoxFactory.VitalBox {
-                            Box(modifier = Modifier.fillMaxSize().clickable { activityLaunchers.battleLauncher.invoke() }, contentAlignment = Alignment.Center) {
+                            Box(modifier = Modifier
+                                .fillMaxSize()
+                                .clickable { activityLaunchers.battleLauncher.invoke() }, contentAlignment = Alignment.Center) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Image(painter = painterResource(id = R.drawable.fight_icon), contentDescription = "Battle")
                                     Text(text = "BATTLE",  fontWeight = FontWeight.Bold, fontSize = 3.em)
                                 }
+                            }
+                        }
+                    }
+                    5 -> {
+                        vitalBoxFactory.VitalBox {
+                            Box(modifier = Modifier
+                                .fillMaxSize()
+                                .clickable { activityLaunchers.debugActivityLauncher.invoke() }, contentAlignment = Alignment.Center) {
+                                Text(text = "DEBUG",  fontWeight = FontWeight.Bold, fontSize = 3.em)
+                            }
+                        }
+                    }
+                    6 -> {
+                        vitalBoxFactory.VitalBox {
+                            Box(modifier = Modifier
+                                .fillMaxSize()
+                                .clickable {
+                                    shutdownManager.shutdown(LocalDateTime.now())
+                                }, contentAlignment = Alignment.Center) {
+                                Text(text = "SAVE",  fontWeight = FontWeight.Bold, fontSize = 3.em)
                             }
                         }
                     }
