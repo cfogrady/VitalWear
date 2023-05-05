@@ -24,6 +24,7 @@ import com.github.cfogrady.vitalwear.character.mood.BEMMoodUpdater
 import com.github.cfogrady.vitalwear.character.mood.MoodBroadcastReceiver
 import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
+import com.github.cfogrady.vitalwear.composable.util.ScrollingNameFactory
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.*
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
@@ -58,6 +59,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var shutdownManager: ShutdownManager
     lateinit var heartRateService : HeartRateService
     lateinit var moodBroadcastReceiver: MoodBroadcastReceiver
+    lateinit var scrollingNameFactory: ScrollingNameFactory
     private lateinit var bemUpdater: BEMUpdater
     var backgroundHeight = 0.dp
 
@@ -97,9 +99,10 @@ class VitalWearApp : Application(), Configuration.Provider {
         imageScaler = ImageScaler(applicationContext.resources.displayMetrics, applicationContext.resources.configuration.isScreenRound)
         backgroundHeight = imageScaler.scaledDpValueFromPixels(ImageScaler.VB_HEIGHT.toInt())
         bitmapScaler = BitmapScaler(imageScaler)
+        scrollingNameFactory = ScrollingNameFactory(backgroundHeight, bitmapScaler)
         vitalBoxFactory = VitalBoxFactory(imageScaler, ImageScaler.VB_WIDTH.toInt(), ImageScaler.VB_HEIGHT.toInt())
         val opponentSplashFactory = OpponentSplashFactory(bitmapScaler)
-        val opponentNameScreenFactory = OpponentNameScreenFactory(bitmapScaler, backgroundHeight)
+        val opponentNameScreenFactory = OpponentNameScreenFactory(bitmapScaler, backgroundHeight, scrollingNameFactory)
         val readyScreenFactory = ReadyScreenFactory(bitmapScaler, backgroundHeight)
         val goScreenFactory = GoScreenFactory(bitmapScaler, backgroundHeight)
         val attackScreenFactory = AttackScreenFactory(bitmapScaler, backgroundHeight)

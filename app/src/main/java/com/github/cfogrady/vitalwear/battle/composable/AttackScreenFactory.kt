@@ -23,6 +23,9 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
 
     companion object {
         const val TAG = "AttackScreenFactory"
+
+        const val ATTACK_TIME_PER_SCREEN_HEIGHT = -1500
+        const val ADDITIONAL_OFFSET_TO_LEAVE_SCREEN = -.275f
         enum class Attacker {
             PLAYER,
             OPPONENT,
@@ -179,12 +182,12 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
         var horizontalTarget by remember { mutableStateOf(0f) }
         val verticalOffset by animateFloatAsState(
             targetValue = verticalTarget,
-            animationSpec = tween(durationMillis = 500),
+            animationSpec = tween(durationMillis = 300, easing = LinearEasing),
             finishedListener = {final -> verticalTarget = 0f}
         )
         val horizontalOffset by animateFloatAsState(
             targetValue = horizontalTarget,
-            animationSpec = tween(durationMillis = 1200)
+            animationSpec = tween(durationMillis = 600, easing = LinearEasing)
         )
         LaunchedEffect(true) {
             verticalTarget = 1f
@@ -209,7 +212,7 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
             } else {
                 phaseUpdater.invoke(AttackPhase.ATTACK)
             }
-        }, 1300)
+        }, 800)
     }
 
     @Composable
@@ -224,17 +227,20 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
     fun Attack(characterIdleImg: Bitmap, characterAttackImg: Bitmap, attack: Bitmap, direction: Float, phaseUpdater: (AttackPhase) -> Unit) {
         var idle by remember { mutableStateOf(true) }
         var targetAttackOffset by remember { mutableStateOf(0f) }
+        val attackSpeed = remember {ADDITIONAL_OFFSET_TO_LEAVE_SCREEN * ATTACK_TIME_PER_SCREEN_HEIGHT}
         val attackOffset by animateFloatAsState(
             targetValue = targetAttackOffset,
-            animationSpec = tween(durationMillis = 1500)
-        )
+            animationSpec = tween(durationMillis = attackSpeed.toInt(), easing = LinearEasing)
+        ) {
+            Handler(Looper.getMainLooper()!!).postDelayed({
+                phaseUpdater.invoke(AttackPhase.OPPONENT_RECEIVES_ATTACK)
+            }, 0)
+        }
         Handler(Looper.getMainLooper()!!).postDelayed({
             idle = false
             targetAttackOffset = 1f
         }, 500)
-        Handler(Looper.getMainLooper()!!).postDelayed({
-            phaseUpdater.invoke(AttackPhase.OPPONENT_RECEIVES_ATTACK)
-        }, 2000)
+
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             bitmapScaler.ScaledBitmap(
                 bitmap = if(idle) characterIdleImg else characterAttackImg,
@@ -254,7 +260,7 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
                     modifier = Modifier
                         .offset(
                             y = backgroundHeight.times(PositionOffsetRatios.ATTACK_OFFSET_FROM_BOTTOM),
-                            x = backgroundHeight.times(direction * (PositionOffsetRatios.ATTACK_OFFSET_FROM_CENTER + -.45f * attackOffset))
+                            x = backgroundHeight.times(direction * (PositionOffsetRatios.ATTACK_OFFSET_FROM_CENTER + ADDITIONAL_OFFSET_TO_LEAVE_SCREEN * attackOffset))
                         )
                         .graphicsLayer(scaleX = direction)
                 )
@@ -264,8 +270,9 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
 
     @Composable
     fun OpponentReceivesAttack(characterIdleSprite: Bitmap, characterDodgeSprite: Bitmap, attackSprite: Bitmap, hitSprites: List<Bitmap>, direction: Float, wasHit: Boolean, phaseUpdater: (AttackPhase) -> Unit) {
-        var targetAttackOffset by remember { mutableStateOf(-0.6f) }
-        var attackSpeed by remember { mutableStateOf(1000) }
+        val screenExitLocation = remember { ADDITIONAL_OFFSET_TO_LEAVE_SCREEN + PositionOffsetRatios.ATTACK_OFFSET_FROM_CENTER}
+        var targetAttackOffset by remember { mutableStateOf(ADDITIONAL_OFFSET_TO_LEAVE_SCREEN + PositionOffsetRatios.ATTACK_OFFSET_FROM_CENTER) }
+        var attackSpeed by remember { mutableStateOf(0) }
         var attackHitting by remember { mutableStateOf(false) }
         var dodging by remember { mutableStateOf(false) }
         var dodgingOffsetTarget by remember { mutableStateOf(PositionOffsetRatios.CHARACTER_OFFSET_FROM_BOTTOM) }
@@ -275,8 +282,6 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
             finishedListener = {fnished ->
                 if(wasHit) {
                     attackHitting = true
-                } else {
-                    dodgingOffsetTarget = PositionOffsetRatios.CHARACTER_OFFSET_FROM_BOTTOM
                 }
             }
         )
@@ -289,19 +294,21 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
                     Handler(Looper.getMainLooper()!!).postDelayed({
                         phaseUpdater.invoke(AttackPhase.OPPONENT_HP)
                     }, 500)
+                } else {
+                    dodgingOffsetTarget = PositionOffsetRatios.CHARACTER_OFFSET_FROM_BOTTOM
                 }
             }
         )
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
                 if(wasHit) {
-                    attackSpeed = 750
+                    attackSpeed = (ATTACK_TIME_PER_SCREEN_HEIGHT * (screenExitLocation)).toInt()
                     targetAttackOffset = 0f
                 } else {
-                    attackSpeed = 1500
-                    targetAttackOffset = 0.6f
+                    attackSpeed = (ATTACK_TIME_PER_SCREEN_HEIGHT * (screenExitLocation)).toInt() * 2
+                    targetAttackOffset = -1 * (ADDITIONAL_OFFSET_TO_LEAVE_SCREEN + PositionOffsetRatios.ATTACK_OFFSET_FROM_CENTER)
                     dodging = true
-                    dodgingOffsetTarget = -0.4f
+                    dodgingOffsetTarget = -0.2f
                 }
             }, 500)
         }

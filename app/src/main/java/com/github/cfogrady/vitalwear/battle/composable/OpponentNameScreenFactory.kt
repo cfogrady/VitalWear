@@ -21,9 +21,10 @@ import com.github.cfogrady.vitalwear.battle.data.BattleCharacter
 import com.github.cfogrady.vitalwear.battle.data.PreBattleModel
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.PositionOffsetRatios
+import com.github.cfogrady.vitalwear.composable.util.ScrollingNameFactory
 import com.google.common.collect.Lists
 
-class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp) {
+class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp, private val scrollingNameFactory: ScrollingNameFactory) {
     companion object {
         const val TAG = "OpponentNameScreenFactory"
     }
@@ -32,6 +33,8 @@ class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private 
     fun OpponentNameScreen(battleModel: PreBattleModel, stateUpdater: (FightTargetState) -> Unit) {
         var leftScreenEarly = remember { false }
         val battleCharacter = battleModel.opponent
+        val nameSprite = battleCharacter.battleSprites.nameBitmap
+        val nameAnimationTime = remember(nameSprite) { 500 + (2000 * nameSprite.width.toLong()/80) }
         var characterFrames = remember {Lists.newArrayList(
             battleCharacter.battleSprites.idleBitmap,
             battleCharacter.battleSprites.attackBitmap)}
@@ -56,7 +59,9 @@ class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private 
                 frames = 2,
                 contentDescription = "Opponent",
                 alignment = Alignment.BottomCenter,
-                modifier = Modifier.offset(y = backgroundHeight.times(PositionOffsetRatios.CHARACTER_OFFSET_FROM_BOTTOM)).graphicsLayer(scaleX = -1.0f)
+                modifier = Modifier
+                    .offset(y = backgroundHeight.times(PositionOffsetRatios.CHARACTER_OFFSET_FROM_BOTTOM))
+                    .graphicsLayer(scaleX = -1.0f)
             )
         }
         NameBox(battleCharacter = battleCharacter)
@@ -64,19 +69,14 @@ class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private 
             if(!leftScreenEarly) {
                 stateUpdater.invoke(FightTargetState.READY)
             }
-        }, 5000)
+        }, nameAnimationTime*2)
     }
     
     @Composable
     private fun NameBox(battleCharacter: BattleCharacter) {
-        val state = rememberScrollState()
-        // Seems like there is probably a better way to do this, but this will work for now.
-        LaunchedEffect(Unit) { state.animateScrollTo(240, tween(durationMillis = 3000, delayMillis = 500, easing = LinearEasing)) }
-        Box(modifier = Modifier.fillMaxSize().padding(vertical =backgroundHeight.times(.1f)), contentAlignment = Alignment.TopCenter) {
-            bitmapScaler.ScaledBitmap(
-                bitmap = battleCharacter.battleSprites.nameBitmap,
-                contentDescription = "OpponentName",
-                modifier = Modifier.horizontalScroll(state).background(color = Color.Black))
+
+        Box(modifier = Modifier.fillMaxWidth().padding(vertical = backgroundHeight.times(.1f)).background(Color.Black)) {
+            scrollingNameFactory.ScrollingName(name = battleCharacter.battleSprites.nameBitmap)
         }
     }
 }

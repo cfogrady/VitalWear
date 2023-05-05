@@ -1,17 +1,9 @@
 package com.github.cfogrady.vitalwear.stats
 
-import android.graphics.Bitmap
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
@@ -31,8 +23,6 @@ import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.composable.util.formatNumber
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
 class StatsMenuActivity : ComponentActivity() {
@@ -60,6 +50,7 @@ class StatsMenuActivity : ComponentActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun statsMenu() {
+        val scrollingNameFactory = remember { (application as VitalWearApp).scrollingNameFactory }
         LaunchedEffect(true) {
             characterManager.getLiveCharacter().value!!.characterStats.updateTimeStamps(LocalDateTime.now())
         }
@@ -74,7 +65,7 @@ class StatsMenuActivity : ComponentActivity() {
             )
             Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally) {
                 if(state.currentPage < 5) {
-                    ScrollingName(name = partner.sprites[0])
+                    scrollingNameFactory.ScrollingName(name = partner.sprites[0])
                     bitmapScaler.ScaledBitmap(bitmap = partner.sprites[1], contentDescription = "Partner")
                 }
                 VerticalPager(state = state, pageCount = 4) { page ->
@@ -194,34 +185,5 @@ class StatsMenuActivity : ComponentActivity() {
             return Pair(timeRemainingMinutes, "m")
         }
         return Pair(timeRemainingMinutes/60, "h")
-    }
-
-    @Composable
-    private fun ScrollingName(name: Bitmap) {
-        val backgroundHeight = (application as VitalWearApp).backgroundHeight
-        val scaledNameWidth = remember {bitmapScaler.scaledDimension(name.width)}
-        val nameScroll = remember {Animatable(0f)}
-        var running by remember { mutableStateOf(true)}
-        LaunchedEffect(running) {
-            nameScroll.animateTo(1f, tween(2000 * name.width / 80 , easing = LinearEasing))
-        }
-        // only do this when animation running state changes
-        LaunchedEffect(key1 = nameScroll.isRunning) {
-            //only do this if we aren't running and we aren't at the start state
-            if(!nameScroll.isRunning && nameScroll.value > 0f) {
-                running = false
-                Handler(Looper.getMainLooper()!!).postDelayed({
-                    GlobalScope.launch {
-                        nameScroll.snapTo(0f)
-                        running = true
-                    }
-                }, 500)
-            }
-        }
-        val offset = backgroundHeight.div(2)
-        val distance = backgroundHeight.div(2).plus(scaledNameWidth)
-        Box(modifier = Modifier.horizontalScroll(ScrollState(0)), contentAlignment = Alignment.TopStart) {
-            bitmapScaler.ScaledBitmap(bitmap = name, contentDescription = "Name", modifier = Modifier.offset(x = offset - distance.times(nameScroll.value)))
-        }
     }
 }
