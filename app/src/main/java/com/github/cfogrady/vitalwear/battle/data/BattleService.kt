@@ -58,7 +58,17 @@ class BattleService(private val cardLoader: CardLoader,
         if(battle.battleResult == BattleResult.WIN) {
             partnerCharacter.characterStats.totalWins++
             partnerCharacter.characterStats.currentPhaseWins++
+            partnerCharacter.characterStats.mood += 10
+            if(partnerCharacter.characterStats.mood > 100) {
+                partnerCharacter.characterStats.mood = 100
+            }
+        } else {
+            partnerCharacter.characterStats.mood -= 10
+            if(partnerCharacter.characterStats.mood < 0) {
+                partnerCharacter.characterStats.mood = 0
+            }
         }
+        partnerCharacter.characterStats.vitals += vitalsForResult(partnerCharacter.speciesStats.stage, preBattleModel.opponent.battleStats.stage, battle.battleResult == BattleResult.WIN)
         GlobalScope.launch(Dispatchers.Default) {
             characterManager.updateCharacterStats(partnerCharacter.characterStats, LocalDateTime.now())
         }
@@ -72,6 +82,32 @@ class BattleService(private val cardLoader: CardLoader,
         )
     }
 
+    val vitalWinTable = arrayOf(
+        intArrayOf(200, 300, 600, 1200, 1800, 2400), //phase 3 (index 2)
+        intArrayOf(100, 300, 450, 700, 1400, 2100), //phase 4 (index 3)
+        intArrayOf(20, 150, 400, 600, 800, 1600), //phase 5 (index 4)
+        intArrayOf(20, 20, 400, 500, 750, 900), //phase 6 (index 5)
+        intArrayOf(20, 20, 20, 500, 600, 800), //phase 7 (index 6)
+        intArrayOf(20, 20, 20, 20, 600, 700), //phase 8 (index 7)
+    )
+
+    val vitalLossTable = arrayOf(
+        intArrayOf(-160, -100, -20, -20, -20, -20), //phase 3 (index 2)
+        intArrayOf(-300, -240, -150, -20, -20, -20), //phase 4 (index 3)
+        intArrayOf(-600, -450, -320, -400, -20, -20), //phase 5 (index 4)
+        intArrayOf(-1200, -700, -600, -400, -500, -20), //phase 6 (index 5)
+        intArrayOf(-1800, -1400, -800, -750, -480, -600), //phase 7 (index 6)
+        intArrayOf(-2400, -2100, -1600, -900, -800, -560), //phase 8 (index 7)
+    )
+
+    private fun vitalsForResult(partnerLevel: Int, opponentLevel: Int, win: Boolean): Int {
+        return if(win) {
+            vitalWinTable[partnerLevel-2][opponentLevel-2]
+        } else {
+            vitalLossTable[partnerLevel-2][opponentLevel-2]
+        }
+    }
+
     private fun loadBattleCharacter(card: Card<*, *, *, *, *, *>, slotId: Int): BattleCharacter {
         val speciesStats = card.characterStats.characterEntries[slotId]
         val battleStats = loadBattleStats(speciesStats)
@@ -80,7 +116,7 @@ class BattleService(private val cardLoader: CardLoader,
     }
 
     private fun loadBattleStats(characterStats: CharacterStats.CharacterStatsEntry, mood: Mood = Mood.NORMAL): BattleStats {
-        return BattleStats(characterStats.dp, characterStats.ap, characterStats.hp, 0, characterStats.attribute, characterStats.type, mood)
+        return BattleStats(characterStats.dp, characterStats.ap, characterStats.hp, 0, characterStats.attribute, characterStats.type, characterStats.stage, mood)
     }
 
     private fun loadBattleSprites(card: Card<*, *, *, *, *, *>, characterStats: CharacterStats.CharacterStatsEntry, slotId: Int): BattleSprites {
@@ -117,6 +153,7 @@ class BattleService(private val cardLoader: CardLoader,
             character.characterStats.vitals,
             character.speciesStats.attribute,
             character.speciesStats.type,
+            character.speciesStats.stage,
             character.mood(),
         )
         val battleSprites = BattleSprites(

@@ -11,6 +11,7 @@ class BattleStats(
     val vitals: Int,
     val attribute: Int,
     val type: Int,
+    val stage: Int,
     val mood: Mood
 )
 
