@@ -51,7 +51,8 @@ class HeartRateService(
         // We need to block the main thread for the shutdown, so that we can ensure everything is saved before the shutdown occurs;
         // otherwise, there is a risk that the shutdown will occur before the other threads have finished.
         if(!sensorManager.registerListener(listener, heartRateSensor, SensorManager.SENSOR_DELAY_NORMAL)) {
-            Log.e(TAG, "Failed to register heart rate sensor!")
+            Log.w(TAG, "Failed to register heart rate sensor!")
+            future.complete(HeartRateResult(0, HeartRateResult.Companion.HeartRateError.UNRELIABLE))
         } else {
             Log.i(TAG, "Registered to Heart Rate Sensor")
         }

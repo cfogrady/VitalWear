@@ -131,6 +131,7 @@ class SensorStepService(
         // otherwise, there is a risk that the shutdown will occur before the other threads have finished.
         if(!sensorManager.registerListener(listener, stepSensor, SensorManager.SENSOR_DELAY_NORMAL)) {
             Log.e(TAG, "Failed to register sensor!")
+            future.complete(null)
         }
         return newFuture
     }
