@@ -17,6 +17,7 @@ class BEMCharacter(
     var activityIdx : Int = 1
 
     companion object {
+        const val MAX_VITALS = 9999
         private val DEFAULT_STATS = CharacterEntity(-1, CharacterState.SYNCED, "NONE", 0, LocalDateTime.MIN, 0, 0, false, 0, 0, 0, 0, 0, false, 0, 0, 0, 0, 0, 0, 0, false)
         val DEFAULT_CHARACTER = BEMCharacter(emptyList(), DEFAULT_STATS, CharacterStatsEntry.builder().build(), 0, emptyList())
     }
@@ -87,6 +88,15 @@ class BEMCharacter(
             Mood.NORMAL
         } else {
             Mood.BAD
+        }
+    }
+
+    fun addVitals(vitalChange: Int) {
+        characterStats.vitals += vitalChange
+        if(characterStats.vitals > MAX_VITALS) {
+            characterStats.vitals = MAX_VITALS
+        } else if(characterStats.vitals < 0) {
+            characterStats.vitals = 0
         }
     }
 }

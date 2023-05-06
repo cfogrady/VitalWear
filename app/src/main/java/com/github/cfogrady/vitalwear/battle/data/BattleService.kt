@@ -68,7 +68,8 @@ class BattleService(private val cardLoader: CardLoader,
                 partnerCharacter.characterStats.mood = 0
             }
         }
-        partnerCharacter.characterStats.vitals += vitalsForResult(partnerCharacter.speciesStats.stage, preBattleModel.opponent.battleStats.stage, battle.battleResult == BattleResult.WIN)
+        val vitalChange = vitalsForResult(partnerCharacter.speciesStats.stage, preBattleModel.opponent.battleStats.stage, battle.battleResult == BattleResult.WIN)
+        partnerCharacter.addVitals(vitalChange)
         GlobalScope.launch(Dispatchers.Default) {
             characterManager.updateCharacterStats(partnerCharacter.characterStats, LocalDateTime.now())
         }
@@ -79,6 +80,7 @@ class BattleService(private val cardLoader: CardLoader,
             preBattleModel.background,
             firmware.battleFirmwareSprites.partnerHpIcons,
             firmware.battleFirmwareSprites.opponentHpIcons,
+            vitalChange
         )
     }
 
@@ -100,7 +102,7 @@ class BattleService(private val cardLoader: CardLoader,
         intArrayOf(-2400, -2100, -1600, -900, -800, -560), //phase 8 (index 7)
     )
 
-    private fun vitalsForResult(partnerLevel: Int, opponentLevel: Int, win: Boolean): Int {
+    fun vitalsForResult(partnerLevel: Int, opponentLevel: Int, win: Boolean): Int {
         return if(win) {
             vitalWinTable[partnerLevel-2][opponentLevel-2]
         } else {

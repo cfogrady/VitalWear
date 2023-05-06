@@ -10,4 +10,5 @@ class BattleFirmwareSprites(
     val partnerHpIcons: List<Bitmap>,
     val opponentHpIcons: List<Bitmap>,
     val hitIcons: List<Bitmap>,
+    val vitalsRangeIcons: List<Bitmap>,
 )

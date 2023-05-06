@@ -38,7 +38,6 @@ class PartnerComplicationService : ComplicationDataSourceService() {
         request: ComplicationRequest,
         listener: ComplicationRequestListener
     ) {
-        Log.i(TAG, "Complication Refresh")
         dataSource = ComponentName(this, javaClass)
         val complicationData = complicationResult()
         listener.onComplicationData(complicationData)

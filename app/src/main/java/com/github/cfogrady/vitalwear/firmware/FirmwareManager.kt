@@ -69,6 +69,8 @@ const val BP_IDX = 409
 const val HP_IDX = 410
 const val AP_IDX = 411
 const val PP_IDX = 412
+const val VITALS_RANGE_START_IDX = 281
+const val VITALS_RANGE_END_IDX = 288
 
 class FirmwareManager(
     val spriteBitmapConverter: SpriteBitmapConverter
@@ -173,7 +175,9 @@ class FirmwareManager(
             OPPONENT_HP_START_IDX, OPPONENT_HP_END_IDX
         )))
         val hitSprites = spriteBitmapConverter.getBitmaps(sprites.subList(HIT_START_IDX, HIT_END_IDX))
-        return BattleFirmwareSprites(attackSprites, largeAttackSprites, battleBackground, battleIcon, partnerHPIcons, opponentHPIcons, hitSprites)
+        val vitalRangeSprites = spriteBitmapConverter.getBitmaps(sprites.subList(
+            VITALS_RANGE_START_IDX, VITALS_RANGE_END_IDX))
+        return BattleFirmwareSprites(attackSprites, largeAttackSprites, battleBackground, battleIcon, partnerHPIcons, opponentHPIcons, hitSprites, vitalRangeSprites)
     }
 
     private fun trainingFirmwareSprites(sprites: List<Sprite>) : TrainingFirmwareSprites {

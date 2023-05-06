@@ -19,6 +19,7 @@ class FightTargetFactory(
     private val attackScreenFactory: AttackScreenFactory,
     private val hpCompareFactory: HPCompareFactory,
     private val endFightReactionFactory: EndFightReactionFactory,
+    private val endFightVitalsFactory: EndFightVitalsFactory,
     ) {
     @Composable
     fun FightTarget(battleModel: PreBattleModel, activityFinished: () -> Unit) {
@@ -74,7 +75,9 @@ class FightTargetFactory(
                 }
                 FightTargetState.VITALS -> {
                     //back to normal background
-                    activityFinished.invoke()
+                    endFightVitalsFactory.EndFightVitals(postBattleModel = postBattle!!) {
+                        activityFinished.invoke()
+                    }
                 }
             }
         }

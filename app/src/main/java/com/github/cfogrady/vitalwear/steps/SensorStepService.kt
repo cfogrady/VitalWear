@@ -78,11 +78,10 @@ class SensorStepService(
         val character = getCharacter()
         if(currentSteps != 0 && character != BEMCharacter.DEFAULT_CHARACTER) {
             if(newStepCount - currentSteps >= remainingSteps) {
-                val stats = character.characterStats
                 currentSteps += remainingSteps
-                stats.vitals += vitalGainModifier(4)
+                character.addVitals(vitalGainModifier(4))
                 val newVitals = 4 * ((newStepCount - currentSteps)/STEPS_PER_VITAL)
-                stats.vitals += vitalGainModifier(newVitals)
+                character.addVitals(vitalGainModifier(newVitals))
                 remainingSteps = (newStepCount - currentSteps) % STEPS_PER_VITAL
             }
             currentSteps = newStepCount

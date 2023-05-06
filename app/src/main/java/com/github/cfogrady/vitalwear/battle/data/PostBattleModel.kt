@@ -10,7 +10,8 @@ class PostBattleModel(val partnerCharacter: BattleCharacter,
                       val battle: Battle,
                       val background: Bitmap,
                       val partnerRemainingHpSprites: List<Bitmap>,
-                      val opponentRemainingHpSprites: List<Bitmap>) {
+                      val opponentRemainingHpSprites: List<Bitmap>,
+                      val vitalChange: Int) {
 
 
     fun opponentHpSprite(round: Int): Bitmap {
