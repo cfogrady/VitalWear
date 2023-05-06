@@ -45,18 +45,6 @@ class MainActivity : ComponentActivity() {
             characterManager.getCurrentCharacter().characterStats.updateTimeStamps(LocalDateTime.now())
         }
         stepListener = stepService.listenDailySteps()
-
-        GlobalScope.launch {
-            val sharedPreferences = (application as VitalWearApp).sharedPreferences
-            val dailyStepsBeforeShutdown = sharedPreferences.getInt(SensorStepService.DAILY_STEPS_KEY, 0)
-            val timeSinceEpoch = sharedPreferences.getLong(SensorStepService.DAY_OF_LAST_READ_KEY, 0)
-            val dateFromSave = LocalDate.ofEpochDay(timeSinceEpoch)
-            Log.i(TAG, "Saved dailySteps: $dailyStepsBeforeShutdown from date: $dateFromSave")
-            val lastMightnight = stepService.getLastMignight()
-            Log.i(TAG, "Last mightnight: $lastMightnight")
-            val gracefulShutdowns = sharedPreferences.getInt(AppShutdownHandler.GRACEFUL_SHUTDOWNS_KEY, 0)
-            Log.i(TAG, "Graceful shutdowns: $gracefulShutdowns")
-        }
     }
 
     override fun onStop() {
