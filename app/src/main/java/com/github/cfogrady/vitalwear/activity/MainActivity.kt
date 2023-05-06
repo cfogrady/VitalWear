@@ -17,6 +17,7 @@ import com.github.cfogrady.vitalwear.training.TrainingMenuActivity
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class MainActivity : ComponentActivity() {
     companion object {
@@ -39,7 +40,12 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         val stepService = (application as VitalWearApp).stepService
+        val characterManager = (application as VitalWearApp).characterManager
+        if(characterManager.activeCharacterIsPresent()) {
+            characterManager.getCurrentCharacter().characterStats.updateTimeStamps(LocalDateTime.now())
+        }
         stepListener = stepService.listenDailySteps()
+
         GlobalScope.launch {
             val sharedPreferences = (application as VitalWearApp).sharedPreferences
             val dailyStepsBeforeShutdown = sharedPreferences.getInt(SensorStepService.DAILY_STEPS_KEY, 0)

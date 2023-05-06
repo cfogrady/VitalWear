@@ -146,6 +146,7 @@ class CharacterManager() {
     }
 
     fun updateActiveCharacter(now: LocalDateTime) {
+        Log.i(TAG, "Updating the active character")
         if(activeCharacterIsPresent()) {
             updateCharacterStats(activeCharacter.value!!.characterStats, now)
         }

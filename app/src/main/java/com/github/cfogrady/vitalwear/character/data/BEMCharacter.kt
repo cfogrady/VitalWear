@@ -30,6 +30,10 @@ class BEMCharacter(
             Pair("MoodVal", "${characterStats.mood}"),
             Pair("Mood", mood().name),
             Pair("Vitals", "${characterStats.vitals}"),
+            Pair("TimeUntilEvolveSeconds", "${characterStats.timeUntilNextTransformation}"),
+            Pair("TimeUntilEvolveMinutes", "${characterStats.timeUntilNextTransformation/60}"),
+            Pair("TimeUntilEvolveHours", "${characterStats.timeUntilNextTransformation/(60*60)}"),
+            Pair("Last Transformation Check", if(lastTransformationCheck == LocalDateTime.MIN) "NONE" else "$lastTransformationCheck"),
         )
     }
 
@@ -52,7 +56,10 @@ class BEMCharacter(
         return Optional.empty()
     }
 
+    var lastTransformationCheck = LocalDateTime.MIN
+
     fun prepCharacterTransformation() {
+        lastTransformationCheck = LocalDateTime.now()
         val characterStats = characterStats
         val transformationOption = hasValidTransformation()
         if(transformationOption.isPresent) {
