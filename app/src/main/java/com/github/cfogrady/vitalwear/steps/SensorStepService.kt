@@ -2,6 +2,7 @@ package com.github.cfogrady.vitalwear.steps
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.SharedPreferences.Editor
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.util.Log
@@ -153,28 +154,28 @@ class SensorStepService(
         return StepListener(dailySteps, sensorManager, listener)
     }
 
-    private fun saveStepData(now: LocalDate) {
-        sharedPreferences.edit().putInt(DAILY_STEPS_KEY, dailySteps.value!!)
+    private fun saveStepData(now: LocalDate, sharedPreferencesEditor: Editor = sharedPreferences.edit()) {
+        sharedPreferencesEditor.putInt(DAILY_STEPS_KEY, dailySteps.value!!)
             .putInt(STEP_COUNTER_KEY, currentSteps)
             .putLong(DAY_OF_LAST_READ_KEY, now.toEpochDay())
-            .putInt(DAILY_STEPS_KEY, dailySteps.value!!)
             .commit()
         Log.i(TAG, "Step data saved")
     }
 
-    override fun handleDayTransition(newDay: LocalDate) {
-        addStepsToVitals()
-        startOfDaySteps = currentSteps
-        dailySteps.postValue(0)
-        saveStepData(newDay)
-        sharedPreferences.edit().putInt(DAILY_STEPS_KEY, dailySteps.value!!)
-            .putLong(LAST_MIDNIGHT_KEY, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
-            .commit()
-    }
-
-    fun getLastMignight() : LocalDateTime {
-        val epochSeconds = sharedPreferences.getLong(LAST_MIDNIGHT_KEY, 0)
-        return LocalDateTime.ofEpochSecond(epochSeconds, 0, ZoneOffset.UTC)
+    override fun handleDayTransition(newDay: LocalDate) : CompletableFuture<Void> {
+        return addStepsToVitals()
+            .thenApplyAsync {
+                runBlocking {
+                    withContext(Dispatchers.Main) {
+                        startOfDaySteps = currentSteps
+                        dailySteps.value = 0
+                    }
+                }
+            }
+            .thenApplyAsync {
+                saveStepData(newDay, sharedPreferences.edit().putLong(LAST_MIDNIGHT_KEY, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)))
+                null
+            }
     }
 
     fun handleBoot(today: LocalDate) {
@@ -223,7 +224,7 @@ class SensorStepService(
                 // App shutdown and restarted. We're on the same day.
                 Log.i(TAG, "Restarting steps from app restart")
                 currentSteps = lastStepCounter
-                startOfDaySteps = curentStepCounter - dailyStepsBeforeShutdown
+                startOfDaySteps = lastStepCounter - dailyStepsBeforeShutdown
                 newSteps(curentStepCounter)
             }
         }

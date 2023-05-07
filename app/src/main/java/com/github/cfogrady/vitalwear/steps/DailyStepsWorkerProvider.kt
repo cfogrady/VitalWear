@@ -12,6 +12,6 @@ class DailyStepsWorkerProvider : WorkerProvider {
         appContext: Context,
         workerParameters: WorkerParameters
     ): ListenableWorker {
-        return DailyStepWorker(appContext, workerParameters, workProviderDependencies.dailyStepHandler)
+        return DailyStepWorker(appContext, workerParameters, workProviderDependencies.dailyStepHandler, workProviderDependencies.characterManager)
     }
 }
