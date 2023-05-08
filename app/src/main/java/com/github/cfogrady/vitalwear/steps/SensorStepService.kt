@@ -12,6 +12,7 @@ import androidx.work.WorkManager
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
+import com.github.cfogrady.vitalwear.util.SensorThreadHandler
 import kotlinx.coroutines.*
 import java.time.*
 
@@ -29,7 +30,8 @@ class SensorStepService(
     //TODO: In addition to on onBoot and onShutdown, we need onStart and onAppShutdown. This will preserve steps over application reboots
     private val characterManager: CharacterManager,
     private val sharedPreferences: SharedPreferences,
-    private val sensorManager: SensorManager): StepService, DailyStepHandler {
+    private val sensorManager: SensorManager,
+    private val sensorThreadHandler: SensorThreadHandler): StepService, DailyStepHandler {
     companion object {
         const val TAG = "StepsService"
         const val STEPS_PER_VITAL = 50
@@ -112,7 +114,7 @@ class SensorStepService(
 
     private suspend fun getSingleSensorReading(): Int {
         var deferred = CompletableDeferred<Int>()
-        SingleStepSensorListener(sensorManager, deferred)
+        SingleStepSensorListener(sensorManager, sensorThreadHandler, deferred)
         return deferred.await()
     }
 

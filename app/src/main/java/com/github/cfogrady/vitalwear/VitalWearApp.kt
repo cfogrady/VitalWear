@@ -32,12 +32,12 @@ import com.github.cfogrady.vitalwear.debug.ExceptionService
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.steps.SensorStepService
+import com.github.cfogrady.vitalwear.util.SensorThreadHandler
 import com.github.cfogrady.vitalwear.training.ExerciseScreenFactory
 import com.github.cfogrady.vitalwear.workmanager.VitalWearWorkerFactory
 import com.github.cfogrady.vitalwear.workmanager.WorkProviderDependencies
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import java.util.Random
 
 class VitalWearApp : Application(), Configuration.Provider {
@@ -45,6 +45,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     val firmwareManager = FirmwareManager(spriteBitmapConverter)
     val partnerComplicationState = PartnerComplicationState()
     val exceptionService = ExceptionService()
+    val sensorThreadHandler = SensorThreadHandler()
     private lateinit var imageScaler : ImageScaler
     lateinit var bitmapScaler: BitmapScaler
     lateinit var cardLoader : CardLoader
@@ -96,7 +97,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         cardLoader = CardLoader(applicationContext, spriteBitmapConverter)
         characterManager = CharacterManagerImpl()
         val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        stepService = SensorStepService(characterManager, sharedPreferences, sensorManager)
+        stepService = SensorStepService(characterManager, sharedPreferences, sensorManager, sensorThreadHandler)
         heartRateService = HeartRateService(sensorManager)
         moodBroadcastReceiver = MoodBroadcastReceiver(BEMMoodUpdater(heartRateService, stepService), characterManager)
         bemUpdater = BEMUpdater(applicationContext)

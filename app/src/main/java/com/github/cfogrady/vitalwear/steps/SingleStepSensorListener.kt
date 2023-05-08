@@ -5,9 +5,13 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
+import com.github.cfogrady.vitalwear.util.SensorThreadHandler
 import kotlinx.coroutines.CompletableDeferred
 
-class SingleStepSensorListener(private val sensorManager: SensorManager, private val deferred: CompletableDeferred<Int>) : SensorEventListener {
+class SingleStepSensorListener(
+    private val sensorManager: SensorManager,
+    sensorThreadHandler: SensorThreadHandler,
+    private val deferred: CompletableDeferred<Int>) : SensorEventListener {
     companion object {
         const val TAG = "SingleStepSensorListener"
     }
@@ -17,13 +21,9 @@ class SingleStepSensorListener(private val sensorManager: SensorManager, private
         if(stepSensor == null) {
             deferred.completeExceptionally(java.lang.IllegalStateException("Step counter sensor doesn't exist on device"))
         }
-        //TODO: add handler thread (https://stackoverflow.com/questions/3286815/sensoreventlistener-in-separate-thread)
-        // Normally the sensor events come through on the main thread. This means we can't block the main thread and still receive events.
-        // We need to block the main thread for the shutdown, so that we can ensure everything is saved before the shutdown occurs;
-        // otherwise, there is a risk that the shutdown will occur before the other threads have finished.
-
         // We want data as fast a possible because this call is really asking what the current reading is.
-        if(!sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_FASTEST)) {
+        // We also want to run on the sensor thread because by default this runs on main and we want to block main for this in certain scenarios
+        if(!sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_FASTEST, sensorThreadHandler.handler)) {
             Log.e(TAG, "Failed to register sensor!")
             deferred.completeExceptionally(java.lang.IllegalStateException("Unable to register sensor"))
         } else {
