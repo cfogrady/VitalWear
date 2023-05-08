@@ -14,6 +14,6 @@ class AppShutdownHandler(private val shutdownManager: ShutdownManager, private v
         sharedPreferences.edit().putInt(GRACEFUL_SHUTDOWNS_KEY, sharedPreferences.getInt(
             GRACEFUL_SHUTDOWNS_KEY, 0) + 1)
         Log.i(TAG, "App is shutting down")
-        shutdownManager.shutdown(LocalDateTime.now())
+        shutdownManager.shutdown()
     }
 }

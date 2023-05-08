@@ -2,13 +2,13 @@ package com.github.cfogrady.vitalwear
 
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.steps.SensorStepService
+import kotlinx.coroutines.runBlocking
 import java.time.LocalDateTime
 
-class ShutdownManager(private val stepService: SensorStepService, private val characterManager: CharacterManager) {
-    fun shutdown(today: LocalDateTime) {
-        stepService.handleShutdown(today.toLocalDate())
-            .thenRun {
-                characterManager.updateActiveCharacter(today)
-            }
+class ShutdownManager(private val saveService: SaveService) {
+    fun shutdown() {
+        runBlocking {
+            saveService.save()
+        }
     }
 }

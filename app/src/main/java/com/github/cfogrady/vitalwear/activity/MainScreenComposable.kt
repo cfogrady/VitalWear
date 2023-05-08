@@ -17,10 +17,8 @@ import androidx.compose.ui.unit.em
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.wear.compose.material.Text
-import com.github.cfogrady.vitalwear.BackgroundManager
-import com.github.cfogrady.vitalwear.Loading
+import com.github.cfogrady.vitalwear.*
 import com.github.cfogrady.vitalwear.R
-import com.github.cfogrady.vitalwear.ShutdownManager
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
@@ -33,7 +31,7 @@ import java.time.LocalDateTime
 
 class MainScreenComposable(
     private val characterManager: CharacterManager,
-    private val shutdownManager: ShutdownManager,
+    private val saveService: SaveService,
     private val firmwareManager: FirmwareManager,
     private val backgroundManager: BackgroundManager,
     private val imageScaler: ImageScaler,
@@ -146,7 +144,7 @@ class MainScreenComposable(
                             Box(modifier = Modifier
                                 .fillMaxSize()
                                 .clickable {
-                                    shutdownManager.shutdown(LocalDateTime.now())
+                                    saveService.saveBlocking()
                                 }, contentAlignment = Alignment.Center) {
                                 Text(text = "SAVE",  fontWeight = FontWeight.Bold, fontSize = 3.em)
                             }

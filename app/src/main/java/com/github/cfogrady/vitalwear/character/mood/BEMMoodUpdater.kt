@@ -4,6 +4,8 @@ import android.util.Log
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.steps.SensorStepService
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.util.concurrent.CompletableFuture
 
@@ -14,13 +16,16 @@ class BEMMoodUpdater(private val heartRateService: HeartRateService, private val
         const val TAG = "BEMMoodUpdater"
     }
 
-    fun updateMood(character: BEMCharacter, now: LocalDateTime) : CompletableFuture<Void> {
-        // update steps first so that we populate vitals from steps using the previous mood level
-        val addStepsFuture = stepService.addStepsToVitals()
+    fun updateMood(character: BEMCharacter, now: LocalDateTime) {
+        val addStepsFuture = CompletableFuture<Void>()
+        GlobalScope.launch {
+            stepService.addStepsToVitals()
+            addStepsFuture.complete(null)
+        }
         // get the exercise level
         val exerciseLevelFuture = heartRateService.getExerciseLevel(lastLevel)
         // once we have both of those, update the mood.
-        return addStepsFuture.thenAcceptBoth(exerciseLevelFuture) { _, level: Int ->
+        addStepsFuture.thenAcceptBoth(exerciseLevelFuture) { _, level: Int ->
             updateFromExerciseLevel(character, level, now)
             lastLevel = level
             Log.i(TAG, "Mood updated successfully")

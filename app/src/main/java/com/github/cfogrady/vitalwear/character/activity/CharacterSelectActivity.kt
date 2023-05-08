@@ -23,6 +23,8 @@ import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.CharacterPreview
 import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
 
 const val TAG = "CharacterSelectActivity"
@@ -78,7 +80,10 @@ class CharacterSelectActivity : ComponentActivity() {
                     Row(horizontalArrangement = Arrangement.SpaceAround, modifier=Modifier.fillMaxWidth().background(Color.LightGray, RoundedCornerShape(10.dp)).padding(5.dp)) {
                         Image(bitmap = character.idle.asImageBitmap(), contentDescription = "Character")
                         Button(onClick = {
-                            characterManager.swapToCharacter(character)
+                            GlobalScope.launch {
+                                // TODO: Apply loading screen
+                                characterManager.swapToCharacter(character)
+                            }
                             finish()
                         }) {
                             Text(text = "Select", modifier = Modifier.padding(5.dp))

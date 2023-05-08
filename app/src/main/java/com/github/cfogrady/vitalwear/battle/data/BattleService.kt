@@ -7,6 +7,7 @@ import com.github.cfogrady.vb.dim.card.Card
 import com.github.cfogrady.vb.dim.card.DimReader
 import com.github.cfogrady.vb.dim.character.BemCharacterStats
 import com.github.cfogrady.vb.dim.character.CharacterStats
+import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.battle.BattleActivity
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
@@ -14,10 +15,6 @@ import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.data.CardLoader
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -27,6 +24,7 @@ class BattleService(private val cardLoader: CardLoader,
                     private val characterManager: CharacterManager,
                     private val firmwareManager: FirmwareManager,
                     private val battleLogic: BEMBattleLogic,
+                    private val saveService: SaveService,
                     private val random: Random,
 ) {
     companion object {
@@ -70,9 +68,7 @@ class BattleService(private val cardLoader: CardLoader,
         }
         val vitalChange = vitalsForResult(partnerCharacter.speciesStats.stage, preBattleModel.opponent.battleStats.stage, battle.battleResult == BattleResult.WIN)
         partnerCharacter.addVitals(vitalChange)
-        GlobalScope.launch(Dispatchers.Default) {
-            characterManager.updateCharacterStats(partnerCharacter.characterStats, LocalDateTime.now())
-        }
+        saveService.saveAsync()
         return PostBattleModel(
             preBattleModel.partnerCharacter,
             preBattleModel.opponent,
@@ -102,7 +98,7 @@ class BattleService(private val cardLoader: CardLoader,
         intArrayOf(-2400, -2100, -1600, -900, -800, -560), //phase 8 (index 7)
     )
 
-    fun vitalsForResult(partnerLevel: Int, opponentLevel: Int, win: Boolean): Int {
+    private fun vitalsForResult(partnerLevel: Int, opponentLevel: Int, win: Boolean): Int {
         return if(win) {
             vitalWinTable[partnerLevel-2][opponentLevel-2]
         } else {
@@ -210,7 +206,7 @@ class BattleService(private val cardLoader: CardLoader,
                     if(species.firstPoolBattleChance != DimReader.NONE_VALUE) {
                         roll -= species.firstPoolBattleChance
                     }
-                } else if(activeStage < 6 || !(species is BemCharacterStats.BemCharacterStatEntry)) {
+                } else if(activeStage < 6 || species !is BemCharacterStats.BemCharacterStatEntry) {
                     if(species.secondPoolBattleChance != DimReader.NONE_VALUE) {
                         roll -= species.secondPoolBattleChance
                     }

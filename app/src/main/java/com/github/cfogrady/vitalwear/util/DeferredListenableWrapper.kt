@@ -1,32 +1,40 @@
 package com.github.cfogrady.vitalwear.util
 
 import com.google.common.util.concurrent.ListenableFuture
-import java.util.concurrent.CompletableFuture
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 
-class CompletableFutureListenableWrapper<T: Any>(private val completableFuture: CompletableFuture<T>) : ListenableFuture<T> {
+class DeferredListenableWrapper<T : Any>(val deferred: Deferred<T>) : ListenableFuture<T> {
     override fun cancel(mayInterruptIfRunning: Boolean): Boolean {
-        return completableFuture.cancel(mayInterruptIfRunning)
+        deferred.cancel()
+        return true
     }
 
     override fun isCancelled(): Boolean {
-        return completableFuture.isCancelled
+        return deferred.isCancelled
     }
 
     override fun isDone(): Boolean {
-        return completableFuture.isDone
+        return deferred.isCompleted
     }
 
     override fun get(): T {
-        return completableFuture.get()
+        return runBlocking {
+            deferred.await()
+        }
     }
 
     override fun get(timeout: Long, unit: TimeUnit?): T {
-        return completableFuture.get(timeout, unit)
+        return runBlocking {
+            deferred.await()
+        }
     }
 
     override fun addListener(listener: Runnable, executor: Executor) {
-        completableFuture.thenAcceptAsync({listener.run()}, executor)
+        deferred.invokeOnCompletion {
+            executor.execute(listener)
+        }
     }
 }

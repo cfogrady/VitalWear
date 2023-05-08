@@ -13,18 +13,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.em
 import androidx.wear.compose.material.Text
-import com.github.cfogrady.vitalwear.character.CharacterManager
+import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterEntity
 import com.github.cfogrady.vitalwear.composable.util.*
 import com.github.cfogrady.vitalwear.data.CharacterSpriteLocations
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.google.common.collect.Lists
-import java.time.LocalDateTime
 import java.util.Random
 
 
-class ExerciseScreenFactory(private val characterManager: CharacterManager, private val vitalBoxFactory: VitalBoxFactory, private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp) {
+class ExerciseScreenFactory(private val saveService: SaveService, private val vitalBoxFactory: VitalBoxFactory, private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp) {
 
     companion object {
         const val TAG = "ExerciseScreenFactory"
@@ -103,7 +102,7 @@ class ExerciseScreenFactory(private val characterManager: CharacterManager, priv
         }
     }
 
-    fun increaseStats(stats: CharacterEntity, trainingType: TrainingType, great: Boolean) {
+    private fun increaseStats(stats: CharacterEntity, trainingType: TrainingType, great: Boolean) {
         val increase = increaseBonus(trainingType, great, true)
         when(trainingType) {
             TrainingType.SQUAT -> {
@@ -119,7 +118,7 @@ class ExerciseScreenFactory(private val characterManager: CharacterManager, priv
                 stats.trainedBp += increase
             }
         }
-        characterManager.updateCharacterStats(stats, LocalDateTime.now())
+        saveService.saveAsync()
     }
 
     @Composable
