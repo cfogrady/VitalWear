@@ -20,14 +20,15 @@ class SingleStepSensorListener(
         val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         if(stepSensor == null) {
             deferred.completeExceptionally(java.lang.IllegalStateException("Step counter sensor doesn't exist on device"))
-        }
-        // We want data as fast a possible because this call is really asking what the current reading is.
-        // We also want to run on the sensor thread because by default this runs on main and we want to block main for this in certain scenarios
-        if(!sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_FASTEST, sensorThreadHandler.handler)) {
-            Log.e(TAG, "Failed to register sensor!")
-            deferred.completeExceptionally(java.lang.IllegalStateException("Unable to register sensor"))
         } else {
-            Log.i(TAG, "Registered single step sensor reading")
+            // We want data as fast a possible because this call is really asking what the current reading is.
+            // We also want to run on the sensor thread because by default this runs on main and we want to block main for this in certain scenarios
+            if(!sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_FASTEST, sensorThreadHandler.handler)) {
+                Log.e(TAG, "Failed to register sensor!")
+                deferred.completeExceptionally(java.lang.IllegalStateException("Unable to register sensor"))
+            } else {
+                Log.i(TAG, "Registered single step sensor reading")
+            }
         }
     }
 

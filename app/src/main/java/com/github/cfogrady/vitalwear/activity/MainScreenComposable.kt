@@ -25,6 +25,7 @@ import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
+import com.github.cfogrady.vitalwear.steps.ManyStepListener
 import com.github.cfogrady.vitalwear.steps.SensorStepService
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -43,7 +44,7 @@ class MainScreenComposable(
         val TAG = "MainScreenComposable"
     }
     @Composable
-    fun mainScreen(activityLaunchers: ActivityLaunchers) {
+    fun mainScreen(activityLaunchers: ActivityLaunchers, manyStepListener: ManyStepListener) {
         val characterManagerInitialized by characterManager.initialized.observeAsState()
         if(!characterManagerInitialized!!) {
             Log.i(TAG, "Loading in mainScreen")
@@ -52,12 +53,12 @@ class MainScreenComposable(
             val activeCharacter = characterManager.getLiveCharacter()
             val firmware = firmwareManager.getFirmware()
             val background = backgroundManager.selectedBackground
-            everythingLoadedScreen(firmwareData = firmware, activeCharacterData = activeCharacter, background, activityLaunchers)
+            everythingLoadedScreen(firmwareData = firmware, activeCharacterData = activeCharacter, background, activityLaunchers, manyStepListener)
         }
     }
 
     @Composable
-    fun everythingLoadedScreen(firmwareData: LiveData<Firmware>, activeCharacterData: LiveData<BEMCharacter>, backgroundData: LiveData<Bitmap>, activityLaunchers: ActivityLaunchers) {
+    fun everythingLoadedScreen(firmwareData: LiveData<Firmware>, activeCharacterData: LiveData<BEMCharacter>, backgroundData: LiveData<Bitmap>, activityLaunchers: ActivityLaunchers, manyStepListener: ManyStepListener) {
         val firmware by firmwareData.observeAsState()
         val character by activeCharacterData.observeAsState()
         val background by backgroundData.observeAsState()
@@ -73,13 +74,13 @@ class MainScreenComposable(
         } else if(character!!.characterStats.id == BEMCharacter.DEFAULT_CHARACTER.characterStats.id) {
             activityLaunchers.characterSelectionLauncher.invoke()
         } else {
-            dailyScreen(firmware!!, character = character!!, background!!, activityLaunchers)
+            dailyScreen(firmware!!, character = character!!, background!!, activityLaunchers, manyStepListener)
         }
     }
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun dailyScreen(firmware: Firmware, character: BEMCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
+    fun dailyScreen(firmware: Firmware, character: BEMCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers, manyStepListener: ManyStepListener) {
         val padding = imageScaler.getPadding()
         Box(modifier = Modifier
             .padding(padding)
@@ -90,7 +91,8 @@ class MainScreenComposable(
                     0 -> {
                         partnerScreenComposable.PartnerScreen(
                             character = character,
-                            firmware = firmware.characterFirmwareSprites
+                            firmware = firmware.characterFirmwareSprites,
+                            manyStepListener
                         )
                     }
                     1 -> {

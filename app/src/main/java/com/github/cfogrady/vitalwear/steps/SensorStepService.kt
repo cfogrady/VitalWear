@@ -3,10 +3,8 @@ package com.github.cfogrady.vitalwear.steps
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.SharedPreferences.Editor
-import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.util.Log
-import androidx.lifecycle.*
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.github.cfogrady.vitalwear.character.CharacterManager
@@ -58,14 +56,14 @@ class SensorStepService(
     private var currentSteps = 0
     private var remainingSteps = STEPS_PER_VITAL
     private var startOfDaySteps = 0
-    override val dailySteps = MutableLiveData(0)
+    private var dailySteps = 0
 
     fun debug(): List<Pair<String, String>> {
         return listOf(
             Pair("currentSteps", "$currentSteps"),
             Pair("remainingSteps", "$remainingSteps"),
             Pair("startOfDaySteps", "$startOfDaySteps"),
-            Pair("dailySteps", "${dailySteps.value}"),
+            Pair("dailySteps", "$dailySteps"),
             Pair(DAILY_STEPS_KEY, "${sharedPreferences.getInt(DAILY_STEPS_KEY, 0)}"),
             Pair(DAY_OF_LAST_READ_KEY, "${LocalDate.ofEpochDay(sharedPreferences.getLong(DAY_OF_LAST_READ_KEY, 0))}"),
             Pair(STEP_COUNTER_KEY, "${sharedPreferences.getInt(STEP_COUNTER_KEY, 0)}"),
@@ -73,7 +71,11 @@ class SensorStepService(
         )
     }
 
-    private suspend fun newSteps(newStepCount: Int) {
+    /**
+     * Process new steps since the last step counter reading.
+     * Returns the daily steps after processing the new steps.
+     */
+    private fun processNewSteps(newStepCount: Int) : Int {
         Log.i(TAG, "StepCount: $newStepCount")
         val character = getCharacter()
         if(character != BEMCharacter.DEFAULT_CHARACTER) {
@@ -86,10 +88,8 @@ class SensorStepService(
             }
         }
         currentSteps = newStepCount
-        // TODO: AHHHHH!!! This gets stuck if we try to block on save or steps!
-        withContext(Dispatchers.Main) {
-            dailySteps.value = currentSteps - startOfDaySteps
-        }
+        dailySteps = currentSteps - startOfDaySteps
+        return dailySteps
     }
 
     private fun getCharacter() : BEMCharacter {
@@ -120,32 +120,15 @@ class SensorStepService(
 
     override suspend fun addStepsToVitals() {
         val newStepCounter = getSingleSensorReading()
-        newSteps(newStepCounter)
+        processNewSteps(newStepCounter)
     }
 
-    override fun listenDailySteps(): StepListener {
-        val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-
-        // This relies on quickly receiving an event describing current value.
-        val listener = StepSensorListener(){ value ->
-            Log.i(TAG, "Steps triggered")
-            //TODO: run blocking is very bad here for some reason... Understand why
-            // It's because the step listener is run on the main thread and newSteps
-            // requires the main thread to be free for posting to the LiveData /facepalm
-            GlobalScope.launch {
-                newSteps(value)
-            }
-        }
-        if(!sensorManager.registerListener(listener, stepSensor, SensorManager.SENSOR_DELAY_UI)) {
-            Log.e(TAG, "Failed to register sensor!")
-        } else {
-            Log.i(TAG, "Registered Listener to sensor.")
-        }
-        return StepListener(dailySteps, sensorManager, listener)
+    override fun listenDailySteps(): ManyStepListener {
+        return ManyStepProcessingListener(dailySteps, this::processNewSteps, sensorManager, sensorThreadHandler)
     }
 
     fun stepPreferenceUpdates(now: LocalDate, sharedPreferencesEditor: Editor = sharedPreferences.edit()) : Editor {
-        return sharedPreferencesEditor.putInt(DAILY_STEPS_KEY, dailySteps.value!!)
+        return sharedPreferencesEditor.putInt(DAILY_STEPS_KEY, dailySteps)
             .putInt(STEP_COUNTER_KEY, currentSteps)
             .putLong(DAY_OF_LAST_READ_KEY, now.toEpochDay())
     }
@@ -154,7 +137,7 @@ class SensorStepService(
         addStepsToVitals()
         withContext(Dispatchers.Main) {
             startOfDaySteps = currentSteps
-            dailySteps.value = 0
+            dailySteps = 0
         }
     }
 
@@ -171,7 +154,7 @@ class SensorStepService(
         return stepsAtBoot(stepCounterOnBoot, today)
     }
 
-    private suspend fun stepsAtBoot(curentStepCounter: Int, today: LocalDate): Boolean {
+    private fun stepsAtBoot(curentStepCounter: Int, today: LocalDate): Boolean {
         Log.i(TAG, "Performing steps on app startup")
         val dailyStepsBeforeShutdown = sharedPreferences.getInt(DAILY_STEPS_KEY, 0)
         val lastStepCounter = sharedPreferences.getInt(STEP_COUNTER_KEY, 0)
@@ -182,25 +165,21 @@ class SensorStepService(
             Log.i(TAG, "Restarting steps with new day")
             startOfDaySteps = curentStepCounter
             currentSteps = curentStepCounter
-            withContext(Dispatchers.Main) {
-                dailySteps.value = 0
-            }
+            dailySteps = 0
             return true //should save because we are starting fresh
         } else if(lastStepCounter > curentStepCounter) {
             // we reset the step counter, so assume a reboot
             Log.i(TAG, "Restarting steps from device reboot")
             startOfDaySteps = curentStepCounter - dailyStepsBeforeShutdown
             currentSteps = lastStepCounter
-            withContext(Dispatchers.Main) {
-                dailySteps.value = dailyStepsBeforeShutdown
-            }
+            dailySteps = dailyStepsBeforeShutdown
             return true //should save because we are starting fresh
         } else {
             // App shutdown and restarted. We're on the same day.
             Log.i(TAG, "Restarting steps from app restart")
             currentSteps = lastStepCounter
             startOfDaySteps = lastStepCounter - dailyStepsBeforeShutdown
-            newSteps(curentStepCounter)
+            processNewSteps(curentStepCounter)
             return false
         }
     }

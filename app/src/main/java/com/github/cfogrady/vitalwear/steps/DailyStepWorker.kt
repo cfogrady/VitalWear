@@ -7,10 +7,8 @@ import androidx.work.WorkerParameters
 import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.util.DeferredListenableWrapper
 import com.google.common.util.concurrent.ListenableFuture
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
-import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
