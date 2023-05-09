@@ -16,8 +16,9 @@ class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (Intent.ACTION_BOOT_COMPLETED == intent!!.action) {
             Log.i(TAG, "Starting up the device")
-            val applicationBootManager = (context!!.applicationContext as VitalWearApp).applicationBootManager
-            applicationBootManager.onStartup()
+            // Assume that application onCreate handled what we need
+//            val applicationBootManager = (context!!.applicationContext as VitalWearApp).applicationBootManager
+//            applicationBootManager.onStartup()
         } else {
             Log.w(TAG, "Called for unexpected intent: ${intent.action}")
         }

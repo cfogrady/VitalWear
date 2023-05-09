@@ -17,17 +17,11 @@ class BEMMoodUpdater(private val heartRateService: HeartRateService, private val
     }
 
     fun updateMood(character: BEMCharacter, now: LocalDateTime) {
-        val addStepsFuture = CompletableFuture<Void>()
         GlobalScope.launch {
             stepService.addStepsToVitals()
-            addStepsFuture.complete(null)
-        }
-        // get the exercise level
-        val exerciseLevelFuture = heartRateService.getExerciseLevel(lastLevel)
-        // once we have both of those, update the mood.
-        addStepsFuture.thenAcceptBoth(exerciseLevelFuture) { _, level: Int ->
-            updateFromExerciseLevel(character, level, now)
-            lastLevel = level
+            val exerciseLevel = heartRateService.getExerciseLevel(lastLevel)
+            updateFromExerciseLevel(character, exerciseLevel, now)
+            lastLevel = exerciseLevel
             Log.i(TAG, "Mood updated successfully")
         }
     }

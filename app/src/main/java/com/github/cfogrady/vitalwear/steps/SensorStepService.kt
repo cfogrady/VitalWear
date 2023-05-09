@@ -147,6 +147,7 @@ class SensorStepService(
      */
     suspend fun handleBoot(today: LocalDate) : Boolean {
         Log.i(TAG, "Handling startup")
+        // For some reason this call seems to wait until we receive a step change before actually registering a change.
         val stepCounterOnBoot = getSingleSensorReading()
         //TODO: Sometimes this isn't called for several minutes after startup because we don't get readings from the sensor.
         // See if there is a way to fix that. We generally rely on fast sensor readings... and we generally get fast sensor readings.

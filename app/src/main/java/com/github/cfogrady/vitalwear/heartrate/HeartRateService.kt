@@ -1,15 +1,15 @@
 package com.github.cfogrady.vitalwear.heartrate
 
-import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.util.Log
+import com.github.cfogrady.vitalwear.util.SensorThreadHandler
 import java.time.LocalDateTime
 import java.util.*
-import java.util.concurrent.CompletableFuture
 
 
 class HeartRateService(
-    private val sensorManager: SensorManager
+    private val sensorManager: SensorManager,
+    private val sensorThreadHandler: SensorThreadHandler,
 ) {
 
     companion object {
@@ -34,42 +34,20 @@ class HeartRateService(
         return debugList
     }
 
-    private fun getHeartRate(): CompletableFuture<HeartRateResult> {
-        val heartRateSensor = sensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE)
-        var future = CompletableFuture<HeartRateResult>()
-        val listener = HeartRateSensorListener(){ result ->
-            Log.i(TAG, "Completing the Future")
-            future.complete(result)
-        }
-        val newFuture = future.thenApply {
-            sensorManager.unregisterListener(listener)
-            Log.i(TAG, "Unregistered Heart Rate Sensor Listener")
-            future.get()
-        }
-        //TODO: add handler thread (https://stackoverflow.com/questions/3286815/sensoreventlistener-in-separate-thread)
-        // Normally the sensor events come through on the main thread. This means we can't block the main thread and still receive events.
-        // We need to block the main thread for the shutdown, so that we can ensure everything is saved before the shutdown occurs;
-        // otherwise, there is a risk that the shutdown will occur before the other threads have finished.
-        if(!sensorManager.registerListener(listener, heartRateSensor, SensorManager.SENSOR_DELAY_NORMAL)) {
-            Log.w(TAG, "Failed to register heart rate sensor!")
-            future.complete(HeartRateResult(0, HeartRateResult.Companion.HeartRateError.UNRELIABLE))
-        } else {
-            Log.i(TAG, "Registered to Heart Rate Sensor")
-        }
-        return newFuture
+    private suspend fun getHeartRate(): HeartRateResult {
+        val listener = SingleHeartRateSensorListener(sensorManager, sensorThreadHandler)
+        return listener.getValue()
     }
 
-    fun getExerciseLevel(lastLevel: Int): CompletableFuture<Int> {
+    suspend fun getExerciseLevel(lastLevel: Int): Int {
         val start = LocalDateTime.now()
-        val latestReadingFuture = getHeartRate()
-        return latestReadingFuture.thenApplyAsync { heartRateResult: HeartRateResult ->
-            val level = exerciseLevelFromResult(heartRateResult, lastLevel)
-            readingsLog.addFirst(HeartRateLog(start, heartRateResult.heartRate, heartRateResult.heartRateError, level, LocalDateTime.now()))
-            if(readingsLog.size > 9) {
-                readingsLog.removeLast()
-            }
-            level
+        val heartRateResult = getHeartRate()
+        val level = exerciseLevelFromResult(heartRateResult, lastLevel)
+        readingsLog.addFirst(HeartRateLog(start, heartRateResult.heartRate, heartRateResult.heartRateError, level, LocalDateTime.now()))
+        if(readingsLog.size > 9) {
+            readingsLog.removeLast()
         }
+        return level
     }
 
     private fun exerciseLevelFromResult(heartRateResult: HeartRateResult, lastLevel: Int): Int {

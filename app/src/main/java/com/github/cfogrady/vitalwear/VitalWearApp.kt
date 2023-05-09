@@ -81,9 +81,6 @@ class VitalWearApp : Application(), Configuration.Provider {
         // This may be run on app shutdown by Android... but updating or killing via the IDE never triggers this.
         Runtime.getRuntime().addShutdownHook(appShutdownHandler)
         GlobalScope.launch {
-            // characterManager init will load WorkManager configuration
-            (characterManager as CharacterManagerImpl).init(database.characterDao(), cardLoader, bemUpdater)
-            bemUpdater.scheduleExactMoodUpdates()
             applicationBootManager.onStartup()
         }
     }
@@ -98,7 +95,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         characterManager = CharacterManagerImpl()
         val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         stepService = SensorStepService(characterManager, sharedPreferences, sensorManager, sensorThreadHandler)
-        heartRateService = HeartRateService(sensorManager)
+        heartRateService = HeartRateService(sensorManager, sensorThreadHandler)
         moodBroadcastReceiver = MoodBroadcastReceiver(BEMMoodUpdater(heartRateService, stepService), characterManager)
         bemUpdater = BEMUpdater(applicationContext)
         saveService = SaveService(characterManager as CharacterManagerImpl, stepService, sharedPreferences)
@@ -127,7 +124,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         mainScreenComposable = MainScreenComposable(characterManager, saveService, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardLoader)
         shutdownReceiver = ShutdownReceiver(shutdownManager)
-        applicationBootManager = ApplicationBootManager(stepService, saveService)
+        applicationBootManager = ApplicationBootManager(database, cardLoader, characterManager as CharacterManagerImpl, stepService, bemUpdater, saveService)
     }
 
     override fun getWorkManagerConfiguration(): Configuration {
