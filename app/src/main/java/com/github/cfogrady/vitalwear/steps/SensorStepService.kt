@@ -27,7 +27,6 @@ import java.time.*
  * Special logic when the app starts up or is shutdown to handle stepcounter resets
  */
 class SensorStepService(
-    //TODO: In addition to on onBoot and onShutdown, we need onStart and onAppShutdown. This will preserve steps over application reboots
     private val characterManager: CharacterManager,
     private val sharedPreferences: SharedPreferences,
     private val sensorManager: SensorManager,
@@ -77,7 +76,7 @@ class SensorStepService(
     private suspend fun newSteps(newStepCount: Int) {
         Log.i(TAG, "StepCount: $newStepCount")
         val character = getCharacter()
-        if(currentSteps != 0 && character != BEMCharacter.DEFAULT_CHARACTER) {
+        if(character != BEMCharacter.DEFAULT_CHARACTER) {
             if(newStepCount - currentSteps >= remainingSteps) {
                 currentSteps += remainingSteps
                 character.addVitals(vitalGainModifier(4))
@@ -85,8 +84,9 @@ class SensorStepService(
                 character.addVitals(vitalGainModifier(newVitals))
                 remainingSteps = (newStepCount - currentSteps) % STEPS_PER_VITAL
             }
-            currentSteps = newStepCount
         }
+        currentSteps = newStepCount
+        // TODO: AHHHHH!!! This gets stuck if we try to block on save or steps!
         withContext(Dispatchers.Main) {
             dailySteps.value = currentSteps - startOfDaySteps
         }
@@ -129,7 +129,10 @@ class SensorStepService(
         // This relies on quickly receiving an event describing current value.
         val listener = StepSensorListener(){ value ->
             Log.i(TAG, "Steps triggered")
-            runBlocking {
+            //TODO: run blocking is very bad here for some reason... Understand why
+            // It's because the step listener is run on the main thread and newSteps
+            // requires the main thread to be free for posting to the LiveData /facepalm
+            GlobalScope.launch {
                 newSteps(value)
             }
         }

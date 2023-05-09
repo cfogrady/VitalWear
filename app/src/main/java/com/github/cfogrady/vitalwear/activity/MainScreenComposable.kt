@@ -144,7 +144,7 @@ class MainScreenComposable(
                             Box(modifier = Modifier
                                 .fillMaxSize()
                                 .clickable {
-                                    saveService.saveBlocking()
+                                    saveService.saveAsync()
                                 }, contentAlignment = Alignment.Center) {
                                 Text(text = "SAVE",  fontWeight = FontWeight.Bold, fontSize = 3.em)
                             }
