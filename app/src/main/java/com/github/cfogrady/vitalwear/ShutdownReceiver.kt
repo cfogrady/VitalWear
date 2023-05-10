@@ -13,7 +13,7 @@ class ShutdownReceiver(private val shutdownManager: ShutdownManager) :BroadcastR
     override fun onReceive(context: Context?, intent: Intent?) {
         if(intent!!.action == Intent.ACTION_SHUTDOWN) {
             Log.i(TAG, "Shutting down the device")
-            shutdownManager.shutdown(LocalDateTime.now())
+            shutdownManager.shutdown()
         } else {
             Log.w(TAG, "Called for unexpected intent: ${intent!!.action}")
         }

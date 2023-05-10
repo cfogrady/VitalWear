@@ -27,6 +27,11 @@ class PartnerComplicationService : ComplicationDataSourceService() {
         return complicationResult()
     }
 
+    override fun onComplicationDeactivated(complicationInstanceId: Int) {
+        //TODO: Use this to remove deactivated complications
+        super.onComplicationDeactivated(complicationInstanceId)
+    }
+
     private fun displayUninitializedFirmwareComplication() : ComplicationData {
         var iconImage = Icon.createWithResource(applicationContext, R.drawable.loading_icon)
         var image = SmallImage.Builder(iconImage, SmallImageType.PHOTO).build()

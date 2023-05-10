@@ -2,21 +2,16 @@ package com.github.cfogrady.vitalwear.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.github.cfogrady.vitalwear.AppShutdownHandler
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.battle.BattleActivity
 import com.github.cfogrady.vitalwear.character.activity.CharacterSelectActivity
 import com.github.cfogrady.vitalwear.debug.DebugActivity
 import com.github.cfogrady.vitalwear.stats.StatsMenuActivity
-import com.github.cfogrady.vitalwear.steps.SensorStepService
-import com.github.cfogrady.vitalwear.steps.StepListener
+import com.github.cfogrady.vitalwear.steps.ManyStepListener
+import com.github.cfogrady.vitalwear.steps.ManyStepProcessingListener
 import com.github.cfogrady.vitalwear.training.TrainingMenuActivity
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 class MainActivity : ComponentActivity() {
@@ -35,8 +30,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    lateinit var stepListener: StepListener
-
     override fun onStart() {
         super.onStart()
         val stepService = (application as VitalWearApp).stepService
@@ -44,12 +37,10 @@ class MainActivity : ComponentActivity() {
         if(characterManager.activeCharacterIsPresent()) {
             characterManager.getCurrentCharacter().characterStats.updateTimeStamps(LocalDateTime.now())
         }
-        stepListener = stepService.listenDailySteps()
     }
 
     override fun onStop() {
         super.onStop()
-        stepListener.unregsiter()
     }
 
     fun buildActivityLaunchers(): ActivityLaunchers {

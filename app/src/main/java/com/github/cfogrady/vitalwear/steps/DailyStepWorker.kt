@@ -1,29 +1,35 @@
 package com.github.cfogrady.vitalwear.steps
 
 import android.content.Context
+import android.content.SharedPreferences
+import android.util.Log
 import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
-import com.github.cfogrady.vitalwear.util.CompletableFutureListenableWrapper
+import com.github.cfogrady.vitalwear.SaveService
+import com.github.cfogrady.vitalwear.util.DeferredListenableWrapper
 import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 import java.time.LocalDate
-import java.util.concurrent.CompletableFuture
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
-class DailyStepWorker(val context: Context, workerParameters: WorkerParameters, private val dailyStepHandler: DailyStepHandler) : ListenableWorker(context, workerParameters) {
+class DailyStepWorker(val context: Context, workerParameters: WorkerParameters, private val dailyStepHandler: DailyStepHandler, private val saveService: SaveService, private val sharedPreferences: SharedPreferences) : ListenableWorker(context, workerParameters) {
 
     companion object {
         const val TAG = "DailyStepWorker"
     }
 
-    private lateinit var workCompletion: CompletableFuture<Result>
-
     override fun startWork(): ListenableFuture<Result> {
-        workCompletion = CompletableFuture<Result>()
-        GlobalScope.launch {
+        val deferred = GlobalScope.async() {
+            Log.i(TAG, "Handling step counter day transition")
             dailyStepHandler.handleDayTransition(LocalDate.now())
-            workCompletion.complete(Result.success())
+            saveService.save(sharedPreferences.edit().putLong(
+                SensorStepService.LAST_MIDNIGHT_KEY, LocalDateTime.now().toEpochSecond(
+                    ZoneOffset.UTC)))
+            Log.i(TAG, "Day transition completed")
+            Result.success()
         }
-        return CompletableFutureListenableWrapper(workCompletion)
+        return DeferredListenableWrapper(deferred)
     }
 }

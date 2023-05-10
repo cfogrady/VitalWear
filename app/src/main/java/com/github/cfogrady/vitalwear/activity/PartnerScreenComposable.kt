@@ -1,13 +1,12 @@
 package com.github.cfogrady.vitalwear.activity
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.wear.compose.material.Text
@@ -15,19 +14,34 @@ import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.formatNumber
+import com.github.cfogrady.vitalwear.steps.ManyStepListener
 import com.github.cfogrady.vitalwear.steps.StepService
+import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onEach
 import java.time.LocalDateTime
 
 class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp, private val stepService: StepService) {
     companion object {
-        val TAG = "PartnerScreenComposable"
+        const val TAG = "PartnerScreenComposable"
     }
 
     @Composable
     fun PartnerScreen(character: BEMCharacter, firmware: CharacterFirmwareSprites) {
         val emojiHeight = 5.dp //imageScaler
         val now = LocalDateTime.now()
-        val dailyStepCount by stepService.dailySteps.observeAsState()
+        var manyStepListener = remember {
+            Log.i(TAG, "Listen to daily steps")
+            stepService.listenDailySteps()
+        }
+        DisposableEffect(Unit) {
+            onDispose {
+                Log.i(TAG, "Stop listening to daily steps")
+                manyStepListener.unregister()
+            }
+        }
+        val dailyStepCount by manyStepListener.dailyStepObserver.collectAsState()
+        Log.i(TAG, "StepCount in activity: $dailyStepCount")
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             Column(verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
                 .fillMaxWidth()
@@ -39,7 +53,7 @@ class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private va
                 }
                 Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                     bitmapScaler.ScaledBitmap(bitmap = firmware.stepsIcon, contentDescription = "Steps Icon")
-                    Text(text = formatNumber(dailyStepCount!!, 5), color = Color.White)
+                    Text(text = formatNumber(dailyStepCount, 5), color = Color.White)
                 }
                 Row(Modifier.height(emojiHeight)) {
                 }

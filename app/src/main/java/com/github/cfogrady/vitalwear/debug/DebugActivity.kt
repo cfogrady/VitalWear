@@ -19,6 +19,7 @@ import com.github.cfogrady.vitalwear.activity.MainActivity
 class DebugActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             Debug()
         }
@@ -43,6 +44,7 @@ class DebugActivity : ComponentActivity() {
     }
 
     private fun getDebugItems(): List<Pair<String, String>> {
+        (application as VitalWearApp).exceptionService.logOutExceptions()
         val list = ArrayList<Pair<String, String>>()
         val gracefulShutdowns = (application as VitalWearApp).sharedPreferences.getInt(AppShutdownHandler.GRACEFUL_SHUTDOWNS_KEY, 0)
         list.add(Pair("Graceful shutdowns:", "$gracefulShutdowns"))

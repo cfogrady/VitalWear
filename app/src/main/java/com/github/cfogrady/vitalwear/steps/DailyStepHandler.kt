@@ -1,8 +1,8 @@
 package com.github.cfogrady.vitalwear.steps
 
-import android.content.Context
+import kotlinx.coroutines.Job
 import java.time.LocalDate
 
 interface DailyStepHandler {
-    fun handleDayTransition(newDay: LocalDate)
+    suspend fun handleDayTransition(newDay: LocalDate)
 }

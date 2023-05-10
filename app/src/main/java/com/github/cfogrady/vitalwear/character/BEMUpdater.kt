@@ -20,13 +20,15 @@ class BEMUpdater(val context: Context) {
 
     fun initializeBEMUpdates(character: BEMCharacter, workManager: WorkManager = WorkManager.getInstance(context)) {
         cancel(workManager)
-        val durationUntilTransformUpdate = Duration.ofSeconds(character.characterStats.timeUntilNextTransformation)
-        Log.i(WORK_TAG, "Queue Transform Update after $durationUntilTransformUpdate")
-        val transformWorkRequest = OneTimeWorkRequestBuilder<BemTransformationWorker>()
-            .setInitialDelay(durationUntilTransformUpdate)
-            .addTag(WORK_TAG)
-            .build()
-        workManager.enqueue(transformWorkRequest)
+        if(!character.transformationOptions.isEmpty()) { //don't queue up if no transformations are possible
+            val durationUntilTransformUpdate = Duration.ofSeconds(character.characterStats.timeUntilNextTransformation)
+            Log.i(WORK_TAG, "Queue Transform Update after $durationUntilTransformUpdate")
+            val transformWorkRequest = OneTimeWorkRequestBuilder<BemTransformationWorker>()
+                .setInitialDelay(durationUntilTransformUpdate)
+                .addTag(WORK_TAG)
+                .build()
+            workManager.enqueue(transformWorkRequest)
+        }
     }
 
     fun scheduleExactMoodUpdates() {
