@@ -2,11 +2,11 @@ package com.github.cfogrady.vitalwear.battle.composable
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import com.github.cfogrady.vitalwear.battle.data.PostBattleModel
 import com.github.cfogrady.vitalwear.battle.data.BattleResult
 import com.github.cfogrady.vitalwear.battle.data.BattleService
 import com.github.cfogrady.vitalwear.battle.data.PreBattleModel
-import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 
 class FightTargetFactory(
@@ -26,6 +26,7 @@ class FightTargetFactory(
         var state by remember { mutableStateOf(FightTargetState.OPPONENT_SPLASH) }
         var battleConclusion by remember { mutableStateOf(BattleResult.RETREAT) }
         var postBattle by remember { mutableStateOf(null as PostBattleModel?) }
+        val context = LocalContext.current
         val stateUpdater = {newState: FightTargetState -> state = newState}
         vitalBoxFactory.VitalBox {
             when(state) {
@@ -45,7 +46,7 @@ class FightTargetFactory(
                     }
                     goScreenFactory.GoScreen(battleModel = battleModel) {
                         state = FightTargetState.ATTACKING
-                        postBattle = battleService.performBattle(battleModel)
+                        postBattle = battleService.performBattle(context, battleModel)
                         battleConclusion = postBattle!!.battle.battleResult
                     }
                 }

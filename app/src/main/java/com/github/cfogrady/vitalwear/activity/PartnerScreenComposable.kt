@@ -6,7 +6,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.wear.compose.material.Text
@@ -14,11 +13,7 @@ import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.formatNumber
-import com.github.cfogrady.vitalwear.steps.ManyStepListener
 import com.github.cfogrady.vitalwear.steps.StepService
-import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.onEach
 import java.time.LocalDateTime
 
 class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp, private val stepService: StepService) {

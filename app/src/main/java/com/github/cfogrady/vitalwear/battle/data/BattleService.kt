@@ -1,7 +1,10 @@
 package com.github.cfogrady.vitalwear.battle.data
 
+import android.content.ComponentName
+import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
 import com.github.cfogrady.vb.dim.card.BemCard
 import com.github.cfogrady.vb.dim.card.Card
 import com.github.cfogrady.vb.dim.card.DimReader
@@ -12,6 +15,9 @@ import com.github.cfogrady.vitalwear.battle.BattleActivity
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
+import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
+import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
+import com.github.cfogrady.vitalwear.complications.VitalsComplicationService
 import com.github.cfogrady.vitalwear.data.CardLoader
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
@@ -25,6 +31,7 @@ class BattleService(private val cardLoader: CardLoader,
                     private val firmwareManager: FirmwareManager,
                     private val battleLogic: BEMBattleLogic,
                     private val saveService: SaveService,
+                    private val complicationRefreshService: ComplicationRefreshService,
                     private val random: Random,
 ) {
     companion object {
@@ -47,7 +54,7 @@ class BattleService(private val cardLoader: CardLoader,
         )
     }
 
-    fun performBattle(preBattleModel: PreBattleModel): PostBattleModel {
+    fun performBattle(context: Context, preBattleModel: PreBattleModel): PostBattleModel {
         val partnerCharacter = characterManager.getLiveCharacter().value!!
         val firmware = firmwareManager.getFirmware().value!!
         val battle = battleLogic.performBattle(preBattleModel)
@@ -69,6 +76,7 @@ class BattleService(private val cardLoader: CardLoader,
         val vitalChange = vitalsForResult(partnerCharacter.speciesStats.stage, preBattleModel.opponent.battleStats.stage, battle.battleResult == BattleResult.WIN)
         partnerCharacter.addVitals(vitalChange)
         saveService.saveAsync()
+        complicationRefreshService.refreshVitalsComplication(context)
         return PostBattleModel(
             preBattleModel.partnerCharacter,
             preBattleModel.opponent,

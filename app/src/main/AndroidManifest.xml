@@ -80,6 +80,7 @@
         </service>
         <service
             android:name=".complications.PartnerComplicationService"
+            android:label="Partner"
             android:exported="true"
             android:icon="@drawable/complication_preview"
             android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
@@ -105,6 +106,22 @@
             <meta-data
                 android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
                 android:value="0" />
+        </service>
+        <service
+            android:name=".complications.VitalsComplicationService"
+            android:label="Vitals"
+            android:exported="true"
+            android:icon="@drawable/complication_preview"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="RANGED_VALUE" />
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="300" />
         </service>
 
         <receiver android:name=".complications.PartnerComplicationReceiver" />
