@@ -23,6 +23,7 @@ import com.github.cfogrady.vitalwear.character.CharacterManagerImpl
 import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
 import com.github.cfogrady.vitalwear.character.mood.BEMMoodUpdater
 import com.github.cfogrady.vitalwear.character.mood.MoodBroadcastReceiver
+import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.ScrollingNameFactory
@@ -104,7 +105,8 @@ class VitalWearApp : Application(), Configuration.Provider {
         backgroundManager = BackgroundManager(cardLoader, firmwareManager)
         val random = Random()
         val bemBattleLogic = BEMBattleLogic(random)
-        battleService = BattleService(cardLoader, characterManager, firmwareManager, bemBattleLogic, saveService, random)
+        val complicationRefreshService = ComplicationRefreshService(partnerComplicationState)
+        battleService = BattleService(cardLoader, characterManager, firmwareManager, bemBattleLogic, saveService, complicationRefreshService, random)
         imageScaler = ImageScaler(applicationContext.resources.displayMetrics, applicationContext.resources.configuration.isScreenRound)
         backgroundHeight = imageScaler.scaledDpValueFromPixels(ImageScaler.VB_HEIGHT.toInt())
         bitmapScaler = BitmapScaler(imageScaler)
