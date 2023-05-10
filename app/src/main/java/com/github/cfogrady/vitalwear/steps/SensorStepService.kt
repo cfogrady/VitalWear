@@ -11,6 +11,7 @@ import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.util.SensorThreadHandler
+import com.github.cfogrady.vitalwear.vitals.VitalService
 import kotlinx.coroutines.*
 import java.time.*
 
@@ -25,13 +26,12 @@ import java.time.*
  * Special logic when the app starts up or is shutdown to handle stepcounter resets
  */
 class SensorStepService(
-    private val characterManager: CharacterManager,
     private val sharedPreferences: SharedPreferences,
     private val sensorManager: SensorManager,
-    private val sensorThreadHandler: SensorThreadHandler): StepService, DailyStepHandler {
+    private val sensorThreadHandler: SensorThreadHandler,
+    private val stepChangeListeners: List<StepChangeListener>): StepService, DailyStepHandler {
     companion object {
         const val TAG = "StepsService"
-        const val STEPS_PER_VITAL = 50
         const val DAILY_STEPS_KEY = "DAILY_STEPS"
         const val DAY_OF_LAST_READ_KEY = "DAY_OF_LAST_READ"
         const val STEP_COUNTER_KEY = "STEP_COUNTER_VALUE"
@@ -54,14 +54,13 @@ class SensorStepService(
     }
 
     private var currentSteps = 0
-    private var remainingSteps = STEPS_PER_VITAL
+
     private var startOfDaySteps = 0
     private var dailySteps = 0
 
     fun debug(): List<Pair<String, String>> {
         return listOf(
             Pair("currentSteps", "$currentSteps"),
-            Pair("remainingSteps", "$remainingSteps"),
             Pair("startOfDaySteps", "$startOfDaySteps"),
             Pair("dailySteps", "$dailySteps"),
             Pair(DAILY_STEPS_KEY, "${sharedPreferences.getInt(DAILY_STEPS_KEY, 0)}"),
@@ -77,39 +76,12 @@ class SensorStepService(
      */
     private fun processNewSteps(newStepCount: Int) : Int {
         Log.i(TAG, "StepCount: $newStepCount")
-        val character = getCharacter()
-        if(character != BEMCharacter.DEFAULT_CHARACTER) {
-            if(newStepCount - currentSteps >= remainingSteps) {
-                currentSteps += remainingSteps
-                character.addVitals(vitalGainModifier(4))
-                val newVitals = 4 * ((newStepCount - currentSteps)/STEPS_PER_VITAL)
-                character.addVitals(vitalGainModifier(newVitals))
-                remainingSteps = (newStepCount - currentSteps) % STEPS_PER_VITAL
-            }
+        for(stepChangeListener in stepChangeListeners) {
+            stepChangeListener.processStepChanges(currentSteps, newStepCount)
         }
         currentSteps = newStepCount
         dailySteps = currentSteps - startOfDaySteps
         return dailySteps
-    }
-
-    private fun getCharacter() : BEMCharacter {
-        return characterManager.getCurrentCharacter()
-    }
-
-    private fun vitalGainModifier(vitals: Int) : Int {
-        val character = getCharacter()
-        if(character == BEMCharacter.DEFAULT_CHARACTER) {
-            Log.w(TAG, "Cannot apply vitals gain modifier for null active character.")
-            return vitals
-        }
-        if(character.characterStats.injured) {
-            return vitals/2
-        }
-        return when(character.mood()) {
-            Mood.NORMAL -> vitals
-            Mood.GOOD -> vitals * 2
-            Mood.BAD -> vitals/2
-        }
     }
 
     private suspend fun getSingleSensorReading(): Int {

@@ -8,7 +8,6 @@ import androidx.compose.runtime.*
 import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.battle.composable.FightTargetFactory
-import com.github.cfogrady.vitalwear.battle.data.BattleService
 import com.github.cfogrady.vitalwear.battle.data.PreBattleModel
 import com.github.cfogrady.vitalwear.composable.util.KeepScreenOn
 import java.util.*

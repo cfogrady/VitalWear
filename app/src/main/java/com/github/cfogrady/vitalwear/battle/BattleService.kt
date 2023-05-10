@@ -1,26 +1,21 @@
-package com.github.cfogrady.vitalwear.battle.data
+package com.github.cfogrady.vitalwear.battle
 
-import android.content.ComponentName
-import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
-import androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
 import com.github.cfogrady.vb.dim.card.BemCard
 import com.github.cfogrady.vb.dim.card.Card
 import com.github.cfogrady.vb.dim.card.DimReader
 import com.github.cfogrady.vb.dim.character.BemCharacterStats
 import com.github.cfogrady.vb.dim.character.CharacterStats
 import com.github.cfogrady.vitalwear.SaveService
-import com.github.cfogrady.vitalwear.battle.BattleActivity
+import com.github.cfogrady.vitalwear.battle.data.*
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
-import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
-import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
-import com.github.cfogrady.vitalwear.complications.VitalsComplicationService
 import com.github.cfogrady.vitalwear.data.CardLoader
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
+import com.github.cfogrady.vitalwear.vitals.VitalService
 import java.util.*
 
 /**
@@ -31,7 +26,7 @@ class BattleService(private val cardLoader: CardLoader,
                     private val firmwareManager: FirmwareManager,
                     private val battleLogic: BEMBattleLogic,
                     private val saveService: SaveService,
-                    private val complicationRefreshService: ComplicationRefreshService,
+                    private val vitalService: VitalService,
                     private val random: Random,
 ) {
     companion object {
@@ -54,7 +49,7 @@ class BattleService(private val cardLoader: CardLoader,
         )
     }
 
-    fun performBattle(context: Context, preBattleModel: PreBattleModel): PostBattleModel {
+    fun performBattle(preBattleModel: PreBattleModel): PostBattleModel {
         val partnerCharacter = characterManager.getLiveCharacter().value!!
         val firmware = firmwareManager.getFirmware().value!!
         val battle = battleLogic.performBattle(preBattleModel)
@@ -73,10 +68,8 @@ class BattleService(private val cardLoader: CardLoader,
                 partnerCharacter.characterStats.mood = 0
             }
         }
-        val vitalChange = vitalsForResult(partnerCharacter.speciesStats.stage, preBattleModel.opponent.battleStats.stage, battle.battleResult == BattleResult.WIN)
-        partnerCharacter.addVitals(vitalChange)
+        val vitalChange = vitalService.processVitalChangeFromBattle(partnerCharacter.speciesStats.stage, preBattleModel.opponent.battleStats.stage, battle.battleResult == BattleResult.WIN)
         saveService.saveAsync()
-        complicationRefreshService.refreshVitalsComplication(context)
         return PostBattleModel(
             preBattleModel.partnerCharacter,
             preBattleModel.opponent,
@@ -86,32 +79,6 @@ class BattleService(private val cardLoader: CardLoader,
             firmware.battleFirmwareSprites.opponentHpIcons,
             vitalChange
         )
-    }
-
-    private val vitalWinTable = arrayOf(
-        intArrayOf(200, 300, 600, 1200, 1800, 2400), //phase 3 (index 2)
-        intArrayOf(100, 300, 450, 700, 1400, 2100), //phase 4 (index 3)
-        intArrayOf(20, 150, 400, 600, 800, 1600), //phase 5 (index 4)
-        intArrayOf(20, 20, 400, 500, 750, 900), //phase 6 (index 5)
-        intArrayOf(20, 20, 20, 500, 600, 800), //phase 7 (index 6)
-        intArrayOf(20, 20, 20, 20, 600, 700), //phase 8 (index 7)
-    )
-
-    private val vitalLossTable = arrayOf(
-        intArrayOf(-160, -100, -20, -20, -20, -20), //phase 3 (index 2)
-        intArrayOf(-300, -240, -150, -20, -20, -20), //phase 4 (index 3)
-        intArrayOf(-600, -450, -320, -400, -20, -20), //phase 5 (index 4)
-        intArrayOf(-1200, -700, -600, -400, -500, -20), //phase 6 (index 5)
-        intArrayOf(-1800, -1400, -800, -750, -480, -600), //phase 7 (index 6)
-        intArrayOf(-2400, -2100, -1600, -900, -800, -560), //phase 8 (index 7)
-    )
-
-    private fun vitalsForResult(partnerLevel: Int, opponentLevel: Int, win: Boolean): Int {
-        return if(win) {
-            vitalWinTable[partnerLevel-2][opponentLevel-2]
-        } else {
-            vitalLossTable[partnerLevel-2][opponentLevel-2]
-        }
     }
 
     private fun loadBattleCharacter(card: Card<*, *, *, *, *, *>, slotId: Int): BattleCharacter {

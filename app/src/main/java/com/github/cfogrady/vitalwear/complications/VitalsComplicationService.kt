@@ -20,8 +20,8 @@ class VitalsComplicationService : ComplicationDataSourceService() {
     }
 
     override fun onComplicationDeactivated(complicationInstanceId: Int) {
-        //TODO: Use this to remove deactivated complications
         super.onComplicationDeactivated(complicationInstanceId)
+        (application as VitalWearApp).partnerComplicationState.vitalComplicationIds.remove(complicationInstanceId)
     }
 
     override fun onComplicationRequest(
@@ -34,7 +34,6 @@ class VitalsComplicationService : ComplicationDataSourceService() {
     }
 
     private fun complicationResult() : ComplicationData {
-        val showCharacterIcon = false
         val goToAppIntent = Intent(applicationContext, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(applicationContext, 0, goToAppIntent, PendingIntent.FLAG_CANCEL_CURRENT.and(
             PendingIntent.FLAG_ONE_SHOT))
@@ -44,9 +43,11 @@ class VitalsComplicationService : ComplicationDataSourceService() {
         if(characterManager.initialized.value!! && characterManager.activeCharacterIsPresent()) {
             val character = characterManager.getCurrentCharacter()
             vitals = character.characterStats.vitals
-            if(character != BEMCharacter.DEFAULT_CHARACTER && showCharacterIcon) {
-                iconImage = Icon.createWithBitmap(character.sprites[1])
-            }
+        }
+        val firmwareManager = (application as VitalWearApp).firmwareManager
+        if(firmwareManager.getFirmware().value != null) {
+            val firmware = firmwareManager.getFirmware().value!!
+            iconImage = Icon.createWithBitmap(firmware.characterFirmwareSprites.vitalsIcon)
         }
         var descr = PlainComplicationText.Builder("VITALS").build()
         var valueText = PlainComplicationText.Builder("$vitals").build()

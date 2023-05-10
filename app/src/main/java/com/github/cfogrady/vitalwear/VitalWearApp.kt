@@ -15,7 +15,7 @@ import com.github.cfogrady.vitalwear.activity.MainScreenComposable
 import com.github.cfogrady.vitalwear.activity.PartnerScreenComposable
 import com.github.cfogrady.vitalwear.battle.composable.*
 import com.github.cfogrady.vitalwear.battle.data.BEMBattleLogic
-import com.github.cfogrady.vitalwear.battle.data.BattleService
+import com.github.cfogrady.vitalwear.battle.BattleService
 import com.github.cfogrady.vitalwear.character.BEMUpdater
 import com.github.cfogrady.vitalwear.data.CardLoader
 import com.github.cfogrady.vitalwear.character.CharacterManager
@@ -35,8 +35,10 @@ import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.steps.SensorStepService
 import com.github.cfogrady.vitalwear.util.SensorThreadHandler
 import com.github.cfogrady.vitalwear.training.ExerciseScreenFactory
+import com.github.cfogrady.vitalwear.vitals.VitalService
 import com.github.cfogrady.vitalwear.workmanager.VitalWearWorkerFactory
 import com.github.cfogrady.vitalwear.workmanager.WorkProviderDependencies
+import com.google.common.collect.Lists
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.Random
@@ -46,7 +48,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     val firmwareManager = FirmwareManager(spriteBitmapConverter)
     val partnerComplicationState = PartnerComplicationState()
     val exceptionService = ExceptionService()
-    val sensorThreadHandler = SensorThreadHandler()
+    private val sensorThreadHandler = SensorThreadHandler()
     private lateinit var imageScaler : ImageScaler
     lateinit var bitmapScaler: BitmapScaler
     lateinit var cardLoader : CardLoader
@@ -95,7 +97,9 @@ class VitalWearApp : Application(), Configuration.Provider {
         cardLoader = CardLoader(applicationContext, spriteBitmapConverter)
         characterManager = CharacterManagerImpl()
         val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        stepService = SensorStepService(characterManager, sharedPreferences, sensorManager, sensorThreadHandler)
+        val complicationRefreshService = ComplicationRefreshService(this, partnerComplicationState)
+        val vitalService = VitalService(characterManager, complicationRefreshService)
+        stepService = SensorStepService(sharedPreferences, sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService))
         heartRateService = HeartRateService(sensorManager, sensorThreadHandler)
         moodBroadcastReceiver = MoodBroadcastReceiver(BEMMoodUpdater(heartRateService, stepService), characterManager)
         bemUpdater = BEMUpdater(applicationContext)
@@ -105,8 +109,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         backgroundManager = BackgroundManager(cardLoader, firmwareManager)
         val random = Random()
         val bemBattleLogic = BEMBattleLogic(random)
-        val complicationRefreshService = ComplicationRefreshService(partnerComplicationState)
-        battleService = BattleService(cardLoader, characterManager, firmwareManager, bemBattleLogic, saveService, complicationRefreshService, random)
+        battleService = BattleService(cardLoader, characterManager, firmwareManager, bemBattleLogic, saveService, vitalService, random)
         imageScaler = ImageScaler(applicationContext.resources.displayMetrics, applicationContext.resources.configuration.isScreenRound)
         backgroundHeight = imageScaler.scaledDpValueFromPixels(ImageScaler.VB_HEIGHT.toInt())
         bitmapScaler = BitmapScaler(imageScaler)

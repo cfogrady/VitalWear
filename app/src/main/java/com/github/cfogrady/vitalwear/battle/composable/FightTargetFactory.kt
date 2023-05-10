@@ -5,7 +5,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.github.cfogrady.vitalwear.battle.data.PostBattleModel
 import com.github.cfogrady.vitalwear.battle.data.BattleResult
-import com.github.cfogrady.vitalwear.battle.data.BattleService
+import com.github.cfogrady.vitalwear.battle.BattleService
 import com.github.cfogrady.vitalwear.battle.data.PreBattleModel
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 
@@ -46,7 +46,7 @@ class FightTargetFactory(
                     }
                     goScreenFactory.GoScreen(battleModel = battleModel) {
                         state = FightTargetState.ATTACKING
-                        postBattle = battleService.performBattle(context, battleModel)
+                        postBattle = battleService.performBattle(battleModel)
                         battleConclusion = postBattle!!.battle.battleResult
                     }
                 }

@@ -42,7 +42,6 @@ internal class ManyStepProcessingListener (
         if(event?.values != null) {
             val stepCount = event.values[event.values.size-1].toInt()
             val dailySteps = stepProcessor.invoke(stepCount)
-            Log.i(TAG, "Emitting dailySteps $dailySteps")
             if(!_dailyStepObserver.tryEmit(dailySteps)) {
                 Log.e(TAG, "Failed to emit daily steps")
             }

@@ -39,17 +39,6 @@ class HeartRateService(
         return listener.getValue()
     }
 
-    suspend fun getExerciseLevel(lastLevel: Int): Int {
-        val start = LocalDateTime.now()
-        val heartRateResult = getHeartRate()
-        val level = exerciseLevelFromResult(heartRateResult, lastLevel)
-        readingsLog.addFirst(HeartRateLog(start, heartRateResult.heartRate, heartRateResult.heartRateError, level, LocalDateTime.now()))
-        if(readingsLog.size > 9) {
-            readingsLog.removeLast()
-        }
-        return level
-    }
-
     private fun exerciseLevelFromResult(heartRateResult: HeartRateResult, lastLevel: Int): Int {
         Log.i(TAG, "HeartRate: ${heartRateResult.heartRate}, Status: ${heartRateResult.heartRateError}")
         val current = if(heartRateResult.heartRateError == HeartRateResult.Companion.HeartRateError.NONE) heartRateResult.heartRate else 65
@@ -64,6 +53,16 @@ class HeartRateService(
         } else {
             1
         }
+    }
+
+    suspend fun getExerciseLevel(lastLevel: Int, now: LocalDateTime): Int {
+        val heartRateResult = getHeartRate()
+        val level = exerciseLevelFromResult(heartRateResult, lastLevel)
+        readingsLog.addFirst(HeartRateLog(now, heartRateResult.heartRate, heartRateResult.heartRateError, level, LocalDateTime.now()))
+        if(readingsLog.size > 9) {
+            readingsLog.removeLast()
+        }
+        return level
     }
 
     private fun restingHeartRate(): Int {
