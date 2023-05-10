@@ -6,13 +6,10 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
 import com.github.cfogrady.vitalwear.util.SensorThreadHandler
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.*
 
 internal class ManyStepProcessingListener (
-    override val dailyStepsAtStart: Int,
+    dailyStepsAtStart: Int,
     private val stepProcessor: (Int) -> Int,
     private val sensorManager: SensorManager,
     sensorThreadHandler: SensorThreadHandler) : SensorEventListener, ManyStepListener {
@@ -20,8 +17,8 @@ internal class ManyStepProcessingListener (
         const val TAG = "ManyStepListener"
     }
 
-    private val _dailyStepObserver = MutableSharedFlow<Int>()
-    override val dailyStepObserver = _dailyStepObserver.asSharedFlow()
+    private val _dailyStepObserver = MutableStateFlow(dailyStepsAtStart)
+    override val dailyStepObserver = _dailyStepObserver.asStateFlow()
 
     init {
         val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
@@ -44,8 +41,10 @@ internal class ManyStepProcessingListener (
     override fun onSensorChanged(event: SensorEvent?) {
         if(event?.values != null) {
             val stepCount = event.values[event.values.size-1].toInt()
-            GlobalScope.launch {
-                _dailyStepObserver.emit(stepProcessor.invoke(stepCount))
+            val dailySteps = stepProcessor.invoke(stepCount)
+            Log.i(TAG, "Emitting dailySteps $dailySteps")
+            if(!_dailyStepObserver.tryEmit(dailySteps)) {
+                Log.e(TAG, "Failed to emit daily steps")
             }
         } else {
             Log.w(TAG, "Received null event or null values")

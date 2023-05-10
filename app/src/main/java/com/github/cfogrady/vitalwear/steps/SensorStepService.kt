@@ -135,10 +135,8 @@ class SensorStepService(
 
     override suspend fun handleDayTransition(newDay: LocalDate) {
         addStepsToVitals()
-        withContext(Dispatchers.Main) {
-            startOfDaySteps = currentSteps
-            dailySteps = 0
-        }
+        startOfDaySteps = currentSteps
+        dailySteps = 0
     }
 
     /**

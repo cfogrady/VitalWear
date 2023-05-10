@@ -23,7 +23,7 @@ class SingleStepSensorListener(
         } else {
             // We want data as fast a possible because this call is really asking what the current reading is.
             // We also want to run on the sensor thread because by default this runs on main and we want to block main for this in certain scenarios
-            if(!sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_FASTEST, sensorThreadHandler.handler)) {
+            if(!sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_UI, sensorThreadHandler.handler)) {
                 Log.e(TAG, "Failed to register sensor!")
                 deferred.completeExceptionally(java.lang.IllegalStateException("Unable to register sensor"))
             } else {

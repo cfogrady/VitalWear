@@ -26,11 +26,9 @@ class MainActivity : ComponentActivity() {
         mainScreenComposable = (application as VitalWearApp).mainScreenComposable
         val activityLaunchers = buildActivityLaunchers()
         setContent {
-            mainScreenComposable.mainScreen(activityLaunchers, stepListener)
+            mainScreenComposable.mainScreen(activityLaunchers)
         }
     }
-
-    lateinit var stepListener: ManyStepListener
 
     override fun onStart() {
         super.onStart()
@@ -39,12 +37,10 @@ class MainActivity : ComponentActivity() {
         if(characterManager.activeCharacterIsPresent()) {
             characterManager.getCurrentCharacter().characterStats.updateTimeStamps(LocalDateTime.now())
         }
-        stepListener = stepService.listenDailySteps()
     }
 
     override fun onStop() {
         super.onStop()
-        stepListener.unregister()
     }
 
     fun buildActivityLaunchers(): ActivityLaunchers {
