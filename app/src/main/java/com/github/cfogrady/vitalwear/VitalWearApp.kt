@@ -93,11 +93,10 @@ class VitalWearApp : Application(), Configuration.Provider {
         database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "VitalWear").allowMainThreadQueries().build()
         //TODO: Should replace sharedPreferences with datastore (see https://developer.android.com/training/data-storage/shared-preferences)
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-
-        cardLoader = CardLoader(applicationContext, spriteBitmapConverter)
-        characterManager = CharacterManagerImpl()
-        val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val complicationRefreshService = ComplicationRefreshService(this, partnerComplicationState)
+        cardLoader = CardLoader(applicationContext, spriteBitmapConverter)
+        characterManager = CharacterManagerImpl(complicationRefreshService, database.characterDao(), cardLoader)
+        val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val vitalService = VitalService(characterManager, complicationRefreshService)
         stepService = SensorStepService(sharedPreferences, sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService))
         heartRateService = HeartRateService(sensorManager, sensorThreadHandler)

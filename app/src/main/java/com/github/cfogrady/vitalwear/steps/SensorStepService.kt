@@ -20,7 +20,7 @@ import java.time.*
  * When an activity is running (the app is in the foreground)
  *   Listen to the service, until the activity exits.
  * When an update is made in the background that requires vitals be up-to-date
- *   Register. This first event should come back immediately with the current count.
+ *   Register. The first event should come back immediately with the current count.
  *   Calculate that value and de-register. This should be before mood is changed, before evolution
  *   is determined, before before device shutdown.
  * Special logic when the app starts up or is shutdown to handle stepcounter resets
@@ -146,6 +146,7 @@ class SensorStepService(
             dailySteps = dailyStepsBeforeShutdown
             return true //should save because we are starting fresh
         } else {
+            // TODO: If the activity processes first, then we double count vitals. Need to protect against this.
             // App shutdown and restarted. We're on the same day.
             Log.i(TAG, "Restarting steps from app restart")
             currentSteps = lastStepCounter

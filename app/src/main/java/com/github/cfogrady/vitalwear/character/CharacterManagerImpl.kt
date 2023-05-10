@@ -7,6 +7,7 @@ import com.github.cfogrady.vb.dim.card.Card
 import com.github.cfogrady.vb.dim.transformation.BemTransformationRequirements
 import com.github.cfogrady.vb.dim.transformation.DimEvolutionRequirements
 import com.github.cfogrady.vitalwear.character.data.*
+import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.data.CardLoader
 import kotlinx.coroutines.*
 import java.io.File
@@ -19,18 +20,16 @@ const val TAG = "CharacterRepository"
 /**
  * Manage the character loading and updating
  */
-class CharacterManagerImpl() : CharacterManager {
+class CharacterManagerImpl(
+    private val complicationRefreshService: ComplicationRefreshService,
+    private val characterDao: CharacterDao,
+    private val cardLoader: CardLoader,
+) : CharacterManager {
     private val activeCharacter = MutableLiveData(BEMCharacter.DEFAULT_CHARACTER)
-    private lateinit var characterDao: CharacterDao
-    private lateinit var cardLoader: CardLoader
     private lateinit var bemUpdater: BEMUpdater
     override val initialized = MutableLiveData(false)
 
-    suspend fun init(characterDao: CharacterDao,
-             cardLoader: CardLoader,
-             bemUpdater: BEMUpdater) {
-        this.characterDao = characterDao
-        this.cardLoader = cardLoader
+    suspend fun init(bemUpdater: BEMUpdater) {
         this.bemUpdater = bemUpdater
         withContext(Dispatchers.IO) {
             val character = loadActiveCharacter()
@@ -161,8 +160,10 @@ class CharacterManagerImpl() : CharacterManager {
         }
         val character = newCharacter(file.name, card, 0)
         insertCharacter(character.characterStats)
+        //TODO: Remove LiveData and replace with StateFlow
         activeCharacter.postValue(character)
         bemUpdater.initializeBEMUpdates(character)
+        complicationRefreshService.refreshVitalsComplication()
     }
 
     private fun newCharacter(file: String, card: Card<*, *, *, *, *, *>, slotId: Int) : BEMCharacter {
@@ -226,6 +227,7 @@ class CharacterManagerImpl() : CharacterManager {
             updateCharacter(characterStats)
             withContext(Dispatchers.Main) {
                 activeCharacter.value = selectedCharacter
+                complicationRefreshService.refreshVitalsComplication()
             }
             bemUpdater.initializeBEMUpdates(selectedCharacter)
         }
