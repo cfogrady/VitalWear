@@ -2,8 +2,7 @@ package com.github.cfogrady.vitalwear
 
 import com.github.cfogrady.vitalwear.character.BEMUpdater
 import com.github.cfogrady.vitalwear.character.CharacterManagerImpl
-import com.github.cfogrady.vitalwear.data.AppDatabase
-import com.github.cfogrady.vitalwear.data.CardLoader
+import com.github.cfogrady.vitalwear.card.CardLoader
 import com.github.cfogrady.vitalwear.debug.ExceptionService
 import com.github.cfogrady.vitalwear.steps.SensorStepService
 import kotlinx.coroutines.GlobalScope

@@ -16,7 +16,7 @@ import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.items
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.CharacterManager
-import com.github.cfogrady.vitalwear.data.CardLoader
+import com.github.cfogrady.vitalwear.card.CardLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

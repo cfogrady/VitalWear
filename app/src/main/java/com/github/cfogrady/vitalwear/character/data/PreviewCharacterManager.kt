@@ -1,7 +1,7 @@
 package com.github.cfogrady.vitalwear.character.data
 
 import android.util.Log
-import com.github.cfogrady.vitalwear.data.CardLoader
+import com.github.cfogrady.vitalwear.card.CardLoader
 import java.util.HashMap
 import java.util.HashSet
 

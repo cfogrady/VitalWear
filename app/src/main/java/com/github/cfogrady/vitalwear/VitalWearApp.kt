@@ -17,7 +17,8 @@ import com.github.cfogrady.vitalwear.battle.composable.*
 import com.github.cfogrady.vitalwear.battle.data.BEMBattleLogic
 import com.github.cfogrady.vitalwear.battle.BattleService
 import com.github.cfogrady.vitalwear.character.BEMUpdater
-import com.github.cfogrady.vitalwear.data.CardLoader
+import com.github.cfogrady.vitalwear.card.CardLoader
+import com.github.cfogrady.vitalwear.card.SpriteBitmapConverter
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.CharacterManagerImpl
 import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager

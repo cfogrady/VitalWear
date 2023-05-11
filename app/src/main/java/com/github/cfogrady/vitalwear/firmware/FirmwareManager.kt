@@ -10,7 +10,7 @@ import com.github.cfogrady.vb.dim.util.RelativeByteOffsetInputStream
 import com.github.cfogrady.vitalwear.battle.data.BattleFirmwareSprites
 import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
 import com.github.cfogrady.vitalwear.character.data.EmoteFirmwareSprites
-import com.github.cfogrady.vitalwear.data.SpriteBitmapConverter
+import com.github.cfogrady.vitalwear.card.SpriteBitmapConverter
 import com.github.cfogrady.vitalwear.menu.MenuFirmwareSprites
 import com.github.cfogrady.vitalwear.training.TrainingFirmwareSprites
 import com.google.common.collect.Lists

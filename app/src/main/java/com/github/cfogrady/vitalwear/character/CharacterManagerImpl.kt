@@ -8,7 +8,7 @@ import com.github.cfogrady.vb.dim.transformation.BemTransformationRequirements
 import com.github.cfogrady.vb.dim.transformation.DimEvolutionRequirements
 import com.github.cfogrady.vitalwear.character.data.*
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
-import com.github.cfogrady.vitalwear.data.CardLoader
+import com.github.cfogrady.vitalwear.card.CardLoader
 import kotlinx.coroutines.*
 import java.io.File
 import java.time.LocalDateTime
