@@ -7,7 +7,7 @@ import androidx.room.Query
 @Dao
 interface AdventureEntityDao {
     @Query("select * from ${AdventureEntity.TABLE} where cardName = :cardName order by adventureId")
-    fun getByCard(cardName: String): List<CardMetaEntity>
+    fun getByCard(cardName: String): List<AdventureEntity>
 
     @Insert
     fun insert(adventureEntity: AdventureEntity)

@@ -9,8 +9,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-class ApplicationBootManager(private val cardLoader: CardLoader,
-                             private val characterManager: CharacterManagerImpl,
+class ApplicationBootManager(private val characterManager: CharacterManagerImpl,
                              private val stepService: SensorStepService,
                              private val bemUpdater: BEMUpdater,
                              private val saveService: SaveService,) {

@@ -5,11 +5,9 @@ import androidx.room.PrimaryKey
 import com.github.cfogrady.vitalwear.card.AttributeFusionEntity.Companion.TABLE
 
 
-@Entity(tableName = TABLE)
+@Entity(tableName = TABLE, primaryKeys = ["cardName", "fromCharacterId"])
 data class AttributeFusionEntity(
-    @PrimaryKey
     val cardName: String,
-    @PrimaryKey
     val fromCharacterId: Int,
     val attribute1Result: Int,
     val attribute2Result: Int,

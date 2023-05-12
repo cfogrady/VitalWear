@@ -80,8 +80,9 @@ class NewCardLoader(
 
     private fun getBackgroundHash(cardName: String, characterId: Int, card: Card<*, *, *, *, *, *>) : String {
         if(card.characterStats.characterEntries[characterId].stage == 0) {
-
+            return getUniqueSprites(cardName, characterId)
         }
+        return "TODO"
     }
 
     private fun getUniqueSprites(cardName: String, characterId: Int): String {

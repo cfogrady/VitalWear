@@ -4,11 +4,9 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.github.cfogrady.vitalwear.card.SpeciesEntity.Companion.TABLE
 
-@Entity(tableName = TABLE)
+@Entity(tableName = TABLE, primaryKeys = ["cardName", "characterId"])
 data class SpeciesEntity (
-    @PrimaryKey
     val cardName: String,
-    @PrimaryKey
     val characterId: Int,
     val phase: Int,
     val attribute: Int,

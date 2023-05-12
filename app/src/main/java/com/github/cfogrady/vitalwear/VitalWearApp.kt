@@ -129,7 +129,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         mainScreenComposable = MainScreenComposable(characterManager, saveService, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardLoader)
         shutdownReceiver = ShutdownReceiver(shutdownManager)
-        applicationBootManager = ApplicationBootManager(database, cardLoader, characterManager as CharacterManagerImpl, stepService, bemUpdater, saveService)
+        applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, bemUpdater, saveService)
     }
 
     override fun getWorkManagerConfiguration(): Configuration {
