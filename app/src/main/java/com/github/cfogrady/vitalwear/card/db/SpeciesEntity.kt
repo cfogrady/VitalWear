@@ -1,8 +1,7 @@
-package com.github.cfogrady.vitalwear.card
+package com.github.cfogrady.vitalwear.card.db
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
-import com.github.cfogrady.vitalwear.card.SpeciesEntity.Companion.TABLE
+import com.github.cfogrady.vitalwear.card.db.SpeciesEntity.Companion.TABLE
 
 @Entity(tableName = TABLE, primaryKeys = ["cardName", "characterId"])
 data class SpeciesEntity (
@@ -25,5 +24,6 @@ data class SpeciesEntity (
     companion object {
         const val TAG = "SpeciesEntity"
         const val TABLE = "species"
+        val EMPTY_SPECIES_ENTITY = SpeciesEntity("NONE", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "")
     }
 }

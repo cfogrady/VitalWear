@@ -8,9 +8,15 @@
     hit up Health Services or some other API
      -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
+    <!-- Keep the screen awake during training -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <!-- Heart Rate -->
     <uses-permission android:name="android.permission.BODY_SENSORS" />
+    <!-- Any Foreground Service -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <!-- Look for firmware and card images -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <uses-feature android:name="android.hardware.type.watch" />
 
@@ -20,6 +26,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:requestLegacyExternalStorage="true"
         android:theme="@android:style/Theme.DeviceDefault">
         <uses-library
             android:name="com.google.android.wearable"
@@ -56,8 +63,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.FileExploreActivity"/>
+        <activity android:name=".card.activity.LoadCardActivity"/>
         <activity android:name=".character.activity.CharacterSelectActivity"/>
-        <activity android:name=".character.activity.NewCardActivity"/>
+        <activity android:name=".character.activity.NewCharacterActivity"/>
+        <activity android:name=".firmware.LoadFirmwareActivity"/>
         <activity android:name=".training.TrainingMenuActivity"/>
         <activity android:name=".training.TrainingActivity"/>
         <activity android:name=".stats.StatsMenuActivity"/>

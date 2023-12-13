@@ -1,8 +1,7 @@
-package com.github.cfogrady.vitalwear.card
+package com.github.cfogrady.vitalwear.card.db
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
-import com.github.cfogrady.vitalwear.card.TransformationEntity.Companion.TABLE
+import com.github.cfogrady.vitalwear.card.db.TransformationEntity.Companion.TABLE
 
 @Entity(tableName = TABLE, primaryKeys = ["cardName", "fromCharacterId", "toCharacterId"])
 data class TransformationEntity(
@@ -15,7 +14,7 @@ data class TransformationEntity(
     val requiredBattles: Int,
     val requiredWinRatio: Int,
     val minAdventureCompletionRequired: Int?,
-    val isSecret: Boolean?,
+    val isSecret: Boolean,
     val sortOrder: Int,
 ) {
     companion object {

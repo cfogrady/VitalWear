@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.card
+package com.github.cfogrady.vitalwear.card.db
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -10,5 +10,5 @@ interface AdventureEntityDao {
     fun getByCard(cardName: String): List<AdventureEntity>
 
     @Insert
-    fun insert(adventureEntity: AdventureEntity)
+    fun insertAll(adventureEntities: Collection<AdventureEntity>)
 }

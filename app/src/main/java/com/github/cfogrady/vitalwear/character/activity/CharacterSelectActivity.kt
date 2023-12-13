@@ -38,7 +38,7 @@ class CharacterSelectActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         characterManager = (application as VitalWearApp).characterManager
         previewCharacterManager = (application as VitalWearApp).previewCharacterManager
-        val intent = Intent(applicationContext, NewCardActivity::class.java)
+        val intent = Intent(applicationContext, NewCharacterActivity::class.java)
         val contract = ActivityResultContracts.StartActivityForResult()
         contract.createIntent(applicationContext, intent)
         val newCharacterLauncher = registerForActivityResult(contract) {result ->
@@ -64,7 +64,7 @@ class CharacterSelectActivity : ComponentActivity() {
                    This should keep somebody with 100+ backups from 100+ card images from having
                    a ridiculously long load just to see the backups
                  */
-                characters = previewCharacterManager.previewCharacters()
+                characters = previewCharacterManager.previewCharacters(applicationContext)
                 loaded = true
             }
         } else {
@@ -77,12 +77,15 @@ class CharacterSelectActivity : ComponentActivity() {
                     }
                 }
                 items(items = characters) { character ->
-                    Row(horizontalArrangement = Arrangement.SpaceAround, modifier=Modifier.fillMaxWidth().background(Color.LightGray, RoundedCornerShape(10.dp)).padding(5.dp)) {
+                    Row(horizontalArrangement = Arrangement.SpaceAround, modifier= Modifier
+                        .fillMaxWidth()
+                        .background(Color.LightGray, RoundedCornerShape(10.dp))
+                        .padding(5.dp)) {
                         Image(bitmap = character.idle.asImageBitmap(), contentDescription = "Character")
                         Button(onClick = {
                             GlobalScope.launch {
                                 // TODO: Apply loading screen
-                                characterManager.swapToCharacter(character)
+                                characterManager.swapToCharacter(applicationContext, character)
                             }
                             finish()
                         }) {

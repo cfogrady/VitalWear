@@ -16,6 +16,7 @@ import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterEntity
+import com.github.cfogrady.vitalwear.character.data.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.*
 import com.github.cfogrady.vitalwear.data.CharacterSpriteLocations
 import com.github.cfogrady.vitalwear.firmware.Firmware
@@ -140,9 +141,9 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
 
     @Composable
     private fun go(partner: BEMCharacter, firmware: Firmware, finished:() -> Unit) {
-        var charaterSprite by remember { mutableStateOf(partner.sprites[CharacterSpriteLocations.IDLE]) }
+        var charaterSprite by remember { mutableStateOf(partner.characterSprites.sprites[CharacterSprites.IDLE_1]) }
         Handler(Looper.getMainLooper()!!).postDelayed({
-            charaterSprite = partner.sprites[CharacterSpriteLocations.WIN]
+            charaterSprite = partner.characterSprites.sprites[CharacterSprites.WIN]
         }, 500)
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
@@ -159,7 +160,7 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
 
     @Composable
     private fun exercise(partner: BEMCharacter, firmware: Firmware, durationSeconds: Int, finished:() -> Unit) {
-        var charaterSprites by remember { mutableStateOf(Lists.newArrayList(partner.sprites[CharacterSpriteLocations.EXERCISE_1], partner.sprites[CharacterSpriteLocations.EXERCISE_2])) }
+        var charaterSprites by remember { mutableStateOf(Lists.newArrayList(partner.characterSprites.sprites[CharacterSprites.TRAIN_1], partner.characterSprites.sprites[CharacterSprites.TRAIN_2])) }
         val sweatIcon = remember {firmware.emoteFirmwareSprites.sweatEmote}
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
@@ -196,7 +197,7 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
 
     @Composable
     fun clear(partner: BEMCharacter, firmware: Firmware, finished: () -> Unit) {
-        val characterAnimation = remember {Lists.newArrayList(partner.sprites[CharacterSpriteLocations.IDLE], partner.sprites[CharacterSpriteLocations.WIN])}
+        val characterAnimation = remember {Lists.newArrayList(partner.characterSprites.sprites[CharacterSprites.IDLE_1], partner.characterSprites.sprites[CharacterSprites.WIN])}
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
                 finished.invoke()
@@ -215,7 +216,7 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
 
     @Composable
     fun fail(partner: BEMCharacter, firmware: Firmware, finished: () -> Unit) {
-        val characterAnimation = remember {Lists.newArrayList(partner.sprites[CharacterSpriteLocations.IDLE], partner.sprites[CharacterSpriteLocations.LOSE])}
+        val characterAnimation = remember {Lists.newArrayList(partner.characterSprites.sprites[CharacterSprites.IDLE_1], partner.characterSprites.sprites[CharacterSprites.DOWN])}
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
                 finished.invoke()
@@ -233,7 +234,7 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
 
     @Composable
     fun result(partner: BEMCharacter, firmware: Firmware, exerciseType: TrainingType, exerciseResult: ExerciseResult, finished: () -> Unit) {
-        val characterAnimation = remember {Lists.newArrayList(partner.sprites[CharacterSpriteLocations.IDLE], partner.sprites[CharacterSpriteLocations.WIN])}
+        val characterAnimation = remember {Lists.newArrayList(partner.characterSprites.sprites[CharacterSprites.IDLE_1], partner.characterSprites.sprites[CharacterSprites.WIN])}
         val resultIcon = remember {if(exerciseResult == ExerciseResult.GREAT) firmware.trainingFirmwareSprites.greatIcon else firmware.trainingFirmwareSprites.goodIcon}
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
@@ -270,7 +271,7 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
         }
     }
 
-    fun increaseBonus(trainingType: TrainingType, great: Boolean, canHaveStatIncrease: Boolean): Int {
+    private fun increaseBonus(trainingType: TrainingType, great: Boolean, canHaveStatIncrease: Boolean): Int {
         val increase = if(great) 10 else 5
         if(!canHaveStatIncrease) {
             return increase/5

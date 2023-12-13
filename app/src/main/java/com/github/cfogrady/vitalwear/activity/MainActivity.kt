@@ -1,6 +1,5 @@
 package com.github.cfogrady.vitalwear.activity
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,10 +7,10 @@ import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.battle.BattleActivity
 import com.github.cfogrady.vitalwear.character.activity.CharacterSelectActivity
 import com.github.cfogrady.vitalwear.debug.DebugActivity
+import com.github.cfogrady.vitalwear.firmware.LoadFirmwareActivity
 import com.github.cfogrady.vitalwear.stats.StatsMenuActivity
-import com.github.cfogrady.vitalwear.steps.ManyStepListener
-import com.github.cfogrady.vitalwear.steps.ManyStepProcessingListener
 import com.github.cfogrady.vitalwear.training.TrainingMenuActivity
+import com.github.cfogrady.vitalwear.util.ActivityHelper
 import java.time.LocalDateTime
 
 class MainActivity : ComponentActivity() {
@@ -43,20 +42,14 @@ class MainActivity : ComponentActivity() {
         super.onStop()
     }
 
-    fun buildActivityLaunchers(): ActivityLaunchers {
-        val trainingMenuIntent = Intent(applicationContext, TrainingMenuActivity::class.java)
-        val statsMenuIntent = Intent(applicationContext, StatsMenuActivity::class.java)
-        val characterSelectorIntent = Intent(applicationContext, CharacterSelectActivity::class.java)
-        val characterSelector = {
-            startActivity(characterSelectorIntent)
-        }
-        val battleIntent = Intent(applicationContext, BattleActivity::class.java)
-        val battle = {
-            startActivity(battleIntent)
-        }
-        val debugActivityLauncher = {
-            startActivity(Intent(applicationContext, DebugActivity::class.java))
-        }
-        return ActivityLaunchers({startActivity(statsMenuIntent)}, {startActivity(trainingMenuIntent)}, characterSelector, battle, debugActivityLauncher)
+    private fun buildActivityLaunchers(): ActivityLaunchers {
+        val activityHelper = ActivityHelper(this)
+        return ActivityLaunchers(
+            activityHelper.getActivityLauncher(LoadFirmwareActivity::class.java),
+            activityHelper.getActivityLauncher(StatsMenuActivity::class.java),
+            activityHelper.getActivityLauncher(TrainingMenuActivity::class.java),
+            activityHelper.getActivityLauncher(CharacterSelectActivity::class.java),
+            activityHelper.getActivityLauncher(BattleActivity::class.java),
+            activityHelper.getActivityLauncher(DebugActivity::class.java))
     }
 }

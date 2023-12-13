@@ -2,7 +2,6 @@ package com.github.cfogrady.vitalwear.battle.composable
 
 import android.os.Handler
 import android.os.Looper
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset

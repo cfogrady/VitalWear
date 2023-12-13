@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import com.github.cfogrady.vitalwear.battle.data.BattleResult
 import com.github.cfogrady.vitalwear.character.CharacterManager
+import com.github.cfogrady.vitalwear.character.data.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.PositionOffsetRatios
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
@@ -56,18 +57,19 @@ class EndFightReactionFactory(private val bitmapScaler: BitmapScaler, private va
 
     private fun characterBitmaps(battleResult: BattleResult): List<Bitmap> {
         val character = characterManager.getLiveCharacter().value!!
+        val sprites = character.characterSprites.sprites
         return when(battleResult) {
             BattleResult.WIN -> {
-                Lists.newArrayList(character.sprites[1], character.sprites[9])
+                Lists.newArrayList(sprites[CharacterSprites.IDLE_1], sprites[CharacterSprites.WIN])
             }
             BattleResult.LOSE -> {
-                Lists.newArrayList(character.sprites[1], character.sprites[10])
+                Lists.newArrayList(sprites[CharacterSprites.IDLE_1], sprites[CharacterSprites.DOWN])
             }
             BattleResult.INJURED -> {
-                Lists.newArrayList(character.sprites[1], character.sprites[10])
+                Lists.newArrayList(sprites[CharacterSprites.IDLE_1], sprites[CharacterSprites.DOWN])
             }
             BattleResult.RETREAT -> {
-                Lists.newArrayList(character.sprites[5], character.sprites[6])
+                Lists.newArrayList(sprites[CharacterSprites.RUN_1], sprites[CharacterSprites.RUN_2])
             }
         }
     }

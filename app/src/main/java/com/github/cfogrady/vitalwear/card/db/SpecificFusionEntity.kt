@@ -1,8 +1,7 @@
-package com.github.cfogrady.vitalwear.card
+package com.github.cfogrady.vitalwear.card.db
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
-import com.github.cfogrady.vitalwear.card.SpecificFusionEntity.Companion.TABLE
+import com.github.cfogrady.vitalwear.card.db.SpecificFusionEntity.Companion.TABLE
 
 @Entity(tableName = TABLE, primaryKeys = ["cardName", "fromCharacterId", "toCharacterId", "supportCardId", "supportCharacterId"])
 data class SpecificFusionEntity(
