@@ -144,6 +144,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val workProviderDependencies = WorkProviderDependencies(
             characterManager,
             notificationChannelManager,
+            bemUpdater,
             stepService,
             saveService,
             sharedPreferences

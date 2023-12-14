@@ -15,6 +15,7 @@ class BemTransformationWorkerProvider : WorkerProvider {
         return BemTransformationWorker(
             workProviderDependencies.characterManager,
             workProviderDependencies.notificationChannelManager,
+            workProviderDependencies.bemUpdater,
             appContext,
             workerParameters,
         )

@@ -6,11 +6,11 @@ import androidx.work.WorkerParameters
 import androidx.work.Worker
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
-import java.time.LocalDateTime
 
 class BemTransformationWorker (
     private val characterManager: CharacterManager,
     private val notificationChannelManager: NotificationChannelManager,
+    private val bemUpdater: BEMUpdater,
     val context: Context,
     workerParams: WorkerParameters) : Worker(context, workerParams) {
 
@@ -23,6 +23,8 @@ class BemTransformationWorker (
             if(characterManager.getCurrentCharacter().readyToTransform.isPresent) {
                 notificationChannelManager.sendGenericNotification(context, "Transformation!", "Character is ready for transformation")
                 characterManager.doActiveCharacterTransformation(context)
+            } else {
+                bemUpdater.initializeBEMUpdates(character)
             }
         }
         return Result.success()
