@@ -11,6 +11,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.mood.MoodBroadcastReceiver
+import com.github.cfogrady.vitalwear.character.transformation.BemTransformationWorker
 import java.time.Duration
 
 class BEMUpdater(val context: Context) {

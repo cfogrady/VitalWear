@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
-import com.github.cfogrady.vitalwear.character.*
-import com.github.cfogrady.vitalwear.character.BemTransformationWorkerProvider
+import com.github.cfogrady.vitalwear.character.transformation.BemTransformationWorkerProvider
+import com.github.cfogrady.vitalwear.character.transformation.BemTransformationWorker
 import com.github.cfogrady.vitalwear.steps.DailyStepWorker
 import com.github.cfogrady.vitalwear.steps.DailyStepsWorkerProvider
 

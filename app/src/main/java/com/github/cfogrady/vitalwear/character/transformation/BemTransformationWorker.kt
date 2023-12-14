@@ -1,9 +1,11 @@
-package com.github.cfogrady.vitalwear.character
+package com.github.cfogrady.vitalwear.character.transformation
 
 import android.content.Context
 import android.util.Log
 import androidx.work.WorkerParameters
 import androidx.work.Worker
+import com.github.cfogrady.vitalwear.character.BEMUpdater
+import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 
