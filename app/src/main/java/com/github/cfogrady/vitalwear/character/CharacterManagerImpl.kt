@@ -122,7 +122,9 @@ class CharacterManagerImpl(
             transformedCharacter.characterStats.lastUpdate = LocalDateTime.now()
             transformedCharacter.characterStats.timeUntilNextTransformation = transformedCharacter.transformationWaitTimeSeconds
             transformedCharacter.characterStats.trainedPP = 0
-            transformedCharacter.characterStats.vitals = 0
+            if(transformedCharacter.speciesStats.phase > 2 || actualCharacter.speciesStats.phase > 2) {
+                transformedCharacter.characterStats.vitals = 0
+            }
             updateCharacter(transformedCharacter.characterStats)
             bemUpdater.cancel()
             activeCharacter.postValue(transformedCharacter)
