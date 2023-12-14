@@ -143,6 +143,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         // After we've setup the workManagerConfiguration, start the service
         val workProviderDependencies = WorkProviderDependencies(
             characterManager,
+            notificationChannelManager,
             stepService,
             saveService,
             sharedPreferences

@@ -12,6 +12,7 @@ import com.github.cfogrady.vitalwear.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.card.db.SpeciesEntityDao
 import com.github.cfogrady.vitalwear.card.db.TransformationEntityDao
+import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 import kotlinx.coroutines.*
 import java.time.LocalDateTime
 import kotlin.collections.ArrayList

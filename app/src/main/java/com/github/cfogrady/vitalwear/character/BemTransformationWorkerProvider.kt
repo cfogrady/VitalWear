@@ -12,6 +12,11 @@ class BemTransformationWorkerProvider : WorkerProvider {
         appContext: Context,
         workerParameters: WorkerParameters
     ): Worker {
-        return BemTransformationWorker(workProviderDependencies.characterManager, appContext, workerParameters)
+        return BemTransformationWorker(
+            workProviderDependencies.characterManager,
+            workProviderDependencies.notificationChannelManager,
+            appContext,
+            workerParameters,
+        )
     }
 }
