@@ -1,17 +1,18 @@
 package com.github.cfogrady.vitalwear.character.data
 
 import android.graphics.Bitmap
-import com.github.cfogrady.vb.dim.character.BemCharacterStats
-import com.github.cfogrady.vb.dim.character.CharacterStats
-import com.github.cfogrady.vb.dim.character.CharacterStats.CharacterStatsEntry
+import com.github.cfogrady.vitalwear.card.CardType
+import com.github.cfogrady.vitalwear.card.db.CardMetaEntity
+import com.github.cfogrady.vitalwear.card.db.SpeciesEntity
 import java.time.LocalDateTime
 import java.util.*
 
 class BEMCharacter(
-    val sprites: List<Bitmap>,
+    val cardMetaEntity: CardMetaEntity,
+    val characterSprites: CharacterSprites,
     val characterStats: CharacterEntity,
-    val speciesStats : CharacterStatsEntry,
-    private val transformationWaitTimeSeconds: Long,
+    val speciesStats : SpeciesEntity,
+    val transformationWaitTimeSeconds: Long,
     val transformationOptions: List<TransformationOption>,
     var readyToTransform: Optional<TransformationOption> = Optional.empty()) {
     var activityIdx : Int = 1
@@ -19,11 +20,15 @@ class BEMCharacter(
     companion object {
         const val MAX_VITALS = 9999
         private val DEFAULT_STATS = CharacterEntity(-1, CharacterState.SYNCED, "NONE", 0, LocalDateTime.MIN, 0, 0, false, 0, 0, 0, 0, 0, false, 0, 0, 0, 0, 0, 0, 0, false)
-        val DEFAULT_CHARACTER = BEMCharacter(emptyList(), DEFAULT_STATS, CharacterStatsEntry.builder().build(), 0, emptyList())
+        val DEFAULT_CHARACTER = BEMCharacter(CardMetaEntity.EMPTY_CARD_META, CharacterSprites.EMPTY_CHARACTER_SPRITES, DEFAULT_STATS, SpeciesEntity.EMPTY_SPECIES_ENTITY, 0, emptyList())
     }
 
     fun isBEM() : Boolean {
-        return speciesStats is BemCharacterStats.BemCharacterStatEntry
+        return cardMetaEntity.cardType == CardType.BEM
+    }
+
+    fun cardName(): String {
+        return cardMetaEntity.cardName
     }
 
     fun debug(): List<Pair<String, String>> {
@@ -71,7 +76,7 @@ class BEMCharacter(
     }
 
     fun totalBp(): Int {
-        return speciesStats.dp + characterStats.trainedBp
+        return speciesStats.bp + characterStats.trainedBp
     }
     fun totalAp(): Int {
         return speciesStats.ap + characterStats.trainedAp

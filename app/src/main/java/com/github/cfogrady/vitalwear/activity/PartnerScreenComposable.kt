@@ -25,7 +25,7 @@ class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private va
     fun PartnerScreen(character: BEMCharacter, firmware: CharacterFirmwareSprites) {
         val emojiHeight = 5.dp //imageScaler
         val now = LocalDateTime.now()
-        var manyStepListener = remember {
+        val manyStepListener = remember {
             Log.i(TAG, "Listen to daily steps")
             stepService.listenDailySteps()
         }
@@ -52,7 +52,7 @@ class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private va
                 }
                 Row(Modifier.height(emojiHeight)) {
                 }
-                bitmapScaler.AnimatedScaledBitmap(bitmaps = character.sprites, startIdx = character.activityIdx, frames = 2, contentDescription = "Character", alignment = Alignment.BottomCenter)
+                bitmapScaler.AnimatedScaledBitmap(bitmaps = character.characterSprites.sprites, startIdx = character.activityIdx, frames = 2, contentDescription = "Character", alignment = Alignment.BottomCenter)
             }
         }
     }

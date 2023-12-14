@@ -15,7 +15,7 @@ class BemTransformationWorker (private val characterManager: CharacterManager, v
         val character = characterManager.getCurrentCharacter()
         if(character != BEMCharacter.DEFAULT_CHARACTER) {
             character.prepCharacterTransformation()
-            characterManager.doActiveCharacterTransformation()
+            characterManager.doActiveCharacterTransformation(context)
         }
         return Result.success()
     }

@@ -7,7 +7,6 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Icon
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.wear.watchface.complications.data.*
 import androidx.wear.watchface.complications.datasource.ComplicationDataSourceService
 import androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
@@ -71,7 +70,7 @@ class PartnerComplicationService : ComplicationDataSourceService() {
                 }
                 maybeFirmware.value!!.insertCardIcon
             } else {
-                character.sprites[character.activityIdx + state.spriteIndex]
+                character.characterSprites.sprites[character.activityIdx + state.spriteIndex]
             }
         }
         var iconImage = Icon.createWithBitmap(bitmap)

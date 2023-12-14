@@ -20,6 +20,7 @@ import com.github.cfogrady.vitalwear.BackgroundManager
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
+import com.github.cfogrady.vitalwear.character.data.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.composable.util.formatNumber
@@ -65,8 +66,8 @@ class StatsMenuActivity : ComponentActivity() {
             )
             Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally) {
                 if(state.currentPage < 5) {
-                    scrollingNameFactory.ScrollingName(name = partner.sprites[0])
-                    bitmapScaler.ScaledBitmap(bitmap = partner.sprites[1], contentDescription = "Partner")
+                    scrollingNameFactory.ScrollingName(name = partner.characterSprites.sprites[CharacterSprites.NAME])
+                    bitmapScaler.ScaledBitmap(bitmap = partner.characterSprites.sprites[CharacterSprites.IDLE_1], contentDescription = "Partner")
                 }
                 VerticalPager(state = state, pageCount = 4) { page ->
                     when (page) {
@@ -107,7 +108,7 @@ class StatsMenuActivity : ComponentActivity() {
     @Composable
     private fun PhaseAndAttribute(partner: BEMCharacter) {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("PHASE ${partner.speciesStats.stage+1}", fontSize = 2.em, fontStyle = FontStyle.Italic)
+            Text("PHASE ${partner.speciesStats.phase+1}", fontSize = 2.em, fontStyle = FontStyle.Italic)
             Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.SpaceBetween) {
                 val attribute = when(partner.speciesStats.attribute) {
                     0 -> "NONE"
@@ -127,7 +128,7 @@ class StatsMenuActivity : ComponentActivity() {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
                 Text("BP", fontSize = 1.5.em)
-                Text(formatNumber(partner.speciesStats.dp, 4), fontSize = 1.5.em)
+                Text(formatNumber(partner.speciesStats.bp, 4), fontSize = 1.5.em)
             }
             Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
                 Text("   ", fontSize = 1.5.em)

@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.data
+package com.github.cfogrady.vitalwear.card
 
 import android.graphics.Bitmap
 import com.github.cfogrady.vb.dim.sprite.SpriteData

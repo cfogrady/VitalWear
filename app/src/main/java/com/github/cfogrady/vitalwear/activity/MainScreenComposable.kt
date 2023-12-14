@@ -46,8 +46,11 @@ class MainScreenComposable(
     @Composable
     fun mainScreen(activityLaunchers: ActivityLaunchers) {
         val characterManagerInitialized by characterManager.initialized.observeAsState()
-        if(!characterManagerInitialized!!) {
+        val firmwareInitialized by firmwareManager.hasBeenInitialized().observeAsState()
+        if(!characterManagerInitialized!! || !firmwareInitialized!!) {
             Log.i(TAG, "Loading in mainScreen")
+            Log.i(TAG, "Character Manager Initialized: $characterManagerInitialized")
+            Log.i(TAG, "Firmware Manager Initialized: $firmwareInitialized")
             Loading() {}
         } else {
             val activeCharacter = characterManager.getLiveCharacter()
@@ -62,7 +65,10 @@ class MainScreenComposable(
         val firmware by firmwareData.observeAsState()
         val character by activeCharacterData.observeAsState()
         val background by backgroundData.observeAsState()
-        if(firmware == null || character == null) {
+        if(firmware == null) {
+            activityLaunchers.firmwareLoadingLauncher.invoke()
+        }
+        if(character == null) {
             Log.i(TAG, "Loading in everythingLoadedScreen. Firmware null: ${firmware == null}; character null: ${character == null}")
             Loading {}
         } else if(background == null) {

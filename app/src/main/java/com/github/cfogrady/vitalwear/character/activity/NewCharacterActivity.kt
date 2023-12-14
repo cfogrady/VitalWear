@@ -16,38 +16,50 @@ import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.items
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.CharacterManager
-import com.github.cfogrady.vitalwear.data.CardLoader
+import com.github.cfogrady.vitalwear.card.CardSpritesIO
+import com.github.cfogrady.vitalwear.card.NewCardLoader
+import com.github.cfogrady.vitalwear.card.activity.LoadCardActivity
+import com.github.cfogrady.vitalwear.card.db.CardMetaEntity
+import com.github.cfogrady.vitalwear.card.db.CardMetaEntityDao
+import com.github.cfogrady.vitalwear.util.ActivityHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 
 
 const val NEW_CHARACTER_SELECTED_FLAG = "newCharacterStarted"
 
-class NewCardActivity : ComponentActivity() {
-    val LOADING_TEXT = "Loading..."
+/**
+ * NewCardActivity is used to start a new character.
+ */
+class NewCharacterActivity : ComponentActivity() {
 
-    lateinit var cardLoader : CardLoader
+    lateinit var cardLoader : NewCardLoader
     lateinit var characterManager : CharacterManager
+    lateinit var cardSpritesIO: CardSpritesIO
+    lateinit var cardMetaEntityDao: CardMetaEntityDao
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        cardLoader = (application as VitalWearApp).cardLoader
+        cardLoader = (application as VitalWearApp).newCardLoader
         characterManager = (application as VitalWearApp).characterManager
+        cardSpritesIO = (application as VitalWearApp).cardSpriteIO
+        cardMetaEntityDao = (application as VitalWearApp).cardMetaEntityDao
+        val activityHelper = ActivityHelper(this)
+        val importCardActivity = activityHelper.getActivityLauncherWithResultHandling(LoadCardActivity::class.java) {}
         setContent {
-            buildScreen()
+            buildScreen(importCardActivityLauncher = importCardActivity)
         }
     }
 
     @Composable
-    fun buildScreen() {
+    fun buildScreen(importCardActivityLauncher: () -> Unit) {
         var loaded by remember { mutableStateOf(false) }
-        var files by remember { mutableStateOf(ArrayList<File>() as List<File>) }
+        var cards by remember { mutableStateOf(ArrayList<CardMetaEntity>() as List<CardMetaEntity>) }
         if(!loaded) {
             Text(text = LOADING_TEXT)
             LaunchedEffect(key1 = loaded) {
-                files = loadFiles()
+                cards = loadCards()
                 loaded = true
             }
         } else {
@@ -55,11 +67,18 @@ class NewCardActivity : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(items = files) { file ->
+                item {
+                    Button(onClick = {
+                        importCardActivityLauncher.invoke()
+                    }) {
+                        Text(text = "Import Card", modifier = Modifier.padding(10.dp))
+                    }
+                }
+                items(items = cards) { card ->
                     Button(onClick = {
                         GlobalScope.launch {
                             withContext(Dispatchers.Default) {
-                                characterManager.createNewCharacter(file)
+                                characterManager.createNewCharacter(applicationContext, card)
                             }
                         }
                         val intent = Intent()
@@ -67,14 +86,14 @@ class NewCardActivity : ComponentActivity() {
                         setResult(0, intent)
                         finish()
                     }) {
-                        Text(text = file.name, modifier = Modifier.padding(10.dp))
+                        Text(text = card.cardName, modifier = Modifier.padding(10.dp))
                     }
                 }
             }
         }
     }
 
-    fun loadFiles() : List<File> {
-        return cardLoader.listLibrary(applicationContext)
+    private fun loadCards() : List<CardMetaEntity> {
+        return cardMetaEntityDao.getAll()
     }
 }

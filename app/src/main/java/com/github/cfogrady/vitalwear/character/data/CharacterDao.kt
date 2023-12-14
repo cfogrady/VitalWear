@@ -5,7 +5,7 @@ import androidx.room.*
 @Dao
 interface CharacterDao {
     @Query("select * from character where id = :id limit 1")
-    fun getCharacterById(id: Int): List<CharacterEntity>
+    fun getCharacterById(id: Int): CharacterEntity
 
     @Query("select * from character order by last_update desc")
     fun getCharactersOrderByRecent(): List<CharacterEntity>

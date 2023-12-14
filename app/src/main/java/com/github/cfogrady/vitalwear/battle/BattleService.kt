@@ -1,18 +1,19 @@
 package com.github.cfogrady.vitalwear.battle
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
-import com.github.cfogrady.vb.dim.card.BemCard
-import com.github.cfogrady.vb.dim.card.Card
 import com.github.cfogrady.vb.dim.card.DimReader
-import com.github.cfogrady.vb.dim.character.BemCharacterStats
-import com.github.cfogrady.vb.dim.character.CharacterStats
 import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.battle.data.*
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
-import com.github.cfogrady.vitalwear.data.CardLoader
+import com.github.cfogrady.vitalwear.card.CardSpritesIO
+import com.github.cfogrady.vitalwear.card.CharacterSpritesIO
+import com.github.cfogrady.vitalwear.card.db.SpeciesEntity
+import com.github.cfogrady.vitalwear.card.db.SpeciesEntityDao
+import com.github.cfogrady.vitalwear.character.data.CharacterSprites
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.vitals.VitalService
@@ -21,7 +22,9 @@ import java.util.*
 /**
  * This class is used to construct BattleModels for each instance of a battle
  */
-class BattleService(private val cardLoader: CardLoader,
+class BattleService(private val cardSpritesIO: CardSpritesIO,
+                    private val speciesEntityDao: SpeciesEntityDao,
+                    private val characterSpritesIO: CharacterSpritesIO,
                     private val characterManager: CharacterManager,
                     private val firmwareManager: FirmwareManager,
                     private val battleLogic: BEMBattleLogic,
@@ -30,22 +33,22 @@ class BattleService(private val cardLoader: CardLoader,
                     private val random: Random,
 ) {
     companion object {
-        const val CARD_HIT_START_IDX = 15
-        const val CARD_HIT_END_IDX = 18
     }
 
-    fun createBattleModel(): PreBattleModel {
+    fun createBattleModel(context: Context): PreBattleModel {
         val partnerCharacter = characterManager.getLiveCharacter().value!!
-        val card = cardLoader.loadCard(partnerCharacter.characterStats.cardFile)
         val firmware = firmwareManager.getFirmware().value!!
-        val partnerBattleCharacter = battleCharacterFromBemCharacter(card, partnerCharacter)
-        val randomOpponent = loadRandomTarget(card)
+        val partnerBattleCharacter = battleCharacterFromBemCharacter(context, partnerCharacter)
+        val hasCardHits = partnerCharacter.isBEM()
+        val hasThirdBattlePool = partnerCharacter.isBEM()
+        val randomOpponent = loadRandomTarget(context, partnerCharacter.cardName(), hasThirdBattlePool, hasCardHits, partnerCharacter.speciesStats.phase)
+        val battleSpriteLoader = if (partnerCharacter.isBEM()) CardBattleSpriteLoader(context, cardSpritesIO, partnerCharacter.cardName()) else FirmwareBattleSpriteLoader(firmware)
         return PreBattleModel(
             partnerBattleCharacter,
             randomOpponent,
-            getBackground(card, firmware),
-            getReadyIcon(card, firmware),
-            getGoIcon(card, firmware),
+            battleSpriteLoader.getBackground(),
+            battleSpriteLoader.getReadyIcon(),
+            battleSpriteLoader.getGoIcon(),
         )
     }
 
@@ -68,7 +71,7 @@ class BattleService(private val cardLoader: CardLoader,
                 partnerCharacter.characterStats.mood = 0
             }
         }
-        val vitalChange = vitalService.processVitalChangeFromBattle(partnerCharacter.speciesStats.stage, preBattleModel.opponent.battleStats.stage, battle.battleResult == BattleResult.WIN)
+        val vitalChange = vitalService.processVitalChangeFromBattle(partnerCharacter.speciesStats.phase, preBattleModel.opponent.battleStats.stage, battle.battleResult == BattleResult.WIN)
         saveService.saveAsync()
         return PostBattleModel(
             preBattleModel.partnerCharacter,
@@ -81,44 +84,42 @@ class BattleService(private val cardLoader: CardLoader,
         )
     }
 
-    private fun loadBattleCharacter(card: Card<*, *, *, *, *, *>, slotId: Int): BattleCharacter {
-        val speciesStats = card.characterStats.characterEntries[slotId]
-        val battleStats = loadBattleStats(speciesStats)
-        val battleSprites = loadBattleSprites(card, speciesStats, slotId)
+    private fun loadBattleCharacter(context: Context, speciesEntity: SpeciesEntity, hasCardHits: Boolean): BattleCharacter {
+        val battleStats = loadBattleStats(speciesEntity)
+        val battleSprites = loadBattleSprites(context, speciesEntity, hasCardHits)
         return BattleCharacter(battleStats, battleSprites)
     }
 
-    private fun loadBattleStats(characterStats: CharacterStats.CharacterStatsEntry, mood: Mood = Mood.NORMAL): BattleStats {
-        return BattleStats(characterStats.dp, characterStats.ap, characterStats.hp, 0, characterStats.attribute, characterStats.type, characterStats.stage, mood)
+    private fun loadBattleStats(speciesEntity: SpeciesEntity, mood: Mood = Mood.NORMAL): BattleStats {
+        return BattleStats(speciesEntity.bp, speciesEntity.ap, speciesEntity.hp, 0, speciesEntity.attribute, speciesEntity.type, speciesEntity.phase, mood)
     }
 
-    private fun loadBattleSprites(card: Card<*, *, *, *, *, *>, characterStats: CharacterStats.CharacterStatsEntry, slotId: Int): BattleSprites {
-        val characterSprites = cardLoader.bitmapsFromCard(card, slotId)
+    private fun loadBattleSprites(context: Context, speciesEntity: SpeciesEntity, hasCardHits: Boolean): BattleSprites {
         val firmware = firmwareManager.getFirmware().value!!
-        val smallAttackId = characterStats.smallAttackId
-        val largeAttackId = characterStats.bigAttackId
-        val projectileSprite = getSmallAttackSprite(card, firmware, smallAttackId)
-        val largeProjectileSprite = getLargeAttackSprite(card, firmware, largeAttackId)
+        val smallAttackId = speciesEntity.attackId
+        val largeAttackId = speciesEntity.criticalAttackId
+        val projectileSprite = getSmallAttackSprite(context, speciesEntity.cardName, firmware, smallAttackId)
+        val largeProjectileSprite = getLargeAttackSprite(context, speciesEntity.cardName, firmware, largeAttackId)
         return BattleSprites(
-            characterSprites[0],
-            characterSprites[1],
-            characterSprites[11],
-            characterSprites[12],
-            characterSprites[9],
-            characterSprites[10],
-            characterSprites[13],
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.NAME),
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.IDLE1),
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.ATTACK),
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.DODGE),
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.WIN),
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.DOWN),
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.SPLASH),
             projectileSprite,
             largeProjectileSprite,
-            getHitSprite(card, firmware)
+            getHitSprite(context, speciesEntity.cardName, hasCardHits, firmware)
         )
     }
 
-    private fun battleCharacterFromBemCharacter(card: Card<*, *, *, *, *, *>, character: BEMCharacter): BattleCharacter {
+    private fun battleCharacterFromBemCharacter(context: Context, character: BEMCharacter): BattleCharacter {
         val firmware = firmwareManager.getFirmware().value!!
-        val smallAttackId = character.speciesStats.smallAttackId
-        val largeAttackId = character.speciesStats.bigAttackId
-        val projectileSprite = getSmallAttackSprite(card, firmware, smallAttackId)
-        val largeProjectileSprite = getLargeAttackSprite(card, firmware, largeAttackId)
+        val smallAttackId = character.speciesStats.attackId
+        val largeAttackId = character.speciesStats.criticalAttackId
+        val projectileSprite = getSmallAttackSprite(context, character.cardName(), firmware, smallAttackId)
+        val largeProjectileSprite = getLargeAttackSprite(context, character.cardName(), firmware, largeAttackId)
         val battleStats = BattleStats(
             character.totalBp(),
             character.totalAp(),
@@ -126,72 +127,72 @@ class BattleService(private val cardLoader: CardLoader,
             character.characterStats.vitals,
             character.speciesStats.attribute,
             character.speciesStats.type,
-            character.speciesStats.stage,
+            character.speciesStats.phase,
             character.mood(),
         )
         val battleSprites = BattleSprites(
-            character.sprites[0],
-            character.sprites[1],
-            character.sprites[11],
-            character.sprites[12],
-            character.sprites[9],
-            character.sprites[10],
-            character.sprites[13],
+            character.characterSprites.sprites[CharacterSprites.NAME],
+            character.characterSprites.sprites[CharacterSprites.IDLE_1],
+            character.characterSprites.sprites[CharacterSprites.ATTACK],
+            character.characterSprites.sprites[CharacterSprites.DODGE],
+            character.characterSprites.sprites[CharacterSprites.WIN],
+            character.characterSprites.sprites[CharacterSprites.DOWN],
+            character.characterSprites.sprites[CharacterSprites.SPLASH],
             projectileSprite,
             largeProjectileSprite,
-            getHitSprite(card, firmware)
+            getHitSprite(context, character.cardName(), character.isBEM(), firmware)
         )
         return BattleCharacter(battleStats, battleSprites)
     }
 
-    private fun getSmallAttackSprite(card: Card<*, *, *, *, *, *>, firmware: Firmware, smallAttackId: Int) : Bitmap {
-        if(smallAttackId < 40) {
+    private fun getSmallAttackSprite(context: Context, cardName: String, firmware: Firmware, smallAttackId: Int) : Bitmap {
+        if(smallAttackId <= 38) {
             return firmware.battleFirmwareSprites.attackSprites[smallAttackId]
         }
-        val cardSpriteIdx = (smallAttackId - 40) + 34
-        return cardLoader.bitmapFromCardByIndex(card, cardSpriteIdx)
+        val cardSpriteIdx = (smallAttackId - 39) + 34
+        return cardSpritesIO.loadIndexedSprite(context, cardName, CardSpritesIO.ATTACKS, cardSpriteIdx)
     }
 
-    private fun getLargeAttackSprite(card: Card<*, *, *, *, *, *>, firmware: Firmware, largeAttackId: Int) : Bitmap {
+    private fun getLargeAttackSprite(context: Context, cardName: String, firmware: Firmware, largeAttackId: Int) : Bitmap {
         if(largeAttackId < 22) {
             return firmware.battleFirmwareSprites.largeAttackSprites[largeAttackId]
         }
         val cardSpriteIdx = (largeAttackId - 22) + 44
-        return cardLoader.bitmapFromCardByIndex(card, cardSpriteIdx)
+        return cardSpritesIO.loadIndexedSprite(context, cardName, CardSpritesIO.CRITICAL_ATTACKS, cardSpriteIdx)
     }
 
-    private fun getHitSprite(card: Card<*, *, *, *, *, *>, firmware: Firmware): List<Bitmap> {
-        if(card is BemCard) {
-            return cardLoader.bitmapsFromCardByIndexes(card, CARD_HIT_START_IDX, CARD_HIT_END_IDX)
+    private fun getHitSprite(context: Context, cardName: String, hasCardHits: Boolean, firmware: Firmware): List<Bitmap> {
+        if(hasCardHits) {
+            return cardSpritesIO.loadCardSpriteList(context, cardName, CardSpritesIO.RECEIVE_HIT_ICONS)
         }
         return firmware.battleFirmwareSprites.hitIcons
     }
 
-    private fun loadRandomTarget(card: Card<*, *, *, *, *, *>): BattleCharacter {
-        val character = characterManager.getLiveCharacter().value!!
-        val opponentSpeciesIdx = assignRandomTargetFromCard(card, character.speciesStats.stage)
-        return loadBattleCharacter(card, opponentSpeciesIdx)
+    private fun loadRandomTarget(context: Context, cardName: String, hasThirdBattlePool: Boolean, hasCardHits: Boolean, phase: Int): BattleCharacter {
+        val speciesEntity = assignRandomTargetFromCard(cardName, hasThirdBattlePool, phase)
+        return loadBattleCharacter(context, speciesEntity, hasCardHits)
     }
 
-    private fun assignRandomTargetFromCard(card: Card<*, *, *, *, *, *>, activeStage: Int): Int {
+    private fun assignRandomTargetFromCard(cardName: String, hasThirdBattlePool: Boolean, activeStage: Int): SpeciesEntity {
         var roll = random.nextInt(100)
+        val cardSpecies = speciesEntityDao.getCharacterByCard(cardName)
         while(roll >= 0) {
-            for((index, species) in card.characterStats.characterEntries.withIndex()) {
+            for(species in cardSpecies) {
                 if(activeStage < 4) {
-                    if(species.firstPoolBattleChance != DimReader.NONE_VALUE) {
-                        roll -= species.firstPoolBattleChance
+                    if(species.battlePool1 != DimReader.NONE_VALUE) {
+                        roll -= species.battlePool1
                     }
-                } else if(activeStage < 6 || species !is BemCharacterStats.BemCharacterStatEntry) {
-                    if(species.secondPoolBattleChance != DimReader.NONE_VALUE) {
-                        roll -= species.secondPoolBattleChance
+                } else if(activeStage < 6 || !hasThirdBattlePool) {
+                    if(species.battlePool2 != DimReader.NONE_VALUE) {
+                        roll -= species.battlePool2
                     }
                 } else {
-                    if(species.thirdPoolBattleChance != DimReader.NONE_VALUE) {
-                        roll -= species.thirdPoolBattleChance
+                    if(species.battlePool3 != DimReader.NONE_VALUE) {
+                        roll -= species.battlePool3
                     }
                 }
                 if(roll < 0) {
-                    return index
+                    return species
                 }
             }
             Log.w(
@@ -199,26 +200,5 @@ class BattleService(private val cardLoader: CardLoader,
                         "Running through the options until our roll is reduced to 0.")
         }
         throw java.lang.IllegalStateException("If we get here then we somehow failed to return the species that brought out role under 0.")
-    }
-
-    private fun getBackground(card: Card<*, *, *, *, *, *>, firmware: Firmware): Bitmap {
-        if(card is BemCard) {
-            return cardLoader.bitmapFromCardByIndex(card, CardLoader.BEM_BATTLE_BACKGROUND_IDX)
-        }
-        return firmware.battleFirmwareSprites.battleBackground
-    }
-
-    private fun getReadyIcon(card: Card<*, *, *, *, *, *>, firmware: Firmware): Bitmap {
-        if(card is BemCard) {
-            return cardLoader.bitmapFromCardByIndex(card, CardLoader.BEM_READY_ICON_IDX)
-        }
-        return firmware.readyIcon
-    }
-
-    private fun getGoIcon(card: Card<*, *, *, *, *, *>, firmware: Firmware): Bitmap {
-        if(card is BemCard) {
-            return cardLoader.bitmapFromCardByIndex(card, CardLoader.BEM_GO_ICON_IDX)
-        }
-        return firmware.goIcon
     }
 }

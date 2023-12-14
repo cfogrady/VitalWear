@@ -8,16 +8,16 @@ import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
 import com.github.cfogrady.vb.dim.sprite.SpriteData.Sprite
 import com.github.cfogrady.vb.dim.util.RelativeByteOffsetInputStream
 import com.github.cfogrady.vitalwear.battle.data.BattleFirmwareSprites
+import com.github.cfogrady.vitalwear.card.SpriteBitmapConverter
 import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
 import com.github.cfogrady.vitalwear.character.data.EmoteFirmwareSprites
-import com.github.cfogrady.vitalwear.data.SpriteBitmapConverter
 import com.github.cfogrady.vitalwear.menu.MenuFirmwareSprites
 import com.github.cfogrady.vitalwear.training.TrainingFirmwareSprites
 import com.google.common.collect.Lists
 import kotlinx.coroutines.*
 import java.io.File
 import java.io.FileInputStream
-import java.lang.Exception
+import java.nio.file.Files
 
 const val FIRMWARE_FILE = "VBBE_10B.vb2"
 const val SPRITE_DIMENSIONS_LOCATION = 0x90a4
@@ -78,6 +78,27 @@ class FirmwareManager(
     private val bemSpriteReader = BemSpriteReader()
     private val TAG = "FirmwareManager"
     private val firmware = MutableLiveData<Firmware>()
+    private val initialized = MutableLiveData(false)
+
+    fun hasBeenInitialized() : LiveData<Boolean> {
+        return initialized
+    }
+
+    fun storeFirmware(applicationContext: Context, file: String): Job {
+        return GlobalScope.launch(Dispatchers.IO) {
+            val srcFile = File(file)
+            val filesRoot = applicationContext.filesDir
+            val firmwareFile = File(filesRoot, FIRMWARE_FILE)
+            if (!srcFile.exists()) {
+                throw IllegalArgumentException("Given firmware file, $file does not exist!")
+            }
+            Files.copy(srcFile.toPath(), firmwareFile.toPath())
+            if(!internalLoadFirmware(applicationContext)) {
+                firmwareFile.delete()
+                throw IllegalArgumentException("Given firmware file, $file has errors!")
+            }
+        }
+    }
 
     fun loadFirmware(applicationContext: Context) {
         GlobalScope.launch {
@@ -89,7 +110,7 @@ class FirmwareManager(
         return firmware
     }
 
-    private fun internalLoadFirmware(applicationContext: Context) {
+    private fun internalLoadFirmware(applicationContext: Context) : Boolean {
         var filesRoot = applicationContext.filesDir
         var firmwareFile = File(filesRoot, FIRMWARE_FILE)
         try {
@@ -130,9 +151,13 @@ class FirmwareManager(
                     failedIcon,
                 )
                 firmware.postValue(loadedFirmware)
+                initialized.postValue(true)
             }
+            return true
         } catch (e: Exception) {
             Log.e(TAG, "Unable to load firmware", e)
+            initialized.postValue(true)
+            return false
         }
     }
 

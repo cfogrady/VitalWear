@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.data
+package com.github.cfogrady.vitalwear.card
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -39,6 +39,10 @@ class CardLoader(val applicationContext: Context, val spriteBitmapConverter: Spr
             Log.e(TAG, "Unable to load Card", e)
             throw e
         }
+    }
+
+    fun loadCard(inputStream: InputStream): Card<*, *, *, *, *, *> {
+        return dimReader.readCard(inputStream, true)
     }
 
     fun loadCard(cardName: String): Card<*, *, *, *, *, *> {

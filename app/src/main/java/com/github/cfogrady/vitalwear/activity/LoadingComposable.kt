@@ -14,11 +14,12 @@ import kotlinx.coroutines.withContext
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.ImageDecoderDecoder
+import kotlinx.coroutines.CoroutineDispatcher
 
 const val LOADING_TEXT = "Loading..."
 
 @Composable
-fun Loading(work: () -> Unit) {
+fun Loading(loadingText: String = LOADING_TEXT, scope: CoroutineDispatcher = Dispatchers.Default, work: () -> Unit) {
     val imageLoader = ImageLoader.Builder(LocalContext.current).components {
         add(ImageDecoderDecoder.Factory())
     }.build()
@@ -29,15 +30,15 @@ fun Loading(work: () -> Unit) {
             .fillMaxWidth()
             .padding(20.dp))
     {
-        Text(text = LOADING_TEXT)
+        Text(text = loadingText)
         Image(
             painter = rememberAsyncImagePainter(R.drawable.loading_icon, imageLoader),
             contentDescription = null,
             modifier = Modifier.fillMaxSize()
         )
     }
-    LaunchedEffect(key1 = LOADING_TEXT) {
-        withContext(Dispatchers.Default) {
+    LaunchedEffect(key1 = loadingText) {
+        withContext(scope) {
             work.invoke()
         }
     }
