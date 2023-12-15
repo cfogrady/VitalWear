@@ -1,6 +1,5 @@
 package com.github.cfogrady.vitalwear.character.data
 
-import android.graphics.Bitmap
 import com.github.cfogrady.vitalwear.card.CardType
 import com.github.cfogrady.vitalwear.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.card.db.SpeciesEntity
