@@ -22,7 +22,15 @@ class MoodBroadcastReceiver(
                 Log.i(TAG, "MOOD_UPDATE_INTENT broadcast received")
                 //TODO: This may only work when we have the complication service running
                 // Might need to start persistent service to do this.
-                bemMoodUpdater.updateMood(characterManager.getCurrentCharacter(), LocalDateTime.now())
+                try {
+                    bemMoodUpdater.updateMood(
+                        characterManager.getCurrentCharacter(),
+                        LocalDateTime.now()
+                    )
+                } catch (ise: IllegalStateException) {
+                    // primarily caused in emulator by lack of step sensor
+                    Log.e(TAG, "Failed to update mood", ise)
+                }
             }
         }
     }

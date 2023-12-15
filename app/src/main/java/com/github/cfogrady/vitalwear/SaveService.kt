@@ -38,6 +38,7 @@ class SaveService(private val characterManager: CharacterManagerImpl, private va
             stepService.stepPreferenceUpdates(now.toLocalDate(), preferencesEditor).commit()
             characterManager.updateActiveCharacter(now)
         } catch (ise: IllegalStateException) {
+            // primarily caused in emulator by lack of step sensor
             Log.e(TAG, "Failed to save steps...", ise)
         }
     }
