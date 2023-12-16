@@ -5,8 +5,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Icon
-import android.os.Handler
-import android.os.Looper
+import android.util.Log
 import androidx.wear.watchface.complications.data.*
 import androidx.wear.watchface.complications.datasource.ComplicationDataSourceService
 import androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
@@ -22,22 +21,25 @@ class PartnerComplicationService : ComplicationDataSourceService() {
     val TAG = "PartnerComplicationService"
     lateinit var dataSource : ComponentName
 
+    // Called when setting up complication (edit screens)
     override fun getPreviewData(type: ComplicationType): ComplicationData? {
         return complicationResult()
     }
 
-    override fun onComplicationDeactivated(complicationInstanceId: Int) {
-        //TODO: Use this to remove deactivated complications
-        super.onComplicationDeactivated(complicationInstanceId)
+    override fun onComplicationActivated(complicationInstanceId: Int, type: ComplicationType) {
+        super.onComplicationActivated(complicationInstanceId, type)
+        val complicationRefreshService = (application as VitalWearApp).complicationRefreshService
+        complicationRefreshService.startupPartnerComplications()
     }
 
     private fun displayUninitializedFirmwareComplication() : ComplicationData {
-        var iconImage = Icon.createWithResource(applicationContext, R.drawable.loading_icon)
-        var image = SmallImage.Builder(iconImage, SmallImageType.PHOTO).build()
-        var text = PlainComplicationText.Builder("Partner").build()
+        val iconImage = Icon.createWithResource(applicationContext, R.drawable.loading_icon)
+        val image = SmallImage.Builder(iconImage, SmallImageType.PHOTO).build()
+        val text = PlainComplicationText.Builder("Partner").build()
         return SmallImageComplicationData.Builder(image, text).build()
     }
 
+    // Called when running and refresh is requested
     override fun onComplicationRequest(
         request: ComplicationRequest,
         listener: ComplicationRequestListener
@@ -45,9 +47,6 @@ class PartnerComplicationService : ComplicationDataSourceService() {
         dataSource = ComponentName(this, javaClass)
         val complicationData = complicationResult()
         listener.onComplicationData(complicationData)
-        Handler(Looper.getMainLooper()!!).postDelayed({
-            refreshComplication(request.complicationInstanceId)
-        }, 500)
     }
 
     private fun complicationResult() : ComplicationData {
@@ -73,24 +72,9 @@ class PartnerComplicationService : ComplicationDataSourceService() {
                 character.characterSprites.sprites[character.activityIdx + state.spriteIndex]
             }
         }
-        var iconImage = Icon.createWithBitmap(bitmap)
-        var image = SmallImage.Builder(iconImage, SmallImageType.PHOTO).build()
-        var text = PlainComplicationText.Builder("Partner").build()
+        val iconImage = Icon.createWithBitmap(bitmap)
+        val image = SmallImage.Builder(iconImage, SmallImageType.PHOTO).build()
+        val text = PlainComplicationText.Builder("Partner").build()
         return SmallImageComplicationData.Builder(image, text).setTapAction(pendingIntent).build()
-    }
-
-    private fun refreshComplication(complicationId: Int) {
-        //Log.i(TAG, "refreshing complication")
-        val state = (application as VitalWearApp).partnerComplicationState
-        state.spriteIndex++
-        if(state.spriteIndex > 1) {
-            state.spriteIndex = 0
-        }
-        val complicationDataSourceUpdateRequester =
-            ComplicationDataSourceUpdateRequester.create(
-                context = this,
-                complicationDataSourceComponent = dataSource
-            )
-        complicationDataSourceUpdateRequester.requestUpdate(complicationId)
     }
 }

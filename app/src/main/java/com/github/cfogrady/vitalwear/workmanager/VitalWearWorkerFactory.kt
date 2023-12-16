@@ -13,7 +13,7 @@ class VitalWearWorkerFactory(
     private val workProviderDependencies: WorkProviderDependencies,
     private val workerProviders: Map<String?, WorkerProvider> =
     mapOf(Pair(BemTransformationWorker::class.qualifiedName, BemTransformationWorkerProvider()),
-        Pair(DailyStepWorker::class.qualifiedName, DailyStepsWorkerProvider())
+        Pair(DailyStepWorker::class.qualifiedName, DailyStepsWorkerProvider()),
     )
 ) : WorkerFactory() {
     private val TAG: String = "VitalWearWorkerFactory"

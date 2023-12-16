@@ -77,6 +77,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var moodBroadcastReceiver: MoodBroadcastReceiver
     lateinit var scrollingNameFactory: ScrollingNameFactory
     lateinit var saveService: SaveService
+    lateinit var complicationRefreshService: ComplicationRefreshService
     private lateinit var applicationBootManager: ApplicationBootManager
     private lateinit var bemUpdater: BEMUpdater
     var backgroundHeight = 0.dp
@@ -100,7 +101,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationChannelManager = NotificationChannelManager(notificationManager)
-        val complicationRefreshService = ComplicationRefreshService(this, partnerComplicationState)
+        complicationRefreshService = ComplicationRefreshService(this, partnerComplicationState)
         characterManager = CharacterManagerImpl(complicationRefreshService, database.characterDao(), characterSpritesIO, database.speciesEntityDao(), database.cardMetaEntityDao(), database.transformationEntityDao(), spriteBitmapConverter)
         cardMetaEntityDao = database.cardMetaEntityDao()
         newCardLoader = NewCardLoader(characterSpritesIO, cardSpriteIO, cardMetaEntityDao, database.speciesEntityDao(), database.transformationEntityDao(), database.adventureEntityDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao(), notificationChannelManager, DimReader())
@@ -136,7 +137,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         mainScreenComposable = MainScreenComposable(characterManager, saveService, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), newCardLoader)
         shutdownReceiver = ShutdownReceiver(shutdownManager)
-        applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, bemUpdater, saveService, notificationChannelManager)
+        applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, bemUpdater, saveService, notificationChannelManager, complicationRefreshService)
     }
 
     override fun getWorkManagerConfiguration(): Configuration {

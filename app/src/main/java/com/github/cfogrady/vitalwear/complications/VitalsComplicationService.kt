@@ -17,16 +17,10 @@ class VitalsComplicationService : ComplicationDataSourceService() {
         return complicationResult()
     }
 
-    override fun onComplicationDeactivated(complicationInstanceId: Int) {
-        super.onComplicationDeactivated(complicationInstanceId)
-        (application as VitalWearApp).partnerComplicationState.vitalComplicationIds.remove(complicationInstanceId)
-    }
-
     override fun onComplicationRequest(
         request: ComplicationRequest,
         listener: ComplicationRequestListener
     ) {
-        (application as VitalWearApp).partnerComplicationState.vitalComplicationIds.add(request.complicationInstanceId)
         val complicationData = complicationResult()
         listener.onComplicationData(complicationData)
     }
