@@ -4,6 +4,10 @@ import android.util.DisplayMetrics
 import android.util.Log
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.math.atan
+import kotlin.math.cos
+import kotlin.math.floor
+import kotlin.math.sin
 
 class ImageScaler(val displayMetrics: DisplayMetrics, val screenIsRound: Boolean) {
     companion object {
@@ -44,15 +48,21 @@ class ImageScaler(val displayMetrics: DisplayMetrics, val screenIsRound: Boolean
         }
         Log.i(TAG, "Calculating padding")
         val radius = calculateRadius()
-        val halfWidth = calculateSquareHalfWidth(radius)
-        Log.i(TAG, "Radius: $radius, HalfWidth: $halfWidth")
-        padding = radius - halfWidth
+        val halfHeight = calculateRectHalfHeight(radius)
+        Log.i(TAG, "Radius: $radius, halfHeight: $halfHeight")
+        padding = radius - halfHeight
         return padding
     }
 
-    private fun calculateSquareHalfWidth(radius: Int) : Int {
+    private fun calculateSquareHalfHeight(radius: Int) : Int {
         // Pythagorean Theorem where both sides are equal and the radius is the hypotenuse
-        return Math.floor(radius/ SQRT_OF_TWO).toInt()
+        return floor(radius/ SQRT_OF_TWO).toInt()
+    }
+
+    private fun calculateRectHalfHeight(radius: Int): Int {
+        val angleFromCenterToBottomRight = atan(0.5)
+        val halfHeight = cos(angleFromCenterToBottomRight) * radius
+        return floor(halfHeight).toInt()
     }
 
     private fun calculateRadius(): Int {
