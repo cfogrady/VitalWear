@@ -18,11 +18,16 @@ class BEMMoodUpdater(private val heartRateService: HeartRateService, private val
 
     fun updateMood(character: BEMCharacter, now: LocalDateTime) {
         GlobalScope.launch {
-            stepService.addStepsToVitals()
-            val exerciseLevel = heartRateService.getExerciseLevel(lastLevel, now)
-            updateFromExerciseLevel(character, exerciseLevel, now)
-            lastLevel = exerciseLevel
-            Log.i(TAG, "Mood updated successfully")
+            try {
+                stepService.addStepsToVitals()
+                val exerciseLevel = heartRateService.getExerciseLevel(lastLevel, now)
+                updateFromExerciseLevel(character, exerciseLevel, now)
+                lastLevel = exerciseLevel
+                Log.i(TAG, "Mood updated successfully")
+            } catch (ise: IllegalStateException) {
+                // primarily caused in emulator by lack of step sensor
+                Log.e(MoodBroadcastReceiver.TAG, "Failed to update mood", ise)
+            }
         }
     }
 
