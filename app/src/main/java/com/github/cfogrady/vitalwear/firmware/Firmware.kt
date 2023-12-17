@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import com.github.cfogrady.vitalwear.battle.data.BattleFirmwareSprites
 import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
 import com.github.cfogrady.vitalwear.character.data.EmoteFirmwareSprites
+import com.github.cfogrady.vitalwear.character.transformation.TransformationFirmwareSprites
 import com.github.cfogrady.vitalwear.menu.MenuFirmwareSprites
 import com.github.cfogrady.vitalwear.training.TrainingFirmwareSprites
 
@@ -13,6 +14,7 @@ class Firmware constructor(
     val battleFirmwareSprites: BattleFirmwareSprites,
     val emoteFirmwareSprites: EmoteFirmwareSprites,
     val trainingFirmwareSprites: TrainingFirmwareSprites,
+    val transformationFirmwareSprites: TransformationFirmwareSprites,
     val loadingIcon : Bitmap,
     val insertCardIcon: Bitmap,
     val defaultBackground: Bitmap,

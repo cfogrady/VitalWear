@@ -3,6 +3,10 @@ package com.github.cfogrady.vitalwear.character.data
 import com.github.cfogrady.vitalwear.card.CardType
 import com.github.cfogrady.vitalwear.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.card.db.SpeciesEntity
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDateTime
 import java.util.*
 
@@ -12,8 +16,10 @@ class BEMCharacter(
     val characterStats: CharacterEntity,
     val speciesStats : SpeciesEntity,
     val transformationWaitTimeSeconds: Long,
-    val transformationOptions: List<TransformationOption>,
-    var readyToTransform: Optional<TransformationOption> = Optional.empty()) {
+    val transformationOptions: List<TransformationOption>
+) {
+    private var _readyToTransform = MutableStateFlow<Optional<TransformationOption>>(Optional.empty())
+    var readyToTransform : StateFlow<Optional<TransformationOption>> = _readyToTransform
     var activityIdx : Int = 1
 
     companion object {
@@ -42,6 +48,13 @@ class BEMCharacter(
         )
     }
 
+    fun popTransformationOption(): Optional<TransformationOption> {
+        characterStats.timeUntilNextTransformation = transformationWaitTimeSeconds
+        val option = readyToTransform.value
+        _readyToTransform.tryEmit(Optional.empty())
+        return option
+    }
+
     fun hasValidTransformation(): Optional<TransformationOption> {
         for(transformationOption in transformationOptions) {
             if(transformationOption.requiredVitals > characterStats.vitals) {
@@ -61,14 +74,14 @@ class BEMCharacter(
         return Optional.empty()
     }
 
-    var lastTransformationCheck = LocalDateTime.MIN
+    private var lastTransformationCheck = LocalDateTime.MIN
 
     fun prepCharacterTransformation() {
         lastTransformationCheck = LocalDateTime.now()
         val characterStats = characterStats
         val transformationOption = hasValidTransformation()
         if(transformationOption.isPresent) {
-            readyToTransform = transformationOption
+            _readyToTransform.tryEmit(transformationOption)
         } else {
             characterStats.timeUntilNextTransformation = transformationWaitTimeSeconds
         }

@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.battle.BattleActivity
 import com.github.cfogrady.vitalwear.character.activity.CharacterSelectActivity
+import com.github.cfogrady.vitalwear.character.transformation.TransformationActivity
 import com.github.cfogrady.vitalwear.debug.DebugActivity
 import com.github.cfogrady.vitalwear.firmware.LoadFirmwareActivity
 import com.github.cfogrady.vitalwear.stats.StatsMenuActivity
@@ -50,6 +51,7 @@ class MainActivity : ComponentActivity() {
             activityHelper.getActivityLauncher(TrainingMenuActivity::class.java),
             activityHelper.getActivityLauncher(CharacterSelectActivity::class.java),
             activityHelper.getActivityLauncher(BattleActivity::class.java),
+            activityHelper.getActivityLauncher(TransformationActivity::class.java),
             activityHelper.getActivityLauncher(DebugActivity::class.java))
     }
 }

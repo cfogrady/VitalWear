@@ -6,6 +6,7 @@ class ActivityLaunchers(
     val trainingMenuLauncher: ()-> Unit,
     val characterSelectionLauncher: ()-> Unit,
     val battleLauncher: () -> Unit,
+    val transformLauncher: () -> Unit,
     val debugActivityLauncher: () -> Unit,
 ) {
 

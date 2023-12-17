@@ -11,6 +11,7 @@ import com.github.cfogrady.vitalwear.battle.data.BattleFirmwareSprites
 import com.github.cfogrady.vitalwear.card.SpriteBitmapConverter
 import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
 import com.github.cfogrady.vitalwear.character.data.EmoteFirmwareSprites
+import com.github.cfogrady.vitalwear.character.transformation.TransformationFirmwareSprites
 import com.github.cfogrady.vitalwear.menu.MenuFirmwareSprites
 import com.github.cfogrady.vitalwear.training.TrainingFirmwareSprites
 import com.google.common.collect.Lists
@@ -26,6 +27,10 @@ const val SPRITE_PACKAGE_LOCATION = 0x80000
 const val TIMER_ICON = 81
 const val INSERT_CARD_ICON = 38
 const val DEFAULT_BACKGROUND = 0
+const val BLACK_BACKGROUND = 1
+const val NEW_BACKGROUND_START_IDX = 2
+const val NEW_BACKGROUND_END_IDX = 5
+const val RAY_OF_LIGHT_BACKGROUND = 5
 const val STEPS_ICON = 55
 const val VITALS_ICON = 54
 const val BATTLE_ICON = 370
@@ -71,6 +76,8 @@ const val AP_IDX = 411
 const val PP_IDX = 412
 const val VITALS_RANGE_START_IDX = 281
 const val VITALS_RANGE_END_IDX = 288
+const val WEAK_PULSE = 65
+const val STRONG_PULSE = 64
 
 class FirmwareManager(
     val spriteBitmapConverter: SpriteBitmapConverter
@@ -141,6 +148,7 @@ class FirmwareManager(
                     battleFirmwareSprites(sprites),
                     emoteFirmwareSprites(sprites),
                     trainingFirmwareSprites(sprites),
+                    transformationFirmwareSprites(sprites),
                     loadingIcon,
                     inserCardIcon,
                     defaultBackground,
@@ -203,6 +211,16 @@ class FirmwareManager(
         val vitalRangeSprites = spriteBitmapConverter.getBitmaps(sprites.subList(
             VITALS_RANGE_START_IDX, VITALS_RANGE_END_IDX))
         return BattleFirmwareSprites(attackSprites, largeAttackSprites, battleBackground, battleIcon, partnerHPIcons, opponentHPIcons, hitSprites, vitalRangeSprites)
+    }
+
+    private fun transformationFirmwareSprites(sprites: List<Sprite>): TransformationFirmwareSprites {
+        val blackBackground = spriteBitmapConverter.getBitmap(sprites[BLACK_BACKGROUND])
+        val weakPulse = spriteBitmapConverter.getBitmap(sprites[WEAK_PULSE])
+        val strongPulse = spriteBitmapConverter.getBitmap(sprites[STRONG_PULSE])
+        val newBackgrounds = spriteBitmapConverter.getBitmaps(sprites.subList(
+            NEW_BACKGROUND_START_IDX, NEW_BACKGROUND_END_IDX))
+        val rayOfLightBackground = spriteBitmapConverter.getBitmap(sprites[RAY_OF_LIGHT_BACKGROUND])
+        return TransformationFirmwareSprites(blackBackground, weakPulse, strongPulse, newBackgrounds, rayOfLightBackground)
     }
 
     private fun trainingFirmwareSprites(sprites: List<Sprite>) : TrainingFirmwareSprites {

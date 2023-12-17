@@ -26,6 +26,7 @@ import com.github.cfogrady.vitalwear.character.CharacterManagerImpl
 import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
 import com.github.cfogrady.vitalwear.character.mood.BEMMoodUpdater
 import com.github.cfogrady.vitalwear.character.mood.MoodBroadcastReceiver
+import com.github.cfogrady.vitalwear.character.transformation.TransformationScreenFactory
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
@@ -55,7 +56,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     val cardSpriteIO = CardSpritesIO(spriteFileIO, spriteBitmapConverter)
     private val sensorThreadHandler = SensorThreadHandler()
     private lateinit var imageScaler : ImageScaler
-    private lateinit var notificationChannelManager: NotificationChannelManager
+    lateinit var notificationChannelManager: NotificationChannelManager
     lateinit var bitmapScaler: BitmapScaler
     lateinit var cardMetaEntityDao: CardMetaEntityDao
     lateinit var newCardLoader: NewCardLoader
@@ -77,6 +78,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var moodBroadcastReceiver: MoodBroadcastReceiver
     lateinit var scrollingNameFactory: ScrollingNameFactory
     lateinit var saveService: SaveService
+    lateinit var transformationScreenFactory: TransformationScreenFactory
     lateinit var complicationRefreshService: ComplicationRefreshService
     private lateinit var applicationBootManager: ApplicationBootManager
     private lateinit var bemUpdater: BEMUpdater
@@ -133,6 +135,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val endFightVitalsFactory = EndFightVitalsFactory(bitmapScaler, firmwareManager, backgroundManager, backgroundHeight)
         fightTargetFactory = FightTargetFactory(battleService, vitalBoxFactory, opponentSplashFactory, opponentNameScreenFactory, readyScreenFactory, goScreenFactory, attackScreenFactory, hpCompareFactory, endFightReactionFactory, endFightVitalsFactory)
         exerciseScreenFactory = ExerciseScreenFactory(saveService, vitalBoxFactory, bitmapScaler, backgroundHeight)
+        transformationScreenFactory = TransformationScreenFactory(characterManager, backgroundHeight, firmwareManager, bitmapScaler, vitalBoxFactory, bemUpdater)
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService)
         mainScreenComposable = MainScreenComposable(characterManager, saveService, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), newCardLoader)

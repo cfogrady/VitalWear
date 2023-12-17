@@ -22,11 +22,11 @@ class BemTransformationWorker (
         val character = characterManager.getCurrentCharacter()
         if(character != BEMCharacter.DEFAULT_CHARACTER) {
             character.prepCharacterTransformation()
-            if(characterManager.getCurrentCharacter().readyToTransform.isPresent) {
-                notificationChannelManager.sendGenericNotification(context, "Transformation!", "Character is ready for transformation")
-                characterManager.doActiveCharacterTransformation(context)
+            if(characterManager.getCurrentCharacter().readyToTransform.value.isPresent) {
+                notificationChannelManager.sendTransformationReadyNotification(context, "Transformation!", "Character is ready for transformation")
+                // characterManager.doActiveCharacterTransformation(context)
             } else {
-                bemUpdater.initializeBEMUpdates(character)
+                bemUpdater.setupTransformationChecker(character)
             }
         }
         return Result.success()

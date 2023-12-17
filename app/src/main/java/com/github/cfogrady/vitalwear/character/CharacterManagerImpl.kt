@@ -12,7 +12,6 @@ import com.github.cfogrady.vitalwear.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.card.db.SpeciesEntityDao
 import com.github.cfogrady.vitalwear.card.db.TransformationEntityDao
-import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 import kotlinx.coroutines.*
 import java.time.LocalDateTime
 import kotlin.collections.ArrayList
@@ -44,7 +43,7 @@ class CharacterManagerImpl(
             if(character != BEMCharacter.DEFAULT_CHARACTER) {
                 withContext(Dispatchers.Main) {
                     activeCharacter.value = character
-                    bemUpdater.initializeBEMUpdates(character)
+                    bemUpdater.setupTransformationChecker(character)
                 }
             }
             initialized.postValue(true)
@@ -110,27 +109,26 @@ class CharacterManagerImpl(
         return transformationOptions
     }
 
-    override fun doActiveCharacterTransformation(applicationContext: Context) {
+    override fun doActiveCharacterTransformation(applicationContext: Context, transformationOption: TransformationOption) : BEMCharacter {
         val actualCharacter = activeCharacter.value!!
-        actualCharacter.readyToTransform.ifPresent { option ->
-            val transformedCharacter = buildBEMCharacter(applicationContext, actualCharacter.cardMetaEntity, option.slotId) {
-                actualCharacter.characterStats
-            }
-            transformedCharacter.characterStats.slotId = option.slotId
-            transformedCharacter.characterStats.currentPhaseBattles = 0
-            transformedCharacter.characterStats.currentPhaseWins = 0
-            transformedCharacter.characterStats.hasTransformations = transformedCharacter.transformationOptions.isNotEmpty()
-            transformedCharacter.characterStats.lastUpdate = LocalDateTime.now()
-            transformedCharacter.characterStats.timeUntilNextTransformation = transformedCharacter.transformationWaitTimeSeconds
-            transformedCharacter.characterStats.trainedPP = 0
-            if(transformedCharacter.speciesStats.phase > 2 || actualCharacter.speciesStats.phase > 2) {
-                transformedCharacter.characterStats.vitals = 0
-            }
-            updateCharacter(transformedCharacter.characterStats)
-            bemUpdater.cancel()
-            activeCharacter.postValue(transformedCharacter)
-            bemUpdater.initializeBEMUpdates(transformedCharacter)
+        val transformedCharacter = buildBEMCharacter(applicationContext, actualCharacter.cardMetaEntity, transformationOption.slotId) {
+            actualCharacter.characterStats
         }
+        transformedCharacter.characterStats.slotId = transformationOption.slotId
+        transformedCharacter.characterStats.currentPhaseBattles = 0
+        transformedCharacter.characterStats.currentPhaseWins = 0
+        transformedCharacter.characterStats.hasTransformations = transformedCharacter.transformationOptions.isNotEmpty()
+        transformedCharacter.characterStats.lastUpdate = LocalDateTime.now()
+        transformedCharacter.characterStats.timeUntilNextTransformation = transformedCharacter.transformationWaitTimeSeconds
+        transformedCharacter.characterStats.trainedPP = 0
+        if(transformedCharacter.speciesStats.phase > 2 || actualCharacter.speciesStats.phase > 2) {
+            transformedCharacter.characterStats.vitals = 0
+        }
+        updateCharacter(transformedCharacter.characterStats)
+        bemUpdater.cancel()
+        activeCharacter.postValue(transformedCharacter)
+        bemUpdater.setupTransformationChecker(transformedCharacter)
+        return transformedCharacter
     }
 
     private fun updateCharacter(character: CharacterEntity) {
@@ -160,7 +158,7 @@ class CharacterManagerImpl(
         insertCharacter(character.characterStats)
         //TODO: Remove LiveData and replace with StateFlow
         activeCharacter.postValue(character)
-        bemUpdater.initializeBEMUpdates(character)
+        bemUpdater.setupTransformationChecker(character)
         complicationRefreshService.refreshVitalsComplication()
     }
 
@@ -230,7 +228,7 @@ class CharacterManagerImpl(
                 activeCharacter.value = selectedCharacter
                 complicationRefreshService.refreshVitalsComplication()
             }
-            bemUpdater.initializeBEMUpdates(selectedCharacter)
+            bemUpdater.setupTransformationChecker(selectedCharacter)
         }
     }
 

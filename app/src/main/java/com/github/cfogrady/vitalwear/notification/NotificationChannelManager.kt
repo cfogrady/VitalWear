@@ -13,7 +13,8 @@ class NotificationChannelManager(private val notificationManager: NotificationMa
     companion object {
         const val NOTIFICATION_CHANNEL = "Vital Wear"
         const val CHANNEL_ID = "VitalWearMainChannel"
-        var notificationId = 0
+        const val GENERIC_ID = 0
+        const val TRANSFORMATION_READY_ID = 1
     }
 
     fun createNotificationChannel() {
@@ -38,7 +39,26 @@ class NotificationChannelManager(private val notificationManager: NotificationMa
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
-        notificationManager.notify(notificationId, builder.build())
-        notificationId++
+        notificationManager.notify(GENERIC_ID, builder.build())
+    }
+
+    fun sendTransformationReadyNotification(context: Context, title: String, content: String) {
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+        var builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.complication_preview)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+        notificationManager.notify(TRANSFORMATION_READY_ID, builder.build())
+    }
+
+    fun cancelTransformationNotification() {
+        notificationManager.cancel(TRANSFORMATION_READY_ID)
     }
 }

@@ -19,7 +19,6 @@ import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 import com.google.android.gms.common.util.Hex
 import com.google.common.collect.ImmutableSet
 import java.io.File
-import java.io.FileWriter
 import java.io.InputStream
 import java.security.MessageDigest
 import java.util.*

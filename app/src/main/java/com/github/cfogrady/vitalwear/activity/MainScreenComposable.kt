@@ -87,6 +87,10 @@ class MainScreenComposable(
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun dailyScreen(firmware: Firmware, character: BEMCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
+        val readyToTransform by character.readyToTransform.collectAsState()
+        if (readyToTransform.isPresent) {
+            activityLaunchers.transformLauncher.invoke()
+        }
         val padding = imageScaler.getPadding()
         Box(modifier = Modifier
             .padding(padding)
