@@ -21,9 +21,12 @@ class VitalService(private val characterManager: CharacterManager, private val c
     private var debugList = LinkedList<Pair<LocalDateTime, String>>()
 
     fun debug(): List<Pair<String, String>> {
-        return debugList.map {
+        val debugInfo = ArrayList<Pair<String, String>>()
+        debugInfo.add(Pair("Last Reboot", bootTime.toString()))
+        debugInfo.addAll(debugList.map {
             Pair(it.first.toLocalTime().toString(), it.second)
-        }
+        })
+        return debugInfo
     }
 
     override fun processStepChanges(oldSteps: Int, newSteps: Int) {
@@ -51,7 +54,7 @@ class VitalService(private val characterManager: CharacterManager, private val c
     }
 
     private fun clearOldDebugEntries() {
-        while(debugList.first().first < LocalDate.now().atStartOfDay()) {
+        while(debugList.isNotEmpty() && debugList.first().first < LocalDate.now().atStartOfDay()) {
             debugList.removeFirst()
         }
     }
@@ -113,6 +116,6 @@ class VitalService(private val characterManager: CharacterManager, private val c
 
     private fun addBattleChangeToDebug(opponentLevel: Int, win: Boolean, newVitals: Int) {
         clearOldDebugEntries()
-        debugList.addLast(Pair<LocalDateTime, String>(LocalDateTime.now(), "Add $newVitals from battle against $opponentLevel. Won: $win"))
+        debugList.addLast(Pair<LocalDateTime, String>(LocalDateTime.now(), "Add $newVitals from battle against level ${opponentLevel+1} opponent. Won: $win"))
     }
 }
