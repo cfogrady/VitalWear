@@ -24,7 +24,6 @@ class BemTransformationWorker (
             character.prepCharacterTransformation()
             if(characterManager.getCurrentCharacter().readyToTransform.value.isPresent) {
                 notificationChannelManager.sendGenericNotification(context, "Transformation!", "Character is ready for transformation", NotificationChannelManager.TRANSFORMATION_READY_ID)
-                // characterManager.doActiveCharacterTransformation(context)
             } else {
                 bemUpdater.setupTransformationChecker(character)
             }

@@ -17,6 +17,7 @@ import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
+import com.github.cfogrady.vitalwear.composable.util.KeepScreenOn
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
@@ -29,6 +30,7 @@ class TransformationActivity : ComponentActivity() {
         val notificationChannelManager = (applicationContext as VitalWearApp).notificationChannelManager
         notificationChannelManager.cancelNotification(NotificationChannelManager.TRANSFORMATION_READY_ID)
         setContent {
+            KeepScreenOn()
             transformationScreenFactory.RunTransformation(applicationContext){
                 finish()
             }
