@@ -13,9 +13,10 @@ class NotificationChannelManager(private val notificationManager: NotificationMa
     companion object {
         const val NOTIFICATION_CHANNEL = "Vital Wear"
         const val CHANNEL_ID = "VitalWearMainChannel"
-        const val GENERIC_ID = 0
-        const val TRANSFORMATION_READY_ID = 1
+        const val TRANSFORMATION_READY_ID = 0
     }
+
+    private var genericNotificationId = 100
 
     fun createNotificationChannel() {
         val importance = NotificationManager.IMPORTANCE_DEFAULT
@@ -26,7 +27,7 @@ class NotificationChannelManager(private val notificationManager: NotificationMa
         notificationManager.createNotificationChannel(channel)
     }
 
-    fun sendGenericNotification(context: Context, title: String, content: String) {
+    fun sendGenericNotification(context: Context, title: String, content: String, notificationId: Int = genericNotificationId++): Int {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -39,26 +40,11 @@ class NotificationChannelManager(private val notificationManager: NotificationMa
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
-        notificationManager.notify(GENERIC_ID, builder.build())
+        notificationManager.notify(notificationId, builder.build())
+        return notificationId
     }
 
-    fun sendTransformationReadyNotification(context: Context, title: String, content: String) {
-        val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-
-        var builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.complication_preview)
-            .setContentTitle(title)
-            .setContentText(content)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-        notificationManager.notify(TRANSFORMATION_READY_ID, builder.build())
-    }
-
-    fun cancelTransformationNotification() {
-        notificationManager.cancel(TRANSFORMATION_READY_ID)
+    fun cancelNotification(notificationId: Int) {
+        notificationManager.cancel(notificationId)
     }
 }
