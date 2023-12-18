@@ -80,6 +80,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var saveService: SaveService
     lateinit var transformationScreenFactory: TransformationScreenFactory
     lateinit var complicationRefreshService: ComplicationRefreshService
+    lateinit var vitalService: VitalService
     private lateinit var applicationBootManager: ApplicationBootManager
     private lateinit var bemUpdater: BEMUpdater
     var backgroundHeight = 0.dp
@@ -108,7 +109,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         cardMetaEntityDao = database.cardMetaEntityDao()
         newCardLoader = NewCardLoader(characterSpritesIO, cardSpriteIO, cardMetaEntityDao, database.speciesEntityDao(), database.transformationEntityDao(), database.adventureEntityDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao(), notificationChannelManager, DimReader())
         val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val vitalService = VitalService(characterManager, complicationRefreshService)
+        vitalService = VitalService(characterManager, complicationRefreshService)
         stepService = SensorStepService(sharedPreferences, sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService))
         heartRateService = HeartRateService(sensorManager, sensorThreadHandler)
         moodBroadcastReceiver = MoodBroadcastReceiver(BEMMoodUpdater(heartRateService, stepService), characterManager)

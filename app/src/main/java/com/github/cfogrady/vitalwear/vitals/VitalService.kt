@@ -7,18 +7,23 @@ import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.steps.SensorStepService
 import com.github.cfogrady.vitalwear.steps.StepChangeListener
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.LinkedList
 
-class VitalService(private val characterManager: CharacterManager, private val complicationRefreshService: ComplicationRefreshService) : StepChangeListener {
+class VitalService(private val characterManager: CharacterManager, private val complicationRefreshService: ComplicationRefreshService, private val bootTime: LocalDateTime = LocalDateTime.now()) : StepChangeListener {
     companion object {
         const val STEPS_PER_VITAL = 50
     }
 
     private var remainingSteps = STEPS_PER_VITAL
 
+    private var debugList = LinkedList<Pair<LocalDateTime, String>>()
+
     fun debug(): List<Pair<String, String>> {
-        return listOf(
-            Pair("remainingSteps", "$remainingSteps"),
-        )
+        return debugList.map {
+            Pair(it.first.toLocalTime().toString(), it.second)
+        }
     }
 
     override fun processStepChanges(oldSteps: Int, newSteps: Int) {
@@ -34,8 +39,20 @@ class VitalService(private val characterManager: CharacterManager, private val c
                 var newVitals = vitalGainModifier(character, 4)
                 newVitals += vitalGainModifier(character, 4 * ((newSteps - stepsAlreadyTransformed)/STEPS_PER_VITAL))
                 remainingSteps = (newSteps - stepsAlreadyTransformed) % STEPS_PER_VITAL
+                addStepChangeToDebug(oldSteps, newSteps, newVitals)
                 addVitals(character, newVitals)
             }
+        }
+    }
+
+    private fun addStepChangeToDebug(oldSteps: Int, newSteps: Int, newVitals: Int) {
+        clearOldDebugEntries()
+        debugList.addLast(Pair<LocalDateTime, String>(LocalDateTime.now(), "Add $newVitals for step change from $oldSteps to $newSteps"))
+    }
+
+    private fun clearOldDebugEntries() {
+        while(debugList.first().first < LocalDate.now().atStartOfDay()) {
+            debugList.removeFirst()
         }
     }
 
@@ -89,9 +106,13 @@ class VitalService(private val characterManager: CharacterManager, private val c
         } else {
             vitalLossTable[partnerLevel-2][opponentLevel-2]
         }
-        characterManager.getCurrentCharacter().addVitals(vitalsChange)
-        complicationRefreshService.refreshVitalsComplication()
+        addBattleChangeToDebug(opponentLevel, win, vitalsChange)
+        addVitals(characterManager.getCurrentCharacter(), vitalsChange)
         return vitalsChange
     }
 
+    private fun addBattleChangeToDebug(opponentLevel: Int, win: Boolean, newVitals: Int) {
+        clearOldDebugEntries()
+        debugList.addLast(Pair<LocalDateTime, String>(LocalDateTime.now(), "Add $newVitals from battle against $opponentLevel. Won: $win"))
+    }
 }

@@ -29,6 +29,7 @@ class DebugActivity : ComponentActivity() {
         STEP_DEBUG_INFO,
         CHARACTER_DEBUG_INFO,
         HEART_RATE_DEBUG_INFO,
+        VITALS_DEBUG_INFO,
     }
 
     @Composable
@@ -55,6 +56,9 @@ class DebugActivity : ComponentActivity() {
                 debugMenuSelection = DebugScreens.DEBUG_MENU
             }
             DebugScreens.HEART_RATE_DEBUG_INFO -> DebugItems(loader = (application as VitalWearApp).heartRateService::debug) {
+                debugMenuSelection = DebugScreens.DEBUG_MENU
+            }
+            DebugScreens.VITALS_DEBUG_INFO -> DebugItems(loader = (application as VitalWearApp).vitalService::debug) {
                 debugMenuSelection = DebugScreens.DEBUG_MENU
             }
         }
