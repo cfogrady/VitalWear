@@ -42,6 +42,9 @@ class VitalService(private val characterManager: CharacterManager, private val c
                 var newVitals = vitalGainModifier(character, 4)
                 newVitals += vitalGainModifier(character, 4 * ((newSteps - stepsAlreadyTransformed)/STEPS_PER_VITAL))
                 remainingSteps = (newSteps - stepsAlreadyTransformed) % STEPS_PER_VITAL
+                if(remainingSteps == 0) { // was an even division, so we're at a full STEPS_PER_VITAL
+                    remainingSteps = STEPS_PER_VITAL
+                }
                 addStepChangeToDebug(oldSteps, newSteps, newVitals)
                 addVitals(character, newVitals)
             } else {
