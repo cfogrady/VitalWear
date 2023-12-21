@@ -44,7 +44,11 @@ class VitalService(private val characterManager: CharacterManager, private val c
                 remainingSteps = (newSteps - stepsAlreadyTransformed) % STEPS_PER_VITAL
                 addStepChangeToDebug(oldSteps, newSteps, newVitals)
                 addVitals(character, newVitals)
+            } else {
+                remainingSteps -= (newSteps - oldSteps)
             }
+        } else {
+            debugList.addLast(Pair(LocalDateTime.now(), "No character selected when updating vitals from steps."))
         }
     }
 
@@ -54,7 +58,7 @@ class VitalService(private val characterManager: CharacterManager, private val c
     }
 
     private fun clearOldDebugEntries() {
-        while(debugList.isNotEmpty() && debugList.first().first < LocalDate.now().atStartOfDay()) {
+        while(debugList.isNotEmpty() && (debugList.first().first < LocalDate.now().atStartOfDay() || debugList.size > 50)) {
             debugList.removeFirst()
         }
     }
