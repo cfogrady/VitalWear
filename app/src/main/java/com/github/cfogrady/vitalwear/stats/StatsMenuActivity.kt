@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.wear.compose.material.Text
@@ -21,21 +22,28 @@ import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterSprites
+import com.github.cfogrady.vitalwear.character.data.TransformationOption
+import com.github.cfogrady.vitalwear.character.transformation.TransformationFirmwareSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.composable.util.formatNumber
+import com.github.cfogrady.vitalwear.firmware.Firmware
 import java.time.LocalDateTime
 
 class StatsMenuActivity : ComponentActivity() {
 
     companion object {
         const val TAG = "StatsMenuActivity"
+        const val TRANSFORMATION_ICON_COLUMN_WEIGHT = 0.3f
+        const val TRANSFORMATION_VALUE_COLUMN_WEIGHT = 0.7f
+        val TRANSFORMATION_ROW_PADDING = 10.dp
     }
 
     lateinit var characterManager: CharacterManager
     lateinit var backgroundManager: BackgroundManager
     lateinit var bitmapScaler: BitmapScaler
     lateinit var vitalBoxFactory: VitalBoxFactory
+    lateinit var firmware: Firmware
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +51,7 @@ class StatsMenuActivity : ComponentActivity() {
         backgroundManager = (application as VitalWearApp).backgroundManager
         bitmapScaler = (application as VitalWearApp).bitmapScaler
         vitalBoxFactory = (application as VitalWearApp).vitalBoxFactory
+        firmware = (application as VitalWearApp).firmwareManager.getFirmware().value!!
         setContent {
             statsMenu()
         }
@@ -51,38 +60,60 @@ class StatsMenuActivity : ComponentActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun statsMenu() {
-        val scrollingNameFactory = remember { (application as VitalWearApp).scrollingNameFactory }
         LaunchedEffect(true) {
             characterManager.getLiveCharacter().value!!.characterStats.updateTimeStamps(LocalDateTime.now())
         }
         val background = remember { backgroundManager.selectedBackground.value!! }
         val partner = remember { characterManager.getLiveCharacter().value!! }
-        var state = remember {PagerState(0)}
+        val initialStatsPage = remember { mutableStateOf(0) }
+
         vitalBoxFactory.VitalBox {
             bitmapScaler.ScaledBitmap(
                 bitmap = background,
                 contentDescription = "Background",
                 alignment = Alignment.BottomCenter
             )
-            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally) {
-                if(state.currentPage < 5) {
-                    scrollingNameFactory.ScrollingName(name = partner.characterSprites.sprites[CharacterSprites.NAME])
-                    bitmapScaler.ScaledBitmap(bitmap = partner.characterSprites.sprites[CharacterSprites.IDLE_1], contentDescription = "Partner")
+            VerticalPager(pageCount = 1 + partner.transformationOptions.size) {rootPage ->
+                when(rootPage) {
+                    0 -> {
+                        PartnerStats(initialPage = initialStatsPage, partner = partner)
+                    }
+                    else -> {
+                        PotentialTransformation(
+                            firmwareSprites = firmware.transformationFirmwareSprites,
+                            bemCharacter = partner,
+                            transformationOption = partner.transformationOptions[rootPage -1],
+                            expectedTransformation = false,
+                            locked = false
+                        )
+                    }
                 }
-                VerticalPager(state = state, pageCount = 4) { page ->
-                    when (page) {
-                        0 -> {
-                            LimitAndRank(partner)
-                        }
-                        1 -> {
-                            PhaseAndAttribute(partner)
-                        }
-                        2 -> {
-                            Stats(partner)
-                        }
-                        3 -> {
-                            TransformationFulfilment(partner)
-                        }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalFoundationApi::class)
+    @Composable
+    private fun PartnerStats(initialPage: MutableState<Int>, partner: BEMCharacter) {
+        val scrollingNameFactory = remember { (application as VitalWearApp).scrollingNameFactory }
+        var state = remember {PagerState(initialPage.value)}
+        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally) {
+            scrollingNameFactory.ScrollingName(name = partner.characterSprites.sprites[CharacterSprites.NAME])
+            bitmapScaler.ScaledBitmap(bitmap = partner.characterSprites.sprites[CharacterSprites.IDLE_1], contentDescription = "Partner")
+            VerticalPager(state = state, pageCount = 4) { page ->
+                initialPage.value = page
+                when (page) {
+                    0 -> {
+                        LimitAndRank(partner)
+                    }
+                    1 -> {
+                        PhaseAndAttribute(partner)
+                    }
+                    2 -> {
+                        Stats(partner)
+                    }
+                    3 -> {
+                        TransformationFulfilment(partner)
                     }
                 }
             }
@@ -119,6 +150,69 @@ class StatsMenuActivity : ComponentActivity() {
                     else -> "UNKNOWN"
                 }
                 Text(text = attribute)
+            }
+        }
+    }
+
+    @Composable
+    private fun PotentialTransformation(firmwareSprites: TransformationFirmwareSprites, bemCharacter: BEMCharacter, transformationOption: TransformationOption, expectedTransformation: Boolean, locked: Boolean) {
+        Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
+            Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                if(expectedTransformation) {
+                    bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.star, contentDescription = "star")
+                    Text(text = "NEXT", fontSize = 2.em, fontStyle = FontStyle.Italic)
+                    bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.star, contentDescription = "star")
+                } else {
+                    Text(text = "NEXT", fontSize = 2.em, fontStyle = FontStyle.Italic)
+                }
+            }
+            if(locked) {
+                bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.locked, contentDescription = "Potential Transformation Locked")
+            } else {
+                bitmapScaler.ScaledBitmap(bitmap = transformationOption.sprite, contentDescription = "Potential Transformation")
+            }
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
+                //TODO: Add minutes (m)
+                bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.hourglass, contentDescription = "time icon", modifier = Modifier.weight(
+                    TRANSFORMATION_ICON_COLUMN_WEIGHT))
+                Text(text = "${formatNumber(bemCharacter.characterStats.timeUntilNextTransformation.toInt()/3600, 2)}h", textAlign = TextAlign.Right, modifier = Modifier.weight(
+                    TRANSFORMATION_VALUE_COLUMN_WEIGHT))
+            }
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
+                bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.vitalsIcon, contentDescription = "vitals icon", modifier = Modifier.weight(
+                    TRANSFORMATION_ICON_COLUMN_WEIGHT))
+                Text(text = "${formatNumber(transformationOption.requiredVitals, 4)}", textAlign = TextAlign.Right, modifier = Modifier.weight(
+                    TRANSFORMATION_VALUE_COLUMN_WEIGHT))
+            }
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
+                bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.battlesIcon, contentDescription = "battles icon", modifier = Modifier.weight(
+                    TRANSFORMATION_ICON_COLUMN_WEIGHT))
+                Text(text = "${formatNumber(transformationOption.requiredBattles, 3)}", textAlign = TextAlign.Right, modifier = Modifier.weight(
+                    TRANSFORMATION_VALUE_COLUMN_WEIGHT))
+            }
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
+                bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.winRatioIcon, contentDescription = "win ratio icon", modifier = Modifier.weight(
+                    TRANSFORMATION_ICON_COLUMN_WEIGHT))
+                Text(text = "${formatNumber(transformationOption.requiredWinRatio, 3)}%", textAlign = TextAlign.Right, modifier = Modifier.weight(
+                    TRANSFORMATION_VALUE_COLUMN_WEIGHT))
+            }
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
+                bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.ppIcon, contentDescription = "pp icon", modifier = Modifier.weight(
+                    TRANSFORMATION_ICON_COLUMN_WEIGHT))
+                Row(modifier = Modifier.weight(TRANSFORMATION_VALUE_COLUMN_WEIGHT), horizontalArrangement = Arrangement.End) {
+                    bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.squatIcon, contentDescription = "squat icon")
+                    Text(text = "${formatNumber(transformationOption.requiredPp, 3)}", textAlign = TextAlign.Right)
+                }
             }
         }
     }

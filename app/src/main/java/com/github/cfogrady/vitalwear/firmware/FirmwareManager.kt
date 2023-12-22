@@ -78,6 +78,15 @@ const val VITALS_RANGE_START_IDX = 281
 const val VITALS_RANGE_END_IDX = 288
 const val WEAK_PULSE = 65
 const val STRONG_PULSE = 64
+const val STAR = 159
+const val TRANSFORMATION_HOURGLASS = 81
+const val TRANSFORMATION_VITALS_ICON = 82
+const val TRANSFORMATION_BATTLES_ICON = 83
+const val TRANSFORMATION_WIN_RATIO_ICON = 84
+const val TRANSFORMATION_PP_ICON = 85
+const val TRANSFORMATION_SQUAT_ICON = 78
+const val TRANSFORMATION_LOCKED = 418
+
 
 class FirmwareManager(
     val spriteBitmapConverter: SpriteBitmapConverter
@@ -220,7 +229,21 @@ class FirmwareManager(
         val newBackgrounds = spriteBitmapConverter.getBitmaps(sprites.subList(
             NEW_BACKGROUND_START_IDX, NEW_BACKGROUND_END_IDX))
         val rayOfLightBackground = spriteBitmapConverter.getBitmap(sprites[RAY_OF_LIGHT_BACKGROUND])
-        return TransformationFirmwareSprites(blackBackground, weakPulse, strongPulse, newBackgrounds, rayOfLightBackground)
+        return TransformationFirmwareSprites(
+            blackBackground,
+            weakPulse,
+            strongPulse,
+            newBackgrounds,
+            rayOfLightBackground,
+            spriteBitmapConverter.getBitmap(sprites[STAR]),
+            spriteBitmapConverter.getBitmap(sprites[TRANSFORMATION_HOURGLASS]),
+            spriteBitmapConverter.getBitmap(sprites[TRANSFORMATION_VITALS_ICON]),
+            spriteBitmapConverter.getBitmap(sprites[TRANSFORMATION_BATTLES_ICON]),
+            spriteBitmapConverter.getBitmap(sprites[TRANSFORMATION_WIN_RATIO_ICON]),
+            spriteBitmapConverter.getBitmap(sprites[TRANSFORMATION_PP_ICON]),
+            spriteBitmapConverter.getBitmap(sprites[TRANSFORMATION_SQUAT_ICON]),
+            spriteBitmapConverter.getBitmap(sprites[TRANSFORMATION_LOCKED]),
+        )
     }
 
     private fun trainingFirmwareSprites(sprites: List<Sprite>) : TrainingFirmwareSprites {
