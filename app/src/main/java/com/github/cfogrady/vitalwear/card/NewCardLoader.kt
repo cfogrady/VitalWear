@@ -202,7 +202,8 @@ class NewCardLoader(
                     cardAdventure.background1,
                     cardAdventure.background2,
                     cardAdventure.showBossIdentity == 2,
-                    if(cardAdventure.giftCharacterIndex == DimReader.NONE_VALUE) null else cardAdventure.giftCharacterIndex
+                    if(cardAdventure.giftCharacterIndex == DimReader.NONE_VALUE) null else cardAdventure.giftCharacterIndex,
+                        false
                 )
                 )
             } else {
@@ -220,7 +221,8 @@ class NewCardLoader(
                     0,
                     0,
                     false,
-                    null
+                    null,
+                        false
                 )
                 )
             }

@@ -18,6 +18,7 @@ data class AdventureEntity(
     val bossBackgroundId: Int,
     val hiddenBoss: Boolean,
     val characterIdJoined: Int?,
+    val cleared: Boolean,
 ) {
     companion object {
         const val TABLE = "adventure"
