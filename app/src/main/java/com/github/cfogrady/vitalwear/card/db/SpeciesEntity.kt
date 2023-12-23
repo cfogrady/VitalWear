@@ -1,7 +1,10 @@
 package com.github.cfogrady.vitalwear.card.db
 
 import androidx.room.Entity
+import com.github.cfogrady.vb.dim.card.BemCardReader
+import com.github.cfogrady.vb.dim.card.DimReader
 import com.github.cfogrady.vitalwear.card.db.SpeciesEntity.Companion.TABLE
+import com.github.cfogrady.vitalwear.composable.util.formatNumber
 
 @Entity(tableName = TABLE, primaryKeys = ["cardName", "characterId"])
 data class SpeciesEntity (
@@ -25,5 +28,26 @@ data class SpeciesEntity (
         const val TAG = "SpeciesEntity"
         const val TABLE = "species"
         val EMPTY_SPECIES_ENTITY = SpeciesEntity("NONE", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "")
+    }
+
+    fun displayBp(): String {
+        if (bp == DimReader.NONE_VALUE) {
+            return formatNumber(0, 4)
+        }
+        return formatNumber(bp, 4)
+    }
+
+    fun displayHp(): String {
+        if (hp == DimReader.NONE_VALUE) {
+            return formatNumber(0, 4)
+        }
+        return formatNumber(hp, 4)
+    }
+
+    fun displayAp(): String {
+        if (ap == DimReader.NONE_VALUE) {
+            return formatNumber(0, 4)
+        }
+        return formatNumber(ap, 4)
     }
 }

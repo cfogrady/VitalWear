@@ -222,7 +222,7 @@ class StatsMenuActivity : ComponentActivity() {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
                 Text("BP", fontSize = 1.5.em)
-                Text(formatNumber(partner.speciesStats.bp, 4), fontSize = 1.5.em)
+                Text(partner.speciesStats.displayBp(), fontSize = 1.5.em)
             }
             Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
                 Text("   ", fontSize = 1.5.em)
@@ -230,7 +230,7 @@ class StatsMenuActivity : ComponentActivity() {
             }
             Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
                 Text("HP", fontSize = 1.5.em)
-                Text(formatNumber(partner.speciesStats.hp, 4), fontSize = 1.5.em)
+                Text(partner.speciesStats.displayHp(), fontSize = 1.5.em)
             }
             Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
                 Text("   ", fontSize = 1.5.em)
@@ -238,7 +238,7 @@ class StatsMenuActivity : ComponentActivity() {
             }
             Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
                 Text("AP", fontSize = 1.5.em)
-                Text(formatNumber(partner.speciesStats.ap, 4), fontSize = 1.5.em)
+                Text(partner.speciesStats.displayAp(), fontSize = 1.5.em)
             }
             Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
                 Text("   ", fontSize = 1.5.em)
