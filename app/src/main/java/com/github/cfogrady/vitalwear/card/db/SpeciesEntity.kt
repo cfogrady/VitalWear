@@ -1,7 +1,6 @@
 package com.github.cfogrady.vitalwear.card.db
 
 import androidx.room.Entity
-import com.github.cfogrady.vb.dim.card.BemCardReader
 import com.github.cfogrady.vb.dim.card.DimReader
 import com.github.cfogrady.vitalwear.card.db.SpeciesEntity.Companion.TABLE
 import com.github.cfogrady.vitalwear.composable.util.formatNumber
@@ -23,11 +22,12 @@ data class SpeciesEntity (
     val battlePool2: Int,
     val battlePool3: Int,
     val spriteDirName: String, //path to sprites
+    val raised: Boolean,
 ) {
     companion object {
         const val TAG = "SpeciesEntity"
         const val TABLE = "species"
-        val EMPTY_SPECIES_ENTITY = SpeciesEntity("NONE", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "")
+        val EMPTY_SPECIES_ENTITY = SpeciesEntity("NONE", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", false)
     }
 
     fun displayBp(): String {

@@ -278,6 +278,7 @@ class NewCardLoader(
             character.secondPoolBattleChance,
             battlePool3,
             spriteDir,
+            false,
         )
     }
 
