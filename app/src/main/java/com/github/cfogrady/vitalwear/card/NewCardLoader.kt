@@ -17,12 +17,10 @@ import com.github.cfogrady.vb.dim.transformation.DimEvolutionRequirements.DimEvo
 import com.github.cfogrady.vitalwear.card.db.*
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 import com.google.android.gms.common.util.Hex
-import com.google.common.collect.ImmutableSet
 import java.io.InputStream
 import java.security.MessageDigest
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 
 /**
  * The purpose of this class is to import card images into the app database
@@ -46,11 +44,7 @@ class NewCardLoader(
         private const val BEM_SPRITES_PER_CHARACTER = 14
     }
 
-    private val cardsBeingLoaded = HashSet<String>()
-    private val cardsBeingLoadedObservers = HashSet<CardLoaderObserverImpl>()
-
     fun importCardImage(applicationContext: Context, cardName: String, inputStream: InputStream, uniqueSprites: Boolean = false) {
-        addCardBeingLoaded(cardName)
         val card = dimReader.readCard(inputStream, true)
         val spritesByCharacterId = spritesByCharacterId(card)
         writeCardMeta(cardName, card)
@@ -60,7 +54,6 @@ class NewCardLoader(
         writeAttributeFusions(cardName, card)
         writeSpecificFusions(cardName, card)
         cardSpritesIO.saveCardSprites(applicationContext, cardName, card)
-        removeCardBeingLoaded(cardName)
         notificationChannelManager.sendGenericNotification(applicationContext, "$cardName Imported", "$cardName Imported Successfully")
     }
 
@@ -81,24 +74,6 @@ class NewCardLoader(
         }
         Log.i(TAG, "BitmapsForSlots Built")
         return resultMap
-    }
-
-    private fun addCardBeingLoaded(cardName: String) {
-        cardsBeingLoaded.add(cardName)
-        val immutableSet = ImmutableSet.copyOf(cardsBeingLoaded)
-        for(cardLoaderObserver in cardsBeingLoadedObservers) {
-            cardLoaderObserver.cardsBeingLoaded = immutableSet
-            cardLoaderObserver.receiveObservation()
-        }
-    }
-
-    private fun removeCardBeingLoaded(cardName: String) {
-        cardsBeingLoaded.remove(cardName)
-        val immutableSet = ImmutableSet.copyOf(cardsBeingLoaded)
-        for(cardLoaderObserver in cardsBeingLoadedObservers) {
-            cardLoaderObserver.cardsBeingLoaded = immutableSet
-            cardLoaderObserver.receiveObservation()
-        }
     }
 
     private fun writeCardMeta(cardName: String, card: Card<*, *, *, *, *, *>) {
