@@ -86,7 +86,7 @@ dependencies {
     debugImplementation 'androidx.wear.tiles:tiles-renderer:1.1.0'
 
     //VB-DIM-Reader and SLF4J logging
-    implementation 'com.github.cfogrady:vb-dim-reader:2.0.0.2-4b6cd48'
+    implementation 'com.github.cfogrady:vb-dim-reader:2.0.2.3-653843e'
     runtimeOnly 'org.slf4j:slf4j-android:1.7.26'
 
 
