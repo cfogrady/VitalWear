@@ -49,6 +49,40 @@ class NewCardLoader(
     private val cardsBeingLoaded = HashSet<String>()
     private val cardsBeingLoadedObservers = HashSet<CardLoaderObserverImpl>()
 
+    fun importCardImage(applicationContext: Context, cardName: String, inputStream: InputStream, uniqueSprites: Boolean = false) {
+        addCardBeingLoaded(cardName)
+        val card = dimReader.readCard(inputStream, true)
+        val spritesByCharacterId = spritesByCharacterId(card)
+        writeCardMeta(cardName, card)
+        writeSpeciesEntitiesAndSprites(applicationContext, cardName, card, uniqueSprites, spritesByCharacterId)
+        writeTransformations(cardName, card)
+        writeAdventures(cardName, card)
+        writeAttributeFusions(cardName, card)
+        writeSpecificFusions(cardName, card)
+        cardSpritesIO.saveCardSprites(applicationContext, cardName, card)
+        removeCardBeingLoaded(cardName)
+        notificationChannelManager.sendGenericNotification(applicationContext, "$cardName Imported", "$cardName Imported Successfully")
+    }
+
+    fun loadBitmapsForSlots(applicationContext: Context, requestedSlotsByCardName : Map<String, Collection<Int>>, spriteFile: String) : Map<String, SparseArray<Bitmap>> {
+        val resultMap = HashMap<String, SparseArray<Bitmap>>()
+        for(entry in requestedSlotsByCardName.entries) {
+            Log.i(TAG, "Reading stats $entry")
+            val speciesStats = speciesEntityDao.getCharacterByCardAndInCharacterIds(entry.key, entry.value)
+            Log.i(TAG, "Card read.")
+            val cardSlots = SparseArray<Bitmap>()
+            for(speciesStat in speciesStats) {
+                Log.i(TAG, "Fetching sprite for slot ${speciesStat.characterId}")
+                val bitmap = characterSpritesIO.loadCharacterBitmapFile(applicationContext, speciesStat.spriteDirName, spriteFile)
+                Log.i(TAG, "Done.")
+                cardSlots.put(speciesStat.characterId, bitmap)
+            }
+            resultMap[entry.key] = cardSlots
+        }
+        Log.i(TAG, "BitmapsForSlots Built")
+        return resultMap
+    }
+
     private fun addCardBeingLoaded(cardName: String) {
         cardsBeingLoaded.add(cardName)
         val immutableSet = ImmutableSet.copyOf(cardsBeingLoaded)
@@ -65,40 +99,6 @@ class NewCardLoader(
             cardLoaderObserver.cardsBeingLoaded = immutableSet
             cardLoaderObserver.receiveObservation()
         }
-    }
-
-    fun importCardImage(applicationContext: Context, cardName: String, inputStream: InputStream, uniqueSprites: Boolean = false) {
-        addCardBeingLoaded(cardName)
-        val card = dimReader.readCard(inputStream, true)
-        val spritesByCharacterId = spritesByCharacterId(card)
-        writeCardMeta(cardName, card)
-        writeSpeciesEntitiesAndSprites(applicationContext, cardName, card, uniqueSprites, spritesByCharacterId)
-        writeTransformations(cardName, card)
-        writeAdventures(cardName, card)
-        writeAttributeFusions(cardName, card)
-        writeSpecificFusions(cardName, card)
-        cardSpritesIO.saveCardSprites(applicationContext, cardName, card)
-        removeCardBeingLoaded(cardName)
-        notificationChannelManager.sendGenericNotification(applicationContext, "$cardName Imported", "$cardName Imported Successfully")
-    }
-
-    fun loadBitmapsForSlots(applicationContext: Context, requestedSlotsByCardName : Map<String, out Collection<Int>>, spriteFile: String) : Map<String, SparseArray<Bitmap>> {
-        val resultMap = HashMap<String, SparseArray<Bitmap>>()
-        for(entry in requestedSlotsByCardName.entries) {
-            Log.i(TAG, "Reading stats $entry")
-            val speciesStats = speciesEntityDao.getCharacterByCardAndInCharacterIds(entry.key, entry.value)
-            Log.i(TAG, "Card read.")
-            val cardSlots = SparseArray<Bitmap>()
-            for(speciesStat in speciesStats) {
-                Log.i(TAG, "Fetching sprite for slot ${speciesStat.characterId}")
-                val bitmap = characterSpritesIO.loadCharacterBitmapFile(applicationContext, speciesStat.spriteDirName, spriteFile)
-                Log.i(TAG, "Done.")
-                cardSlots.put(speciesStat.characterId, bitmap)
-            }
-            resultMap.put(entry.key, cardSlots)
-        }
-        Log.i(TAG, "BitmapsForSlots Built")
-        return resultMap
     }
 
     private fun writeCardMeta(cardName: String, card: Card<*, *, *, *, *, *>) {
