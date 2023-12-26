@@ -18,7 +18,6 @@ import com.github.cfogrady.vitalwear.card.db.*
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 import com.google.android.gms.common.util.Hex
 import com.google.common.collect.ImmutableSet
-import java.io.File
 import java.io.InputStream
 import java.security.MessageDigest
 import java.util.*
@@ -42,7 +41,6 @@ class NewCardLoader(
 ) {
     companion object {
         private const val TAG = "NewCardLoader"
-        const val IMPORT_DIR = "import"
         private const val DIM_FIRST_CHARACTER_SPRITE_INDEX = 10
         private const val BEM_FIRST_CHARACTER_SPRITE_INDEX = 54
         private const val BEM_SPRITES_PER_CHARACTER = 14
@@ -69,13 +67,6 @@ class NewCardLoader(
         }
     }
 
-    fun observerCardLoading(onChange: () -> Unit): CardLoaderObserver {
-        val observer = CardLoaderObserverImpl(onChange, ImmutableSet.copyOf(cardsBeingLoaded)) { thisCardLoaderObserver ->
-            cardsBeingLoadedObservers.remove(thisCardLoaderObserver)
-        }
-        return observer
-    }
-
     fun importCardImage(applicationContext: Context, cardName: String, inputStream: InputStream, uniqueSprites: Boolean = false) {
         addCardBeingLoaded(cardName)
         val card = dimReader.readCard(inputStream, true)
@@ -89,12 +80,6 @@ class NewCardLoader(
         cardSpritesIO.saveCardSprites(applicationContext, cardName, card)
         removeCardBeingLoaded(cardName)
         notificationChannelManager.sendGenericNotification(applicationContext, "$cardName Imported", "$cardName Imported Successfully")
-    }
-
-    fun listImportDir(applicationContext: Context) : List<File> {
-        val filesRoot = applicationContext.filesDir
-        val libraryDir = File(filesRoot, IMPORT_DIR)
-        return libraryDir.listFiles().toList()
     }
 
     fun loadBitmapsForSlots(applicationContext: Context, requestedSlotsByCardName : Map<String, out Collection<Int>>, spriteFile: String) : Map<String, SparseArray<Bitmap>> {
