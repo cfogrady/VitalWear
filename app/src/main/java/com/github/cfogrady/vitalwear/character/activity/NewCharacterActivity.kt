@@ -19,8 +19,8 @@ import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.card.CardLoader
 import com.github.cfogrady.vitalwear.card.activity.LoadCardActivity
-import com.github.cfogrady.vitalwear.card.db.CardMetaEntity
-import com.github.cfogrady.vitalwear.card.db.CardMetaEntityDao
+import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
+import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.common.util.ActivityHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.card.db
+package com.github.cfogrady.vitalwear.common.card.db
 
 import androidx.room.Dao
 import androidx.room.Insert

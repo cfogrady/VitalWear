@@ -19,7 +19,7 @@ import com.github.cfogrady.vitalwear.battle.composable.*
 import com.github.cfogrady.vitalwear.battle.data.BEMBattleLogic
 import com.github.cfogrady.vitalwear.battle.BattleService
 import com.github.cfogrady.vitalwear.card.*
-import com.github.cfogrady.vitalwear.card.db.CardMetaEntityDao
+import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.character.BEMUpdater
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.CharacterManagerImpl

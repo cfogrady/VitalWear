@@ -1,8 +1,8 @@
 package com.github.cfogrady.vitalwear.card
 
 import android.util.Log
-import com.github.cfogrady.vitalwear.card.db.ValidatedCardEntity
-import com.github.cfogrady.vitalwear.card.db.ValidatedCardEntityDao
+import com.github.cfogrady.vitalwear.common.card.db.ValidatedCardEntity
+import com.github.cfogrady.vitalwear.common.card.db.ValidatedCardEntityDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

@@ -11,8 +11,8 @@ import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.card.CharacterSpritesIO
-import com.github.cfogrady.vitalwear.card.db.SpeciesEntity
-import com.github.cfogrady.vitalwear.card.db.SpeciesEntityDao
+import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntity
+import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntityDao
 import com.github.cfogrady.vitalwear.character.data.CharacterSprites
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager

@@ -8,10 +8,10 @@ import com.github.cfogrady.vitalwear.character.data.*
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.card.CharacterSpritesIO
 import com.github.cfogrady.vitalwear.card.SpriteBitmapConverter
-import com.github.cfogrady.vitalwear.card.db.CardMetaEntity
-import com.github.cfogrady.vitalwear.card.db.CardMetaEntityDao
-import com.github.cfogrady.vitalwear.card.db.SpeciesEntityDao
-import com.github.cfogrady.vitalwear.card.db.TransformationEntityDao
+import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
+import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
+import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntityDao
+import com.github.cfogrady.vitalwear.common.card.db.TransformationEntityDao
 import kotlinx.coroutines.*
 import java.time.LocalDateTime
 import kotlin.collections.ArrayList

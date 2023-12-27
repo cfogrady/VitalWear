@@ -89,16 +89,4 @@ dependencies {
     //VB-DIM-Reader and SLF4J logging
     implementation 'com.github.cfogrady:vb-dim-reader:2.0.2.3-653843e'
     runtimeOnly 'org.slf4j:slf4j-android:1.7.26'
-
-
-    def room_version = "2.5.1"
-
-    implementation "androidx.room:room-runtime:$room_version"
-    // annotationProcessor "androidx.room:room-compiler:$room_version"
-
-    // To use Kotlin Symbol Processing (KSP)
-    ksp "androidx.room:room-compiler:$room_version"
-
-    // optional - Test helpers
-    testImplementation "androidx.room:room-testing:$room_version"
 }

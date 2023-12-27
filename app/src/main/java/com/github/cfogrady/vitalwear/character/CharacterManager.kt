@@ -2,7 +2,7 @@ package com.github.cfogrady.vitalwear.character
 
 import android.content.Context
 import androidx.lifecycle.LiveData
-import com.github.cfogrady.vitalwear.card.db.CardMetaEntity
+import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterPreview
 import com.github.cfogrady.vitalwear.character.data.TransformationOption
