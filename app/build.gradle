@@ -86,7 +86,14 @@ dependencies {
     implementation 'androidx.wear.tiles:tiles:1.1.0'
     debugImplementation 'androidx.wear.tiles:tiles-renderer:1.1.0'
 
-    //VB-DIM-Reader and SLF4J logging
-    implementation 'com.github.cfogrady:vb-dim-reader:2.0.2.3-653843e'
+    //SLF4J logging
     runtimeOnly 'org.slf4j:slf4j-android:1.7.26'
+
+    // Rooms
+    implementation "androidx.room:room-runtime:$room_version"
+    // To use Kotlin Symbol Processing (KSP)
+    ksp "androidx.room:room-compiler:$room_version"
+
+    //VB-Dim-Reader library
+    implementation 'com.github.cfogrady:vb-dim-reader:2.0.2.3-653843e'
 }

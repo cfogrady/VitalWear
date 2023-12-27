@@ -14,6 +14,7 @@ import com.github.cfogrady.vb.dim.character.DimStats
 import com.github.cfogrady.vb.dim.sprite.SpriteData.Sprite
 import com.github.cfogrady.vb.dim.transformation.BemTransformationRequirements.BemTransformationRequirementEntry
 import com.github.cfogrady.vb.dim.transformation.DimEvolutionRequirements.DimEvolutionRequirementBlock
+import com.github.cfogrady.vitalwear.common.card.CardType
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntity
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.AttributeFusionEntity

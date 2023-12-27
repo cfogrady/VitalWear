@@ -53,7 +53,7 @@ class NewCharacterActivity : ComponentActivity() {
     }
 
     @Composable
-    fun buildScreen(importCardActivityLauncher: () -> Unit) {
+    fun buildScreen(importCardActivityLauncher: ((Intent) -> Unit) -> Unit) {
         var loaded by remember { mutableStateOf(false) }
         var cards by remember { mutableStateOf(ArrayList<CardMetaEntity>() as List<CardMetaEntity>) }
         if(!loaded) {
@@ -69,7 +69,9 @@ class NewCharacterActivity : ComponentActivity() {
             ) {
                 item {
                     Button(onClick = {
-                        importCardActivityLauncher.invoke()
+                        importCardActivityLauncher.invoke {
+
+                        }
                     }) {
                         Text(text = "Import Card", modifier = Modifier.padding(10.dp))
                     }

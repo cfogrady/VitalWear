@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id 'com.android.library'
     id 'com.google.devtools.ksp'
@@ -32,6 +34,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = '11'
+        // Needed for kotlin symbol processing
+        tasks.withType(KotlinCompile).configureEach {
+            kotlinOptions.jvmTarget = "11"
+        }
     }
     composeOptions {
         kotlinCompilerExtensionVersion compose_version
@@ -61,8 +67,10 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     implementation 'androidx.activity:activity-compose:1.8.2'
 
+    //VB-Dim-Reader library
+    implementation 'com.github.cfogrady:vb-dim-reader:2.0.2.3-653843e'
+
     // Rooms
-    def room_version = "2.5.1"
     implementation "androidx.room:room-runtime:$room_version"
     // To use Kotlin Symbol Processing (KSP)
     ksp "androidx.room:room-compiler:$room_version"

@@ -1,6 +1,6 @@
 package com.github.cfogrady.vitalwear.character.data
 
-import com.github.cfogrady.vitalwear.card.CardType
+import com.github.cfogrady.vitalwear.common.card.CardType
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntity
 import kotlinx.coroutines.flow.MutableStateFlow

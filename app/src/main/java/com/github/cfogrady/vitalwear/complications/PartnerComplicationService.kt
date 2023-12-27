@@ -33,7 +33,7 @@ class PartnerComplicationService : ComplicationDataSourceService() {
     }
 
     private fun displayUninitializedFirmwareComplication() : ComplicationData {
-        val iconImage = Icon.createWithResource(applicationContext, R.drawable.loading_icon)
+        val iconImage = Icon.createWithResource(applicationContext, com.github.cfogrady.vitalwear.common.R.drawable.loading_icon)
         val image = SmallImage.Builder(iconImage, SmallImageType.PHOTO).build()
         val text = PlainComplicationText.Builder("Partner").build()
         return SmallImageComplicationData.Builder(image, text).build()

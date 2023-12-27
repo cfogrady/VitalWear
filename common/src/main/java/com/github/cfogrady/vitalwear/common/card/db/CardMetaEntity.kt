@@ -2,7 +2,7 @@ package com.github.cfogrady.vitalwear.common.card.db
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.github.cfogrady.vitalwear.card.CardType
+import com.github.cfogrady.vitalwear.common.card.CardType
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity.Companion.TABLE
 
 @Entity(tableName = TABLE)

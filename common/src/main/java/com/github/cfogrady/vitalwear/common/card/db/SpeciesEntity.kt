@@ -3,7 +3,7 @@ package com.github.cfogrady.vitalwear.common.card.db
 import androidx.room.Entity
 import com.github.cfogrady.vb.dim.card.DimReader
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntity.Companion.TABLE
-import com.github.cfogrady.vitalwear.composable.util.formatNumber
+import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 
 @Entity(tableName = TABLE, primaryKeys = ["cardName", "characterId"])
 data class SpeciesEntity (

@@ -19,6 +19,7 @@ import com.github.cfogrady.vitalwear.common.card.db.TransformationEntity
 import com.github.cfogrady.vitalwear.common.card.db.TransformationEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.ValidatedCardEntity
 import com.github.cfogrady.vitalwear.common.card.db.ValidatedCardEntityDao
+import com.github.cfogrady.vitalwear.common.data.LocalDateTimeConverters
 
 @Database(entities = [
     CharacterEntity::class,
