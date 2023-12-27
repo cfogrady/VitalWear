@@ -107,7 +107,8 @@ class VitalWearApp : Application(), Configuration.Provider {
         complicationRefreshService = ComplicationRefreshService(this, partnerComplicationState)
         characterManager = CharacterManagerImpl(complicationRefreshService, database.characterDao(), characterSpritesIO, database.speciesEntityDao(), database.cardMetaEntityDao(), database.transformationEntityDao(), spriteBitmapConverter)
         cardMetaEntityDao = database.cardMetaEntityDao()
-        newCardLoader = NewCardLoader(characterSpritesIO, cardSpriteIO, cardMetaEntityDao, database.speciesEntityDao(), database.transformationEntityDao(), database.adventureEntityDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao(), notificationChannelManager, DimReader())
+        val validatedCardManager = ValidatedCardManager(database.validatedCardEntityDao())
+        newCardLoader = NewCardLoader(characterSpritesIO, cardSpriteIO, cardMetaEntityDao, database.speciesEntityDao(), database.transformationEntityDao(), database.adventureEntityDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao(), validatedCardManager, notificationChannelManager, DimReader())
         val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         vitalService = VitalService(characterManager, complicationRefreshService)
         stepService = SensorStepService(sharedPreferences, sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService))

@@ -11,7 +11,7 @@ import com.github.cfogrady.vitalwear.debug.DebugActivity
 import com.github.cfogrady.vitalwear.firmware.LoadFirmwareActivity
 import com.github.cfogrady.vitalwear.stats.StatsMenuActivity
 import com.github.cfogrady.vitalwear.training.TrainingMenuActivity
-import com.github.cfogrady.vitalwear.util.ActivityHelper
+import com.github.cfogrady.vitalwear.common.util.ActivityHelper
 import java.time.LocalDateTime
 
 class MainActivity : ComponentActivity() {

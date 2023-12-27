@@ -21,7 +21,7 @@ import com.github.cfogrady.vitalwear.card.NewCardLoader
 import com.github.cfogrady.vitalwear.card.activity.LoadCardActivity
 import com.github.cfogrady.vitalwear.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.card.db.CardMetaEntityDao
-import com.github.cfogrady.vitalwear.util.ActivityHelper
+import com.github.cfogrady.vitalwear.common.util.ActivityHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

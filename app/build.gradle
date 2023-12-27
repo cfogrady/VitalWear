@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
@@ -26,7 +26,7 @@ android {
     defaultConfig {
         applicationId "com.github.cfogrady.vitalwear"
         minSdk 28
-        targetSdk 28
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -69,14 +69,9 @@ dependencies {
     implementation('androidx.work:work-runtime:2.8.1')
     implementation('androidx.work:work-runtime-ktx:2.8.1')
 
-    // GIF
-    implementation("io.coil-kt:coil-compose:2.2.2")
-    implementation("io.coil-kt:coil-gif:2.2.2")
-
     implementation("androidx.wear.compose:compose-foundation:1.1.2")
     // For Wear Material Design UX guidelines and specifications
     implementation("androidx.wear.compose:compose-material:1.1.2")
-    // implementation "androidx.compose.material:material:$compose_version"
     // For integration between Wear Compose and Androidx Navigation libraries
     implementation("androidx.wear.compose:compose-navigation:1.1.2")
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
@@ -101,10 +96,9 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     // annotationProcessor "androidx.room:room-compiler:$room_version"
 
-    // To use Kotlin annotation processing tool (kapt)
-    ksp "androidx.room:room-compiler:$room_version"
     // To use Kotlin Symbol Processing (KSP)
-    // ksp "androidx.room:room-compiler:$room_version"
+    ksp "androidx.room:room-compiler:$room_version"
+
     // optional - Test helpers
     testImplementation "androidx.room:room-testing:$room_version"
 }

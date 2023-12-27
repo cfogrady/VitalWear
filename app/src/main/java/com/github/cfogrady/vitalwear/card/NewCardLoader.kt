@@ -34,6 +34,7 @@ class NewCardLoader(
     private val adventureEntityDao: AdventureEntityDao,
     private val attributeFusionEntityDao: AttributeFusionEntityDao,
     private val specificFusionEntityDao: SpecificFusionEntityDao,
+    private val validatedCardManager: ValidatedCardManager,
     private val notificationChannelManager: NotificationChannelManager,
     private val dimReader: DimReader,
 ) {
@@ -46,6 +47,9 @@ class NewCardLoader(
 
     fun importCardImage(applicationContext: Context, cardName: String, inputStream: InputStream, uniqueSprites: Boolean = false) {
         val card = dimReader.readCard(inputStream, true)
+        if (!validatedCardManager.isValidatedCard(card.header.dimId)) {
+            notificationChannelManager.sendGenericNotification(applicationContext, "$cardName Import Failed", "$cardName requires validation from a bracelet before it can be imported.")
+        }
         val spritesByCharacterId = spritesByCharacterId(card)
         writeCardMeta(cardName, card)
         writeSpeciesEntitiesAndSprites(applicationContext, cardName, card, uniqueSprites, spritesByCharacterId)
@@ -54,7 +58,7 @@ class NewCardLoader(
         writeAttributeFusions(cardName, card)
         writeSpecificFusions(cardName, card)
         cardSpritesIO.saveCardSprites(applicationContext, cardName, card)
-        notificationChannelManager.sendGenericNotification(applicationContext, "$cardName Imported", "$cardName Imported Successfully")
+        notificationChannelManager.sendGenericNotification(applicationContext, "$cardName Import Success", "$cardName imported successfully")
     }
 
     fun loadBitmapsForSlots(applicationContext: Context, requestedSlotsByCardName : Map<String, Collection<Int>>, spriteFile: String) : Map<String, SparseArray<Bitmap>> {

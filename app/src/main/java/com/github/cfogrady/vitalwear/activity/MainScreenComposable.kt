@@ -15,7 +15,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.em
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.*
 import com.github.cfogrady.vitalwear.R
@@ -25,10 +24,6 @@ import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
-import com.github.cfogrady.vitalwear.steps.ManyStepListener
-import com.github.cfogrady.vitalwear.steps.SensorStepService
-import java.time.LocalDate
-import java.time.LocalDateTime
 
 class MainScreenComposable(
     private val characterManager: CharacterManager,
@@ -120,9 +115,7 @@ class MainScreenComposable(
                     }
                     3 -> {
                         vitalBoxFactory.VitalBox {
-                            Box(modifier = Modifier
-                                .fillMaxSize()
-                                .clickable { activityLaunchers.battleLauncher.invoke() }, contentAlignment = Alignment.Center) {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.trainingIcon, contentDescription = "Training", modifier = Modifier.clickable {
                                     activityLaunchers.trainingMenuLauncher.invoke()
                                 })
