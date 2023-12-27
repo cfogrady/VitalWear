@@ -10,7 +10,7 @@ import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.activity.FileExploreActivity
 import com.github.cfogrady.vitalwear.activity.PROMPT_TEXT
 import com.github.cfogrady.vitalwear.activity.SELECTED_FILE
-import com.github.cfogrady.vitalwear.card.NewCardLoader
+import com.github.cfogrady.vitalwear.card.CardLoader
 import com.github.cfogrady.vitalwear.common.util.ActivityHelper
 import kotlinx.coroutines.*
 import java.io.File
@@ -20,11 +20,11 @@ import java.io.FileInputStream
 const val TAG = "LoadCardActivity"
 class LoadCardActivity : ComponentActivity() {
 
-    lateinit var cardLoader : NewCardLoader
+    lateinit var cardLoader : CardLoader
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        cardLoader = (application as VitalWearApp).newCardLoader
+        cardLoader = (application as VitalWearApp).cardLoader
         val activityHelper = ActivityHelper(this)
         activityHelper.getActivityLauncherWithResultHandling(FileExploreActivity::class.java, addToIntent = {
             it.putExtra(PROMPT_TEXT, "Select card image to load")

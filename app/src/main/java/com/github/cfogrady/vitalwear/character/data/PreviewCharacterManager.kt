@@ -3,11 +3,11 @@ package com.github.cfogrady.vitalwear.character.data
 import android.content.Context
 import android.util.Log
 import com.github.cfogrady.vitalwear.card.CharacterSpritesIO
-import com.github.cfogrady.vitalwear.card.NewCardLoader
+import com.github.cfogrady.vitalwear.card.CardLoader
 import java.util.HashMap
 import java.util.HashSet
 
-class PreviewCharacterManager(val characterDao: CharacterDao, val cardLoader: NewCardLoader) {
+class PreviewCharacterManager(val characterDao: CharacterDao, val cardLoader: CardLoader) {
     fun previewCharacters(applicationContext: Context) : List<CharacterPreview> {
         Log.i(com.github.cfogrady.vitalwear.character.TAG, "Fetching preview characters")
         val characters = characterDao.getCharactersOrderByRecent()

@@ -17,7 +17,7 @@ class FileReceiverListenerService  : WearableListenerService() {
             GlobalScope.launch {
                 channelClient.getInputStream(channel).await().use { cardStream ->
                     try {
-                        (application as VitalWearApp).newCardLoader.importCardImage(applicationContext, "cardName", cardStream)
+                        (application as VitalWearApp).cardLoader.importCardImage(applicationContext, "cardName", cardStream)
                     } catch (e: Exception) {
                         Log.e(TAG, "Unable to load received card data", e)
                     }

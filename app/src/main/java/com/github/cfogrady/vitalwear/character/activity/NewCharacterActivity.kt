@@ -17,7 +17,7 @@ import androidx.wear.compose.material.items
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.card.CardSpritesIO
-import com.github.cfogrady.vitalwear.card.NewCardLoader
+import com.github.cfogrady.vitalwear.card.CardLoader
 import com.github.cfogrady.vitalwear.card.activity.LoadCardActivity
 import com.github.cfogrady.vitalwear.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.card.db.CardMetaEntityDao
@@ -35,13 +35,13 @@ const val NEW_CHARACTER_SELECTED_FLAG = "newCharacterStarted"
  */
 class NewCharacterActivity : ComponentActivity() {
 
-    lateinit var cardLoader : NewCardLoader
+    lateinit var cardLoader : CardLoader
     lateinit var characterManager : CharacterManager
     lateinit var cardSpritesIO: CardSpritesIO
     lateinit var cardMetaEntityDao: CardMetaEntityDao
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        cardLoader = (application as VitalWearApp).newCardLoader
+        cardLoader = (application as VitalWearApp).cardLoader
         characterManager = (application as VitalWearApp).characterManager
         cardSpritesIO = (application as VitalWearApp).cardSpriteIO
         cardMetaEntityDao = (application as VitalWearApp).cardMetaEntityDao
