@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.common.card.db
+package com.github.cfogrady.vitalwear.card
 
 import androidx.room.Entity
 

@@ -68,7 +68,7 @@ dependencies {
     implementation 'androidx.activity:activity-compose:1.8.2'
 
     // VB-Dim-Reader library
-    implementation 'com.github.cfogrady:vb-dim-reader:2.0.2.3-653843e'
+    implementation 'com.github.cfogrady:vb-dim-reader:2.0.2.4-64233c4'
 
     // Needed
     implementation 'com.google.guava:guava:31.1-android'

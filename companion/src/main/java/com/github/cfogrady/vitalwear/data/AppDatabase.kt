@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.companion.data
+package com.github.cfogrady.vitalwear.data
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -15,8 +15,8 @@ import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.TransformationEntity
 import com.github.cfogrady.vitalwear.common.card.db.TransformationEntityDao
-import com.github.cfogrady.vitalwear.common.card.db.ValidatedCardEntity
-import com.github.cfogrady.vitalwear.common.card.db.ValidatedCardEntityDao
+import com.github.cfogrady.vitalwear.card.ValidatedCardEntity
+import com.github.cfogrady.vitalwear.card.ValidatedCardEntityDao
 import com.github.cfogrady.vitalwear.common.data.LocalDateTimeConverters
 
 @Database(entities = [

@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace 'com.github.cfogrady.vitalwear.companion'
+    namespace 'com.github.cfogrady.vitalwear'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.github.cfogrady.vitalwear.companion"
+        applicationId "com.github.cfogrady.vitalwear"
         minSdk 28
         targetSdk 34
         versionCode 1
@@ -70,7 +70,7 @@ dependencies {
     implementation 'androidx.activity:activity-compose:1.8.2'
 
     //VB-DIM-Reader and SLF4J logging
-    implementation 'com.github.cfogrady:vb-dim-reader:2.0.2.3-653843e'
+    implementation 'com.github.cfogrady:vb-dim-reader:2.0.2.4-64233c4'
     runtimeOnly 'org.slf4j:slf4j-android:1.7.26'
 
     //Channel Client (data transfer)

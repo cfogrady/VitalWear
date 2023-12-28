@@ -13,6 +13,8 @@ import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.TransformationEntityDao
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDateTime
 import kotlin.collections.ArrayList
 import kotlin.math.max
@@ -31,9 +33,9 @@ class CharacterManagerImpl(
     private val transformationEntityDao: TransformationEntityDao,
     private val spriteBitmapConverter: SpriteBitmapConverter,
 ) : CharacterManager {
-    private val activeCharacter = MutableLiveData(BEMCharacter.DEFAULT_CHARACTER)
+    private val activeCharacter = MutableStateFlow(BEMCharacter.DEFAULT_CHARACTER)
     private lateinit var bemUpdater: BEMUpdater
-    override val initialized = MutableLiveData(false)
+    override val initialized = MutableStateFlow(false)
 
     suspend fun init(applicationContext: Context, bemUpdater: BEMUpdater) {
         Log.i(TAG, "Initializing character manager")
@@ -46,21 +48,21 @@ class CharacterManagerImpl(
                     bemUpdater.setupTransformationChecker(character)
                 }
             }
-            initialized.postValue(true)
+            initialized.value = true
             Log.i(TAG, "Character manager initialized")
         }
     }
 
     override fun getCurrentCharacter(): BEMCharacter {
-        return activeCharacter.value!!
+        return activeCharacter.value
     }
 
-    override fun getLiveCharacter() : LiveData<BEMCharacter> {
+    override fun getCharacterFlow() : StateFlow<BEMCharacter> {
         return activeCharacter
     }
 
     override fun activeCharacterIsPresent() : Boolean {
-        return activeCharacter.value != null && activeCharacter.value != BEMCharacter.DEFAULT_CHARACTER
+        return  activeCharacter.value != BEMCharacter.DEFAULT_CHARACTER
     }
 
     private fun loadActiveCharacter(applicationContext: Context) : BEMCharacter {
@@ -110,7 +112,7 @@ class CharacterManagerImpl(
     }
 
     override fun doActiveCharacterTransformation(applicationContext: Context, transformationOption: TransformationOption) : BEMCharacter {
-        val actualCharacter = activeCharacter.value!!
+        val actualCharacter = activeCharacter.value
         val transformedCharacter = buildBEMCharacter(applicationContext, actualCharacter.cardMetaEntity, transformationOption.slotId) {
             actualCharacter.characterStats
         }
@@ -126,7 +128,7 @@ class CharacterManagerImpl(
         }
         updateCharacter(transformedCharacter.characterStats)
         bemUpdater.cancel()
-        activeCharacter.postValue(transformedCharacter)
+        activeCharacter.value = transformedCharacter
         bemUpdater.setupTransformationChecker(transformedCharacter)
         return transformedCharacter
     }
@@ -143,13 +145,13 @@ class CharacterManagerImpl(
     fun updateActiveCharacter(now: LocalDateTime) {
         Log.i(TAG, "Updating the active character")
         if(activeCharacterIsPresent()) {
-            updateCharacterStats(activeCharacter.value!!.characterStats, now)
+            updateCharacterStats(activeCharacter.value.characterStats, now)
         }
     }
 
     override fun createNewCharacter(applicationContext: Context, cardMetaEntity: CardMetaEntity) {
         if(activeCharacterIsPresent()) {
-            val currentCharacter = activeCharacter.value!!
+            val currentCharacter = activeCharacter.value
             currentCharacter.characterStats.state = CharacterState.BACKUP
             updateCharacter(currentCharacter.characterStats)
             bemUpdater.cancel()
@@ -157,7 +159,7 @@ class CharacterManagerImpl(
         val character = newCharacter(applicationContext, cardMetaEntity, 0)
         insertCharacter(character.characterStats)
         //TODO: Remove LiveData and replace with StateFlow
-        activeCharacter.postValue(character)
+        activeCharacter.value = character
         bemUpdater.setupTransformationChecker(character)
         complicationRefreshService.refreshVitalsComplication()
     }
@@ -217,7 +219,7 @@ class CharacterManagerImpl(
                 characterDao.getCharacterById(selectedCharacterPreview.characterId)
             }
             if(activeCharacterIsPresent()) {
-                val currentCharacter = activeCharacter.value!!
+                val currentCharacter = activeCharacter.value
                 currentCharacter.characterStats.state = CharacterState.BACKUP
                 updateCharacter(currentCharacter.characterStats)
                 bemUpdater.cancel()

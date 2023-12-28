@@ -61,10 +61,10 @@ class StatsMenuActivity : ComponentActivity() {
     @Composable
     private fun statsMenu() {
         LaunchedEffect(true) {
-            characterManager.getLiveCharacter().value!!.characterStats.updateTimeStamps(LocalDateTime.now())
+            characterManager.getCharacterFlow().value!!.characterStats.updateTimeStamps(LocalDateTime.now())
         }
         val background = remember { backgroundManager.selectedBackground.value!! }
-        val partner = remember { characterManager.getLiveCharacter().value!! }
+        val partner = remember { characterManager.getCharacterFlow().value!! }
         val initialStatsPage = remember { mutableStateOf(0) }
 
         vitalBoxFactory.VitalBox {

@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.companion.util
+package com.github.cfogrady.vitalwear.util
 
 import java.lang.IllegalArgumentException
 

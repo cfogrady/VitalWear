@@ -24,6 +24,7 @@ import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
+import kotlinx.coroutines.flow.StateFlow
 
 class MainScreenComposable(
     private val characterManager: CharacterManager,
@@ -39,49 +40,45 @@ class MainScreenComposable(
         val TAG = "MainScreenComposable"
     }
     @Composable
-    fun mainScreen(activityLaunchers: ActivityLaunchers) {
-        val characterManagerInitialized by characterManager.initialized.observeAsState()
-        val firmwareInitialized by firmwareManager.hasBeenInitialized().observeAsState()
-        if(!characterManagerInitialized!! || !firmwareInitialized!!) {
+    fun MainScreen(activityLaunchers: ActivityLaunchers) {
+        val characterManagerInitialized by characterManager.initialized.collectAsState()
+        val firmwareState by firmwareManager.firmwareState.collectAsState()
+        if(!characterManagerInitialized || firmwareState == FirmwareManager.FirmwareState.Loading) {
             Log.i(TAG, "Loading in mainScreen")
             Log.i(TAG, "Character Manager Initialized: $characterManagerInitialized")
-            Log.i(TAG, "Firmware Manager Initialized: $firmwareInitialized")
-            Loading() {}
+            Log.i(TAG, "Firmware Manager Initialized: $firmwareState")
+            Loading(loadingText = "Initializing") {}
+        } else if(firmwareState == FirmwareManager.FirmwareState.Missing) {
+            activityLaunchers.firmwareLoadingLauncher.invoke()
         } else {
-            val activeCharacter = characterManager.getLiveCharacter()
+            val activeCharacter = characterManager.getCharacterFlow()
             val firmware = firmwareManager.getFirmware()
             val background = backgroundManager.selectedBackground
-            everythingLoadedScreen(firmwareData = firmware, activeCharacterData = activeCharacter, background, activityLaunchers)
+            EverythingLoadedScreen(firmwareData = firmware, activeCharacterData = activeCharacter, background, activityLaunchers)
         }
     }
 
     @Composable
-    fun everythingLoadedScreen(firmwareData: LiveData<Firmware>, activeCharacterData: LiveData<BEMCharacter>, backgroundData: LiveData<Bitmap>, activityLaunchers: ActivityLaunchers) {
-        val firmware by firmwareData.observeAsState()
-        val character by activeCharacterData.observeAsState()
+    fun EverythingLoadedScreen(firmwareData: StateFlow<Firmware?>, activeCharacterData: StateFlow<BEMCharacter>, backgroundData: LiveData<Bitmap>, activityLaunchers: ActivityLaunchers) {
+        val firmware by firmwareData.collectAsState()
+        val character by activeCharacterData.collectAsState()
         val background by backgroundData.observeAsState()
-        if(firmware == null) {
-            activityLaunchers.firmwareLoadingLauncher.invoke()
-        }
-        if(character == null) {
-            Log.i(TAG, "Loading in everythingLoadedScreen. Firmware null: ${firmware == null}; character null: ${character == null}")
-            Loading {}
-        } else if(background == null) {
+        if(background == null) {
             Log.i(TAG, "Loading in everythingLoadedScreen background is null")
             Loading {
                 // TODO: Change to loadCurrent or similar
                 backgroundManager.loadDefault()
             }
-        } else if(character!!.characterStats.id == BEMCharacter.DEFAULT_CHARACTER.characterStats.id) {
+        } else if(character.characterStats.id == BEMCharacter.DEFAULT_CHARACTER.characterStats.id) {
             activityLaunchers.characterSelectionLauncher.invoke()
         } else {
-            dailyScreen(firmware!!, character = character!!, background!!, activityLaunchers)
+            DailyScreen(firmware!!, character = character, background!!, activityLaunchers)
         }
     }
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun dailyScreen(firmware: Firmware, character: BEMCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
+    fun DailyScreen(firmware: Firmware, character: BEMCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
         val readyToTransform by character.readyToTransform.collectAsState()
         if (readyToTransform.isPresent) {
             activityLaunchers.transformLauncher.invoke()

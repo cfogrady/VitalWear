@@ -1,5 +1,9 @@
 package com.github.cfogrady.vitalwear.companion.util
 
+import com.github.cfogrady.vitalwear.util.Endian
+import com.github.cfogrady.vitalwear.util.getUInt16
+import com.github.cfogrady.vitalwear.util.getUInt32
+import com.github.cfogrady.vitalwear.util.toByteArray
 import org.junit.Assert
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -60,7 +64,8 @@ class ByteManipulationTest {
         assertArrayEquals(byteArrayOf(0, 0, 1, 1), 257u.toByteArray(Endian.Big))
         assertArrayEquals(byteArrayOf(0, 1, 0, 0), 65536u.toByteArray(Endian.Big))
         assertArrayEquals(byteArrayOf(1, 0, 0, 0), 16777216u.toByteArray(Endian.Big))
-        assertArrayEquals(byteArrayOf(0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(),0xFF.toByte()), 4294967295u.toByteArray(Endian.Big))
+        assertArrayEquals(byteArrayOf(0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(),0xFF.toByte()), 4294967295u.toByteArray(
+            Endian.Big))
     }
 
     @Test

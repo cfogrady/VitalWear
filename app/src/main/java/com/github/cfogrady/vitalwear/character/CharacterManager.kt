@@ -1,17 +1,17 @@
 package com.github.cfogrady.vitalwear.character
 
 import android.content.Context
-import androidx.lifecycle.LiveData
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterPreview
 import com.github.cfogrady.vitalwear.character.data.TransformationOption
+import kotlinx.coroutines.flow.StateFlow
 
 interface CharacterManager {
-    val initialized: LiveData<Boolean>
+    val initialized: StateFlow<Boolean>
     fun getCurrentCharacter(): BEMCharacter
 
-    fun getLiveCharacter() : LiveData<BEMCharacter>
+    fun getCharacterFlow() : StateFlow<BEMCharacter>
 
     fun activeCharacterIsPresent() : Boolean
 

@@ -62,7 +62,9 @@ class LoadFirmwareActivity  : ComponentActivity() {
             super.onInputClosed(channel, closeReason, errorCode)
             Log.i(TAG, "Firmware file received")
             channelClient.close(channel)
-            finish()
+            firmwareManager.loadFirmware(applicationContext).invokeOnCompletion {
+                finish()
+            }
         }
     }
 }

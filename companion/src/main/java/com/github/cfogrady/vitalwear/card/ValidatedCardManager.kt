@@ -1,10 +1,8 @@
-package com.github.cfogrady.vitalwear.common.card
+package com.github.cfogrady.vitalwear.card
 
 import android.util.Log
-import com.github.cfogrady.vitalwear.common.card.db.ValidatedCardEntity
-import com.github.cfogrady.vitalwear.common.card.db.ValidatedCardEntityDao
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 
@@ -14,10 +12,10 @@ class ValidatedCardManager(private val validatedCardEntityDao: ValidatedCardEnti
         const val TAG = "ValidatedCardManager"
     }
 
-    lateinit var validatedIds: Set<Int>
+    private lateinit var validatedIds: Set<Int>
 
     init {
-        GlobalScope.launch(Dispatchers.IO) {
+        CoroutineScope(Dispatchers.IO).launch {
             validatedIds = HashSet(validatedCardEntityDao.getIds())
         }
     }
@@ -26,7 +24,7 @@ class ValidatedCardManager(private val validatedCardEntityDao: ValidatedCardEnti
         if (!isInitialized()) {
             throw IllegalStateException("Not yet initialized")
         }
-        validatedCardEntityDao.insert(ValidatedCardEntity(cardId))
+        validatedCardEntityDao.insert(com.github.cfogrady.vitalwear.card.ValidatedCardEntity(cardId))
         validatedIds = validatedIds.plus(cardId)
     }
 
@@ -35,11 +33,10 @@ class ValidatedCardManager(private val validatedCardEntityDao: ValidatedCardEnti
         if (!isInitialized()) {
             throw IllegalStateException("Not yet initialized")
         }
-        return true
-        // return validatedIds.contains(cardId)
+        return validatedIds.contains(cardId)
     }
 
-    fun isInitialized(): Boolean {
+    private fun isInitialized(): Boolean {
         return this::validatedIds.isInitialized
     }
 }

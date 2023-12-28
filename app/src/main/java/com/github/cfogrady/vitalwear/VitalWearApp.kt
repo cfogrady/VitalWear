@@ -31,7 +31,6 @@ import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
 import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
 import com.github.cfogrady.vitalwear.common.card.SpriteFileIO
-import com.github.cfogrady.vitalwear.common.card.ValidatedCardManager
 import com.github.cfogrady.vitalwear.data.AppDatabase
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
@@ -112,7 +111,6 @@ class VitalWearApp : Application(), Configuration.Provider {
         complicationRefreshService = ComplicationRefreshService(this, partnerComplicationState)
         characterManager = CharacterManagerImpl(complicationRefreshService, database.characterDao(), characterSpritesIO, database.speciesEntityDao(), database.cardMetaEntityDao(), database.transformationEntityDao(), spriteBitmapConverter)
         cardMetaEntityDao = database.cardMetaEntityDao()
-        val validatedCardManager = ValidatedCardManager(database.validatedCardEntityDao())
         cardLoader = CardLoader(characterSpritesIO, cardSpriteIO, cardMetaEntityDao, database.speciesEntityDao(), database.transformationEntityDao(), database.adventureEntityDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao(), DimReader())
         val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         vitalService = VitalService(characterManager, complicationRefreshService)

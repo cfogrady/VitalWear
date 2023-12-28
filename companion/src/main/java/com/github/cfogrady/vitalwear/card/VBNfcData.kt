@@ -1,10 +1,10 @@
-package com.github.cfogrady.vitalwear.companion.card
+package com.github.cfogrady.vitalwear.card
 
 import android.nfc.tech.MifareUltralight
-import com.github.cfogrady.vitalwear.companion.util.Endian
-import com.github.cfogrady.vitalwear.companion.util.getUInt16
-import com.github.cfogrady.vitalwear.companion.util.getUInt32
-import com.github.cfogrady.vitalwear.companion.util.toByteArray
+import com.github.cfogrady.vitalwear.util.Endian
+import com.github.cfogrady.vitalwear.util.getUInt16
+import com.github.cfogrady.vitalwear.util.getUInt32
+import com.github.cfogrady.vitalwear.util.toByteArray
 
 class VBNfcData(nfcData: MifareUltralight) {
     companion object {

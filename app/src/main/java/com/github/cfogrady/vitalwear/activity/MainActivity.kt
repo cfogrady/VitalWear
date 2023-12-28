@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
         mainScreenComposable = (application as VitalWearApp).mainScreenComposable
         val activityLaunchers = buildActivityLaunchers()
         setContent {
-            mainScreenComposable.mainScreen(activityLaunchers)
+            mainScreenComposable.MainScreen(activityLaunchers)
         }
     }
 

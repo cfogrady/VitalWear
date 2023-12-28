@@ -36,7 +36,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
     }
 
     fun createBattleModel(context: Context): PreBattleModel {
-        val partnerCharacter = characterManager.getLiveCharacter().value!!
+        val partnerCharacter = characterManager.getCharacterFlow().value!!
         val firmware = firmwareManager.getFirmware().value!!
         val partnerBattleCharacter = battleCharacterFromBemCharacter(context, partnerCharacter)
         val hasCardHits = partnerCharacter.isBEM()
@@ -53,7 +53,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
     }
 
     fun performBattle(preBattleModel: PreBattleModel): PostBattleModel {
-        val partnerCharacter = characterManager.getLiveCharacter().value!!
+        val partnerCharacter = characterManager.getCharacterFlow().value!!
         val firmware = firmwareManager.getFirmware().value!!
         val battle = battleLogic.performBattle(preBattleModel)
         partnerCharacter.characterStats.totalBattles++

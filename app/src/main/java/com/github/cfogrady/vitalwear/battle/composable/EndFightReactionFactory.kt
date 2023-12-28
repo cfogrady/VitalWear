@@ -56,7 +56,7 @@ class EndFightReactionFactory(private val bitmapScaler: BitmapScaler, private va
     }
 
     private fun characterBitmaps(battleResult: BattleResult): List<Bitmap> {
-        val character = characterManager.getLiveCharacter().value!!
+        val character = characterManager.getCharacterFlow().value!!
         val sprites = character.characterSprites.sprites
         return when(battleResult) {
             BattleResult.WIN -> {
