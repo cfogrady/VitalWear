@@ -1,14 +1,14 @@
 package com.github.cfogrady.vitalwear.firmware
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.core.net.toUri
 import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
 import com.github.cfogrady.vb.dim.sprite.SpriteData.Sprite
 import com.github.cfogrady.vb.dim.util.RelativeByteOffsetInputStream
 import com.github.cfogrady.vitalwear.battle.data.BattleFirmwareSprites
-import com.github.cfogrady.vitalwear.card.SpriteBitmapConverter
+import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
 import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
 import com.github.cfogrady.vitalwear.character.data.EmoteFirmwareSprites
 import com.github.cfogrady.vitalwear.character.transformation.TransformationFirmwareSprites
@@ -16,9 +16,11 @@ import com.github.cfogrady.vitalwear.menu.MenuFirmwareSprites
 import com.github.cfogrady.vitalwear.training.TrainingFirmwareSprites
 import com.google.common.collect.Lists
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 import java.io.FileInputStream
-import java.nio.file.Files
+import java.io.FileNotFoundException
 
 const val FIRMWARE_FILE = "VBBE_10B.vb2"
 const val SPRITE_DIMENSIONS_LOCATION = 0x90a4
@@ -91,44 +93,45 @@ const val TRANSFORMATION_LOCKED = 418
 class FirmwareManager(
     val spriteBitmapConverter: SpriteBitmapConverter
 ) {
+
+    enum class FirmwareState {
+        Loading,
+        Missing,
+        Loaded,
+    }
+
     private val bemSpriteReader = BemSpriteReader()
     private val TAG = "FirmwareManager"
-    private val firmware = MutableLiveData<Firmware>()
-    private val initialized = MutableLiveData(false)
+    private val firmware = MutableStateFlow<Firmware?>(null)
+    private val mutalbeFirmwareState = MutableStateFlow(FirmwareState.Loading)
+    val firmwareState: StateFlow<FirmwareState> = mutalbeFirmwareState
 
-    fun hasBeenInitialized() : LiveData<Boolean> {
-        return initialized
+    fun firmwareUri(context: Context): Uri {
+        val filesRoot = context.filesDir
+        val firmwareFile = File(filesRoot, FIRMWARE_FILE)
+        return firmwareFile.toUri()
     }
 
-    fun storeFirmware(applicationContext: Context, file: String): Job {
-        return GlobalScope.launch(Dispatchers.IO) {
-            val srcFile = File(file)
-            val filesRoot = applicationContext.filesDir
-            val firmwareFile = File(filesRoot, FIRMWARE_FILE)
-            if (!srcFile.exists()) {
-                throw IllegalArgumentException("Given firmware file, $file does not exist!")
-            }
-            Files.copy(srcFile.toPath(), firmwareFile.toPath())
+    fun loadFirmware(applicationContext: Context): Job {
+        return CoroutineScope(Dispatchers.IO).launch {
+            mutalbeFirmwareState.value = FirmwareState.Loading
             if(!internalLoadFirmware(applicationContext)) {
+                val filesRoot = applicationContext.filesDir
+                val firmwareFile = File(filesRoot, FIRMWARE_FILE)
                 firmwareFile.delete()
-                throw IllegalArgumentException("Given firmware file, $file has errors!")
+                mutalbeFirmwareState.value = FirmwareState.Missing
+                Log.w(TAG, "Imported Firmware file had errors!")
             }
         }
     }
 
-    fun loadFirmware(applicationContext: Context) {
-        GlobalScope.launch {
-            internalLoadFirmware(applicationContext)
-        }
-    }
-
-    fun getFirmware() : LiveData<Firmware> {
+    fun getFirmware() : StateFlow<Firmware?> {
         return firmware
     }
 
     private fun internalLoadFirmware(applicationContext: Context) : Boolean {
-        var filesRoot = applicationContext.filesDir
-        var firmwareFile = File(filesRoot, FIRMWARE_FILE)
+        val filesRoot = applicationContext.filesDir
+        val firmwareFile = File(filesRoot, FIRMWARE_FILE)
         try {
             FileInputStream(firmwareFile).use { fileInput ->
                 val startFirmwareRead = System.currentTimeMillis()
@@ -140,7 +143,7 @@ class FirmwareManager(
                 val sprites = bemSpriteReader.getSpriteData(input, dimensionsList).sprites
                 Log.i(TAG, "Time to initialize firmware: ${System.currentTimeMillis() - startFirmwareRead}")
                 val loadingIcon = spriteBitmapConverter.getBitmap(sprites[TIMER_ICON])
-                val inserCardIcon = spriteBitmapConverter.getBitmap(sprites[INSERT_CARD_ICON])
+                val insertCardIcon = spriteBitmapConverter.getBitmap(sprites[INSERT_CARD_ICON])
                 val defaultBackground = spriteBitmapConverter.getBitmap(sprites[DEFAULT_BACKGROUND])
 
 
@@ -159,7 +162,7 @@ class FirmwareManager(
                     trainingFirmwareSprites(sprites),
                     transformationFirmwareSprites(sprites),
                     loadingIcon,
-                    inserCardIcon,
+                    insertCardIcon,
                     defaultBackground,
                     readyIcon,
                     goIcon,
@@ -167,13 +170,16 @@ class FirmwareManager(
                     clearIcon,
                     failedIcon,
                 )
-                firmware.postValue(loadedFirmware)
-                initialized.postValue(true)
+                firmware.value = loadedFirmware
             }
+            mutalbeFirmwareState.value = FirmwareState.Loaded
+            return true
+        } catch(fnfe: FileNotFoundException) {
+            Log.e(TAG, "No firmware file", fnfe)
+            mutalbeFirmwareState.value = FirmwareState.Missing
             return true
         } catch (e: Exception) {
             Log.e(TAG, "Unable to load firmware", e)
-            initialized.postValue(true)
             return false
         }
     }

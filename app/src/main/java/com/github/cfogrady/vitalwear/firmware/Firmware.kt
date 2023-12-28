@@ -8,7 +8,7 @@ import com.github.cfogrady.vitalwear.character.transformation.TransformationFirm
 import com.github.cfogrady.vitalwear.menu.MenuFirmwareSprites
 import com.github.cfogrady.vitalwear.training.TrainingFirmwareSprites
 
-class Firmware constructor(
+class Firmware(
     val characterFirmwareSprites: CharacterFirmwareSprites,
     val menuFirmwareSprites: MenuFirmwareSprites,
     val battleFirmwareSprites: BattleFirmwareSprites,
@@ -23,6 +23,4 @@ class Firmware constructor(
     val mission: Bitmap,
     val clear: Bitmap,
     val failedIcon: Bitmap,
-) {
-
-}
+)

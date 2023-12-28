@@ -19,7 +19,7 @@ import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.BackgroundManager
 import com.github.cfogrady.vitalwear.battle.data.PostBattleModel
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
-import com.github.cfogrady.vitalwear.composable.util.formatNumber
+import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import java.lang.Math.abs
 

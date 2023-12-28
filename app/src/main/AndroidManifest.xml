@@ -16,6 +16,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <!-- Look for firmware and card images -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <!-- post notifications -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-feature android:name="android.hardware.type.watch" />
 
@@ -133,9 +135,18 @@
                 android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
                 android:value="300" />
         </service>
+        <!-- This stupid service doesn't work. TODO: Figure out why -->
+        <service android:name=".card.CardImageImportService" android:exported="true" android:enabled="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.CHANNEL_EVENT" />
+                <data android:scheme="wear" android:host="*"/>
+            </intent-filter>
+        </service>
 
         <receiver android:name=".complications.PartnerComplicationReceiver" />
-        <receiver android:name=".BootReceiver">
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

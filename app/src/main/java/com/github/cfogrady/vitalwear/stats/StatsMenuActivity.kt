@@ -21,12 +21,12 @@ import com.github.cfogrady.vitalwear.BackgroundManager
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
-import com.github.cfogrady.vitalwear.character.data.CharacterSprites
+import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.character.data.TransformationOption
 import com.github.cfogrady.vitalwear.character.transformation.TransformationFirmwareSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
-import com.github.cfogrady.vitalwear.composable.util.formatNumber
+import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import java.time.LocalDateTime
 
@@ -61,10 +61,10 @@ class StatsMenuActivity : ComponentActivity() {
     @Composable
     private fun statsMenu() {
         LaunchedEffect(true) {
-            characterManager.getLiveCharacter().value!!.characterStats.updateTimeStamps(LocalDateTime.now())
+            characterManager.getCharacterFlow().value!!.characterStats.updateTimeStamps(LocalDateTime.now())
         }
         val background = remember { backgroundManager.selectedBackground.value!! }
-        val partner = remember { characterManager.getLiveCharacter().value!! }
+        val partner = remember { characterManager.getCharacterFlow().value!! }
         val initialStatsPage = remember { mutableStateOf(0) }
 
         vitalBoxFactory.VitalBox {

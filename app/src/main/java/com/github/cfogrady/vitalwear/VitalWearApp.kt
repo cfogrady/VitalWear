@@ -18,8 +18,7 @@ import com.github.cfogrady.vitalwear.activity.PartnerScreenComposable
 import com.github.cfogrady.vitalwear.battle.composable.*
 import com.github.cfogrady.vitalwear.battle.data.BEMBattleLogic
 import com.github.cfogrady.vitalwear.battle.BattleService
-import com.github.cfogrady.vitalwear.card.*
-import com.github.cfogrady.vitalwear.card.db.CardMetaEntityDao
+import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.character.BEMUpdater
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.CharacterManagerImpl
@@ -27,12 +26,17 @@ import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
 import com.github.cfogrady.vitalwear.character.mood.BEMMoodUpdater
 import com.github.cfogrady.vitalwear.character.mood.MoodBroadcastReceiver
 import com.github.cfogrady.vitalwear.character.transformation.TransformationScreenFactory
+import com.github.cfogrady.vitalwear.common.card.CardLoader
+import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
+import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
+import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
+import com.github.cfogrady.vitalwear.common.card.SpriteFileIO
+import com.github.cfogrady.vitalwear.data.AppDatabase
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.ScrollingNameFactory
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
-import com.github.cfogrady.vitalwear.data.*
 import com.github.cfogrady.vitalwear.debug.ExceptionService
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
@@ -59,7 +63,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var notificationChannelManager: NotificationChannelManager
     lateinit var bitmapScaler: BitmapScaler
     lateinit var cardMetaEntityDao: CardMetaEntityDao
-    lateinit var newCardLoader: NewCardLoader
+    lateinit var cardLoader: CardLoader
     lateinit var database : AppDatabase
     lateinit var characterManager: CharacterManager
     lateinit var previewCharacterManager: PreviewCharacterManager
@@ -107,7 +111,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         complicationRefreshService = ComplicationRefreshService(this, partnerComplicationState)
         characterManager = CharacterManagerImpl(complicationRefreshService, database.characterDao(), characterSpritesIO, database.speciesEntityDao(), database.cardMetaEntityDao(), database.transformationEntityDao(), spriteBitmapConverter)
         cardMetaEntityDao = database.cardMetaEntityDao()
-        newCardLoader = NewCardLoader(characterSpritesIO, cardSpriteIO, cardMetaEntityDao, database.speciesEntityDao(), database.transformationEntityDao(), database.adventureEntityDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao(), notificationChannelManager, DimReader())
+        cardLoader = CardLoader(characterSpritesIO, cardSpriteIO, cardMetaEntityDao, database.speciesEntityDao(), database.transformationEntityDao(), database.adventureEntityDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao(), DimReader())
         val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         vitalService = VitalService(characterManager, complicationRefreshService)
         stepService = SensorStepService(sharedPreferences, sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService))
@@ -117,7 +121,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         saveService = SaveService(characterManager as CharacterManagerImpl, stepService, sharedPreferences)
         shutdownManager = ShutdownManager(saveService)
         firmwareManager.loadFirmware(applicationContext)
-        backgroundManager = BackgroundManager(newCardLoader, firmwareManager)
+        backgroundManager = BackgroundManager(cardLoader, firmwareManager)
         val random = Random()
         val bemBattleLogic = BEMBattleLogic(random)
         battleService = BattleService(cardSpriteIO, database.speciesEntityDao(), characterSpritesIO, characterManager, firmwareManager, bemBattleLogic, saveService, vitalService, random)
@@ -139,7 +143,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         transformationScreenFactory = TransformationScreenFactory(characterManager, backgroundHeight, firmwareManager, bitmapScaler, vitalBoxFactory, bemUpdater)
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService)
         mainScreenComposable = MainScreenComposable(characterManager, saveService, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory)
-        previewCharacterManager = PreviewCharacterManager(database.characterDao(), newCardLoader)
+        previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardLoader)
         shutdownReceiver = ShutdownReceiver(shutdownManager)
         applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, bemUpdater, saveService, notificationChannelManager, complicationRefreshService)
     }

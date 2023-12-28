@@ -15,3 +15,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "VitalWear"
 include ':app'
+include ':companion'
+include ':common'

@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.Dp
 import com.github.cfogrady.vitalwear.character.BEMUpdater
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
-import com.github.cfogrady.vitalwear.character.data.CharacterSprites
+import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
