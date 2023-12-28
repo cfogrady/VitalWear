@@ -22,8 +22,10 @@ import com.github.cfogrady.vitalwear.card.activity.LoadCardActivity
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.common.util.ActivityHelper
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -39,6 +41,9 @@ class NewCharacterActivity : ComponentActivity() {
     lateinit var characterManager : CharacterManager
     lateinit var cardSpritesIO: CardSpritesIO
     lateinit var cardMetaEntityDao: CardMetaEntityDao
+
+    var newCardLoads = MutableStateFlow(0)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         cardLoader = (application as VitalWearApp).cardLoader
@@ -46,7 +51,12 @@ class NewCharacterActivity : ComponentActivity() {
         cardSpritesIO = (application as VitalWearApp).cardSpriteIO
         cardMetaEntityDao = (application as VitalWearApp).cardMetaEntityDao
         val activityHelper = ActivityHelper(this)
-        val importCardActivity = activityHelper.getActivityLauncherWithResultHandling(LoadCardActivity::class.java) {}
+        val importCardActivity = activityHelper.getActivityLauncherWithResultHandling(LoadCardActivity::class.java) {
+            val cardAdded = it.data?.extras?.getBoolean(LoadCardActivity.LOADED_CARD_KEY, false)
+            if(cardAdded != null && cardAdded) {
+                newCardLoads.value++
+            }
+        }
         setContent {
             buildScreen(importCardActivityLauncher = importCardActivity)
         }
@@ -54,14 +64,18 @@ class NewCharacterActivity : ComponentActivity() {
 
     @Composable
     fun buildScreen(importCardActivityLauncher: ((Intent) -> Unit) -> Unit) {
+        val cardLoads by newCardLoads.collectAsState()
         var loaded by remember { mutableStateOf(false) }
         var cards by remember { mutableStateOf(ArrayList<CardMetaEntity>() as List<CardMetaEntity>) }
-        if(!loaded) {
-            Text(text = LOADING_TEXT)
-            LaunchedEffect(key1 = loaded) {
+        LaunchedEffect(cardLoads) {
+            loaded = false
+            withContext(Dispatchers.IO) {
                 cards = loadCards()
                 loaded = true
             }
+        }
+        if(!loaded) {
+            Text(text = LOADING_TEXT)
         } else {
             ScalingLazyColumn(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -78,10 +92,8 @@ class NewCharacterActivity : ComponentActivity() {
                 }
                 items(items = cards) { card ->
                     Button(onClick = {
-                        GlobalScope.launch {
-                            withContext(Dispatchers.Default) {
-                                characterManager.createNewCharacter(applicationContext, card)
-                            }
+                        CoroutineScope(Dispatchers.Default).launch {
+                            characterManager.createNewCharacter(applicationContext, card)
                         }
                         val intent = Intent()
                         intent.putExtra(NEW_CHARACTER_SELECTED_FLAG, true)

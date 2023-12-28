@@ -4,7 +4,16 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.lifecycleScope
+import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.common.communication.ChannelTypes
@@ -20,18 +29,34 @@ class LoadFirmwareActivity  : ComponentActivity() {
         val TAG = "FileExploreActivity"
     }
 
+    enum class LoadFirmwareState{
+        WaitingForPhone,
+        Loading,
+    }
+
     lateinit var firmwareManager: FirmwareManager
     lateinit var channelClient: ChannelClient
 
-    var loading = MutableStateFlow(false)
+    var loadFirmwareState = MutableStateFlow(LoadFirmwareState.WaitingForPhone)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         firmwareManager = (application as VitalWearApp).firmwareManager
         channelClient = Wearable.getChannelClient(this)
         setContent {
+            val state by loadFirmwareState.collectAsState()
             KeepScreenOn()
-            Loading(loadingText = "Import Firmware From Phone"){}
+            when(state) {
+                LoadFirmwareState.WaitingForPhone -> {
+                    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = "Import Firmware From Phone To Continue", textAlign = TextAlign.Center)
+                    }
+                }
+                LoadFirmwareState.Loading -> {
+                    KeepScreenOn()
+                    Loading(loadingText = "Importing Firmware"){}
+                }
+            }
         }
     }
 
@@ -53,6 +78,7 @@ class LoadFirmwareActivity  : ComponentActivity() {
                 return
             }
             lifecycleScope.launch(Dispatchers.IO) {
+                loadFirmwareState.value = LoadFirmwareState.Loading
                 Log.i(TAG, "Receiving firmware file")
                 channelClient.receiveFile(channel, firmwareManager.firmwareUri(applicationContext), false)
             }

@@ -54,8 +54,10 @@ import com.github.cfogrady.vitalwear.common.util.ActivityHelper
 import com.github.cfogrady.vitalwear.VitalWearCompanion
 import com.github.cfogrady.vitalwear.common.composable.util.KeepScreenOn
 import com.google.android.gms.wearable.Wearable
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.nio.charset.Charset
@@ -211,7 +213,9 @@ class ImportCardActivity() : ComponentActivity() {
                 finish()
             } else {
                 Log.i(TAG, "Validated Card $validatedCardId")
-                validatedCardManager.addValidatedCard(validatedCardId)
+                CoroutineScope(Dispatchers.IO).launch {
+                    validatedCardManager.addValidatedCard(validatedCardId)
+                }
                 importState.value = ImportState.ImportCard
             }
         }

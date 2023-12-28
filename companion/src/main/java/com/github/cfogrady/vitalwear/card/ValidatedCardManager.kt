@@ -4,6 +4,7 @@ import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.IllegalStateException
 
 class ValidatedCardManager(private val validatedCardEntityDao: ValidatedCardEntityDao) {
@@ -20,12 +21,14 @@ class ValidatedCardManager(private val validatedCardEntityDao: ValidatedCardEnti
         }
     }
 
-    fun addValidatedCard(cardId: Int) {
+    suspend fun addValidatedCard(cardId: Int) {
         if (!isInitialized()) {
             throw IllegalStateException("Not yet initialized")
         }
-        validatedCardEntityDao.insert(com.github.cfogrady.vitalwear.card.ValidatedCardEntity(cardId))
-        validatedIds = validatedIds.plus(cardId)
+        withContext(Dispatchers.IO) {
+            validatedCardEntityDao.insert(ValidatedCardEntity(cardId))
+            validatedIds = validatedIds.plus(cardId)
+        }
     }
 
     fun isValidatedCard(cardId: Int): Boolean {
