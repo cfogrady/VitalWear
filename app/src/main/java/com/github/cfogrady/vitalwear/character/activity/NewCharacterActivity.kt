@@ -16,8 +16,8 @@ import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.items
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.CharacterManager
-import com.github.cfogrady.vitalwear.card.CardSpritesIO
-import com.github.cfogrady.vitalwear.card.CardLoader
+import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
+import com.github.cfogrady.vitalwear.common.card.CardLoader
 import com.github.cfogrady.vitalwear.card.activity.LoadCardActivity
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao

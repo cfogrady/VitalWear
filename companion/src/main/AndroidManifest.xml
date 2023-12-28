@@ -26,6 +26,7 @@
         </activity>
         <activity android:name=".card.ImportCardActivity"/>
         <activity android:name=".card.ValidateCardActivity"/>
+        <activity android:name=".firmware.FirmwareImportActivity"/>
     </application>
 
 </manifest>

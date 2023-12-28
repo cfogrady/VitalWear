@@ -16,7 +16,8 @@ import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterEntity
-import com.github.cfogrady.vitalwear.character.data.CharacterSprites
+import com.github.cfogrady.vitalwear.common.character.CharacterSprites
+import com.github.cfogrady.vitalwear.common.composable.util.KeepScreenOn
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.composable.util.*
 import com.github.cfogrady.vitalwear.firmware.Firmware

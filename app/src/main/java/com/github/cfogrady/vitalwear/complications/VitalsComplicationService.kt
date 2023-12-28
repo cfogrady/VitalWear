@@ -28,7 +28,7 @@ class VitalsComplicationService : ComplicationDataSourceService() {
     private fun complicationResult() : ComplicationData {
         val goToAppIntent = Intent(applicationContext, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(applicationContext, 0, goToAppIntent, PendingIntent.FLAG_CANCEL_CURRENT.and(
-            PendingIntent.FLAG_ONE_SHOT))
+            PendingIntent.FLAG_ONE_SHOT).and(PendingIntent.FLAG_IMMUTABLE))
         val characterManager = (application as VitalWearApp).characterManager
         var vitals = 0
         var iconImage: Icon? = null

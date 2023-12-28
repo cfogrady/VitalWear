@@ -1,5 +1,8 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id 'com.android.application'
+    id 'com.google.devtools.ksp'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-android'
 }
@@ -35,6 +38,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = '11'
+        // Needed for kotlin symbol processing
+        tasks.withType(KotlinCompile).configureEach {
+            kotlinOptions.jvmTarget = "11"
+        }
     }
     composeOptions {
         kotlinCompilerExtensionVersion compose_version
@@ -65,4 +72,15 @@ dependencies {
     //VB-DIM-Reader and SLF4J logging
     implementation 'com.github.cfogrady:vb-dim-reader:2.0.2.3-653843e'
     runtimeOnly 'org.slf4j:slf4j-android:1.7.26'
+
+    //Channel Client (data transfer)
+    implementation 'com.google.android.gms:play-services-wearable:17.1.0'
+
+    // Task.await() extension
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.4.3-native-mt"
+
+    // Rooms
+    implementation "androidx.room:room-runtime:$room_version"
+    // To use Kotlin Symbol Processing (KSP)
+    ksp "androidx.room:room-compiler:$room_version"
 }

@@ -51,7 +51,7 @@ class PartnerComplicationService : ComplicationDataSourceService() {
 
     private fun complicationResult() : ComplicationData {
         val goToAppIntent = Intent(applicationContext, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(applicationContext, 0, goToAppIntent, PendingIntent.FLAG_CANCEL_CURRENT.and(PendingIntent.FLAG_ONE_SHOT))
+        val pendingIntent = PendingIntent.getActivity(applicationContext, 0, goToAppIntent, PendingIntent.FLAG_CANCEL_CURRENT.and(PendingIntent.FLAG_IMMUTABLE).and(PendingIntent.FLAG_ONE_SHOT))
         lateinit var bitmap: Bitmap
         val characterManager = (application as VitalWearApp).characterManager
         val maybeFirmware = (application as VitalWearApp).firmwareManager.getFirmware()

@@ -2,7 +2,7 @@ package com.github.cfogrady.vitalwear.menu
 
 import android.graphics.Bitmap
 import com.github.cfogrady.vb.dim.sprite.SpriteData
-import com.github.cfogrady.vitalwear.card.SpriteBitmapConverter
+import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
 
 class MenuFirmwareSprites(
     val statsIcon: Bitmap,

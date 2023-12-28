@@ -9,11 +9,11 @@ import com.github.cfogrady.vitalwear.battle.data.*
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
-import com.github.cfogrady.vitalwear.card.CardSpritesIO
-import com.github.cfogrady.vitalwear.card.CharacterSpritesIO
+import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
+import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntityDao
-import com.github.cfogrady.vitalwear.character.data.CharacterSprites
+import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.vitals.VitalService

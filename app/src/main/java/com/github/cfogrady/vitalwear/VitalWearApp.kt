@@ -18,7 +18,6 @@ import com.github.cfogrady.vitalwear.activity.PartnerScreenComposable
 import com.github.cfogrady.vitalwear.battle.composable.*
 import com.github.cfogrady.vitalwear.battle.data.BEMBattleLogic
 import com.github.cfogrady.vitalwear.battle.BattleService
-import com.github.cfogrady.vitalwear.card.*
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.character.BEMUpdater
 import com.github.cfogrady.vitalwear.character.CharacterManager
@@ -27,6 +26,12 @@ import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
 import com.github.cfogrady.vitalwear.character.mood.BEMMoodUpdater
 import com.github.cfogrady.vitalwear.character.mood.MoodBroadcastReceiver
 import com.github.cfogrady.vitalwear.character.transformation.TransformationScreenFactory
+import com.github.cfogrady.vitalwear.common.card.CardLoader
+import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
+import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
+import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
+import com.github.cfogrady.vitalwear.common.card.SpriteFileIO
+import com.github.cfogrady.vitalwear.common.card.ValidatedCardManager
 import com.github.cfogrady.vitalwear.data.AppDatabase
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
@@ -108,7 +113,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         characterManager = CharacterManagerImpl(complicationRefreshService, database.characterDao(), characterSpritesIO, database.speciesEntityDao(), database.cardMetaEntityDao(), database.transformationEntityDao(), spriteBitmapConverter)
         cardMetaEntityDao = database.cardMetaEntityDao()
         val validatedCardManager = ValidatedCardManager(database.validatedCardEntityDao())
-        cardLoader = CardLoader(characterSpritesIO, cardSpriteIO, cardMetaEntityDao, database.speciesEntityDao(), database.transformationEntityDao(), database.adventureEntityDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao(), validatedCardManager, notificationChannelManager, DimReader())
+        cardLoader = CardLoader(characterSpritesIO, cardSpriteIO, cardMetaEntityDao, database.speciesEntityDao(), database.transformationEntityDao(), database.adventureEntityDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao(), DimReader())
         val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         vitalService = VitalService(characterManager, complicationRefreshService)
         stepService = SensorStepService(sharedPreferences, sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService))

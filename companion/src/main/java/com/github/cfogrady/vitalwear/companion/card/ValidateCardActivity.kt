@@ -1,11 +1,8 @@
 package com.github.cfogrady.vitalwear.companion.card
 
-import android.app.PendingIntent
 import android.content.Intent
-import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
 import android.nfc.Tag
-import android.nfc.TagLostException
 import android.nfc.tech.MifareUltralight
 import android.os.Bundle
 import android.os.Handler
@@ -21,13 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.github.cfogrady.vitalwear.Loading
-import com.github.cfogrady.vitalwear.companion.util.Endian
-import com.github.cfogrady.vitalwear.companion.util.getUInt16
-import com.github.cfogrady.vitalwear.companion.util.getUInt32
-import com.github.cfogrady.vitalwear.companion.util.toByteArray
 import kotlinx.coroutines.flow.MutableStateFlow
-import java.io.IOException
-import java.lang.IllegalArgumentException
 
 /**
  * This activity is used to connect with a VBBE to validate cardIds.

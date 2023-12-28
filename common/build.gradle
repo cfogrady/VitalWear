@@ -67,8 +67,11 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     implementation 'androidx.activity:activity-compose:1.8.2'
 
-    //VB-Dim-Reader library
+    // VB-Dim-Reader library
     implementation 'com.github.cfogrady:vb-dim-reader:2.0.2.3-653843e'
+
+    // Needed
+    implementation 'com.google.guava:guava:31.1-android'
 
     // Rooms
     implementation "androidx.room:room-runtime:$room_version"

@@ -9,7 +9,7 @@ import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.battle.composable.FightTargetFactory
 import com.github.cfogrady.vitalwear.battle.data.PreBattleModel
-import com.github.cfogrady.vitalwear.composable.util.KeepScreenOn
+import com.github.cfogrady.vitalwear.common.composable.util.KeepScreenOn
 import kotlinx.coroutines.Dispatchers
 import java.util.*
 

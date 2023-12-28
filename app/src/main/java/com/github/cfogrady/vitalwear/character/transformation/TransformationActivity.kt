@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.github.cfogrady.vitalwear.VitalWearApp
-import com.github.cfogrady.vitalwear.composable.util.KeepScreenOn
+import com.github.cfogrady.vitalwear.common.composable.util.KeepScreenOn
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 
 class TransformationActivity : ComponentActivity() {

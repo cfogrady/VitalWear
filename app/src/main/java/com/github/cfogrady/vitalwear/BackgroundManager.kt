@@ -3,7 +3,7 @@ package com.github.cfogrady.vitalwear
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import com.github.cfogrady.vitalwear.card.CardLoader
+import com.github.cfogrady.vitalwear.common.card.CardLoader
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 
 class BackgroundManager(private val cardLoader: CardLoader, private val firmwareManager: FirmwareManager) {

@@ -6,8 +6,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.github.cfogrady.vitalwear.character.data.*
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
-import com.github.cfogrady.vitalwear.card.CharacterSpritesIO
-import com.github.cfogrady.vitalwear.card.SpriteBitmapConverter
+import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
+import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntityDao

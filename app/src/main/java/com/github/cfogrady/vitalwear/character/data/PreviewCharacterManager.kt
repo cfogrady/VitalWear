@@ -2,8 +2,8 @@ package com.github.cfogrady.vitalwear.character.data
 
 import android.content.Context
 import android.util.Log
-import com.github.cfogrady.vitalwear.card.CharacterSpritesIO
-import com.github.cfogrady.vitalwear.card.CardLoader
+import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
+import com.github.cfogrady.vitalwear.common.card.CardLoader
 import java.util.HashMap
 import java.util.HashSet
 

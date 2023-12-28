@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.card
+package com.github.cfogrady.vitalwear.common.card
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -14,7 +14,6 @@ import com.github.cfogrady.vb.dim.character.DimStats
 import com.github.cfogrady.vb.dim.sprite.SpriteData.Sprite
 import com.github.cfogrady.vb.dim.transformation.BemTransformationRequirements.BemTransformationRequirementEntry
 import com.github.cfogrady.vb.dim.transformation.DimEvolutionRequirements.DimEvolutionRequirementBlock
-import com.github.cfogrady.vitalwear.common.card.CardType
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntity
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.AttributeFusionEntity
@@ -27,8 +26,7 @@ import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.TransformationEntity
 import com.github.cfogrady.vitalwear.common.card.db.TransformationEntityDao
-import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
-import com.google.android.gms.common.util.Hex
+import com.google.common.io.BaseEncoding
 import java.io.InputStream
 import java.security.MessageDigest
 import java.util.*
@@ -46,8 +44,6 @@ class CardLoader(
     private val adventureEntityDao: AdventureEntityDao,
     private val attributeFusionEntityDao: AttributeFusionEntityDao,
     private val specificFusionEntityDao: SpecificFusionEntityDao,
-    private val validatedCardManager: ValidatedCardManager,
-    private val notificationChannelManager: NotificationChannelManager,
     private val dimReader: DimReader,
 ) {
     companion object {
@@ -57,11 +53,7 @@ class CardLoader(
         private const val BEM_SPRITES_PER_CHARACTER = 14
     }
 
-    fun importCardImage(applicationContext: Context, cardName: String, inputStream: InputStream, uniqueSprites: Boolean = false) {
-        val card = dimReader.readCard(inputStream, true)
-        if (!validatedCardManager.isValidatedCard(card.header.dimId)) {
-            notificationChannelManager.sendGenericNotification(applicationContext, "$cardName Import Failed", "$cardName requires validation from a bracelet before it can be imported.")
-        }
+    fun importCardImage(applicationContext: Context, cardName: String, card: Card<*, *, *, *, *, *>, uniqueSprites: Boolean = false) {
         val spritesByCharacterId = spritesByCharacterId(card)
         writeCardMeta(cardName, card)
         writeSpeciesEntitiesAndSprites(applicationContext, cardName, card, uniqueSprites, spritesByCharacterId)
@@ -70,7 +62,11 @@ class CardLoader(
         writeAttributeFusions(cardName, card)
         writeSpecificFusions(cardName, card)
         cardSpritesIO.saveCardSprites(applicationContext, cardName, card)
-        notificationChannelManager.sendGenericNotification(applicationContext, "$cardName Import Success", "$cardName imported successfully")
+    }
+
+    fun importCardImage(applicationContext: Context, cardName: String, inputStream: InputStream, uniqueSprites: Boolean = false) {
+        val card = dimReader.readCard(inputStream, true)
+        importCardImage(applicationContext, cardName, card, uniqueSprites)
     }
 
     fun loadBitmapsForSlots(applicationContext: Context, requestedSlotsByCardName : Map<String, Collection<Int>>, spriteFile: String) : Map<String, SparseArray<Bitmap>> {
@@ -268,7 +264,7 @@ class CardLoader(
         }
         val digest = MessageDigest.getInstance("MD5")
         val hash = digest.digest(background.pixelData)
-        val hex = Hex.bytesToStringLowercase(hash)
+        val hex = BaseEncoding.base16().encode(hash)
         var dir = hex
         var i = 1
         // handle hash collisions

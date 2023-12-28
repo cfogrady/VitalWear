@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.card
+package com.github.cfogrady.vitalwear.common.card
 
 import android.util.Log
 import com.github.cfogrady.vitalwear.common.card.db.ValidatedCardEntity
@@ -35,8 +35,8 @@ class ValidatedCardManager(private val validatedCardEntityDao: ValidatedCardEnti
         if (!isInitialized()) {
             throw IllegalStateException("Not yet initialized")
         }
-        // return validatedIds.contains(cardId)
         return true
+        // return validatedIds.contains(cardId)
     }
 
     fun isInitialized(): Boolean {

@@ -22,6 +22,7 @@ import com.github.cfogrady.vb.dim.card.DimReader
 import com.github.cfogrady.vitalwear.common.commonLog
 import com.github.cfogrady.vitalwear.companion.VitalWearCompanion
 import com.github.cfogrady.vitalwear.companion.card.ImportCardActivity
+import com.github.cfogrady.vitalwear.companion.firmware.FirmwareImportActivity
 import java.io.File
 
 class MainActivity : ComponentActivity() {
@@ -45,10 +46,11 @@ class MainActivity : ComponentActivity() {
             }) {
                 Text(text = "Import Card Image", color = Color.Cyan)
             }
+            Button(onClick = {
+                startActivity(Intent(applicationContext, FirmwareImportActivity::class.java))
+            }) {
+                Text(text = "Import Firmware", color = Color.Cyan)
+            }
         }
-    }
-
-    private fun importCard() {
-
     }
 }

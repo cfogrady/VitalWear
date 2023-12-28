@@ -2,7 +2,7 @@ package com.github.cfogrady.vitalwear.battle
 
 import android.content.Context
 import android.graphics.Bitmap
-import com.github.cfogrady.vitalwear.card.CardSpritesIO
+import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
 
 class CardBattleSpriteLoader(private val context: Context, private val cardSpritesIO: CardSpritesIO, private val cardName: String) :  BattleSpriteLoader {
     override fun getBackground(): Bitmap {

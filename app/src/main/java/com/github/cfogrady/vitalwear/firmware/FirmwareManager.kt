@@ -1,14 +1,16 @@
 package com.github.cfogrady.vitalwear.firmware
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
+import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
 import com.github.cfogrady.vb.dim.sprite.SpriteData.Sprite
 import com.github.cfogrady.vb.dim.util.RelativeByteOffsetInputStream
 import com.github.cfogrady.vitalwear.battle.data.BattleFirmwareSprites
-import com.github.cfogrady.vitalwear.card.SpriteBitmapConverter
+import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
 import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
 import com.github.cfogrady.vitalwear.character.data.EmoteFirmwareSprites
 import com.github.cfogrady.vitalwear.character.transformation.TransformationFirmwareSprites
@@ -114,6 +116,12 @@ class FirmwareManager(
                 throw IllegalArgumentException("Given firmware file, $file has errors!")
             }
         }
+    }
+
+    fun firmwareUri(context: Context): Uri {
+        val filesRoot = context.filesDir
+        val firmwareFile = File(filesRoot, FIRMWARE_FILE)
+        return firmwareFile.toUri()
     }
 
     fun loadFirmware(applicationContext: Context) {

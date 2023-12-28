@@ -37,7 +37,8 @@ class BEMUpdater(val context: Context) {
         val alarmManager = context.getSystemService(Service.ALARM_SERVICE) as AlarmManager
         val now = SystemClock.elapsedRealtime()
         val period = Duration.ofMinutes(5).toMillis()
-        val moodUpdateIntent = PendingIntent.getBroadcast(context, 0, Intent(MoodBroadcastReceiver.MOOD_UPDATE), 0)
+        val moodUpdateIntent = PendingIntent.getBroadcast(context, 0, Intent(MoodBroadcastReceiver.MOOD_UPDATE),
+            PendingIntent.FLAG_IMMUTABLE)
         alarmManager.cancel(moodUpdateIntent)
         alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, now + period, period, moodUpdateIntent)
     }

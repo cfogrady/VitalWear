@@ -10,7 +10,7 @@ import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.activity.FileExploreActivity
 import com.github.cfogrady.vitalwear.activity.PROMPT_TEXT
 import com.github.cfogrady.vitalwear.activity.SELECTED_FILE
-import com.github.cfogrady.vitalwear.card.CardLoader
+import com.github.cfogrady.vitalwear.common.card.CardLoader
 import com.github.cfogrady.vitalwear.common.util.ActivityHelper
 import kotlinx.coroutines.*
 import java.io.File
