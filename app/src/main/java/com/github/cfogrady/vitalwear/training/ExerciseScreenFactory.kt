@@ -47,7 +47,7 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
 
     val random = Random()
     @Composable
-    fun exerciseScreen(partner: BEMCharacter, firmware: Firmware, background: Bitmap, exerciseType: TrainingType, finished: () -> Unit) {
+    fun ExerciseScreen(partner: BEMCharacter, firmware: Firmware, background: Bitmap, exerciseType: TrainingType, finished: () -> Unit) {
         KeepScreenOn()
         var exerciseState by remember { mutableStateOf(ExerciseState.READY) }
         var exerciseResult by remember { mutableStateOf(ExerciseResult.FAIL) }
@@ -55,12 +55,12 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
             bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background")
             when(exerciseState) {
                 ExerciseState.READY -> {
-                    ready(firmware = firmware) {
+                    Ready(firmware = firmware) {
                         exerciseState = ExerciseState.GO
                     }
                 }
                 ExerciseState.GO -> {
-                    go(partner, firmware) {
+                    Go(partner, firmware) {
                         exerciseState = ExerciseState.EXERCISE
                     }
                 }
@@ -69,7 +69,7 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
                         //TODO: Start exercise in service
                         Log.i(TAG, "Starting exercise")
                     }
-                    exercise(partner = partner, firmware = firmware, durationSeconds = exerciseType.durationSeconds) {
+                    Exercise(partner = partner, firmware = firmware, durationSeconds = exerciseType.durationSeconds) {
                         //TODO: End exercise in service
                         val roll = random.nextInt(100)
                         if(roll < 20) {
@@ -86,17 +86,17 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
                     }
                 }
                 ExerciseState.CLEAR -> {
-                    clear(partner = partner, firmware = firmware) {
+                    Clear(partner = partner, firmware = firmware) {
                         exerciseState = ExerciseState.RESULT
                     }
                 }
                 ExerciseState.FAIL -> {
-                    fail(partner = partner, firmware = firmware) {
+                    Fail(partner = partner, firmware = firmware) {
                         finished.invoke()
                     }
                 }
                 ExerciseState.RESULT -> {
-                    result(partner, firmware, exerciseType, exerciseResult) {
+                    Result(partner, firmware, exerciseType, exerciseResult) {
                         finished.invoke()
                     }
                 }
@@ -124,7 +124,7 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
     }
 
     @Composable
-    private fun ready(firmware: Firmware, finished: () -> Unit) {
+    private fun Ready(firmware: Firmware, finished: () -> Unit) {
         var countDown by remember { mutableStateOf(3) }
         Handler(Looper.getMainLooper()!!).postDelayed({
             countDown -= 1
@@ -141,7 +141,7 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
     }
 
     @Composable
-    private fun go(partner: BEMCharacter, firmware: Firmware, finished:() -> Unit) {
+    private fun Go(partner: BEMCharacter, firmware: Firmware, finished:() -> Unit) {
         var charaterSprite by remember { mutableStateOf(partner.characterSprites.sprites[CharacterSprites.IDLE_1]) }
         Handler(Looper.getMainLooper()!!).postDelayed({
             charaterSprite = partner.characterSprites.sprites[CharacterSprites.WIN]
@@ -160,8 +160,9 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
     }
 
     @Composable
-    private fun exercise(partner: BEMCharacter, firmware: Firmware, durationSeconds: Int, finished:() -> Unit) {
-        var charaterSprites by remember { mutableStateOf(Lists.newArrayList(partner.characterSprites.sprites[CharacterSprites.TRAIN_1], partner.characterSprites.sprites[CharacterSprites.TRAIN_2])) }
+    private fun Exercise(partner: BEMCharacter, firmware: Firmware, durationSeconds: Int, finished:() -> Unit) {
+        val charaterSprites = arrayListOf(partner.characterSprites.sprites[CharacterSprites.TRAIN_1],
+            partner.characterSprites.sprites[CharacterSprites.TRAIN_2])
         val sweatIcon = remember {firmware.emoteFirmwareSprites.sweatEmote}
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
@@ -197,7 +198,7 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
     }
 
     @Composable
-    fun clear(partner: BEMCharacter, firmware: Firmware, finished: () -> Unit) {
+    fun Clear(partner: BEMCharacter, firmware: Firmware, finished: () -> Unit) {
         val characterAnimation = remember {Lists.newArrayList(partner.characterSprites.sprites[CharacterSprites.IDLE_1], partner.characterSprites.sprites[CharacterSprites.WIN])}
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
@@ -216,7 +217,7 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
     }
 
     @Composable
-    fun fail(partner: BEMCharacter, firmware: Firmware, finished: () -> Unit) {
+    fun Fail(partner: BEMCharacter, firmware: Firmware, finished: () -> Unit) {
         val characterAnimation = remember {Lists.newArrayList(partner.characterSprites.sprites[CharacterSprites.IDLE_1], partner.characterSprites.sprites[CharacterSprites.DOWN])}
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
@@ -234,7 +235,7 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
     }
 
     @Composable
-    fun result(partner: BEMCharacter, firmware: Firmware, exerciseType: TrainingType, exerciseResult: ExerciseResult, finished: () -> Unit) {
+    fun Result(partner: BEMCharacter, firmware: Firmware, exerciseType: TrainingType, exerciseResult: ExerciseResult, finished: () -> Unit) {
         val characterAnimation = remember {Lists.newArrayList(partner.characterSprites.sprites[CharacterSprites.IDLE_1], partner.characterSprites.sprites[CharacterSprites.WIN])}
         val resultIcon = remember {if(exerciseResult == ExerciseResult.GREAT) firmware.trainingFirmwareSprites.greatIcon else firmware.trainingFirmwareSprites.goodIcon}
         LaunchedEffect(true) {
@@ -245,7 +246,7 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
             Column(modifier = Modifier.offset(y = backgroundHeight.times(.3f)), horizontalAlignment = Alignment.CenterHorizontally) {
                 bitmapScaler.ScaledBitmap(bitmap = resultIcon, contentDescription = "result")
-                resultTextRow(exerciseType = exerciseType, exerciseResult = exerciseResult, trainingFirmwareSprites = firmware.trainingFirmwareSprites)
+                ResultTextRow(exerciseType = exerciseType, exerciseResult = exerciseResult, trainingFirmwareSprites = firmware.trainingFirmwareSprites)
             }
         }
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
@@ -254,7 +255,7 @@ class ExerciseScreenFactory(private val saveService: SaveService, private val vi
     }
 
     @Composable
-    fun resultTextRow(exerciseType: TrainingType, exerciseResult: ExerciseResult, trainingFirmwareSprites: TrainingFirmwareSprites) {
+    fun ResultTextRow(exerciseType: TrainingType, exerciseResult: ExerciseResult, trainingFirmwareSprites: TrainingFirmwareSprites) {
         val typeIcon = remember {
             when(exerciseType) {
                 TrainingType.SQUAT -> trainingFirmwareSprites.ppIcon
