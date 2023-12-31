@@ -161,7 +161,7 @@ class TrainingScreenFactory(private val saveService: SaveService, private val vi
 
     @Composable
     private fun Exercise(partner: BEMCharacter, firmware: Firmware, durationSeconds: Int, finished:() -> Unit) {
-        val charaterSprites = arrayListOf(partner.characterSprites.sprites[CharacterSprites.TRAIN_1],
+        val characterSprites = arrayListOf(partner.characterSprites.sprites[CharacterSprites.TRAIN_1],
             partner.characterSprites.sprites[CharacterSprites.TRAIN_2])
         val sweatIcon = remember {firmware.emoteFirmwareSprites.sweatEmote}
         LaunchedEffect(true) {
@@ -190,7 +190,7 @@ class TrainingScreenFactory(private val saveService: SaveService, private val vi
                     }
                 }
                 bitmapScaler.ScaledBitmap(
-                    bitmap = charaterSprites[spriteIdx],
+                    bitmap = characterSprites[spriteIdx],
                     contentDescription = "Character"
                 )
             }
