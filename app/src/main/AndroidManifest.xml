@@ -14,8 +14,6 @@
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <!-- Any Foreground Service -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <!-- Look for firmware and card images -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <!-- post notifications -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
