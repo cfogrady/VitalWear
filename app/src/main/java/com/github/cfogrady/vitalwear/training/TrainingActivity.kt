@@ -13,7 +13,7 @@ class TrainingActivity : ComponentActivity() {
         const val TRAINING_TYPE = "TRAINING_TYPE"
     }
 
-    lateinit var exerciseScreenFactory: ExerciseScreenFactory
+    lateinit var trainingScreenFactory: TrainingScreenFactory
     lateinit var partner: BEMCharacter
     lateinit var firmware: Firmware
     lateinit var background: Bitmap
@@ -24,9 +24,9 @@ class TrainingActivity : ComponentActivity() {
         partner = (application as VitalWearApp).characterManager.getCharacterFlow().value!!
         firmware = (application as VitalWearApp).firmwareManager.getFirmware().value!!
         background = (application as VitalWearApp).backgroundManager.selectedBackground.value!!
-        exerciseScreenFactory = (application as VitalWearApp).exerciseScreenFactory
+        trainingScreenFactory = (application as VitalWearApp).trainingScreenFactory
         setContent {
-            exerciseScreenFactory.ExerciseScreen(partner, firmware, background, trainingType) {
+            trainingScreenFactory.ExerciseScreen(partner, firmware, background, trainingType) {
                 finish()
             }
         }

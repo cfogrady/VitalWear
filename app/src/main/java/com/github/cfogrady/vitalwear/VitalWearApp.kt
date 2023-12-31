@@ -43,7 +43,7 @@ import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 import com.github.cfogrady.vitalwear.steps.SensorStepService
 import com.github.cfogrady.vitalwear.util.SensorThreadHandler
-import com.github.cfogrady.vitalwear.training.ExerciseScreenFactory
+import com.github.cfogrady.vitalwear.training.TrainingScreenFactory
 import com.github.cfogrady.vitalwear.vitals.VitalService
 import com.github.cfogrady.vitalwear.workmanager.VitalWearWorkerFactory
 import com.github.cfogrady.vitalwear.workmanager.WorkProviderDependencies
@@ -73,7 +73,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var partnerScreenComposable: PartnerScreenComposable
     lateinit var mainScreenComposable: MainScreenComposable
     lateinit var fightTargetFactory: FightTargetFactory
-    lateinit var exerciseScreenFactory: ExerciseScreenFactory
+    lateinit var trainingScreenFactory: TrainingScreenFactory
     lateinit var sharedPreferences: SharedPreferences
     lateinit var stepService: SensorStepService
     lateinit var shutdownReceiver: ShutdownReceiver
@@ -139,7 +139,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val endFightReactionFactory = EndFightReactionFactory(bitmapScaler, firmwareManager, characterManager, backgroundHeight)
         val endFightVitalsFactory = EndFightVitalsFactory(bitmapScaler, firmwareManager, backgroundManager, backgroundHeight)
         fightTargetFactory = FightTargetFactory(battleService, vitalBoxFactory, opponentSplashFactory, opponentNameScreenFactory, readyScreenFactory, goScreenFactory, attackScreenFactory, hpCompareFactory, endFightReactionFactory, endFightVitalsFactory)
-        exerciseScreenFactory = ExerciseScreenFactory(saveService, vitalBoxFactory, bitmapScaler, backgroundHeight)
+        trainingScreenFactory = TrainingScreenFactory(saveService, vitalBoxFactory, bitmapScaler, backgroundHeight)
         transformationScreenFactory = TransformationScreenFactory(characterManager, backgroundHeight, firmwareManager, bitmapScaler, vitalBoxFactory, bemUpdater)
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService)
         mainScreenComposable = MainScreenComposable(characterManager, saveService, firmwareManager, backgroundManager, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory)
