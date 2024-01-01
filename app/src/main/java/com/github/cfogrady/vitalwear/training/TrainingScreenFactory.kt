@@ -179,7 +179,7 @@ class TrainingScreenFactory(private val saveService: SaveService,
         }
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
             var spriteIdx = (progress * firmware.trainingFirmwareSprites.trainingState.size).toInt()
-            if (spriteIdx > firmware.trainingFirmwareSprites.trainingState.size) {
+            if (spriteIdx >= firmware.trainingFirmwareSprites.trainingState.size) {
                 spriteIdx = firmware.trainingFirmwareSprites.trainingState.size-1
             }
             bitmapScaler.ScaledBitmap(bitmap = firmware.trainingFirmwareSprites.trainingState[spriteIdx], contentDescription = "level", modifier = Modifier.offset(y = backgroundHeight.times(.3f)))
