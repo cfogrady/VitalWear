@@ -1,6 +1,7 @@
 package com.github.cfogrady.vitalwear.training
 
 import android.graphics.Bitmap
+import android.hardware.SensorEventListener
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -22,10 +23,15 @@ import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.composable.util.*
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.google.common.collect.Lists
+import kotlinx.coroutines.flow.StateFlow
 import java.util.Random
 
 
-class TrainingScreenFactory(private val saveService: SaveService, private val vitalBoxFactory: VitalBoxFactory, private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp) {
+class TrainingScreenFactory(private val saveService: SaveService,
+                            private val vitalBoxFactory: VitalBoxFactory,
+                            private val bitmapScaler: BitmapScaler,
+                            private val backgroundHeight: Dp,
+                            private val trainingService: TrainingService) {
 
     companion object {
         const val TAG = "ExerciseScreenFactory"
@@ -45,7 +51,6 @@ class TrainingScreenFactory(private val saveService: SaveService, private val vi
         }
     }
 
-    val random = Random()
     @Composable
     fun ExerciseScreen(partner: BEMCharacter, firmware: Firmware, background: Bitmap, exerciseType: TrainingType, finished: () -> Unit) {
         KeepScreenOn()
@@ -65,23 +70,25 @@ class TrainingScreenFactory(private val saveService: SaveService, private val vi
                     }
                 }
                 ExerciseState.EXERCISE -> {
-                    LaunchedEffect(key1 = true) {
-                        //TODO: Start exercise in service
-                        Log.i(TAG, "Starting exercise")
+                    var trainingListener = remember { trainingService.trainSquats() }
+                    DisposableEffect(key1 = true) {
+                        onDispose {
+                            trainingListener.unregister()
+                        }
                     }
-                    Exercise(partner = partner, firmware = firmware, durationSeconds = exerciseType.durationSeconds) {
+                    Exercise(partner = partner, firmware = firmware, trainingListener.progressFlow(), durationSeconds = exerciseType.durationSeconds) {
                         //TODO: End exercise in service
-                        val roll = random.nextInt(100)
-                        if(roll < 20) {
-                            exerciseState = ExerciseState.FAIL
-                        } else if(roll < 80) {
+                        if(trainingListener.meetsBonus()) {
+                            increaseStats(partner.characterStats, exerciseType,true)
+                            exerciseState = ExerciseState.CLEAR
+                            exerciseResult = ExerciseResult.GREAT
+                        } else if(trainingListener.meetsGoal()) {
                             increaseStats(partner.characterStats, exerciseType,false)
                             exerciseState = ExerciseState.CLEAR
                             exerciseResult = ExerciseResult.GOOD
                         } else {
-                            increaseStats(partner.characterStats, exerciseType,true)
-                            exerciseState = ExerciseState.CLEAR
-                            exerciseResult = ExerciseResult.GREAT
+                            exerciseState = ExerciseState.FAIL
+                            exerciseResult = ExerciseResult.FAIL
                         }
                     }
                 }
@@ -160,17 +167,22 @@ class TrainingScreenFactory(private val saveService: SaveService, private val vi
     }
 
     @Composable
-    private fun Exercise(partner: BEMCharacter, firmware: Firmware, durationSeconds: Int, finished:() -> Unit) {
+    private fun Exercise(partner: BEMCharacter, firmware: Firmware, progressFlow: StateFlow<Float>, durationSeconds: Int, finished:() -> Unit) {
         val characterSprites = arrayListOf(partner.characterSprites.sprites[CharacterSprites.TRAIN_1],
             partner.characterSprites.sprites[CharacterSprites.TRAIN_2])
         val sweatIcon = remember {firmware.emoteFirmwareSprites.sweatEmote}
+        val progress by progressFlow.collectAsState()
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
                 finished.invoke()
             }, durationSeconds * 1000L)
         }
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-            bitmapScaler.ScaledBitmap(bitmap = firmware.trainingFirmwareSprites.trainingState[0], contentDescription = "level", modifier = Modifier.offset(y = backgroundHeight.times(.3f)))
+            var spriteIdx = (progress * firmware.trainingFirmwareSprites.trainingState.size).toInt()
+            if (spriteIdx > firmware.trainingFirmwareSprites.trainingState.size) {
+                spriteIdx = firmware.trainingFirmwareSprites.trainingState.size-1
+            }
+            bitmapScaler.ScaledBitmap(bitmap = firmware.trainingFirmwareSprites.trainingState[spriteIdx], contentDescription = "level", modifier = Modifier.offset(y = backgroundHeight.times(.3f)))
         }
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
