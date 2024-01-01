@@ -193,9 +193,11 @@ class TrainingScreenFactory(private val saveService: SaveService,
                     )
                 )) {
                 var spriteIdx by remember { mutableStateOf(0) }
-                Handler(Looper.getMainLooper()!!).postDelayed({
-                    spriteIdx = (spriteIdx + 1) % 2
-                }, 500)
+                LaunchedEffect(key1 = spriteIdx) {
+                    Handler(Looper.getMainLooper()!!).postDelayed({
+                        spriteIdx = (spriteIdx + 1) % 2
+                    }, 500)
+                }
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomEnd) {
                     if(spriteIdx % 2 == 1) {
                         bitmapScaler.ScaledBitmap(bitmap = sweatIcon, contentDescription = "Emote")
