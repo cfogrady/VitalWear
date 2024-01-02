@@ -17,7 +17,6 @@ class CrunchSensorListener(private val restingHeartRate: Float, private val unre
         const val BONUS = 11
     }
 
-    private var count = 0
     private val sumQueue = LinkedList<Float>()
     private val deltaQueue = LinkedList<Float>()
     private var lastTime = timeProvider.invoke()
@@ -59,7 +58,6 @@ class CrunchSensorListener(private val restingHeartRate: Float, private val unre
         val x = event.values[0]
         val y = event.values[1]
         val z = event.values[2]
-        count++
         val sum = abs(x) + abs(y) + abs(z)
         sumQueue.addLast(sum)
         while(sumQueue.size > 17) {
@@ -76,13 +74,16 @@ class CrunchSensorListener(private val restingHeartRate: Float, private val unre
                 totalValleys++
                 progress.value = totalValleys.toFloat()/ GOAL.toFloat()
             }
-            while(deltaQueue.size > 3) {
+            while(deltaQueue.size > 2) {
                 deltaQueue.removeFirst()
             }
         }
     }
 
     private fun hasValley(values: Collection<Float>): Boolean {
+        if(values.size < 3) {
+            return false
+        }
         for(value in values) {
             if (value < VALLEY_VALUE) {
                 return true
