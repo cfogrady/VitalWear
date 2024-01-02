@@ -16,7 +16,6 @@ class PunchSensorListener(private val restingHeartRate: Float, private val unreg
         const val BONUS = 16
     }
 
-    private var count = 0
     private val squaredMagnitudeQueue = LinkedList<Float>()
     private var previousDiff = 0f
     private var lastTime = timeProvider.invoke()
@@ -60,7 +59,6 @@ class PunchSensorListener(private val restingHeartRate: Float, private val unreg
         val x = event.values[0]
         val y = event.values[1]
         val z = event.values[2]
-        count++
         val squaredMagnitude = x*x + y*y + z*z
         squaredMagnitudeQueue.addLast(squaredMagnitude)
         if(squaredMagnitudeQueue.size > 2) {
