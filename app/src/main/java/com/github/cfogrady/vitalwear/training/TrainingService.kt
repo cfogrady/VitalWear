@@ -24,7 +24,7 @@ class TrainingService(
         return when(trainingType) {
             TrainingType.SQUAT -> trainSquats()
             TrainingType.CRUNCH -> trainCrunches()
-            TrainingType.PUNCH -> trainSquats()
+            TrainingType.PUNCH -> trainPunches()
             TrainingType.DASH -> TODO()
         }
     }
@@ -41,6 +41,13 @@ class TrainingService(
         listenToAccelerometer(crunchSensorListener)
         listenToHeartRate(crunchSensorListener)
         return crunchSensorListener
+    }
+
+    private fun trainPunches(): PunchSensorListener {
+        val punchSensorListener = PunchSensorListener(heartRateService.restingHeartRate().toFloat(), this::stopListening)
+        listenToAccelerometer(punchSensorListener)
+        listenToHeartRate(punchSensorListener)
+        return punchSensorListener
     }
 
     fun stopListening(sensorEventListener: SensorEventListener) {
