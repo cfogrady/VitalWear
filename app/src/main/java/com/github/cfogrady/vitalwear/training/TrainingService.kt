@@ -12,7 +12,6 @@ import java.io.File
  * depending on watch orientation.
  */
 class TrainingService(
-    private val trainingPath: File,
     private val sensorManager: SensorManager,
     private val heartRateService: HeartRateService
 ) {
@@ -21,11 +20,27 @@ class TrainingService(
 
     }
 
-    fun trainSquats(): TrainingProgressTracker {
-        val squatSensorListener = SquatSensorListener(trainingPath, heartRateService.restingHeartRate().toFloat(), this::stopListening)
+    fun startTraining(trainingType: TrainingType): TrainingProgressTracker {
+        return when(trainingType) {
+            TrainingType.SQUAT -> trainSquats()
+            TrainingType.CRUNCH -> trainCrunches()
+            TrainingType.PUNCH -> trainSquats()
+            TrainingType.DASH -> TODO()
+        }
+    }
+
+    private fun trainSquats(): SquatSensorListener {
+        val squatSensorListener = SquatSensorListener(heartRateService.restingHeartRate().toFloat(), this::stopListening)
         listenToAccelerometer(squatSensorListener)
         listenToHeartRate(squatSensorListener)
         return squatSensorListener
+    }
+
+    private fun trainCrunches(): CrunchSensorListener {
+        val crunchSensorListener = CrunchSensorListener(heartRateService.restingHeartRate().toFloat(), this::stopListening)
+        listenToAccelerometer(crunchSensorListener)
+        listenToHeartRate(crunchSensorListener)
+        return crunchSensorListener
     }
 
     fun stopListening(sensorEventListener: SensorEventListener) {

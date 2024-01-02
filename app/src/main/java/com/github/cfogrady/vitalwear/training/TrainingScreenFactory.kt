@@ -70,7 +70,7 @@ class TrainingScreenFactory(private val saveService: SaveService,
                     }
                 }
                 ExerciseState.EXERCISE -> {
-                    var trainingListener = remember { trainingService.trainSquats() }
+                    val trainingListener = remember { trainingService.startTraining(exerciseType) }
                     DisposableEffect(key1 = true) {
                         onDispose {
                             trainingListener.unregister()

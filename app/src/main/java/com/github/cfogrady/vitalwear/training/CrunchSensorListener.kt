@@ -1,27 +1,20 @@
 package com.github.cfogrady.vitalwear.training
 
-import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.util.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileWriter
-import java.util.ArrayList
 import java.util.LinkedList
 import kotlin.math.abs
 
-class SquatSensorListener(private val restingHeartRate: Float, private val unregisterFunctor: (SensorEventListener)->Unit, private val timeProvider: () -> Long = System::currentTimeMillis) : TrainingProgressTracker {
+class CrunchSensorListener(private val restingHeartRate: Float, private val unregisterFunctor: (SensorEventListener)->Unit, private val timeProvider: () -> Long = System::currentTimeMillis) : TrainingProgressTracker  {
     companion object {
-        const val TAG = "SquatSensorListener"
-        const val PEAK_VALUE = 2.0
-        const val GOAL = 5
-        const val BONUS = 9
+        const val TAG = "CrunchSensorListener"
+        const val VALLEY_VALUE = -2.0
+        const val GOAL = 8
+        const val BONUS = 11
     }
 
     private var count = 0
@@ -29,7 +22,7 @@ class SquatSensorListener(private val restingHeartRate: Float, private val unreg
     private val deltaQueue = LinkedList<Float>()
     private var lastTime = timeProvider.invoke()
     private var roundsUntilNextReading = 0
-    private var totalPeaks = 0
+    private var totalValleys = 0
     private val progress = MutableStateFlow(0.0f)
     private var maxTrainingHeartRate = restingHeartRate
     override fun onSensorChanged(maybeEvent: SensorEvent?) {
@@ -78,10 +71,10 @@ class SquatSensorListener(private val restingHeartRate: Float, private val unreg
             deltaQueue.addLast(middleAverage - fullAverage)
             if( roundsUntilNextReading > 0) {
                 roundsUntilNextReading--
-            } else if(hasPeak(deltaQueue)) {
-                roundsUntilNextReading = 8
-                totalPeaks++
-                progress.value = totalPeaks.toFloat()/ GOAL.toFloat()
+            } else if(hasValley(deltaQueue)) {
+                roundsUntilNextReading = 12
+                totalValleys++
+                progress.value = totalValleys.toFloat()/ GOAL.toFloat()
             }
             while(deltaQueue.size > 3) {
                 deltaQueue.removeFirst()
@@ -89,9 +82,9 @@ class SquatSensorListener(private val restingHeartRate: Float, private val unreg
         }
     }
 
-    private fun hasPeak(values: Collection<Float>): Boolean {
+    private fun hasValley(values: Collection<Float>): Boolean {
         for(value in values) {
-            if (value > PEAK_VALUE) {
+            if (value < VALLEY_VALUE) {
                 return true
             }
         }
@@ -116,9 +109,9 @@ class SquatSensorListener(private val restingHeartRate: Float, private val unreg
 
     override fun getPoints(): Int {
         var points = 0
-        if(totalPeaks >= BONUS) {
+        if(totalValleys >= BONUS) {
             points +=2
-        } else if(totalPeaks >= GOAL) {
+        } else if(totalValleys >= GOAL) {
             points++
         }
 
