@@ -116,8 +116,8 @@ class VitalWearApp : Application(), Configuration.Provider {
         val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         vitalService = VitalService(characterManager, complicationRefreshService)
         stepService = SensorStepService(sharedPreferences, sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService))
-        val trainingService = TrainingService(filesDir, sensorManager)
         heartRateService = HeartRateService(sensorManager, sensorThreadHandler)
+        val trainingService = TrainingService(filesDir, sensorManager, heartRateService)
         moodBroadcastReceiver = MoodBroadcastReceiver(BEMMoodUpdater(heartRateService, stepService), characterManager)
         bemUpdater = BEMUpdater(applicationContext)
         saveService = SaveService(characterManager as CharacterManagerImpl, stepService, sharedPreferences)

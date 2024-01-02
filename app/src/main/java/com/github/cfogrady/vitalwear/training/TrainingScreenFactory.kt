@@ -78,11 +78,12 @@ class TrainingScreenFactory(private val saveService: SaveService,
                     }
                     Exercise(partner = partner, firmware = firmware, trainingListener.progressFlow(), durationSeconds = exerciseType.durationSeconds) {
                         //TODO: End exercise in service
-                        if(trainingListener.meetsBonus()) {
+                        val points = trainingListener.getPoints()
+                        if(points == 4) {
                             increaseStats(partner.characterStats, exerciseType,true)
                             exerciseState = ExerciseState.CLEAR
                             exerciseResult = ExerciseResult.GREAT
-                        } else if(trainingListener.meetsGoal()) {
+                        } else if(points >= 1) {
                             increaseStats(partner.characterStats, exerciseType,false)
                             exerciseState = ExerciseState.CLEAR
                             exerciseResult = ExerciseResult.GOOD

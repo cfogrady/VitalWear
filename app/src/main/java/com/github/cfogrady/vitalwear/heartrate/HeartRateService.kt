@@ -65,7 +65,7 @@ class HeartRateService(
         return level
     }
 
-    private fun restingHeartRate(): Int {
+    fun restingHeartRate(): Int {
         //TODO: Get actual
         return 65
     }

@@ -8,7 +8,5 @@ interface TrainingProgressTracker : SensorEventListener {
 
     fun unregister()
 
-    fun meetsGoal(): Boolean
-
-    fun meetsBonus(): Boolean
+    fun getPoints(): Int
 }

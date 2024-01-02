@@ -16,7 +16,7 @@ import java.util.ArrayList
 import java.util.LinkedList
 import kotlin.math.abs
 
-class SquatSensorListener(private val filePath: File, private val unregisterFunctor: (SensorEventListener)->Unit, private val timeProvider: () -> Long = System::currentTimeMillis) : TrainingProgressTracker {
+class SquatSensorListener(private val filePath: File, private val restingHeartRate: Float, private val unregisterFunctor: (SensorEventListener)->Unit, private val timeProvider: () -> Long = System::currentTimeMillis) : TrainingProgressTracker {
     companion object {
         const val TAG = "SquatSensorListener"
         const val PEAK_VALUE = 2.0
@@ -32,7 +32,26 @@ class SquatSensorListener(private val filePath: File, private val unregisterFunc
     private var totalPeaks = 0
     private val data = ArrayList<TrainingDataRow>(160)
     private val progress = MutableStateFlow(0.0f)
+    private var maxTrainingHeartRate = restingHeartRate
     override fun onSensorChanged(maybeEvent: SensorEvent?) {
+        if(maybeEvent?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
+            handleAccelerometer(maybeEvent)
+        } else if (maybeEvent?.sensor?.type == Sensor.TYPE_HEART_RATE) {
+
+        } else {
+            Log.w(TAG, "Event for Unexpected sensor type: ${maybeEvent?.sensor?.name}")
+        }
+    }
+
+    private fun handleHeartRate(event: SensorEvent) {
+        for(heartRate in event.values) {
+            if(heartRate > maxTrainingHeartRate) {
+                maxTrainingHeartRate = heartRate
+            }
+        }
+    }
+
+    private fun handleAccelerometer(event: SensorEvent) {
         // Note: Accelerometer includes forces of gravity and can be against any axis or a
         // combination depending on watch orientation.
         val currentTime = timeProvider.invoke()
@@ -41,7 +60,6 @@ class SquatSensorListener(private val filePath: File, private val unregisterFunc
             return
         }
         lastTime = currentTime
-        val event = maybeEvent!!
         val x = event.values[0]
         val y = event.values[1]
         val z = event.values[2]
@@ -95,12 +113,20 @@ class SquatSensorListener(private val filePath: File, private val unregisterFunc
         return progress
     }
 
-    override fun meetsGoal(): Boolean {
-        return totalPeaks >= GOAL
-    }
+    override fun getPoints(): Int {
+        var points = 0
+        if(totalPeaks >= BONUS) {
+            points +=2
+        } else if(totalPeaks >= GOAL) {
+            points++
+        }
 
-    override fun meetsBonus(): Boolean {
-        return totalPeaks >= BONUS
+        if(maxTrainingHeartRate >= restingHeartRate + 15) {
+            points +=2
+        } else if(maxTrainingHeartRate >= restingHeartRate + 10) {
+            points++
+        }
+        return points
     }
 
     override fun unregister() {
