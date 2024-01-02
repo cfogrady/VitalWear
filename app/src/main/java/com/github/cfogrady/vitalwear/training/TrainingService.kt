@@ -25,7 +25,7 @@ class TrainingService(
             TrainingType.SQUAT -> trainSquats()
             TrainingType.CRUNCH -> trainCrunches()
             TrainingType.PUNCH -> trainPunches()
-            TrainingType.DASH -> TODO()
+            TrainingType.DASH -> trainDash()
         }
     }
 
@@ -50,6 +50,13 @@ class TrainingService(
         return punchSensorListener
     }
 
+    private fun trainDash(): DashSensorListener {
+        val dashSensorListener = DashSensorListener(heartRateService.restingHeartRate().toFloat(), this::stopListening)
+        listenToStepCounter(dashSensorListener)
+        listenToHeartRate(dashSensorListener)
+        return dashSensorListener
+    }
+
     fun stopListening(sensorEventListener: SensorEventListener) {
         sensorManager.unregisterListener(sensorEventListener)
     }
@@ -63,5 +70,10 @@ class TrainingService(
     private fun listenToHeartRate(sensorEventListener: SensorEventListener) {
         val heartRateSensor = sensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE)
         sensorManager.registerListener(sensorEventListener, heartRateSensor, SensorManager.SENSOR_DELAY_GAME)
+    }
+
+    private fun listenToStepCounter(sensorEventListener: SensorEventListener) {
+        val stepCounter = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        sensorManager.registerListener(sensorEventListener, stepCounter, SensorManager.SENSOR_DELAY_GAME)
     }
 }
