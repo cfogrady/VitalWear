@@ -32,17 +32,17 @@ class VitalsComplicationService : ComplicationDataSourceService() {
         val characterManager = (application as VitalWearApp).characterManager
         var vitals = 0
         var iconImage: Icon? = null
-        if(characterManager.initialized.value!! && characterManager.activeCharacterIsPresent()) {
-            val character = characterManager.getCurrentCharacter()
-            vitals = character.characterStats.vitals
+        val currentCharacter = characterManager.getCurrentCharacter()
+        if(characterManager.initialized.value && currentCharacter != null) {
+            vitals = currentCharacter.characterStats.vitals
         }
         val firmwareManager = (application as VitalWearApp).firmwareManager
         if(firmwareManager.getFirmware().value != null) {
             val firmware = firmwareManager.getFirmware().value!!
             iconImage = Icon.createWithBitmap(firmware.characterFirmwareSprites.vitalsIcon)
         }
-        var descr = PlainComplicationText.Builder("VITALS").build()
-        var valueText = PlainComplicationText.Builder("$vitals").build()
+        val descr = PlainComplicationText.Builder("VITALS").build()
+        val valueText = PlainComplicationText.Builder("$vitals").build()
         val resultDataBuilder = RangedValueComplicationData.Builder(value = vitals.toFloat(), min = 0f, max = 9999f, descr)
             .setText(valueText)
             .setTapAction(pendingIntent)

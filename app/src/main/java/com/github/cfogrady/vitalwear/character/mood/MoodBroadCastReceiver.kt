@@ -18,11 +18,12 @@ class MoodBroadcastReceiver(
 
     override fun onReceive(context: Context?, intent: Intent?) {
         if(intent?.action == MOOD_UPDATE) {
-            if(characterManager.activeCharacterIsPresent()) {
+            val currentCharacter = characterManager.getCurrentCharacter()
+            if(currentCharacter != null) {
                 Log.i(TAG, "MOOD_UPDATE_INTENT broadcast received")
                 //TODO: This may only work when we have the complication service running
                 // Might need to start persistent service to do this.
-                bemMoodUpdater.updateMood(characterManager.getCurrentCharacter(), LocalDateTime.now())
+                bemMoodUpdater.updateMood(currentCharacter, LocalDateTime.now())
             }
         }
     }

@@ -35,7 +35,7 @@ class VitalService(private val characterManager: CharacterManager, private val c
 
     private fun transformStepsIntoVitals(oldSteps: Int, newSteps: Int) {
         val character = getCharacter()
-        if(character != BEMCharacter.DEFAULT_CHARACTER) {
+        if(character != null) {
             var stepsAlreadyTransformed = oldSteps
             if(newSteps - oldSteps >= remainingSteps) {
                 stepsAlreadyTransformed += remainingSteps
@@ -71,7 +71,7 @@ class VitalService(private val characterManager: CharacterManager, private val c
         complicationRefreshService.refreshVitalsComplication()
     }
 
-    private fun getCharacter() : BEMCharacter {
+    private fun getCharacter() : BEMCharacter? {
         return characterManager.getCurrentCharacter()
     }
 
@@ -117,7 +117,7 @@ class VitalService(private val characterManager: CharacterManager, private val c
             vitalLossTable[partnerLevel-2][opponentLevel-2]
         }
         addBattleChangeToDebug(opponentLevel, win, vitalsChange)
-        addVitals(characterManager.getCurrentCharacter(), vitalsChange)
+        addVitals(characterManager.getCurrentCharacter()!!, vitalsChange)
         return vitalsChange
     }
 

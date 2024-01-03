@@ -59,7 +59,7 @@ class MainScreenComposable(
     }
 
     @Composable
-    fun EverythingLoadedScreen(firmwareData: StateFlow<Firmware?>, activeCharacterData: StateFlow<BEMCharacter>, backgroundData: LiveData<Bitmap>, activityLaunchers: ActivityLaunchers) {
+    fun EverythingLoadedScreen(firmwareData: StateFlow<Firmware?>, activeCharacterData: StateFlow<BEMCharacter?>, backgroundData: LiveData<Bitmap>, activityLaunchers: ActivityLaunchers) {
         val firmware by firmwareData.collectAsState()
         val character by activeCharacterData.collectAsState()
         val background by backgroundData.observeAsState()
@@ -69,10 +69,10 @@ class MainScreenComposable(
                 // TODO: Change to loadCurrent or similar
                 backgroundManager.loadDefault()
             }
-        } else if(character.characterStats.id == BEMCharacter.DEFAULT_CHARACTER.characterStats.id) {
+        } else if(character == null) {
             activityLaunchers.characterSelectionLauncher.invoke()
         } else {
-            DailyScreen(firmware!!, character = character, background!!, activityLaunchers)
+            DailyScreen(firmware!!, character = character!!, background!!, activityLaunchers)
         }
     }
 

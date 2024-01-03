@@ -18,6 +18,8 @@ import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.TransformationEntity
 import com.github.cfogrady.vitalwear.common.card.db.TransformationEntityDao
 import com.github.cfogrady.vitalwear.common.data.LocalDateTimeConverters
+import com.github.cfogrady.vitalwear.settings.CharacterSettingsDao
+import com.github.cfogrady.vitalwear.settings.CharacterSettingsEntity
 
 @Database(entities = [
     CharacterEntity::class,
@@ -26,7 +28,8 @@ import com.github.cfogrady.vitalwear.common.data.LocalDateTimeConverters
     TransformationEntity::class,
     AdventureEntity::class,
     AttributeFusionEntity::class,
-    SpecificFusionEntity::class],
+    SpecificFusionEntity::class,
+    CharacterSettingsEntity::class],
     version = 1)
 @TypeConverters(LocalDateTimeConverters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -38,4 +41,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun adventureEntityDao(): AdventureEntityDao
     abstract fun attributeFusionEntityDao(): AttributeFusionEntityDao
     abstract fun specificFusionEntityDao(): SpecificFusionEntityDao
+
+    abstract fun CharacterSettingsDao(): CharacterSettingsDao
 }

@@ -20,9 +20,9 @@ class BemTransformationWorker (
     override fun doWork(): Result {
         Log.i(TAG, "Transforming!")
         val character = characterManager.getCurrentCharacter()
-        if(character != BEMCharacter.DEFAULT_CHARACTER) {
+        if(character != null) {
             character.prepCharacterTransformation()
-            if(characterManager.getCurrentCharacter().readyToTransform.value.isPresent) {
+            if(character.readyToTransform.value.isPresent) {
                 notificationChannelManager.sendGenericNotification(context, "Transformation!", "Character is ready for transformation", NotificationChannelManager.TRANSFORMATION_READY_ID)
             } else {
                 bemUpdater.setupTransformationChecker(character)

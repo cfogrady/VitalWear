@@ -34,9 +34,7 @@ class MainActivity : ComponentActivity() {
         super.onStart()
         val stepService = (application as VitalWearApp).stepService
         val characterManager = (application as VitalWearApp).characterManager
-        if(characterManager.activeCharacterIsPresent()) {
-            characterManager.getCurrentCharacter().characterStats.updateTimeStamps(LocalDateTime.now())
-        }
+        characterManager.getCurrentCharacter()?.characterStats?.updateTimeStamps(LocalDateTime.now())
     }
 
     override fun onStop() {

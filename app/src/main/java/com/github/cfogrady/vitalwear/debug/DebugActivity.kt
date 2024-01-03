@@ -52,7 +52,7 @@ class DebugActivity : ComponentActivity() {
             DebugScreens.STEP_DEBUG_INFO -> DebugItems(loader = (application as VitalWearApp).stepService::debug) {
                 debugMenuSelection = DebugScreens.DEBUG_MENU
             }
-            DebugScreens.CHARACTER_DEBUG_INFO -> DebugItems(loader = (application as VitalWearApp).characterManager.getCurrentCharacter()::debug) {
+            DebugScreens.CHARACTER_DEBUG_INFO -> DebugItems(loader = (application as VitalWearApp).characterManager.getCurrentCharacter()!!::debug) {
                 debugMenuSelection = DebugScreens.DEBUG_MENU
             }
             DebugScreens.HEART_RATE_DEBUG_INFO -> DebugItems(loader = (application as VitalWearApp).heartRateService::debug) {

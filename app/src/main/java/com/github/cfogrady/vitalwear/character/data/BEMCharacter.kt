@@ -4,6 +4,7 @@ import com.github.cfogrady.vitalwear.common.card.CardType
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntity
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
+import com.github.cfogrady.vitalwear.settings.CharacterSettingsEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDateTime
@@ -15,7 +16,8 @@ class BEMCharacter(
     val characterStats: CharacterEntity,
     val speciesStats : SpeciesEntity,
     val transformationWaitTimeSeconds: Long,
-    val transformationOptions: List<TransformationOption>
+    val transformationOptions: List<TransformationOption>,
+    val settings: CharacterSettingsEntity
 ) {
     private var _readyToTransform = MutableStateFlow<Optional<TransformationOption>>(Optional.empty())
     var readyToTransform : StateFlow<Optional<TransformationOption>> = _readyToTransform
@@ -23,8 +25,7 @@ class BEMCharacter(
 
     companion object {
         const val MAX_VITALS = 9999
-        private val DEFAULT_STATS = CharacterEntity(-1, CharacterState.SYNCED, "NONE", 0, LocalDateTime.MIN, 0, 0, false, 0, 0, 0, 0, 0, false, 0, 0, 0, 0, 0, 0, 0, false)
-        val DEFAULT_CHARACTER = BEMCharacter(CardMetaEntity.EMPTY_CARD_META, CharacterSprites.EMPTY_CHARACTER_SPRITES, DEFAULT_STATS, SpeciesEntity.EMPTY_SPECIES_ENTITY, 0, emptyList())
+        val DEFAULT_CHARACTER: BEMCharacter? = null
     }
 
     fun isBEM() : Boolean {

@@ -34,8 +34,9 @@ class TransformationScreenFactory(
     @Composable
     fun RunTransformation(context: Context, onFinish: () -> Unit) {
         var transformationProgress by remember { mutableStateOf(TransformationState.POWER_INCREASING) }
-        var character = characterManager.getCurrentCharacter()
-        val transformationFirmwareSprites = firmwareManager.getFirmware().value!!.transformationFirmwareSprites
+        var character = characterManager.getCurrentCharacter()!!
+        val firmware by firmwareManager.getFirmware().collectAsState()
+        val transformationFirmwareSprites = firmware!!.transformationFirmwareSprites
         val transformationOption = remember { character.popTransformationOption().get() }
         LaunchedEffect(key1 = transformationOption) {
             // assume we click back and need to setup the next check

@@ -9,11 +9,9 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface CharacterManager {
     val initialized: StateFlow<Boolean>
-    fun getCurrentCharacter(): BEMCharacter
+    fun getCurrentCharacter(): BEMCharacter?
 
-    fun getCharacterFlow() : StateFlow<BEMCharacter>
-
-    fun activeCharacterIsPresent() : Boolean
+    fun getCharacterFlow() : StateFlow<BEMCharacter?>
 
     fun doActiveCharacterTransformation(applicationContext: Context, transformationOption: TransformationOption) : BEMCharacter
 

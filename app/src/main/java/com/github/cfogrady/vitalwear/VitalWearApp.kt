@@ -1,5 +1,6 @@
 package com.github.cfogrady.vitalwear
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.app.NotificationManager
 import android.content.Context
@@ -90,6 +91,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     private lateinit var bemUpdater: BEMUpdater
     var backgroundHeight = 0.dp
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
         super.onCreate()
         buildDependencies()
@@ -110,7 +112,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationChannelManager = NotificationChannelManager(notificationManager)
         complicationRefreshService = ComplicationRefreshService(this, partnerComplicationState)
-        characterManager = CharacterManagerImpl(complicationRefreshService, database.characterDao(), characterSpritesIO, database.speciesEntityDao(), database.cardMetaEntityDao(), database.transformationEntityDao(), spriteBitmapConverter)
+        characterManager = CharacterManagerImpl(complicationRefreshService, database.characterDao(), characterSpritesIO, database.speciesEntityDao(), database.cardMetaEntityDao(), database.transformationEntityDao(), spriteBitmapConverter, database.CharacterSettingsDao())
         cardMetaEntityDao = database.cardMetaEntityDao()
         cardLoader = CardLoader(characterSpritesIO, cardSpriteIO, cardMetaEntityDao, database.speciesEntityDao(), database.transformationEntityDao(), database.adventureEntityDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao(), DimReader())
         val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
