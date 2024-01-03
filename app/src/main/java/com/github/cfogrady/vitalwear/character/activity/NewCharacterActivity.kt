@@ -58,12 +58,12 @@ class NewCharacterActivity : ComponentActivity() {
             }
         }
         setContent {
-            buildScreen(importCardActivityLauncher = importCardActivity)
+            BuildScreen(importCardActivityLauncher = importCardActivity)
         }
     }
 
     @Composable
-    fun buildScreen(importCardActivityLauncher: ((Intent) -> Unit) -> Unit) {
+    fun BuildScreen(importCardActivityLauncher: ((Intent) -> Unit) -> Unit) {
         val cardLoads by newCardLoads.collectAsState()
         var loaded by remember { mutableStateOf(false) }
         var cards by remember { mutableStateOf(ArrayList<CardMetaEntity>() as List<CardMetaEntity>) }

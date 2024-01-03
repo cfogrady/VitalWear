@@ -12,18 +12,6 @@ class ActivityHelper(val activity: ComponentActivity) {
         addToIntent(intent)
         return {activity.startActivity(intent)}
     }
-    fun getActivityLauncherWithResultHandling(activityClass : Class<*>?, addToIntent: (Intent) -> Unit = { _ -> {}}, onResult: (ActivityResult) -> Unit): () -> Unit {
-        val intent = Intent(activity.applicationContext, activityClass)
-        addToIntent(intent)
-        val contract = ActivityResultContracts.StartActivityForResult()
-        contract.createIntent(activity.applicationContext, intent)
-        val activityLauncher = activity.registerForActivityResult(contract) {result ->
-            onResult(result)
-        }
-        return {
-            activityLauncher.launch(intent)
-        }
-    }
 
     fun getActivityLauncherWithResultHandling(activityClass : Class<*>?, onResult: (ActivityResult) -> Unit): ((Intent) -> Unit) -> Unit {
         val intent = Intent(activity.applicationContext, activityClass)

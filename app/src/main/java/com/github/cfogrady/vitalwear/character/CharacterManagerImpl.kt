@@ -233,6 +233,15 @@ class CharacterManagerImpl(
         }
     }
 
+    override suspend fun updateSettings() {
+        withContext(Dispatchers.IO) {
+            val character = getCurrentCharacter()
+            if(character != null) {
+                characterSettingsDao.update(character.settings)
+            }
+        }
+    }
+
     override fun deleteCharacter(characterPreview: CharacterPreview) {
         val currentCharacter = activeCharacterFlow.value
         if(currentCharacter == null) {
