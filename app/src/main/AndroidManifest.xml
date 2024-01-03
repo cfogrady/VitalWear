@@ -64,18 +64,30 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.FileExploreActivity"/>
-        <activity android:name=".card.activity.LoadCardActivity"/>
-        <activity android:name=".character.activity.CharacterSelectActivity"/>
-        <activity android:name=".character.activity.NewCharacterActivity"/>
-        <activity android:name=".character.transformation.TransformationActivity"/>
-        <activity android:name=".firmware.LoadFirmwareActivity"/>
-        <activity android:name=".training.TrainingMenuActivity"/>
-        <activity android:name=".training.TrainingActivity"/>
-        <activity android:name=".settings.SettingsActivity"/>
-        <activity android:name=".stats.StatsMenuActivity"/>
-        <activity android:name=".battle.BattleActivity"/>
-        <activity android:name=".debug.DebugActivity"/>
+        <activity android:name=".activity.FileExploreActivity"
+            android:taskAffinity="" />
+        <activity android:name=".card.activity.LoadCardActivity"
+            android:taskAffinity="" />
+        <activity android:name=".character.activity.CharacterSelectActivity"
+            android:taskAffinity="" />
+        <activity android:name=".character.activity.NewCharacterActivity"
+            android:taskAffinity="" />
+        <activity android:name=".character.transformation.TransformationActivity"
+            android:taskAffinity="" />
+        <activity android:name=".firmware.LoadFirmwareActivity"
+            android:taskAffinity="" />
+        <activity android:name=".training.TrainingMenuActivity"
+            android:taskAffinity="" />
+        <activity android:name=".training.TrainingActivity"
+            android:taskAffinity="" />
+        <activity android:name=".settings.SettingsActivity"
+            android:taskAffinity="" />
+        <activity android:name=".stats.StatsMenuActivity"
+            android:taskAffinity="" />
+        <activity android:name=".battle.BattleActivity"
+            android:taskAffinity="" />
+        <activity android:name=".debug.DebugActivity"
+            android:taskAffinity="" />
         <service
             android:name=".tiles.PetTileService"
             android:label="VitalWear"
