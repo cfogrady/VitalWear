@@ -22,11 +22,13 @@ import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
+import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import kotlinx.coroutines.flow.StateFlow
 
 class MainScreenComposable(
+    private val gameStateFlow: StateFlow<GameState>,
     private val characterManager: CharacterManager,
     private val saveService: SaveService,
     private val firmwareManager: FirmwareManager,
@@ -63,6 +65,7 @@ class MainScreenComposable(
         val firmware by firmwareData.collectAsState()
         val character by activeCharacterData.collectAsState()
         val background by backgroundData.observeAsState()
+        val gameState by gameStateFlow.collectAsState()
         if(background == null) {
             Log.i(TAG, "Loading in everythingLoadedScreen background is null")
             Loading {
@@ -71,8 +74,44 @@ class MainScreenComposable(
             }
         } else if(character == null) {
             activityLaunchers.characterSelectionLauncher.invoke()
+        } else if(gameState == GameState.TRAINING) {
+
         } else {
             DailyScreen(firmware!!, character = character!!, background!!, activityLaunchers)
+        }
+    }
+
+    @OptIn(ExperimentalFoundationApi::class)
+    @Composable
+    fun BackgroundTraining(firmware: Firmware, character: BEMCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
+        vitalBoxFactory.VitalBox {
+            bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
+            VerticalPager(pageCount = 2) { page ->
+                when (page) {
+                    0 -> {
+                        partnerScreenComposable.PartnerScreen(
+                            character = character,
+                            firmware = firmware.characterFirmwareSprites,
+                        )
+                    }
+                    1 -> {
+                        Column(
+                            modifier = Modifier.fillMaxSize().clickable {
+                                activityLaunchers.trainingLauncher.invoke()
+                            },
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            bitmapScaler.ScaledBitmap(
+                                bitmap = firmware.menuFirmwareSprites.trainingIcon,
+                                contentDescription = "training")
+                            bitmapScaler.ScaledBitmap(
+                                bitmap = firmware.menuFirmwareSprites.stopIcon,
+                                contentDescription = "stop")
+                        }
+                    }
+                }
+            }
         }
     }
 

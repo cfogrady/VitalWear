@@ -4,8 +4,11 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
+import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.firmware.Firmware
 
 class TrainingActivity : ComponentActivity() {
@@ -26,9 +29,16 @@ class TrainingActivity : ComponentActivity() {
         background = (application as VitalWearApp).backgroundManager.selectedBackground.value!!
         trainingScreenFactory = (application as VitalWearApp).trainingScreenFactory
         setContent {
-            trainingScreenFactory.ExerciseScreen(partner, firmware, background, trainingType) {
-                finish()
+            val gameState by (application as VitalWearApp).gameState.collectAsState()
+            when(gameState) {
+                GameState.TRAINING -> TODO()
+                else -> {
+                    trainingScreenFactory.ExerciseScreen(partner, firmware, background, trainingType) {
+                        finish()
+                    }
+                }
             }
+
         }
     }
 }

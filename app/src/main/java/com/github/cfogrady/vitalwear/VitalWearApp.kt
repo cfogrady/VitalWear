@@ -38,6 +38,7 @@ import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.ScrollingNameFactory
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
+import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.debug.ExceptionService
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
@@ -50,6 +51,7 @@ import com.github.cfogrady.vitalwear.vitals.VitalService
 import com.github.cfogrady.vitalwear.workmanager.VitalWearWorkerFactory
 import com.github.cfogrady.vitalwear.workmanager.WorkProviderDependencies
 import com.google.common.collect.Lists
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Random
 
 class VitalWearApp : Application(), Configuration.Provider {
@@ -90,6 +92,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     private lateinit var applicationBootManager: ApplicationBootManager
     private lateinit var bemUpdater: BEMUpdater
     var backgroundHeight = 0.dp
+    val gameState = MutableStateFlow(GameState.IDLE)
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
@@ -104,7 +107,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         applicationBootManager.onStartup(this)
     }
 
-    fun buildDependencies() {
+    private fun buildDependencies() {
         //TODO: Remove allowMainThread before release
         database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "VitalWear").allowMainThreadQueries().build()
         //TODO: Should replace sharedPreferences with datastore (see https://developer.android.com/training/data-storage/shared-preferences)
