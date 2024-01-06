@@ -97,5 +97,5 @@ dependencies {
     ksp "androidx.room:room-compiler:$room_version"
 
     //VB-Dim-Reader library
-    implementation 'com.github.cfogrady:vb-dim-reader:2.0.2.4-64233c4'
+    implementation "com.github.cfogrady:vb-dim-reader:$vb_dim_reader_version"
 }

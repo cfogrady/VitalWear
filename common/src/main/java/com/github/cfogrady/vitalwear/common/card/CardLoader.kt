@@ -93,7 +93,7 @@ class CardLoader(
         var franchise = 0
         if(card is BemCard) {
             cardType = CardType.BEM
-            franchise = card.header.bemFlags[2].toInt()
+            franchise = card.header.franchiseId
         }
         val cardMetaEntity = CardMetaEntity(cardName, card.header.dimId, card.checksum, cardType, franchise)
         cardMetaEntityDao.insert(cardMetaEntity)

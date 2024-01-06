@@ -70,7 +70,7 @@ dependencies {
     implementation 'androidx.activity:activity-compose:1.8.2'
 
     //VB-DIM-Reader and SLF4J logging
-    implementation 'com.github.cfogrady:vb-dim-reader:2.0.2.4-64233c4'
+    implementation "com.github.cfogrady:vb-dim-reader:$vb_dim_reader_version"
     runtimeOnly 'org.slf4j:slf4j-android:1.7.26'
 
     //Channel Client (data transfer)

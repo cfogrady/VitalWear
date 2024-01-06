@@ -3,6 +3,7 @@ buildscript {
     ext {
         compose_version = '1.4.3'
         room_version = "2.5.1"
+        vb_dim_reader_version = "2.1.0.1-231156d"
     }
 }
 
