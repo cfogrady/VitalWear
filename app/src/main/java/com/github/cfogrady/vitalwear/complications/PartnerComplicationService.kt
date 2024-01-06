@@ -14,6 +14,7 @@ import com.github.cfogrady.vitalwear.R
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.activity.MainActivity
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
+import com.github.cfogrady.vitalwear.data.GameState
 
 
 class PartnerComplicationService : ComplicationDataSourceService() {
@@ -61,7 +62,8 @@ class PartnerComplicationService : ComplicationDataSourceService() {
         } else if(character == null) {
             Icon.createWithBitmap(maybeFirmware.value!!.insertCardIcon)
         } else {
-            Icon.createWithBitmap(character.characterSprites.sprites[character.activityIdx + state.spriteIndex])
+            val characterBitmaps = (application as VitalWearApp).gameState.value.bitmaps(character)
+            Icon.createWithBitmap(characterBitmaps[state.spriteIndex])
         }
     }
 }
