@@ -16,6 +16,8 @@ class PunchSensorListener(private val restingHeartRate: Float, private val unreg
         const val BONUS = 16
     }
 
+    override val trainingType = TrainingType.PUNCH
+
     private val squaredMagnitudeQueue = LinkedList<Float>()
     private var previousDiff = 0f
     private var lastTime = timeProvider.invoke()
@@ -23,6 +25,10 @@ class PunchSensorListener(private val restingHeartRate: Float, private val unreg
     private var totalRegisters = 0
     private val progress = MutableStateFlow(0.0f)
     private var maxTrainingHeartRate = restingHeartRate
+
+    private var goods = 0
+    private var greats = 0
+    private var fails = 0
     override fun onSensorChanged(maybeEvent: SensorEvent?) {
         when (maybeEvent?.sensor?.type) {
             Sensor.TYPE_ACCELEROMETER -> {
@@ -99,6 +105,28 @@ class PunchSensorListener(private val restingHeartRate: Float, private val unreg
             points++
         }
         return points
+    }
+
+    // TODO: Someday this should be synced so we don't take any sensor readings in the middle of this
+    override fun finishRep() {
+        val points = getPoints()
+        totalRegisters = 0
+        maxTrainingHeartRate = restingHeartRate
+        roundsUntilNextReading = 0
+        progress.value = 0f
+        previousDiff = 0f
+        squaredMagnitudeQueue.clear()
+        if(points == 4) {
+            greats++
+        } else if(points > 0) {
+            goods++
+        } else {
+            fails++
+        }
+    }
+
+    override fun results(): BackgroundTrainingResults {
+        return BackgroundTrainingResults(greats, goods, fails, trainingType)
     }
 
     override fun unregister() {

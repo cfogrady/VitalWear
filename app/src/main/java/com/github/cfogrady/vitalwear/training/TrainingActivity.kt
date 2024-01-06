@@ -1,5 +1,6 @@
 package com.github.cfogrady.vitalwear.training
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -7,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.github.cfogrady.vitalwear.VitalWearApp
+import com.github.cfogrady.vitalwear.activity.SELECTED_FILE
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.firmware.Firmware
@@ -14,12 +16,13 @@ import com.github.cfogrady.vitalwear.firmware.Firmware
 class TrainingActivity : ComponentActivity() {
     companion object {
         const val TRAINING_TYPE = "TRAINING_TYPE"
+        const val FINISH_TO_MENU = "FINISH_TO_MENU"
     }
 
-    lateinit var trainingScreenFactory: TrainingScreenFactory
-    lateinit var partner: BEMCharacter
-    lateinit var firmware: Firmware
-    lateinit var background: Bitmap
+    private lateinit var trainingScreenFactory: TrainingScreenFactory
+    private lateinit var partner: BEMCharacter
+    private lateinit var firmware: Firmware
+    private lateinit var background: Bitmap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,16 +32,18 @@ class TrainingActivity : ComponentActivity() {
         background = (application as VitalWearApp).backgroundManager.selectedBackground.value!!
         trainingScreenFactory = (application as VitalWearApp).trainingScreenFactory
         setContent {
-            val gameState by (application as VitalWearApp).gameState.collectAsState()
-            when(gameState) {
-                GameState.TRAINING -> TODO()
-                else -> {
-                    trainingScreenFactory.ExerciseScreen(partner, firmware, background, trainingType) {
-                        finish()
-                    }
-                }
+            trainingScreenFactory.ExerciseScreen(
+                this,
+                partner,
+                firmware,
+                background,
+                trainingType
+            ) { finishToMenu ->
+                val intent = Intent()
+                intent.putExtra(FINISH_TO_MENU, finishToMenu)
+                setResult(0, intent)
+                finish()
             }
-
         }
     }
 }

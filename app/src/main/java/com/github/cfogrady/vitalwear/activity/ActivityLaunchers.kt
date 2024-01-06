@@ -8,7 +8,7 @@ class ActivityLaunchers(
     val battleLauncher: () -> Unit,
     val transformLauncher: () -> Unit,
     val debugActivityLauncher: () -> Unit,
-    val trainingLauncher: () -> Unit
+    val stopBackgroundTrainingLauncher: () -> Unit,
 ) {
 
 }

@@ -14,6 +14,7 @@ class NotificationChannelManager(private val notificationManager: NotificationMa
         const val NOTIFICATION_CHANNEL = "Vital Wear"
         const val CHANNEL_ID = "VitalWearMainChannel"
         const val TRANSFORMATION_READY_ID = 0
+        const val BACKGROUND_TRAINING = 1
     }
 
     private var genericNotificationId = 100

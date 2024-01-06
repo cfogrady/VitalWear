@@ -12,6 +12,7 @@ import com.github.cfogrady.vitalwear.firmware.LoadFirmwareActivity
 import com.github.cfogrady.vitalwear.stats.StatsMenuActivity
 import com.github.cfogrady.vitalwear.training.TrainingMenuActivity
 import com.github.cfogrady.vitalwear.common.util.ActivityHelper
+import com.github.cfogrady.vitalwear.training.StopBackgroundTrainingActivity
 import com.github.cfogrady.vitalwear.training.TrainingActivity
 import java.time.LocalDateTime
 
@@ -52,6 +53,7 @@ class MainActivity : ComponentActivity() {
             activityHelper.getActivityLauncher(BattleActivity::class.java),
             activityHelper.getActivityLauncher(TransformationActivity::class.java),
             activityHelper.getActivityLauncher(DebugActivity::class.java),
-            activityHelper.getActivityLauncher(TrainingActivity::class.java))
+            activityHelper.getActivityLauncher(StopBackgroundTrainingActivity::class.java),
+            )
     }
 }
