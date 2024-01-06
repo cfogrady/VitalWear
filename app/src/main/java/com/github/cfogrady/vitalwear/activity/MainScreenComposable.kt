@@ -1,5 +1,6 @@
 package com.github.cfogrady.vitalwear.activity
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -13,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.lifecycle.LiveData
 import androidx.wear.compose.material.Text
@@ -20,17 +23,23 @@ import com.github.cfogrady.vitalwear.*
 import com.github.cfogrady.vitalwear.R
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
+import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
+import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
+import com.github.cfogrady.vitalwear.training.BackgroundTrainingScreenFactory
+import com.github.cfogrady.vitalwear.training.TrainingScreenFactory
 import kotlinx.coroutines.flow.StateFlow
 
 class MainScreenComposable(
+    private val gameStateFlow: StateFlow<GameState>,
     private val characterManager: CharacterManager,
     private val saveService: SaveService,
     private val firmwareManager: FirmwareManager,
     private val backgroundManager: BackgroundManager,
+    private val backgroundTrainingScreenFactory: BackgroundTrainingScreenFactory,
     private val imageScaler: ImageScaler,
     private val bitmapScaler: BitmapScaler,
     private val partnerScreenComposable: PartnerScreenComposable,
@@ -63,6 +72,7 @@ class MainScreenComposable(
         val firmware by firmwareData.collectAsState()
         val character by activeCharacterData.collectAsState()
         val background by backgroundData.observeAsState()
+        val gameState by gameStateFlow.collectAsState()
         if(background == null) {
             Log.i(TAG, "Loading in everythingLoadedScreen background is null")
             Loading {
@@ -71,8 +81,45 @@ class MainScreenComposable(
             }
         } else if(character == null) {
             activityLaunchers.characterSelectionLauncher.invoke()
+        } else if(gameState == GameState.TRAINING) {
+            BackgroundTraining(firmware = firmware!!, character = character!!, background = background!!, activityLaunchers = activityLaunchers)
         } else {
             DailyScreen(firmware!!, character = character!!, background!!, activityLaunchers)
+        }
+    }
+
+    @OptIn(ExperimentalFoundationApi::class)
+    @Composable
+    fun BackgroundTraining(firmware: Firmware, character: BEMCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
+        vitalBoxFactory.VitalBox {
+            bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
+            VerticalPager(pageCount = 2) { page ->
+                when (page) {
+                    0 -> {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            backgroundTrainingScreenFactory.BackgroundTraining(character, firmware)
+                        }
+                    }
+                    1 -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clickable {
+                                    activityLaunchers.stopBackgroundTrainingLauncher.invoke()
+                                },
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            bitmapScaler.ScaledBitmap(
+                                bitmap = firmware.menuFirmwareSprites.stopIcon,
+                                contentDescription = "stop")
+                            bitmapScaler.ScaledBitmap(
+                                bitmap = firmware.menuFirmwareSprites.trainingIcon,
+                                contentDescription = "training")
+                        }
+                    }
+                }
+            }
         }
     }
 

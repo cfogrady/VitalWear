@@ -16,6 +16,7 @@
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
     <!-- Any Foreground Service -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH"/>
     <!-- post notifications -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
@@ -88,6 +89,8 @@
             android:taskAffinity="" />
         <activity android:name=".debug.DebugActivity"
             android:taskAffinity="" />
+        <activity android:name=".training.StopBackgroundTrainingActivity"
+            android:taskAffinity="" />
         <service
             android:name=".tiles.PetTileService"
             android:label="VitalWear"
@@ -103,6 +106,9 @@
                 android:resource="@drawable/tile_preview"/>
 
         </service>
+        <service
+            android:name=".training.TrainingForegroundService"
+            android:foregroundServiceType="health"/>
         <service
             android:name=".complications.PartnerComplicationService"
             android:label="Partner"

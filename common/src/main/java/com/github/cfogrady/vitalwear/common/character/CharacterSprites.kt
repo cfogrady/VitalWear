@@ -6,7 +6,6 @@ data class CharacterSprites(
     val sprites: List<Bitmap>,
 ) {
     companion object {
-        val EMPTY_CHARACTER_SPRITES = CharacterSprites(arrayListOf())
         val NAME = 0
         val IDLE_1 = 1
         val IDLE_2 = 2

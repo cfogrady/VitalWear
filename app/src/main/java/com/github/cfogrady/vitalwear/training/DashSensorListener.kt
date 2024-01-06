@@ -14,10 +14,17 @@ class DashSensorListener(private val restingHeartRate: Float, private val unregi
         const val BONUS = 16
     }
 
+    override val trainingType = TrainingType.DASH
+
     private var startingSteps = Int.MAX_VALUE
     private var lastStep = 0
     private val progress = MutableStateFlow(0.0f)
     private var maxTrainingHeartRate = restingHeartRate
+
+    private var goods = 0
+    private var greats = 0
+    private var fails = 0
+
     override fun onSensorChanged(maybeEvent: SensorEvent?) {
         when (maybeEvent?.sensor?.type) {
             Sensor.TYPE_STEP_COUNTER -> {
@@ -74,6 +81,25 @@ class DashSensorListener(private val restingHeartRate: Float, private val unregi
             points++
         }
         return points
+    }
+
+    // TODO: Someday this should be synced so we don't take any sensor readings in the middle of this
+    override fun finishRep() {
+        val points = getPoints()
+        startingSteps = lastStep
+        maxTrainingHeartRate = restingHeartRate
+        progress.value = 0f
+        if(points == 4) {
+            greats++
+        } else if(points > 0) {
+            goods++
+        } else {
+            fails++
+        }
+    }
+
+    override fun results(): BackgroundTrainingResults {
+        return BackgroundTrainingResults(greats, goods, fails, trainingType)
     }
 
     override fun unregister() {
