@@ -68,9 +68,10 @@ class CharacterManagerImpl(
         val activeCharacterStats = characterDao.getCharactersByNotState(CharacterState.BACKUP)
         if(activeCharacterStats.isNotEmpty()) {
             val characterStats = activeCharacterStats[0]
+            val settings = characterSettingsDao.getByCharacterId(characterStats.id)
             return try {
                 val cardMetaEntity = cardMetaEntityDao.getByName(characterStats.cardFile)
-                buildBEMCharacter(applicationContext, cardMetaEntity, characterStats.slotId) {
+                buildBEMCharacter(applicationContext, cardMetaEntity, characterStats.slotId, settings) {
                     characterStats
                 }
             } catch (e: Exception) {
@@ -110,7 +111,7 @@ class CharacterManagerImpl(
 
     override fun doActiveCharacterTransformation(applicationContext: Context, transformationOption: TransformationOption) : BEMCharacter {
         val actualCharacter = activeCharacterFlow.value!!
-        val transformedCharacter = buildBEMCharacter(applicationContext, actualCharacter.cardMetaEntity, transformationOption.slotId) {
+        val transformedCharacter = buildBEMCharacter(applicationContext, actualCharacter.cardMetaEntity, transformationOption.slotId, actualCharacter.settings) {
             actualCharacter.characterStats
         }
         transformedCharacter.characterStats.slotId = transformationOption.slotId
@@ -162,19 +163,19 @@ class CharacterManagerImpl(
     }
 
     private fun newCharacter(applicationContext: Context, cardMetaEntity: CardMetaEntity, slotId: Int) : BEMCharacter {
-        return buildBEMCharacter(applicationContext, cardMetaEntity, slotId) { transformationTime ->
+        return buildBEMCharacter(applicationContext, cardMetaEntity, slotId, CharacterSettingsEntity.DEFAULT_SETTINGS) { transformationTime ->
             newCharacterEntityFromCard(cardMetaEntity.cardName, slotId, transformationTime)
         }
     }
 
-    private fun buildBEMCharacter(applicationContext: Context, cardMetaEntity: CardMetaEntity, slotId: Int, characterEntitySupplier: (Long) -> CharacterEntity): BEMCharacter {
+    private fun buildBEMCharacter(applicationContext: Context, cardMetaEntity: CardMetaEntity, slotId: Int, settings: CharacterSettingsEntity, characterEntitySupplier: (Long) -> CharacterEntity): BEMCharacter {
         val cardName = cardMetaEntity.cardName
         val transformationTime = largestTransformationTimeSeconds(cardMetaEntity.cardName, slotId)
         val characterEntity = characterEntitySupplier.invoke(transformationTime)
         val speciesEntity = speciesEntityDao.getCharacterByCardAndCharacterId(cardName, slotId)
         val bitmaps = characterSpritesIO.loadCharacterSprites(applicationContext, speciesEntity.spriteDirName)
         val transformationOptions = transformationOptions(applicationContext, cardName, slotId)
-        return BEMCharacter(cardMetaEntity, bitmaps, characterEntity, speciesEntity, transformationTime, transformationOptions, CharacterSettingsEntity.DEFAULT_SETTINGS)
+        return BEMCharacter(cardMetaEntity, bitmaps, characterEntity, speciesEntity, transformationTime, transformationOptions, settings)
     }
 
     private val totalTrainingTime = 100L*60L*60L //100 hours * 60min/hr * 60sec/min = total seconds
@@ -214,7 +215,8 @@ class CharacterManagerImpl(
     override suspend fun swapToCharacter(applicationContext: Context, selectedCharacterPreview : CharacterPreview) {
         withContext(Dispatchers.IO) {
             val cardMetaEntity = cardMetaEntityDao.getByName(selectedCharacterPreview.cardName)
-            val selectedCharacter = buildBEMCharacter(applicationContext, cardMetaEntity, selectedCharacterPreview.slotId) {
+            val settings = characterSettingsDao.getByCharacterId(selectedCharacterPreview.characterId)
+            val selectedCharacter = buildBEMCharacter(applicationContext, cardMetaEntity, selectedCharacterPreview.slotId, settings) {
                 characterDao.getCharacterById(selectedCharacterPreview.characterId)
             }
             val currentCharacter = activeCharacterFlow.value
@@ -245,10 +247,12 @@ class CharacterManagerImpl(
     override fun deleteCharacter(characterPreview: CharacterPreview) {
         val currentCharacter = activeCharacterFlow.value
         if(currentCharacter == null) {
+            characterSettingsDao.deleteById(characterPreview.characterId)
             characterDao.deleteById(characterPreview.characterId)
         } else if(currentCharacter.characterStats.id == characterPreview.characterId) {
             Log.e(TAG, "Cannot delete active character")
         } else {
+            characterSettingsDao.deleteById(characterPreview.characterId)
             characterDao.deleteById(characterPreview.characterId)
         }
     }
