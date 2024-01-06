@@ -3,6 +3,7 @@ package com.github.cfogrady.vitalwear.training
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -108,18 +109,18 @@ class BackgroundTrainingScreenFactory(
                 finished.invoke()
             }, 3000)
         }
-        Column(modifier = Modifier.padding(3.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Row {
-                Text("Greats:", fontWeight = FontWeight.Bold, fontSize = 2.5.em, modifier = Modifier.weight(.7f))
-                Text(formatNumber(backgroundTrainingResults.great, 3), fontSize = 2.5.em, modifier = Modifier.weight(.3f))
+        Column(modifier = Modifier.fillMaxSize().padding(3.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceAround) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                Text("Greats:", fontWeight = FontWeight.Bold, fontSize = 3.em)
+                Text(formatNumber(backgroundTrainingResults.great, 3), fontSize = 3.em)
             }
-            Row {
-                Text("Goods:", fontWeight = FontWeight.Bold, fontSize = 2.5.em, modifier = Modifier.weight(.7f))
-                Text(formatNumber(backgroundTrainingResults.good, 3), fontSize = 2.5.em, modifier = Modifier.weight(.3f))
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                Text("Goods:", fontWeight = FontWeight.Bold, fontSize = 3.em)
+                Text(formatNumber(backgroundTrainingResults.good, 3), fontSize = 3.em)
             }
-            Row {
-                Text("Fails:", fontWeight = FontWeight.Bold, fontSize = 2.5.em, modifier = Modifier.weight(.7f))
-                Text(formatNumber(backgroundTrainingResults.failure, 3), fontSize = 2.5.em, modifier = Modifier.weight(.3f))
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                Text("Fails:", fontWeight = FontWeight.Bold, fontSize = 3.em)
+                Text(formatNumber(backgroundTrainingResults.failure, 3), fontSize = 3.em)
             }
         }
     }
