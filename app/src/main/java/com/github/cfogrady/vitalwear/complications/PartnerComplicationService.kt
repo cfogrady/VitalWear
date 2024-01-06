@@ -3,19 +3,12 @@ package com.github.cfogrady.vitalwear.complications
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.drawable.Icon
-import android.util.Log
 import androidx.wear.watchface.complications.data.*
 import androidx.wear.watchface.complications.datasource.ComplicationDataSourceService
-import androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
-import com.github.cfogrady.vitalwear.R
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.activity.MainActivity
-import com.github.cfogrady.vitalwear.character.data.BEMCharacter
-import com.github.cfogrady.vitalwear.data.GameState
-
 
 class PartnerComplicationService : ComplicationDataSourceService() {
     // TODO: Mood and Sleeping Sprites: 23-28
@@ -45,7 +38,7 @@ class PartnerComplicationService : ComplicationDataSourceService() {
 
     private fun complicationResult() : ComplicationData {
         val goToAppIntent = Intent(applicationContext, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(applicationContext, 0, goToAppIntent, PendingIntent.FLAG_CANCEL_CURRENT.and(PendingIntent.FLAG_IMMUTABLE).and(PendingIntent.FLAG_ONE_SHOT))
+        val pendingIntent = PendingIntent.getActivity(applicationContext, 0, goToAppIntent, PendingIntent.FLAG_CANCEL_CURRENT.or(PendingIntent.FLAG_IMMUTABLE).or(PendingIntent.FLAG_ONE_SHOT))
         val iconImage = findComplicationIcon()
         val image = SmallImage.Builder(iconImage, SmallImageType.PHOTO).build()
         val text = PlainComplicationText.Builder("Partner").build()
