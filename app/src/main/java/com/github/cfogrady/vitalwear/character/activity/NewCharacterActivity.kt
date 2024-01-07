@@ -4,6 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
@@ -64,6 +67,7 @@ class NewCharacterActivity : ComponentActivity() {
     fun BuildScreen(importCardActivityLauncher: ((Intent) -> Unit) -> Unit) {
         val cardLoads by newCardLoads.collectAsState()
         var loaded by remember { mutableStateOf(false) }
+        var loadingNewCharacter by remember { mutableStateOf(false) }
         var cards by remember { mutableStateOf(ArrayList<CardMetaEntity>() as List<CardMetaEntity>) }
         LaunchedEffect(cardLoads) {
             loaded = false
@@ -72,8 +76,14 @@ class NewCharacterActivity : ComponentActivity() {
                 loaded = true
             }
         }
-        if(!loaded) {
-            Text(text = LOADING_TEXT)
+        if(loadingNewCharacter) {
+            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "Loading New Character")
+            }
+        } else if(!loaded) {
+            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = LOADING_TEXT)
+            }
         } else {
             ScalingLazyColumn(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -90,13 +100,14 @@ class NewCharacterActivity : ComponentActivity() {
                 }
                 items(items = cards) { card ->
                     Button(onClick = {
+                        loadingNewCharacter = true
                         CoroutineScope(Dispatchers.Default).launch {
                             characterManager.createNewCharacter(applicationContext, card)
+                            val intent = Intent()
+                            intent.putExtra(NEW_CHARACTER_SELECTED_FLAG, true)
+                            setResult(0, intent)
+                            finish()
                         }
-                        val intent = Intent()
-                        intent.putExtra(NEW_CHARACTER_SELECTED_FLAG, true)
-                        setResult(0, intent)
-                        finish()
                     }) {
                         Text(text = card.cardName, modifier = Modifier.padding(10.dp))
                     }
