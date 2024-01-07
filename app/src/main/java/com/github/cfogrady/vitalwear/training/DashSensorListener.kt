@@ -7,7 +7,7 @@ import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class DashSensorListener(private val restingHeartRate: Float, private val unregisterFunctor: (SensorEventListener)->Unit) : TrainingProgressTracker {
+class DashSensorListener(private val restingHeartRate: Float, private val unregisterFunctor: (SensorEventListener)->Unit) : TrainingProgressTracker() {
     companion object {
         const val TAG = "DashSensorListener"
         const val GOAL = 12
@@ -20,10 +20,6 @@ class DashSensorListener(private val restingHeartRate: Float, private val unregi
     private var lastStep = 0
     private val progress = MutableStateFlow(0.0f)
     private var maxTrainingHeartRate = restingHeartRate
-
-    private var goods = 0
-    private var greats = 0
-    private var fails = 0
 
     override fun onSensorChanged(maybeEvent: SensorEvent?) {
         when (maybeEvent?.sensor?.type) {
@@ -83,23 +79,10 @@ class DashSensorListener(private val restingHeartRate: Float, private val unregi
         return points
     }
 
-    // TODO: Someday this should be synced so we don't take any sensor readings in the middle of this
-    override fun finishRep() {
-        val points = getPoints()
+    override fun reset() {
         startingSteps = lastStep
         maxTrainingHeartRate = restingHeartRate
         progress.value = 0f
-        if(points == 4) {
-            greats++
-        } else if(points > 0) {
-            goods++
-        } else {
-            fails++
-        }
-    }
-
-    override fun results(): BackgroundTrainingResults {
-        return BackgroundTrainingResults(greats, goods, fails, trainingType)
     }
 
     override fun unregister() {

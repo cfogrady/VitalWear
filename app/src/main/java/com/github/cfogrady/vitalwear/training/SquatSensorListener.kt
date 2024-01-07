@@ -16,7 +16,7 @@ import java.util.ArrayList
 import java.util.LinkedList
 import kotlin.math.abs
 
-class SquatSensorListener(private val restingHeartRate: Float, private val unregisterFunctor: (SensorEventListener)->Unit, private val timeProvider: () -> Long = System::currentTimeMillis) : TrainingProgressTracker {
+class SquatSensorListener(private val restingHeartRate: Float, private val unregisterFunctor: (SensorEventListener)->Unit, private val timeProvider: () -> Long = System::currentTimeMillis) : TrainingProgressTracker() {
     companion object {
         const val TAG = "SquatSensorListener"
         const val PEAK_VALUE = 2.0
@@ -34,9 +34,6 @@ class SquatSensorListener(private val restingHeartRate: Float, private val unreg
     private val progress = MutableStateFlow(0.0f)
     private var maxTrainingHeartRate = restingHeartRate
 
-    private var goods = 0
-    private var greats = 0
-    private var fails = 0
     override fun onSensorChanged(maybeEvent: SensorEvent?) {
         when (maybeEvent?.sensor?.type) {
             Sensor.TYPE_ACCELEROMETER -> {
@@ -137,26 +134,13 @@ class SquatSensorListener(private val restingHeartRate: Float, private val unreg
         return points
     }
 
-    // TODO: Someday this should be synced so we don't take any sensor readings in the middle of this
-    override fun finishRep() {
-        val points = getPoints()
+    override fun reset() {
         totalPeaks = 0
         maxTrainingHeartRate = restingHeartRate
         roundsUntilNextReading = 0
         progress.value = 0f
         sumQueue.clear()
         deltaQueue.clear()
-        if(points == 4) {
-            greats++
-        } else if(points > 0) {
-            goods++
-        } else {
-            fails++
-        }
-    }
-
-    override fun results(): BackgroundTrainingResults {
-        return BackgroundTrainingResults(greats, goods, fails, trainingType)
     }
 
     override fun unregister() {

@@ -3,16 +3,35 @@ package com.github.cfogrady.vitalwear.training
 import android.hardware.SensorEventListener
 import kotlinx.coroutines.flow.StateFlow
 
-interface TrainingProgressTracker : SensorEventListener {
+abstract class TrainingProgressTracker : SensorEventListener {
 
-    val trainingType: TrainingType
-    fun progressFlow(): StateFlow<Float>
+    abstract val trainingType: TrainingType
 
-    fun unregister()
+    private var greats = 0
+    private var goods = 0
+    private var fails = 0
+    abstract fun progressFlow(): StateFlow<Float>
 
-    fun getPoints(): Int
+    abstract fun unregister()
 
-    fun finishRep()
+    abstract fun getPoints(): Int
 
-    fun results(): BackgroundTrainingResults
+    protected abstract fun reset()
+
+    // TODO: Someday this should be synced so we don't take any sensor readings in the middle of this
+    fun finishRep() {
+        val points = getPoints()
+        reset()
+        if(points == 4) {
+            greats++
+        } else if(points > 0) {
+            goods++
+        } else {
+            fails++
+        }
+    }
+
+    fun results(): BackgroundTrainingResults {
+        return BackgroundTrainingResults(greats, goods, fails, trainingType)
+    }
 }
