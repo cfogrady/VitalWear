@@ -38,7 +38,7 @@ class CardImageImportService  : WearableListenerService() {
                     val cardName = getName(cardStream)
                     val uniqueSprites = cardStream.read() != 0
                     Log.i(TAG, "Importing card $cardName")
-                    (application as VitalWearApp).cardLoader.importCardImage(applicationContext, cardName, cardStream, uniqueSprites)
+                    (application as VitalWearApp).cardLoader.importCard(applicationContext, cardName, cardStream, uniqueSprites)
                     (applicationContext as VitalWearApp).notificationChannelManager.sendGenericNotification(applicationContext, "$cardName Import Success", "$cardName imported successfully")
                 } catch (e: Exception) {
                     Log.e(TAG, "Unable to load received card data", e)

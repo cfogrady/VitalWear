@@ -2,12 +2,13 @@ package com.github.cfogrady.vitalwear.character.data
 
 import android.content.Context
 import android.util.Log
+import com.github.cfogrady.vitalwear.common.card.CardCharacterImageService
 import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
 import com.github.cfogrady.vitalwear.common.card.CardLoader
 import java.util.HashMap
 import java.util.HashSet
 
-class PreviewCharacterManager(val characterDao: CharacterDao, val cardLoader: CardLoader) {
+class PreviewCharacterManager(private val characterDao: CharacterDao, private val cardCharacterImageService: CardCharacterImageService) {
     fun previewCharacters(applicationContext: Context) : List<CharacterPreview> {
         Log.i(com.github.cfogrady.vitalwear.character.TAG, "Fetching preview characters")
         val characters = characterDao.getCharactersOrderByRecent()
@@ -18,7 +19,7 @@ class PreviewCharacterManager(val characterDao: CharacterDao, val cardLoader: Ca
             slotSet.add(character.slotId)
         }
         Log.i(com.github.cfogrady.vitalwear.character.TAG, "Built. Reading Card Data.")
-        val bitmapsByCardNameAndSlotId = cardLoader.loadBitmapsForSlots(applicationContext, slotsNeededByCard, CharacterSpritesIO.IDLE1)
+        val bitmapsByCardNameAndSlotId = cardCharacterImageService.loadBitmapsForSlots(applicationContext, slotsNeededByCard, CharacterSpritesIO.IDLE1)
         Log.i(com.github.cfogrady.vitalwear.character.TAG, "Read. Creating CharacterPreview objects")
         val previewCharacters = ArrayList<CharacterPreview>()
         for(character in characters) {

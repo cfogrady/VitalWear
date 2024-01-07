@@ -8,9 +8,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,7 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.VitalWearApp
-import com.github.cfogrady.vitalwear.common.card.CardLoader
+import com.github.cfogrady.vitalwear.card.AppCardLoader
 import com.github.cfogrady.vitalwear.common.communication.ChannelTypes
 import com.github.cfogrady.vitalwear.common.composable.util.KeepScreenOn
 import com.google.android.gms.wearable.ChannelClient
@@ -49,7 +47,7 @@ class LoadCardActivity : ComponentActivity() {
         Error,
     }
 
-    lateinit var cardLoader : CardLoader
+    lateinit var cardLoader : AppCardLoader
     lateinit var channelClient: ChannelClient
     var loadCardStateFlow = MutableStateFlow(LoadCardState.WaitingForCard)
 
@@ -133,7 +131,7 @@ class LoadCardActivity : ComponentActivity() {
                     val test = getName(cardStream)
                     val uniqueSprites = cardStream.read() != 0
                     Log.i(TAG, "Importing card $cardName with $test tag")
-                    (application as VitalWearApp).cardLoader.importCardImage(applicationContext, cardName, cardStream, uniqueSprites)
+                    cardLoader.importCard(applicationContext, cardName, cardStream, uniqueSprites)
                     // (applicationContext as VitalWearApp).notificationChannelManager.sendGenericNotification(applicationContext, "$cardName Import Success", "$cardName imported successfully")
                 } catch (e: Exception) {
                     Log.e(TAG, "Unable to load received card data", e)
