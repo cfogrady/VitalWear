@@ -37,7 +37,6 @@ const val NEW_CHARACTER_SELECTED_FLAG = "newCharacterStarted"
  */
 class NewCharacterActivity : ComponentActivity() {
 
-    lateinit var cardLoader : CardLoader
     lateinit var characterManager : CharacterManager
     lateinit var cardSpritesIO: CardSpritesIO
     lateinit var cardMetaEntityDao: CardMetaEntityDao
@@ -46,7 +45,6 @@ class NewCharacterActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        cardLoader = (application as VitalWearApp).cardLoader
         characterManager = (application as VitalWearApp).characterManager
         cardSpritesIO = (application as VitalWearApp).cardSpriteIO
         cardMetaEntityDao = (application as VitalWearApp).cardMetaEntityDao
