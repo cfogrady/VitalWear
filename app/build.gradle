@@ -58,7 +58,6 @@ dependencies {
     implementation "androidx.compose.foundation:foundation:$compose_version"
     implementation 'androidx.lifecycle:lifecycle-service:2.6.1'
     implementation project(':common')
-    implementation 'androidx.compose.material3:material3:1.1.2'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     implementation "androidx.wear.watchface:watchface-complications-data-source-ktx:1.2.0"

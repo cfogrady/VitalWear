@@ -185,7 +185,7 @@ class StatsMenuActivity : ComponentActivity() {
                 .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
                 bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.vitalsIcon, contentDescription = "vitals icon", modifier = Modifier.weight(
                     TRANSFORMATION_ICON_COLUMN_WEIGHT))
-                Text(text = "${formatNumber(transformationOption.requiredVitals, 4)}", textAlign = TextAlign.Right, modifier = Modifier.weight(
+                Text(text = formatNumber(transformationOption.requiredVitals, 4), textAlign = TextAlign.Right, modifier = Modifier.weight(
                     TRANSFORMATION_VALUE_COLUMN_WEIGHT))
             }
             Row(modifier = Modifier
@@ -193,7 +193,7 @@ class StatsMenuActivity : ComponentActivity() {
                 .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
                 bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.battlesIcon, contentDescription = "battles icon", modifier = Modifier.weight(
                     TRANSFORMATION_ICON_COLUMN_WEIGHT))
-                Text(text = "${formatNumber(transformationOption.requiredBattles, 3)}", textAlign = TextAlign.Right, modifier = Modifier.weight(
+                Text(text = formatNumber(transformationOption.requiredBattles, 3), textAlign = TextAlign.Right, modifier = Modifier.weight(
                     TRANSFORMATION_VALUE_COLUMN_WEIGHT))
             }
             Row(modifier = Modifier

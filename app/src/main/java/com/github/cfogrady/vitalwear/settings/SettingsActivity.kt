@@ -4,12 +4,11 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Checkbox
+import androidx.wear.compose.material.RadioButton
 import androidx.wear.compose.material.ScalingLazyColumn
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.VitalWearApp
@@ -64,16 +64,15 @@ class SettingsActivity : ComponentActivity() {
                 }
             }
             item {
-                var expanded by remember { mutableStateOf(false) }
-                Text(text = allowedBattles.descr, modifier = Modifier.clickable { expanded = true })
-                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    CharacterSettingsEntity.AllowedBattles.values().forEachIndexed { index, allowedBattlesOption ->
-                        DropdownMenuItem(text = {
-                            Text(text = allowedBattlesOption.descr)
-                        }, onClick = {
-                            allowedBattles = allowedBattlesOption
-                            expanded = false
-                        })
+                Column {
+                    CharacterSettingsEntity.AllowedBattles.values().forEach{allowBattlesOption ->
+                        Row(horizontalArrangement = Arrangement.Start) {
+                            RadioButton(
+                                selected = allowedBattles == allowBattlesOption,
+                                onClick = {allowedBattles = allowBattlesOption},
+                                modifier = Modifier.weight(.2f))
+                            Text(text = allowBattlesOption.descr, modifier = Modifier.weight(.8f))
+                        }
                     }
                 }
             }
