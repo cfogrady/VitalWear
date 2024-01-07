@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +55,7 @@ class SettingsActivity : ComponentActivity() {
     @Composable
     private fun BuildScreen(settings: CharacterSettingsEntity) {
         var trainInBackground by remember { mutableStateOf(settings.trainInBackground) }
+        var allowedBattles by remember { mutableStateOf(settings.allowedBattles) }
         ScalingLazyColumn(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
             item {
                 Row {
@@ -61,8 +64,23 @@ class SettingsActivity : ComponentActivity() {
                 }
             }
             item {
+                var expanded by remember { mutableStateOf(false) }
+                Text(text = allowedBattles.descr, modifier = Modifier.clickable { expanded = true })
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    CharacterSettingsEntity.AllowedBattles.values().forEachIndexed { index, allowedBattlesOption ->
+                        DropdownMenuItem(text = {
+                            Text(text = allowedBattlesOption.descr)
+                        }, onClick = {
+                            allowedBattles = allowedBattlesOption
+                            expanded = false
+                        })
+                    }
+                }
+            }
+            item {
                 Button(onClick = {
                     settings.trainInBackground = trainInBackground
+                    settings.allowedBattles = allowedBattles
                     finish()
                 }) {
                     Text(text = "Continue", modifier = Modifier.padding(5.dp))

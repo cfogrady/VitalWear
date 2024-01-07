@@ -2,10 +2,14 @@ package com.github.cfogrady.vitalwear.character
 
 import android.content.Context
 import android.util.Log
+import com.github.cfogrady.vitalwear.adventure.data.CharacterAdventureDao
 import com.github.cfogrady.vitalwear.character.data.*
+import com.github.cfogrady.vitalwear.character.transformation.history.TransformationHistoryDao
+import com.github.cfogrady.vitalwear.character.transformation.history.TransformationHistoryEntity
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
 import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
+import com.github.cfogrady.vitalwear.common.card.db.AdventureEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntityDao
@@ -33,6 +37,8 @@ class CharacterManagerImpl(
     private val transformationEntityDao: TransformationEntityDao,
     private val spriteBitmapConverter: SpriteBitmapConverter,
     private val characterSettingsDao: CharacterSettingsDao,
+    private val characterAdventureDao: CharacterAdventureDao,
+    private val transformationHistoryDao: TransformationHistoryDao,
 ) : CharacterManager {
     private val activeCharacterFlow = MutableStateFlow(BEMCharacter.DEFAULT_CHARACTER)
     private lateinit var bemUpdater: BEMUpdater
@@ -125,6 +131,7 @@ class CharacterManagerImpl(
             transformedCharacter.characterStats.vitals = 0
         }
         updateCharacter(transformedCharacter.characterStats)
+        transformationHistoryDao.upsert(TransformationHistoryEntity(transformedCharacter.characterStats.id, transformedCharacter.speciesStats.phase, transformedCharacter.cardName(), transformedCharacter.characterStats.slotId ))
         bemUpdater.cancel()
         activeCharacterFlow.value = transformedCharacter
         bemUpdater.setupTransformationChecker(transformedCharacter)
@@ -156,7 +163,7 @@ class CharacterManagerImpl(
             bemUpdater.cancel()
         }
         val character = newCharacter(applicationContext, cardMetaEntity, 0)
-        insertCharacter(character.characterStats, character.settings)
+        insertCharacter(character.characterStats, character.settings, character.speciesStats.phase)
         activeCharacterFlow.value = character
         bemUpdater.setupTransformationChecker(character)
         complicationRefreshService.refreshVitalsComplication()
@@ -206,10 +213,11 @@ class CharacterManagerImpl(
         )
     }
 
-    private fun insertCharacter(character: CharacterEntity, settings: CharacterSettingsEntity) {
+    private fun insertCharacter(character: CharacterEntity, settings: CharacterSettingsEntity, phase: Int) {
         character.id = characterDao.insert(character).toInt()
         settings.characterId = character.id
         characterSettingsDao.insert(settings)
+        transformationHistoryDao.upsert(TransformationHistoryEntity(character.id, phase, character.cardFile, character.slotId))
     }
 
     override suspend fun swapToCharacter(applicationContext: Context, selectedCharacterPreview : CharacterPreview) {
@@ -248,11 +256,15 @@ class CharacterManagerImpl(
         val currentCharacter = activeCharacterFlow.value
         if(currentCharacter == null) {
             characterSettingsDao.deleteById(characterPreview.characterId)
+            characterAdventureDao.deleteByCharacterId(characterPreview.characterId)
+            transformationHistoryDao.deleteByCharacterId(characterPreview.characterId)
             characterDao.deleteById(characterPreview.characterId)
         } else if(currentCharacter.characterStats.id == characterPreview.characterId) {
             Log.e(TAG, "Cannot delete active character")
         } else {
             characterSettingsDao.deleteById(characterPreview.characterId)
+            characterAdventureDao.deleteByCharacterId(characterPreview.characterId)
+            transformationHistoryDao.deleteByCharacterId(characterPreview.characterId)
             characterDao.deleteById(characterPreview.characterId)
         }
     }
