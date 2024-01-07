@@ -2,6 +2,7 @@ package com.github.cfogrady.vitalwear.training
 
 import android.hardware.SensorEventListener
 import kotlinx.coroutines.flow.StateFlow
+import java.time.LocalTime
 
 abstract class TrainingProgressTracker : SensorEventListener {
 
@@ -10,6 +11,8 @@ abstract class TrainingProgressTracker : SensorEventListener {
     private var greats = 0
     private var goods = 0
     private var fails = 0
+
+    private var debugReps = mutableListOf<Pair<String, String>>()
     abstract fun progressFlow(): StateFlow<Float>
 
     abstract fun unregister()
@@ -29,9 +32,10 @@ abstract class TrainingProgressTracker : SensorEventListener {
         } else {
             fails++
         }
+        debugReps.add(Pair("Rep End At: ${LocalTime.now()}", "$points"))
     }
 
     fun results(): BackgroundTrainingResults {
-        return BackgroundTrainingResults(greats, goods, fails, trainingType)
+        return BackgroundTrainingResults(greats, goods, fails, trainingType, debugReps)
     }
 }

@@ -7,6 +7,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.character.data.CharacterEntity
+import com.github.cfogrady.vitalwear.debug.Debuggable
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import java.lang.IllegalStateException
 
@@ -15,15 +16,17 @@ import java.lang.IllegalStateException
  * Note: Accelerometer includes forces of gravity and can be against any axis or a combination
  * depending on watch orientation.
  */
-class TrainingService(
+class TrainingService (
     private val sensorManager: SensorManager,
     private val heartRateService: HeartRateService,
     private val saveService: SaveService,
-) {
+) : Debuggable {
     companion object {
     }
 
     var backgroundTrainingProgressTracker: TrainingProgressTracker? = null
+
+    var lastTraining: BackgroundTrainingResults? = null
 
     fun startBackgroundTraining(context: Context, trainingType: TrainingType): TrainingProgressTracker {
         backgroundTrainingProgressTracker = when(trainingType) {
@@ -46,7 +49,8 @@ class TrainingService(
         tracker.unregister()
         tracker.finishRep()
         context.stopService(Intent(context, TrainingForegroundService::class.java))
-        return tracker.results()
+        lastTraining = tracker.results()
+        return lastTraining!!
     }
 
     fun startTraining(trainingType: TrainingType): TrainingProgressTracker {
@@ -152,5 +156,12 @@ class TrainingService(
     private fun listenToStepCounter(sensorEventListener: SensorEventListener) {
         val stepCounter = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         sensorManager.registerListener(sensorEventListener, stepCounter, SensorManager.SENSOR_DELAY_GAME)
+    }
+
+    override fun debug(): List<Pair<String, String>> {
+        if(lastTraining == null) {
+            return emptyList()
+        }
+        return lastTraining!!.reps
     }
 }

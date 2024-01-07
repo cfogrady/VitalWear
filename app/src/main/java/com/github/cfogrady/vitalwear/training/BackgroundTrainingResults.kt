@@ -1,6 +1,6 @@
 package com.github.cfogrady.vitalwear.training
 
-data class BackgroundTrainingResults(val great: Int, val good: Int, val failure: Int, val trainingType: TrainingType) {
+data class BackgroundTrainingResults(val great: Int, val good: Int, val failure: Int, val trainingType: TrainingType, val reps: List<Pair<String, String>>) {
     fun resultType(): TrainingResult {
         return if(great > 0) {
             TrainingResult.GREAT
