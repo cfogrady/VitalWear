@@ -16,6 +16,8 @@ import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntityDao
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
+import com.github.cfogrady.vitalwear.settings.CardSettingsDao
+import com.github.cfogrady.vitalwear.settings.CharacterSettingsEntity
 import com.github.cfogrady.vitalwear.vitals.VitalService
 import java.util.*
 
@@ -31,6 +33,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
                     private val saveService: SaveService,
                     private val vitalService: VitalService,
                     private val random: Random,
+                    private val cardSettingsDao: CardSettingsDao
 ) {
     companion object {
     }
@@ -41,7 +44,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         val partnerBattleCharacter = battleCharacterFromBemCharacter(context, partnerCharacter)
         val hasCardHits = partnerCharacter.isBEM()
         val hasThirdBattlePool = partnerCharacter.isBEM()
-        val randomOpponent = loadRandomTarget(context, partnerCharacter.cardName(), hasThirdBattlePool, hasCardHits, partnerCharacter.speciesStats.phase)
+        val randomOpponent = loadRandomTarget(context, partnerCharacter.cardName(), hasThirdBattlePool, hasCardHits, partnerCharacter.speciesStats.phase, partnerCharacter.settings.allowedBattles, partnerCharacter.cardMetaEntity.franchise)
         val battleSpriteLoader = if (partnerCharacter.isBEM()) CardBattleSpriteLoader(context, cardSpritesIO, partnerCharacter.cardName()) else FirmwareBattleSpriteLoader(firmware)
         return PreBattleModel(
             partnerBattleCharacter,
@@ -168,8 +171,16 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         return firmware.battleFirmwareSprites.hitIcons
     }
 
-    private fun loadRandomTarget(context: Context, cardName: String, hasThirdBattlePool: Boolean, hasCardHits: Boolean, phase: Int): BattleCharacter {
-        val speciesEntity = assignRandomTargetFromCard(cardName, hasThirdBattlePool, phase)
+    private fun loadRandomTarget(context: Context, cardName: String, hasThirdBattlePool: Boolean, hasCardHits: Boolean, phase: Int, allowedBattles: CharacterSettingsEntity.AllowedBattles, franchiseId: Int): BattleCharacter {
+        var targetCard = cardName
+        if (allowedBattles == CharacterSettingsEntity.AllowedBattles.ALL) {
+            val options = cardSettingsDao.getAllBattleCardNames()
+            targetCard = options[random.nextInt(options.size)]
+        } else if (allowedBattles == CharacterSettingsEntity.AllowedBattles.ALL_FRANCHISE) {
+            val options = cardSettingsDao.getAllFranchiseBattleCardNames(franchiseId)
+            targetCard = options[random.nextInt(options.size)]
+        }
+        val speciesEntity = assignRandomTargetFromCard(targetCard, hasThirdBattlePool, phase)
         return loadBattleCharacter(context, speciesEntity, hasCardHits)
     }
 
