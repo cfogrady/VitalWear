@@ -4,10 +4,13 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -58,6 +61,10 @@ class SettingsActivity : ComponentActivity() {
         var allowedBattles by remember { mutableStateOf(settings.allowedBattles) }
         ScalingLazyColumn(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
             item {
+                // Take some space at the top so the Background training isn't cut off
+                Box(modifier = Modifier.height(2.dp))
+            }
+            item {
                 Row {
                     Text(text = "Background Training:", fontWeight = FontWeight.Bold, modifier = Modifier.padding(5.dp))
                     Checkbox(checked = trainInBackground, onCheckedChange = {trainInBackground = it})
@@ -66,10 +73,11 @@ class SettingsActivity : ComponentActivity() {
             item {
                 Column {
                     CharacterSettingsEntity.AllowedBattles.values().forEach{allowBattlesOption ->
-                        Row(horizontalArrangement = Arrangement.Start) {
+                        Row(horizontalArrangement = Arrangement.Start, modifier = Modifier.clickable {
+                            allowedBattles = allowBattlesOption
+                        }) {
                             RadioButton(
                                 selected = allowedBattles == allowBattlesOption,
-                                onClick = {allowedBattles = allowBattlesOption},
                                 modifier = Modifier.weight(.2f))
                             Text(text = allowBattlesOption.descr, modifier = Modifier.weight(.8f))
                         }
