@@ -9,6 +9,7 @@ class ActivityLaunchers(
     val transformLauncher: () -> Unit,
     val debugActivityLauncher: () -> Unit,
     val stopBackgroundTrainingLauncher: () -> Unit,
+    val toastLauncher: (String) -> Unit,
 ) {
 
 }

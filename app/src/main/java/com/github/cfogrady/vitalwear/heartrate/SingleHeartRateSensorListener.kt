@@ -28,7 +28,7 @@ class SingleHeartRateSensorListener(
             if(!sensorManager.registerListener(this, heartRateSensor, SensorManager.SENSOR_DELAY_NORMAL, sensorThreadHandler.handler)) {
                 Log.w(HeartRateService.TAG, "Failed to register heart rate sensor!")
                 hasReading.complete(0)
-                hasAccuracy.complete(HeartRateResult.Companion.HeartRateError.UNRELIABLE)
+                hasAccuracy.complete(HeartRateResult.Companion.HeartRateError.UNAVAILABLE)
             } else {
                 Log.i(HeartRateService.TAG, "Registered to Heart Rate Sensor")
             }

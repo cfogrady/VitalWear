@@ -3,6 +3,7 @@ package com.github.cfogrady.vitalwear.activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -170,7 +171,13 @@ class MainScreenComposable(
                         vitalBoxFactory.VitalBox {
                             Box(modifier = Modifier
                                 .fillMaxSize()
-                                .clickable { activityLaunchers.battleLauncher.invoke() }, contentAlignment = Alignment.Center) {
+                                .clickable {
+                                    if(character.speciesStats.phase >= 2) {
+                                        activityLaunchers.battleLauncher.invoke()
+                                    } else {
+                                        activityLaunchers.toastLauncher.invoke("Must be at a higher level to battle")
+                                    }
+                                           }, contentAlignment = Alignment.Center) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Image(painter = painterResource(id = R.drawable.fight_icon), contentDescription = "Battle")
                                     Text(text = "BATTLE",  fontWeight = FontWeight.Bold, fontSize = 3.em)

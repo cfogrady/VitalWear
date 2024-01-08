@@ -5,6 +5,7 @@ class HeartRateResult(val heartRate: Int, val heartRateError: HeartRateError) {
         enum class HeartRateError {
             NONE,
             UNRELIABLE,
+            UNAVAILABLE,
             NO_CONTACT
         }
     }

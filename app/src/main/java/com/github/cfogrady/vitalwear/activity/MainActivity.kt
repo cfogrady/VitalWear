@@ -1,6 +1,7 @@
 package com.github.cfogrady.vitalwear.activity
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.github.cfogrady.vitalwear.VitalWearApp
@@ -53,7 +54,9 @@ class MainActivity : ComponentActivity() {
             activityHelper.getActivityLauncher(BattleActivity::class.java),
             activityHelper.getActivityLauncher(TransformationActivity::class.java),
             activityHelper.getActivityLauncher(DebugActivity::class.java),
-            activityHelper.getActivityLauncher(StopBackgroundTrainingActivity::class.java),
-            )
+            activityHelper.getActivityLauncher(StopBackgroundTrainingActivity::class.java)
+        ) { text ->
+            Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+        }
     }
 }
