@@ -52,6 +52,9 @@ If using custom card images, you only have to verify the card id against the Vit
 Subsequent card images with the same card id will skip straight to connecting with the watch after
 the card image is selected on the phone.
 
+## Permissions
+At the moment permissions must be manually enabled by going to permissions in App Info on the watch.
+
 ## Issues
 If there are any issues, please see if there is already a matching issue on github. If not, feel
 free to add one.
