@@ -30,11 +30,11 @@ From the phone app, click "Import Card Image". This will allow the user to navig
 file.
 
 **NOTE:** At this time only BE Memories are supported. Loading a DIM may cause the app to malfunction.
-From the character selection screen click "Import Card".
 
-Once the card image is selected, the user will be able to set a card name, and specify whether the
-card has unique sprites. If this flag is off, Vital Wear will attempt to save space by re-using
-sprites across cards for a character when the splash screen sprite of the character is identical.
+From the character selection screen click "Import Card". Once the card image is selected, the user
+will be able to set a card name, and specify whether the card has unique sprites. If this flag is
+off, Vital Wear will attempt to save space by re-using sprites across cards for a character when the
+splash screen sprite of the character is identical.
 
 Clicking "continue", will take the user to a screen asking the user to connect to their bracelet.
 On a Vital Bracelet BE, go to "Connect"->"App Loglink". Once the bracelet is ready, tap the bracelet
