@@ -41,6 +41,9 @@ On a Vital Bracelet BE, go to "Connect"->"App Loglink". Once the bracelet is rea
 to the phone. The phone will send a code to the bracelet asking for card verification and after a
 few seconds the bracelet will show the insert card icon.
 
+**NOTE:** At this time there must be an active character (from any card) on the Vital Bracelet BE
+during validation.
+
 Insert the physical card into the bracelet that matches the card image being imported. Once the BE
 has loaded the card, tap the bracelet back to the phone.
 
