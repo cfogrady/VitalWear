@@ -58,6 +58,9 @@ the card image is selected on the phone.
 ## Permissions
 At the moment permissions must be manually enabled by going to permissions in App Info on the watch.
 
+## Videos:
+https://www.youtube.com/channel/UCnfuVAlPwwKOLTkVx7bW-6Q
+
 ## Issues
 If there are any issues, please see if there is already a matching issue on github. If not, feel
 free to add one.
