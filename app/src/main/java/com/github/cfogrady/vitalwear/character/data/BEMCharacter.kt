@@ -88,13 +88,13 @@ class BEMCharacter(
     }
 
     fun totalBp(): Int {
-        return speciesStats.bp + characterStats.trainedBp
+        return speciesStats.bp + characterStats.trainedBp.coerceAtMost(999)
     }
     fun totalAp(): Int {
-        return speciesStats.ap + characterStats.trainedAp
+        return speciesStats.ap + characterStats.trainedAp.coerceAtMost(999)
     }
     fun totalHp(): Int {
-        return speciesStats.hp + characterStats.trainedHp
+        return speciesStats.hp + characterStats.trainedHp.coerceAtMost(999)
     }
 
     fun mood(): Mood {

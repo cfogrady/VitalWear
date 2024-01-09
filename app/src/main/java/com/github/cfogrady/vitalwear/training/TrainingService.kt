@@ -98,16 +98,16 @@ class TrainingService (
         val increase = increaseBonus(great, trainingType == TrainingType.SQUAT)
         when(trainingType) {
             TrainingType.SQUAT -> {
-                stats.trainedPP += increase
+                stats.trainedPP = (stats.trainedPP + increase).coerceAtMost(99)
             }
             TrainingType.CRUNCH -> {
-                stats.trainedHp += increase
+                stats.trainedHp = (stats.trainedHp + increase).coerceAtMost(999)
             }
             TrainingType.PUNCH -> {
-                stats.trainedAp += increase
+                stats.trainedAp = (stats.trainedAp + increase).coerceAtMost(999)
             }
             TrainingType.DASH -> {
-                stats.trainedBp += increase
+                stats.trainedBp = (stats.trainedBp + increase).coerceAtMost(999)
             }
         }
         saveService.saveAsync()
@@ -119,16 +119,16 @@ class TrainingService (
         statChange += increaseBonus(false, isPP) * backgroundTrainingResults.good
         when(backgroundTrainingResults.trainingType) {
             TrainingType.SQUAT -> {
-                stats.trainedPP += statChange
+                stats.trainedPP = (stats.trainedPP + statChange).coerceAtMost(99)
             }
             TrainingType.CRUNCH -> {
-                stats.trainedHp += statChange
+                stats.trainedHp = (stats.trainedHp + statChange).coerceAtMost(999)
             }
             TrainingType.PUNCH -> {
-                stats.trainedAp += statChange
+                stats.trainedAp = (stats.trainedAp + statChange).coerceAtMost(999)
             }
             TrainingType.DASH -> {
-                stats.trainedBp += statChange
+                stats.trainedBp = (stats.trainedBp + statChange).coerceAtMost(999)
             }
         }
         saveService.saveAsync()
