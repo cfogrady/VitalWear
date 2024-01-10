@@ -49,6 +49,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
         KeepScreenOn()
         var trainingState by remember { mutableStateOf(TrainingState.READY) }
         var trainingResult by remember { mutableStateOf(TrainingResult.FAIL) }
+        var statIncease by remember { mutableStateOf(0) }
         vitalBoxFactory.VitalBox {
             bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background")
             when(trainingState) {
@@ -76,14 +77,13 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
                         }
                     }
                     Exercise(partner = partner, firmware = firmware, trainingListener.progressFlow(), durationSeconds = exerciseType.durationSeconds) {
-                        //TODO: End exercise in service
                         val points = trainingListener.getPoints()
                         if(points == 4) {
-                            trainingService.increaseStats(partner.characterStats, exerciseType, true)
+                            statIncease = trainingService.increaseStats(partner, exerciseType, true)
                             trainingState = TrainingState.CLEAR
                             trainingResult = TrainingResult.GREAT
                         } else if(points >= 1) {
-                            trainingService.increaseStats(partner.characterStats, exerciseType, false)
+                            statIncease = trainingService.increaseStats(partner, exerciseType, false)
                             trainingState = TrainingState.CLEAR
                             trainingResult = TrainingResult.GOOD
                         } else {
@@ -103,7 +103,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
                     }
                 }
                 TrainingState.RESULT -> {
-                    Result(partner, firmware, exerciseType, trainingResult, trainingService.increaseBonus(trainingResult == TrainingResult.GREAT, exerciseType == TrainingType.SQUAT)) {
+                    Result(partner, firmware, exerciseType, trainingResult, statIncease) {
                         finishedToMenu.invoke(true)
                     }
                 }

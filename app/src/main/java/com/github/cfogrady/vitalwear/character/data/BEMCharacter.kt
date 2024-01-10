@@ -17,7 +17,8 @@ class BEMCharacter(
     val speciesStats : SpeciesEntity,
     val transformationWaitTimeSeconds: Long,
     val transformationOptions: List<TransformationOption>,
-    val settings: CharacterSettingsEntity
+    val settings: CharacterSettingsEntity,
+    private val currentTimeProvider: ()->LocalDateTime = LocalDateTime::now
 ) {
     private var _readyToTransform = MutableStateFlow<Optional<TransformationOption>>(Optional.empty())
     var readyToTransform : StateFlow<Optional<TransformationOption>> = _readyToTransform
@@ -34,6 +35,11 @@ class BEMCharacter(
 
     fun cardName(): String {
         return cardMetaEntity.cardName
+    }
+
+    fun canIncreaseStats(): Boolean {
+        val trainingEndTime = characterStats.lastUpdate.plusSeconds(characterStats.trainingTimeRemainingInSeconds)
+        return trainingEndTime.isAfter(currentTimeProvider.invoke())
     }
 
     fun debug(): List<Pair<String, String>> {

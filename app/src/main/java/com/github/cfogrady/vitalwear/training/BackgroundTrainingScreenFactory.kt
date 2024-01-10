@@ -71,7 +71,7 @@ class BackgroundTrainingScreenFactory(
             trainingService.stopBackgroundTraining(context)
         }
         val statIncrease = remember {
-            trainingService.increaseStatsFromMultipleTrainings(partner.characterStats, results)
+            trainingService.increaseStatsFromMultipleTrainings(partner, results)
         }
         var endTrainingScreen by remember {
             if (results.good == 0 && results.great == 0) {
