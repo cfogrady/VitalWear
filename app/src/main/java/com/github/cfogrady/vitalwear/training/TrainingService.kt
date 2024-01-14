@@ -43,7 +43,7 @@ class TrainingService (
 
     fun stopBackgroundTraining(context: Context): BackgroundTrainingResults {
         if(backgroundTrainingProgressTracker == null) {
-            throw IllegalStateException("Can't stopBackgroundService if not training progress tracker is present")
+            throw IllegalStateException("Can't stopBackgroundService if training progress tracker isn't present")
         }
         val tracker = backgroundTrainingProgressTracker!!
         backgroundTrainingProgressTracker = null
