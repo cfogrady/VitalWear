@@ -22,6 +22,7 @@ import androidx.lifecycle.LiveData
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.*
 import com.github.cfogrady.vitalwear.R
+import com.github.cfogrady.vitalwear.adventure.AdventureScreenFactory
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
@@ -45,6 +46,7 @@ class MainScreenComposable(
     private val bitmapScaler: BitmapScaler,
     private val partnerScreenComposable: PartnerScreenComposable,
     private val vitalBoxFactory: VitalBoxFactory,
+    private val adventureScreenFactory: AdventureScreenFactory,
 ) {
     companion object {
         val TAG = "MainScreenComposable"
@@ -84,6 +86,8 @@ class MainScreenComposable(
             activityLaunchers.characterSelectionLauncher.invoke()
         } else if(gameState == GameState.TRAINING) {
             BackgroundTraining(firmware = firmware!!, character = character!!, background = background!!, activityLaunchers = activityLaunchers)
+        } else if (gameState == GameState.ADVENTURE) {
+            adventureScreenFactory.AdventureScreen(activityLaunchers.context, firmware!!, character!!)
         } else {
             DailyScreen(firmware!!, character = character!!, background!!, activityLaunchers)
         }

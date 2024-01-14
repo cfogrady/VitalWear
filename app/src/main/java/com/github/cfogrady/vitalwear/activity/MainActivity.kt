@@ -48,6 +48,7 @@ class MainActivity : ComponentActivity() {
     private fun buildActivityLaunchers(): ActivityLaunchers {
         val activityHelper = ActivityHelper(this)
         return ActivityLaunchers(
+            this,
             activityHelper.getActivityLauncher(LoadFirmwareActivity::class.java),
             activityHelper.getActivityLauncher(StatsMenuActivity::class.java),
             activityHelper.getActivityLauncher(TrainingMenuActivity::class.java),

@@ -1,6 +1,9 @@
 package com.github.cfogrady.vitalwear.activity
 
+import android.content.Context
+
 class ActivityLaunchers(
+    val context: Context,
     val firmwareLoadingLauncher: ()-> Unit,
     val statsMenuLauncher: ()-> Unit,
     val trainingMenuLauncher: ()-> Unit,

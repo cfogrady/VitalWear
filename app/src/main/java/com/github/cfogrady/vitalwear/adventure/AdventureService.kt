@@ -2,37 +2,42 @@ package com.github.cfogrady.vitalwear.adventure
 
 import android.content.Context
 import android.content.Intent
-import com.github.cfogrady.vitalwear.BackgroundManager
+import android.hardware.Sensor
+import android.hardware.SensorManager
 import com.github.cfogrady.vitalwear.adventure.data.CharacterAdventureDao
 import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntity
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntityDao
+import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
-import com.github.cfogrady.vitalwear.training.TrainingForegroundService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.IllegalStateException
 
 class AdventureService(
+    private val gameStateFlow: MutableStateFlow<GameState>,
     private val adventureEntityDao: AdventureEntityDao,
     private val cardSpritesIO: CardSpritesIO,
     private val notificationChannelManager: NotificationChannelManager,
-    private val characterAdventureDao: CharacterAdventureDao) {
+    private val characterAdventureDao: CharacterAdventureDao,
+    private val sensorManager: SensorManager) {
 
     var activeAdventure: ActiveAdventure? = null
 
-    fun startAdventure(context: Context, cardName: String, startingZone: Int = 0): Job {
+    fun startAdventure(context: Context, cardName: String, startingAdventure: Int): Job {
         val adventureService = this
         return CoroutineScope(Dispatchers.IO).launch {
-            val adventures = adventureEntityDao.getByCard(cardName)
+            val adventures = getAdventureOptions(cardName)
             val backgrounds = cardSpritesIO.loadCardBackgrounds(context, cardName)
-            val adventure = ActiveAdventure(adventureService, adventures, backgrounds, currentZone = startingZone)
-            val foregroundIntent = Intent(context, AdventureForegroundService::class.java)
-            context.startForegroundService(foregroundIntent)
+            val adventure = ActiveAdventure(context, adventureService, adventures, backgrounds, startingAdventure)
             activeAdventure = adventure
+            val stepCounter = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+            sensorManager.registerListener(activeAdventure, stepCounter, SensorManager.SENSOR_DELAY_GAME)
+            gameStateFlow.value = GameState.ADVENTURE
         }
     }
 
@@ -40,12 +45,13 @@ class AdventureService(
         if(activeAdventure == null) {
             throw IllegalStateException("Can't stopAdventure if activeAdventure isn't present")
         }
-        // val adventure = activeAdventure!!
-        activeAdventure = null
         context.stopService(Intent(context, AdventureForegroundService::class.java))
+        sensorManager.unregisterListener(activeAdventure)
+        gameStateFlow.value = GameState.IDLE
+        activeAdventure = null
     }
 
-    fun finishCurrentZone(context: Context) {
+    fun notifyZoneCompletion(context: Context) {
         notificationChannelManager.sendGenericNotification(context, "Adventure Boss!", "", NotificationChannelManager.ADVENTURE_BOSS)
     }
 
@@ -64,4 +70,5 @@ class AdventureService(
             0
         }
     }
+
 }

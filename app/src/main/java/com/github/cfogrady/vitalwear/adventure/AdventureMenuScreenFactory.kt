@@ -1,13 +1,13 @@
 package com.github.cfogrady.vitalwear.adventure
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,8 +33,6 @@ import androidx.wear.compose.material.ScalingLazyColumn
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.items
 import com.github.cfogrady.vitalwear.Loading
-import com.github.cfogrady.vitalwear.VitalWearApp
-import com.github.cfogrady.vitalwear.activity.PartnerScreenComposable
 import com.github.cfogrady.vitalwear.adventure.firmware.AdventureFirmwareSprites
 import com.github.cfogrady.vitalwear.character.activity.LOADING_TEXT
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
@@ -111,6 +109,10 @@ class AdventureMenuScreenFactory(
                 adventureMenuState = AdventureMenuState.Ready
             }
             AdventureMenuState.Ready -> Ready(firmware = firmware, background = backgrounds[selectedAdventure!!.adventureId]) {
+                val foregroundIntent = Intent(context, AdventureForegroundService::class.java)
+                foregroundIntent.putExtra(AdventureForegroundService.CARD_NAME, selectedAdventure!!.cardName)
+                foregroundIntent.putExtra(AdventureForegroundService.STARTING_ADVENTURE, selectedAdventure!!.adventureId)
+                context.startForegroundService(foregroundIntent)
                 adventureMenuState = AdventureMenuState.Go
             }
             AdventureMenuState.Go -> Go(firmware = firmware, background = backgrounds[selectedAdventure!!.adventureId], characterSprites = character.characterSprites) {

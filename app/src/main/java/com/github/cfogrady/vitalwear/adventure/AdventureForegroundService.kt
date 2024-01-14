@@ -17,6 +17,8 @@ class AdventureForegroundService : Service() {
 
     companion object {
         const val TAG = "AdventureService"
+        const val CARD_NAME = "CARD_NAME"
+        const val STARTING_ADVENTURE = "STARTING_ADVENTURE"
     }
 
     private lateinit var adventureService: AdventureService
@@ -32,6 +34,13 @@ class AdventureForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if(intent == null) {
+            Log.e(TAG, "Attempted to start AdventureForegroundService with null intent!")
+            return super.onStartCommand(null, flags, startId)
+        }
+        val cardName = intent.extras?.getString(CARD_NAME)!!
+        val startingAdventure = intent.extras?.getInt(STARTING_ADVENTURE)!!
+        adventureService.startAdventure(this, cardName, startingAdventure)
         val notificationBuilder = NotificationCompat.Builder(this, NotificationChannelManager.CHANNEL_ID)
             .setContentTitle("VitalWear Adventure")
         if (android.os.Build.VERSION.SDK_INT >= 34) {
