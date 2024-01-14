@@ -55,8 +55,8 @@ class CardSpritesIO(private val spriteFileIO: SpriteFileIO, private val spriteBi
         return spriteFileIO.loadSpriteFile(file)
     }
 
-    fun loadCardBackgrounds(applicationContext: Context, cardName: String): ArrayList<SpriteData.Sprite> {
-        val backgrounds = ArrayList<SpriteData.Sprite>()
+    fun loadCardBackgrounds(applicationContext: Context, cardName: String): ArrayList<Bitmap> {
+        val backgrounds = ArrayList<Bitmap>()
         val file = File(
             applicationContext.filesDir,
             "${SpriteFileIO.LIBRARY_DIR}/$CARDS/$cardName/$BACKGROUNDS"
@@ -64,7 +64,7 @@ class CardSpritesIO(private val spriteFileIO: SpriteFileIO, private val spriteBi
         for(i in 0 .. 5) {
             val backgroundFile = File(file, "$i.img")
             if(backgroundFile.exists()) {
-                backgrounds.add(spriteFileIO.loadSpriteFile(file))
+                backgrounds.add(spriteBitmapConverter.getBitmap(spriteFileIO.loadSpriteFile(backgroundFile)))
             } else {
                 break
             }
