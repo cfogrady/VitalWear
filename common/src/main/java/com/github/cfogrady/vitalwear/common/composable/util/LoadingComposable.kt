@@ -16,11 +16,12 @@ import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.ImageDecoderDecoder
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlin.coroutines.RestrictsSuspension
 
 const val LOADING_TEXT = "Loading..."
 
 @Composable
-fun Loading(loadingText: String = LOADING_TEXT, scope: CoroutineDispatcher = Dispatchers.Default, work: () -> Unit) {
+fun Loading(loadingText: String = LOADING_TEXT, scope: CoroutineDispatcher = Dispatchers.Default, work: suspend () -> Unit) {
     val imageLoader = ImageLoader.Builder(LocalContext.current).components {
         add(ImageDecoderDecoder.Factory())
     }.build()
