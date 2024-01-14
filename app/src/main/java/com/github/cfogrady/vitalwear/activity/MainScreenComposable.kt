@@ -136,7 +136,7 @@ class MainScreenComposable(
             .padding(padding)
             .fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
-            VerticalPager(pageCount = 7) {page ->
+            VerticalPager(pageCount = 8) {page ->
                 when(page) {
                     0 -> {
                         partnerScreenComposable.PartnerScreen(
@@ -169,15 +169,28 @@ class MainScreenComposable(
                     }
                     4 -> {
                         vitalBoxFactory.VitalBox {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.adventureIcon, contentDescription = "Adventure", modifier = Modifier.clickable {
+                                    if(character.speciesStats.phase >= 2) {
+                                        activityLaunchers.adventureMenuLauncher.invoke()
+                                    } else {
+                                        activityLaunchers.toastLauncher.invoke("Must be at a higher level to adventure")
+                                    }
+                                })
+                            }
+                        }
+                    }
+                    5 -> {
+                        vitalBoxFactory.VitalBox {
                             Box(modifier = Modifier
                                 .fillMaxSize()
                                 .clickable {
-                                    if(character.speciesStats.phase >= 2) {
+                                    if (character.speciesStats.phase >= 2) {
                                         activityLaunchers.battleLauncher.invoke()
                                     } else {
                                         activityLaunchers.toastLauncher.invoke("Must be at a higher level to battle")
                                     }
-                                           }, contentAlignment = Alignment.Center) {
+                                }, contentAlignment = Alignment.Center) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Image(painter = painterResource(id = R.drawable.fight_icon), contentDescription = "Battle")
                                     Text(text = "BATTLE",  fontWeight = FontWeight.Bold, fontSize = 3.em)
@@ -185,7 +198,7 @@ class MainScreenComposable(
                             }
                         }
                     }
-                    5 -> {
+                    6 -> {
                         vitalBoxFactory.VitalBox {
                             Box(modifier = Modifier
                                 .fillMaxSize()
@@ -194,7 +207,7 @@ class MainScreenComposable(
                             }
                         }
                     }
-                    6 -> {
+                    7 -> {
                         vitalBoxFactory.VitalBox {
                             Box(modifier = Modifier
                                 .fillMaxSize()

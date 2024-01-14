@@ -4,6 +4,7 @@ class ActivityLaunchers(
     val firmwareLoadingLauncher: ()-> Unit,
     val statsMenuLauncher: ()-> Unit,
     val trainingMenuLauncher: ()-> Unit,
+    val adventureMenuLauncher: () -> Unit,
     val characterSelectionLauncher: ()-> Unit,
     val battleLauncher: () -> Unit,
     val transformLauncher: () -> Unit,

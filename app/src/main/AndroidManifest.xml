@@ -70,6 +70,8 @@
             android:taskAffinity="" />
         <activity android:name=".card.activity.LoadCardActivity"
             android:taskAffinity="" />
+        <activity android:name=".adventure.AdventureMenuActivity"
+            android:taskAffinity="" />
         <activity android:name=".character.activity.CharacterSelectActivity"
             android:taskAffinity="" />
         <activity android:name=".character.activity.NewCharacterActivity"
@@ -109,6 +111,9 @@
         </service>
         <service
             android:name=".training.TrainingForegroundService"
+            android:foregroundServiceType="health"/>
+        <service
+            android:name=".adventure.AdventureForegroundService"
             android:foregroundServiceType="health"/>
         <service
             android:name=".complications.PartnerComplicationService"

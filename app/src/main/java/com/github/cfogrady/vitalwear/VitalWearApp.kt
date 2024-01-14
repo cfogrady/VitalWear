@@ -16,6 +16,8 @@ import com.github.cfogrady.vb.dim.card.DimReader
 import com.github.cfogrady.vitalwear.activity.ImageScaler
 import com.github.cfogrady.vitalwear.activity.MainScreenComposable
 import com.github.cfogrady.vitalwear.activity.PartnerScreenComposable
+import com.github.cfogrady.vitalwear.adventure.AdventureMenuScreenFactory
+import com.github.cfogrady.vitalwear.adventure.AdventureService
 import com.github.cfogrady.vitalwear.battle.composable.*
 import com.github.cfogrady.vitalwear.battle.data.BEMBattleLogic
 import com.github.cfogrady.vitalwear.battle.BattleService
@@ -94,6 +96,8 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var transformationScreenFactory: TransformationScreenFactory
     lateinit var complicationRefreshService: ComplicationRefreshService
     lateinit var vitalService: VitalService
+    lateinit var adventureMenuScreenFactory: AdventureMenuScreenFactory
+    lateinit var adventureService: AdventureService
     private lateinit var applicationBootManager: ApplicationBootManager
     private lateinit var bemUpdater: BEMUpdater
     var backgroundHeight = 0.dp
@@ -162,6 +166,8 @@ class VitalWearApp : Application(), Configuration.Provider {
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardCharacterImageService)
         shutdownReceiver = ShutdownReceiver(shutdownManager)
         applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, bemUpdater, saveService, notificationChannelManager, complicationRefreshService)
+        adventureService = AdventureService(database.adventureEntityDao(), cardSpriteIO, notificationChannelManager, database.characterAdventureDao())
+        adventureMenuScreenFactory = AdventureMenuScreenFactory(cardSpriteIO, database.cardMetaEntityDao(), adventureService, vitalBoxFactory, characterSpritesIO, database.speciesEntityDao(), bitmapScaler, backgroundHeight)
     }
 
     override fun getWorkManagerConfiguration(): Configuration {
