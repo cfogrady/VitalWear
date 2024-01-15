@@ -87,7 +87,7 @@ class MainScreenComposable(
         } else if(gameState == GameState.TRAINING) {
             BackgroundTraining(firmware = firmware!!, character = character!!, background = background!!, activityLaunchers = activityLaunchers)
         } else if (gameState == GameState.ADVENTURE) {
-            adventureScreenFactory.AdventureScreen(activityLaunchers.context, firmware!!, character!!)
+            adventureScreenFactory.AdventureScreen(activityLaunchers.context, activityLaunchers.adventureActivityLauncher, firmware!!, character!!)
         } else {
             DailyScreen(firmware!!, character = character!!, background!!, activityLaunchers)
         }
@@ -176,7 +176,7 @@ class MainScreenComposable(
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.adventureIcon, contentDescription = "Adventure", modifier = Modifier.clickable {
                                     if(character.speciesStats.phase >= 2) {
-                                        activityLaunchers.adventureMenuLauncher.invoke()
+                                        activityLaunchers.adventureActivityLauncher.launchMenu.invoke()
                                     } else {
                                         activityLaunchers.toastLauncher.invoke("Must be at a higher level to adventure")
                                     }

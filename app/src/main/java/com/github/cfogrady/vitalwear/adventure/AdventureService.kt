@@ -4,12 +4,16 @@ import android.content.Context
 import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorManager
+import android.util.Log
 import com.github.cfogrady.vitalwear.adventure.data.CharacterAdventureDao
+import com.github.cfogrady.vitalwear.adventure.data.CharacterAdventureEntity
+import com.github.cfogrady.vitalwear.battle.data.BattleResult
 import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntity
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntityDao
 import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
+import com.github.cfogrady.vitalwear.steps.AccelerometerToStepSensor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -26,17 +30,28 @@ class AdventureService(
     private val characterAdventureDao: CharacterAdventureDao,
     private val sensorManager: SensorManager) {
 
-    var activeAdventure: ActiveAdventure? = null
+    companion object {
+        const val TAG = "AdventureService"
+    }
 
-    fun startAdventure(context: Context, cardName: String, startingAdventure: Int): Job {
+    var activeAdventure: ActiveAdventure? = null
+    var accelerometerToStepSensor: AccelerometerToStepSensor? = null
+
+    fun startAdventure(context: Context, cardName: String, partnerId: Int, startingAdventure: Int): Job {
         val adventureService = this
         return CoroutineScope(Dispatchers.IO).launch {
             val adventures = getAdventureOptions(cardName)
             val backgrounds = cardSpritesIO.loadCardBackgrounds(context, cardName)
-            val adventure = ActiveAdventure(context, adventureService, adventures, backgrounds, startingAdventure)
+            val adventure = ActiveAdventure(context, adventureService, adventures, backgrounds, startingAdventure, partnerId)
             activeAdventure = adventure
             val stepCounter = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-            sensorManager.registerListener(activeAdventure, stepCounter, SensorManager.SENSOR_DELAY_GAME)
+            if(stepCounter == null) {
+                val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+                accelerometerToStepSensor = AccelerometerToStepSensor(adventure)
+                sensorManager.registerListener(accelerometerToStepSensor, accelerometer, SensorManager.SENSOR_DELAY_GAME)
+            } else {
+                sensorManager.registerListener(activeAdventure, stepCounter, SensorManager.SENSOR_DELAY_GAME)
+            }
             gameStateFlow.value = GameState.ADVENTURE
         }
     }
@@ -46,9 +61,37 @@ class AdventureService(
             throw IllegalStateException("Can't stopAdventure if activeAdventure isn't present")
         }
         context.stopService(Intent(context, AdventureForegroundService::class.java))
-        sensorManager.unregisterListener(activeAdventure)
+        if(accelerometerToStepSensor != null) {
+            sensorManager.unregisterListener(accelerometerToStepSensor)
+            accelerometerToStepSensor = null
+        } else {
+            sensorManager.unregisterListener(activeAdventure)
+        }
         gameStateFlow.value = GameState.IDLE
         activeAdventure = null
+    }
+
+    fun completeBattle(context: Context, battleResult: BattleResult) {
+        val adventure = activeAdventure
+        if(adventure?.zoneCompleted?.value != true) {
+            Log.e(TAG, "Battle completed, but we haven't completed a zone...")
+            return
+        }
+        if(battleResult == BattleResult.RETREAT) {
+            stopAdventure(context)
+            return
+        }
+        notificationChannelManager.cancelNotification(NotificationChannelManager.ADVENTURE_BOSS)
+        if(battleResult == BattleResult.WIN) {
+            CoroutineScope(Dispatchers.IO).launch {
+                val adventureEntity = adventure.currentAdventureEntity()
+                val highestCompleted = characterAdventureDao.getByCharacterIdAndCardName(adventureEntity.characterId, adventureEntity.cardName)?.adventureId ?: -1
+                if(highestCompleted < adventureEntity.adventureId) {
+                    characterAdventureDao.upsert(CharacterAdventureEntity(adventureEntity.cardName, adventure.partnerId, adventureEntity.adventureId))
+                }
+            }
+        }
+        adventure.finishZone(battleResult == BattleResult.WIN)
     }
 
     fun notifyZoneCompletion(context: Context) {
@@ -64,10 +107,11 @@ class AdventureService(
     suspend fun getCurrentMaxAdventure(characterId: Int, cardName: String): Int {
         return withContext(Dispatchers.IO) {
             val highestCompletion = characterAdventureDao.getByCharacterIdAndCardName(characterId, cardName)
-            highestCompletion?.let {
-                it.adventureId + 1
+            if(highestCompletion == null) {
+                0
+            } else {
+                highestCompletion.adventureId + 1
             }
-            0
         }
     }
 

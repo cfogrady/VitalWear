@@ -5,8 +5,10 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.github.cfogrady.vitalwear.VitalWearApp
+import com.github.cfogrady.vitalwear.adventure.AdventureActivityLauncher
 import com.github.cfogrady.vitalwear.adventure.AdventureMenuActivity
 import com.github.cfogrady.vitalwear.battle.BattleActivity
+import com.github.cfogrady.vitalwear.battle.data.BattleResult
 import com.github.cfogrady.vitalwear.character.activity.CharacterSelectActivity
 import com.github.cfogrady.vitalwear.character.transformation.TransformationActivity
 import com.github.cfogrady.vitalwear.debug.DebugActivity
@@ -15,7 +17,6 @@ import com.github.cfogrady.vitalwear.stats.StatsMenuActivity
 import com.github.cfogrady.vitalwear.training.TrainingMenuActivity
 import com.github.cfogrady.vitalwear.common.util.ActivityHelper
 import com.github.cfogrady.vitalwear.training.StopBackgroundTrainingActivity
-import com.github.cfogrady.vitalwear.training.TrainingActivity
 import java.time.LocalDateTime
 
 class MainActivity : ComponentActivity() {
@@ -52,14 +53,13 @@ class MainActivity : ComponentActivity() {
             activityHelper.getActivityLauncher(LoadFirmwareActivity::class.java),
             activityHelper.getActivityLauncher(StatsMenuActivity::class.java),
             activityHelper.getActivityLauncher(TrainingMenuActivity::class.java),
-            activityHelper.getActivityLauncher(AdventureMenuActivity::class.java),
             activityHelper.getActivityLauncher(CharacterSelectActivity::class.java),
             activityHelper.getActivityLauncher(BattleActivity::class.java),
             activityHelper.getActivityLauncher(TransformationActivity::class.java),
             activityHelper.getActivityLauncher(DebugActivity::class.java),
-            activityHelper.getActivityLauncher(StopBackgroundTrainingActivity::class.java)
-        ) { text ->
-            Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
-        }
+            activityHelper.getActivityLauncher(StopBackgroundTrainingActivity::class.java),
+            {text -> Toast.makeText(this, text, Toast.LENGTH_SHORT).show() },
+            AdventureActivityLauncher.buildFromContextAndActivityHelper(application, activityHelper),
+        )
     }
 }

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.wear.compose.material.Text
+import com.github.cfogrady.vitalwear.battle.BattleActivity
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
@@ -47,15 +48,29 @@ class AdventureScreenFactory(
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun AdventureScreen(context: Context, firmware: Firmware, partner: BEMCharacter) {
+    fun AdventureScreen(context: Context, adventureActivityLauncher: AdventureActivityLauncher, firmware: Firmware, partner: BEMCharacter) {
         val adventure = adventureService.activeAdventure!!
         val currentStep by adventure.currentStep.collectAsState()
-        val stepsToGoal = remember(currentStep) {
+        val goalComplete by adventure.zoneCompleted.collectAsState()
+        val stepsToGoal = remember(currentStep, goalComplete) {
             adventure.stepsTowardsGoal()
         }
-        val goalComplete by adventure.zoneCompleted.collectAsState()
-        if(goalComplete) {
-            // start battle
+        LaunchedEffect(goalComplete) {
+            if(goalComplete) {
+                Handler.createAsync(Looper.getMainLooper()).postDelayed({
+                    adventureActivityLauncher.launchBattle {
+                        val adventureEntity = adventure.currentAdventureEntity()
+                        it.putExtra(BattleActivity.CARD_NAME, adventureEntity.cardName)
+                        it.putExtra(BattleActivity.CHARACTER_ID, adventureEntity.characterId)
+                        it.putExtra(BattleActivity.OPPONENT_BP, adventureEntity.bp)
+                        it.putExtra(BattleActivity.OPPONENT_AP, adventureEntity.ap)
+                        it.putExtra(BattleActivity.OPPONENT_HP, adventureEntity.hp)
+                        it.putExtra(BattleActivity.BACKGROUND, adventureEntity.bossBackgroundId)
+                        it.putExtra(BattleActivity.OPPONENT_ATTACK, adventureEntity.attackId)
+                        it.putExtra(BattleActivity.OPPONENT_CRITICAL, adventureEntity.criticalAttackId)
+                    }
+                }, 500)
+            }
         }
         vitalBoxFactory.VitalBox {
             bitmapScaler.ScaledBitmap(bitmap = adventure.currentBackground(), contentDescription = "background")

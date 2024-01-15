@@ -19,6 +19,7 @@ class AdventureForegroundService : Service() {
         const val TAG = "AdventureService"
         const val CARD_NAME = "CARD_NAME"
         const val STARTING_ADVENTURE = "STARTING_ADVENTURE"
+        const val PARTNER = "PARTNER"
     }
 
     private lateinit var adventureService: AdventureService
@@ -40,7 +41,8 @@ class AdventureForegroundService : Service() {
         }
         val cardName = intent.extras?.getString(CARD_NAME)!!
         val startingAdventure = intent.extras?.getInt(STARTING_ADVENTURE)!!
-        adventureService.startAdventure(this, cardName, startingAdventure)
+        val partnerId = intent.extras?.getInt(PARTNER)!!
+        adventureService.startAdventure(this, cardName, partnerId, startingAdventure)
         val notificationBuilder = NotificationCompat.Builder(this, NotificationChannelManager.CHANNEL_ID)
             .setContentTitle("VitalWear Adventure")
         if (android.os.Build.VERSION.SDK_INT >= 34) {

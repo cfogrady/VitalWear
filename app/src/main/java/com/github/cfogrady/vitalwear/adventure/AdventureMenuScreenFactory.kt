@@ -112,6 +112,7 @@ class AdventureMenuScreenFactory(
                 val foregroundIntent = Intent(context, AdventureForegroundService::class.java)
                 foregroundIntent.putExtra(AdventureForegroundService.CARD_NAME, selectedAdventure!!.cardName)
                 foregroundIntent.putExtra(AdventureForegroundService.STARTING_ADVENTURE, selectedAdventure!!.adventureId)
+                foregroundIntent.putExtra(AdventureForegroundService.PARTNER, character.characterStats.id)
                 context.startForegroundService(foregroundIntent)
                 adventureMenuState = AdventureMenuState.Go
             }

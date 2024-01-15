@@ -142,7 +142,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         backgroundManager = BackgroundManager(firmwareManager)
         val random = Random()
         val bemBattleLogic = BEMBattleLogic(random)
-        battleService = BattleService(cardSpriteIO, database.speciesEntityDao(), characterSpritesIO, characterManager, firmwareManager, bemBattleLogic, saveService, vitalService, random, database.cardSettingsDao())
+        battleService = BattleService(cardSpriteIO, database.speciesEntityDao(), characterSpritesIO, characterManager, firmwareManager, bemBattleLogic, saveService, vitalService, random, database.cardSettingsDao(), database.cardMetaEntityDao())
         imageScaler = ImageScaler(applicationContext.resources.displayMetrics, applicationContext.resources.configuration.isScreenRound)
         backgroundHeight = imageScaler.scaledDpValueFromPixels(ImageScaler.VB_HEIGHT.toInt())
         bitmapScaler = BitmapScaler(imageScaler)

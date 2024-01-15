@@ -22,11 +22,10 @@ class FightTargetFactory(
     private val endFightVitalsFactory: EndFightVitalsFactory,
     ) {
     @Composable
-    fun FightTarget(battleModel: PreBattleModel, activityFinished: () -> Unit) {
+    fun FightTarget(battleModel: PreBattleModel, activityFinished: (BattleResult) -> Unit) {
         var state by remember { mutableStateOf(FightTargetState.OPPONENT_SPLASH) }
         var battleConclusion by remember { mutableStateOf(BattleResult.RETREAT) }
         var postBattle by remember { mutableStateOf(null as PostBattleModel?) }
-        val context = LocalContext.current
         val stateUpdater = {newState: FightTargetState -> state = newState}
         vitalBoxFactory.VitalBox {
             when(state) {
@@ -77,7 +76,7 @@ class FightTargetFactory(
                 FightTargetState.VITALS -> {
                     //back to normal background
                     endFightVitalsFactory.EndFightVitals(postBattleModel = postBattle!!) {
-                        activityFinished.invoke()
+                        activityFinished.invoke(battleConclusion)
                     }
                 }
             }
