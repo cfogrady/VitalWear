@@ -23,7 +23,7 @@ class AdventureForegroundService : Service() {
     }
 
     private lateinit var adventureService: AdventureService
-    private var wakeLock: PowerManager.WakeLock? = null
+    // private var wakeLock: PowerManager.WakeLock? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -53,24 +53,23 @@ class AdventureForegroundService : Service() {
             notificationBuilder.setCategory(Notification.CATEGORY_SERVICE)
             startForeground(NotificationChannelManager.BACKGROUND_ADVENTURE, notificationBuilder.build())
         }
-        // we need this lock so our service prevents Doze mode from taking affect
-        wakeLock =
-            (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$TAG:lock").apply {
-                    acquire()
-                }
-            }
-        Log.i(TAG, "Start foreground adventure")
+//        // we need this lock so our service prevents Doze mode from taking affect
+//        wakeLock =
+//            (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
+//                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$TAG:lock").apply {
+//                    acquire()
+//                }
+//            }
         return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Log.i(TAG, "Remove Wakelock")
-        wakeLock?.let {
-            if (it.isHeld) {
-                it.release()
-            }
-        }
+//        wakeLock?.let {
+//            if (it.isHeld) {
+//                it.release()
+//            }
+//        }
     }
 }
