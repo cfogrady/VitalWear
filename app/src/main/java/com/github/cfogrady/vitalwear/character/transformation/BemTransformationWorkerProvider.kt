@@ -16,6 +16,7 @@ class BemTransformationWorkerProvider : WorkerProvider {
             workProviderDependencies.characterManager,
             workProviderDependencies.notificationChannelManager,
             workProviderDependencies.bemUpdater,
+            workProviderDependencies.adventureEntityDao,
             appContext,
             workerParameters,
         )

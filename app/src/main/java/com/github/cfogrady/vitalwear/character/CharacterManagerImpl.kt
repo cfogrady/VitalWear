@@ -109,7 +109,9 @@ class CharacterManagerImpl(
                     transformationEntity.requiredVitals,
                     transformationEntity.requiredPp,
                     transformationEntity.requiredBattles,
-                    transformationEntity.requiredWinRatio)
+                    transformationEntity.requiredWinRatio,
+                    transformationEntity.minAdventureCompletionRequired,
+                    transformationEntity.isSecret)
             )
         }
         return transformationOptions

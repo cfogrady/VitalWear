@@ -180,7 +180,8 @@ class VitalWearApp : Application(), Configuration.Provider {
             bemUpdater,
             stepService,
             saveService,
-            sharedPreferences
+            sharedPreferences,
+            database.adventureEntityDao()
         )
         return Configuration.Builder().setWorkerFactory(VitalWearWorkerFactory(workProviderDependencies)).build()
     }

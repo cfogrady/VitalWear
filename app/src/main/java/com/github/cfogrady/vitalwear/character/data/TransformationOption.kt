@@ -9,5 +9,7 @@ class TransformationOption(
     val requiredPp: Int,
     val requiredBattles: Int,
     val requiredWinRatio: Int,
+    val requiredAdventureCompleted: Int?,
+    val isSecret: Boolean,
 ) {
 }

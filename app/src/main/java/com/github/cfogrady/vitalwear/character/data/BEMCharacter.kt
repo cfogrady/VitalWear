@@ -1,6 +1,7 @@
 package com.github.cfogrady.vitalwear.character.data
 
 import com.github.cfogrady.vitalwear.common.card.CardType
+import com.github.cfogrady.vitalwear.common.card.db.AdventureEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntity
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
@@ -61,8 +62,13 @@ class BEMCharacter(
         return option
     }
 
-    fun hasValidTransformation(): Optional<TransformationOption> {
+    private fun hasValidTransformation(highestAdventureCompleted: Int?): Optional<TransformationOption> {
         for(transformationOption in transformationOptions) {
+            if((transformationOption.requiredAdventureCompleted ?: -1) > (highestAdventureCompleted
+                    ?: -1)
+            ) {
+                continue
+            }
             if(transformationOption.requiredVitals > characterStats.vitals) {
                 continue
             }
@@ -82,10 +88,10 @@ class BEMCharacter(
 
     private var lastTransformationCheck = LocalDateTime.MIN
 
-    fun prepCharacterTransformation() {
+    fun prepCharacterTransformation(highestAdventureCompleted: Int?) {
         lastTransformationCheck = LocalDateTime.now()
         val characterStats = characterStats
-        val transformationOption = hasValidTransformation()
+        val transformationOption = hasValidTransformation(highestAdventureCompleted)
         if(transformationOption.isPresent) {
             _readyToTransform.tryEmit(transformationOption)
         } else {
