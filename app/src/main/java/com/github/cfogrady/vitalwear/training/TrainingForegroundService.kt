@@ -25,7 +25,7 @@ class TrainingForegroundService : Service() {
         TODO("Not yet implemented")
     }
 
-    lateinit var trainingService: TrainingService
+    private lateinit var trainingService: TrainingService
     private var wakeLock: PowerManager.WakeLock? = null
 
 
@@ -45,7 +45,7 @@ class TrainingForegroundService : Service() {
             notificationBuilder.setCategory(Notification.CATEGORY_SERVICE)
             startForeground(NotificationChannelManager.BACKGROUND_TRAINING, notificationBuilder.build())
         }
-        // we need this lock so our service gets not affected by Doze Mode
+        // we need this lock so our service prevents Doze mode from taking affect
         wakeLock =
             (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
                 newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$TAG:lock").apply {

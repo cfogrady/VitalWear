@@ -16,6 +16,9 @@ import com.github.cfogrady.vb.dim.card.DimReader
 import com.github.cfogrady.vitalwear.activity.ImageScaler
 import com.github.cfogrady.vitalwear.activity.MainScreenComposable
 import com.github.cfogrady.vitalwear.activity.PartnerScreenComposable
+import com.github.cfogrady.vitalwear.adventure.AdventureMenuScreenFactory
+import com.github.cfogrady.vitalwear.adventure.AdventureScreenFactory
+import com.github.cfogrady.vitalwear.adventure.AdventureService
 import com.github.cfogrady.vitalwear.battle.composable.*
 import com.github.cfogrady.vitalwear.battle.data.BEMBattleLogic
 import com.github.cfogrady.vitalwear.battle.BattleService
@@ -94,6 +97,8 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var transformationScreenFactory: TransformationScreenFactory
     lateinit var complicationRefreshService: ComplicationRefreshService
     lateinit var vitalService: VitalService
+    lateinit var adventureMenuScreenFactory: AdventureMenuScreenFactory
+    lateinit var adventureService: AdventureService
     private lateinit var applicationBootManager: ApplicationBootManager
     private lateinit var bemUpdater: BEMUpdater
     var backgroundHeight = 0.dp
@@ -137,7 +142,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         backgroundManager = BackgroundManager(firmwareManager)
         val random = Random()
         val bemBattleLogic = BEMBattleLogic(random)
-        battleService = BattleService(cardSpriteIO, database.speciesEntityDao(), characterSpritesIO, characterManager, firmwareManager, bemBattleLogic, saveService, vitalService, random, database.cardSettingsDao())
+        battleService = BattleService(cardSpriteIO, database.speciesEntityDao(), characterSpritesIO, characterManager, firmwareManager, bemBattleLogic, saveService, vitalService, random, database.cardSettingsDao(), database.cardMetaEntityDao())
         imageScaler = ImageScaler(applicationContext.resources.displayMetrics, applicationContext.resources.configuration.isScreenRound)
         backgroundHeight = imageScaler.scaledDpValueFromPixels(ImageScaler.VB_HEIGHT.toInt())
         bitmapScaler = BitmapScaler(imageScaler)
@@ -157,11 +162,14 @@ class VitalWearApp : Application(), Configuration.Provider {
 
         transformationScreenFactory = TransformationScreenFactory(characterManager, backgroundHeight, firmwareManager, bitmapScaler, vitalBoxFactory, bemUpdater)
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService)
-        mainScreenComposable = MainScreenComposable(gameState, characterManager, saveService, firmwareManager, backgroundManager, backgroundTrainingScreenFactory, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory)
+        adventureService = AdventureService(gameState, database.adventureEntityDao(), cardSpriteIO, notificationChannelManager, database.characterAdventureDao(), sensorManager)
+        val adventureScreenFactory = AdventureScreenFactory(adventureService, vitalBoxFactory, bitmapScaler, backgroundHeight)
+        mainScreenComposable = MainScreenComposable(gameState, characterManager, saveService, firmwareManager, backgroundManager, backgroundTrainingScreenFactory, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory, adventureScreenFactory)
         val cardCharacterImageService = CardCharacterImageService(database.speciesEntityDao(), characterSpritesIO)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardCharacterImageService)
         shutdownReceiver = ShutdownReceiver(shutdownManager)
         applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, bemUpdater, saveService, notificationChannelManager, complicationRefreshService)
+        adventureMenuScreenFactory = AdventureMenuScreenFactory(cardSpriteIO, database.cardMetaEntityDao(), adventureService, vitalBoxFactory, characterSpritesIO, database.speciesEntityDao(), bitmapScaler, backgroundHeight)
     }
 
     override fun getWorkManagerConfiguration(): Configuration {
@@ -172,7 +180,8 @@ class VitalWearApp : Application(), Configuration.Provider {
             bemUpdater,
             stepService,
             saveService,
-            sharedPreferences
+            sharedPreferences,
+            database.adventureEntityDao()
         )
         return Configuration.Builder().setWorkerFactory(VitalWearWorkerFactory(workProviderDependencies)).build()
     }

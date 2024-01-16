@@ -7,6 +7,7 @@ import androidx.core.net.toUri
 import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
 import com.github.cfogrady.vb.dim.sprite.SpriteData.Sprite
 import com.github.cfogrady.vb.dim.util.RelativeByteOffsetInputStream
+import com.github.cfogrady.vitalwear.adventure.firmware.AdventureFirmwareSprites
 import com.github.cfogrady.vitalwear.battle.data.BattleFirmwareSprites
 import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
 import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
@@ -157,6 +158,7 @@ class FirmwareManager(
                 val loadedFirmware = Firmware(
                     characterFirmwareSprites(sprites),
                     MenuFirmwareSprites.menuFirmwareSprites(spriteBitmapConverter, sprites),
+                    AdventureFirmwareSprites.fromSprites(sprites, spriteBitmapConverter),
                     battleFirmwareSprites(sprites),
                     emoteFirmwareSprites(sprites),
                     trainingFirmwareSprites(sprites),

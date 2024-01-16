@@ -10,7 +10,10 @@ import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
+import com.github.cfogrady.vitalwear.common.card.CardType
 import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
+import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
+import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntityDao
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
@@ -33,9 +36,26 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
                     private val saveService: SaveService,
                     private val vitalService: VitalService,
                     private val random: Random,
-                    private val cardSettingsDao: CardSettingsDao
+                    private val cardSettingsDao: CardSettingsDao,
+                    private val cardMetaEntityDao: CardMetaEntityDao,
 ) {
     companion object {
+    }
+
+    fun createBattleModel(context: Context, battleTargetInfo: BattleCharacterInfo): PreBattleModel {
+        val partnerCharacter = characterManager.getCharacterFlow().value!!
+        val firmware = firmwareManager.getFirmware().value!!
+        val partnerBattleCharacter = battleCharacterFromBemCharacter(context, partnerCharacter)
+        val targetCard = cardMetaEntityDao.getByName(battleTargetInfo.cardName)
+        val battleTarget = buildTargetFromInfo(context, targetCard, battleTargetInfo)
+        val battleSpriteLoader = CardBattleSpriteLoader(context, cardSpritesIO, targetCard.cardName)
+        return PreBattleModel(
+            partnerBattleCharacter,
+            battleTarget,
+            battleSpriteLoader.getBackground(),
+            battleSpriteLoader.getReadyIcon(),
+            battleSpriteLoader.getGoIcon(),
+        )
     }
 
     fun createBattleModel(context: Context): PreBattleModel {
@@ -53,6 +73,18 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
             battleSpriteLoader.getReadyIcon(),
             battleSpriteLoader.getGoIcon(),
         )
+    }
+
+    fun buildTargetFromInfo(context: Context, cardMetaEntity: CardMetaEntity, battleTargetInfo: BattleCharacterInfo): BattleCharacter {
+        val speciesEntity = speciesEntityDao.getCharacterByCardAndCharacterId(battleTargetInfo.cardName, battleTargetInfo.characterId)
+        val battleStats =
+        if(battleTargetInfo.hp == null || battleTargetInfo.ap == null || battleTargetInfo.bp == null || battleTargetInfo.attack == null || battleTargetInfo.critical == null) {
+            loadBattleStats(speciesEntity)
+        } else {
+            BattleStats(battleTargetInfo.bp, battleTargetInfo.ap, battleTargetInfo.hp, 0, speciesEntity.attribute, speciesEntity.type, speciesEntity.phase, Mood.NORMAL)
+        }
+        val battleSprites = loadBattleSprites(context, speciesEntity, cardMetaEntity.cardType == CardType.BEM, battleTargetInfo.attack, battleTargetInfo.critical)
+        return BattleCharacter(battleStats, battleSprites)
     }
 
     fun performBattle(preBattleModel: PreBattleModel): PostBattleModel {
@@ -97,10 +129,10 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         return BattleStats(speciesEntity.bp, speciesEntity.ap, speciesEntity.hp, 0, speciesEntity.attribute, speciesEntity.type, speciesEntity.phase, mood)
     }
 
-    private fun loadBattleSprites(context: Context, speciesEntity: SpeciesEntity, hasCardHits: Boolean): BattleSprites {
+    private fun loadBattleSprites(context: Context, speciesEntity: SpeciesEntity, hasCardHits: Boolean, attack: Int? = null, critical: Int? = null): BattleSprites {
         val firmware = firmwareManager.getFirmware().value!!
-        val smallAttackId = speciesEntity.attackId
-        val largeAttackId = speciesEntity.criticalAttackId
+        val smallAttackId = attack ?: speciesEntity.attackId
+        val largeAttackId = critical ?: speciesEntity.criticalAttackId
         val projectileSprite = getSmallAttackSprite(context, speciesEntity.cardName, firmware, smallAttackId)
         val largeProjectileSprite = getLargeAttackSprite(context, speciesEntity.cardName, firmware, largeAttackId)
         return BattleSprites(

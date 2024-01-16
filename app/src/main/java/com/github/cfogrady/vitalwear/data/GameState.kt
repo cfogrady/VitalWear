@@ -7,7 +7,8 @@ enum class GameState {
     IDLE,
     WALKING,
     RUNNING,
-    TRAINING;
+    TRAINING,
+    ADVENTURE;
 
     fun bitmaps(character: BEMCharacter): List<Bitmap> {
         return when(this) {
@@ -23,6 +24,7 @@ enum class GameState {
             TRAINING -> {
                 character.characterSprites.sprites.subList(7, 9)
             }
+            ADVENTURE -> character.characterSprites.sprites.subList(3, 5)
         }
     }
 }

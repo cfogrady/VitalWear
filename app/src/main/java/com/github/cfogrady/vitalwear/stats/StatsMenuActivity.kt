@@ -24,6 +24,8 @@ import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.character.data.TransformationOption
 import com.github.cfogrady.vitalwear.character.transformation.TransformationFirmwareSprites
+import com.github.cfogrady.vitalwear.common.card.db.AdventureEntity
+import com.github.cfogrady.vitalwear.common.card.db.AdventureEntityDao
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
@@ -52,14 +54,20 @@ class StatsMenuActivity : ComponentActivity() {
         bitmapScaler = (application as VitalWearApp).bitmapScaler
         vitalBoxFactory = (application as VitalWearApp).vitalBoxFactory
         firmware = (application as VitalWearApp).firmwareManager.getFirmware().value!!
+        val adventureEntityDao = (application as VitalWearApp).database.adventureEntityDao()
         setContent {
-            statsMenu()
+            var highestCompletedAdventure by remember { mutableStateOf<Int?>(null) }
+            LaunchedEffect(true) {
+                val adventures = adventureEntityDao.getByCard(characterManager.getCurrentCharacter()!!.cardName())
+                highestCompletedAdventure = AdventureEntity.highestAdventureCompleted(adventures)
+            }
+            StatsMenu(highestCompletedAdventure)
         }
     }
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    private fun statsMenu() {
+    private fun StatsMenu(highestCompletedAdventure: Int?) {
         LaunchedEffect(true) {
             characterManager.getCharacterFlow().value!!.characterStats.updateTimeStamps(LocalDateTime.now())
         }
@@ -79,12 +87,13 @@ class StatsMenuActivity : ComponentActivity() {
                         PartnerStats(initialPage = initialStatsPage, partner = partner)
                     }
                     else -> {
+                        val potentialOption = partner.transformationOptions[rootPage - 1]
                         PotentialTransformation(
                             firmwareSprites = firmware.transformationFirmwareSprites,
                             bemCharacter = partner,
-                            transformationOption = partner.transformationOptions[rootPage -1],
+                            transformationOption = potentialOption,
                             expectedTransformation = false,
-                            locked = false
+                            locked = (potentialOption.requiredAdventureCompleted ?: -1) > (highestCompletedAdventure ?: -1)
                         )
                     }
                 }

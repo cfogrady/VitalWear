@@ -22,5 +22,15 @@ data class AdventureEntity(
 ) {
     companion object {
         const val TABLE = "adventure"
+
+        fun highestAdventureCompleted(adventures: List<AdventureEntity>): Int? {
+            var highestCompleted: Int? = null
+            for(adventure in adventures) {
+                if(adventure.cleared) {
+                    highestCompleted = adventure.adventureId
+                }
+            }
+            return highestCompleted
+        }
     }
 }

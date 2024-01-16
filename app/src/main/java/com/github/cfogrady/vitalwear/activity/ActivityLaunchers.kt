@@ -1,6 +1,10 @@
 package com.github.cfogrady.vitalwear.activity
 
+import android.content.Context
+import com.github.cfogrady.vitalwear.adventure.AdventureActivityLauncher
+
 class ActivityLaunchers(
+    val context: Context,
     val firmwareLoadingLauncher: ()-> Unit,
     val statsMenuLauncher: ()-> Unit,
     val trainingMenuLauncher: ()-> Unit,
@@ -10,6 +14,7 @@ class ActivityLaunchers(
     val debugActivityLauncher: () -> Unit,
     val stopBackgroundTrainingLauncher: () -> Unit,
     val toastLauncher: (String) -> Unit,
+    val adventureActivityLauncher: AdventureActivityLauncher,
 ) {
 
 }
