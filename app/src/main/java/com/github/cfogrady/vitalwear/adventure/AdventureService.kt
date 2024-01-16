@@ -83,15 +83,25 @@ class AdventureService(
         }
         notificationChannelManager.cancelNotification(NotificationChannelManager.ADVENTURE_BOSS)
         if(battleResult == BattleResult.WIN) {
-            CoroutineScope(Dispatchers.IO).launch {
-                val adventureEntity = adventure.currentAdventureEntity()
-                val highestCompleted = characterAdventureDao.getByCharacterIdAndCardName(adventureEntity.characterId, adventureEntity.cardName)?.adventureId ?: -1
-                if(highestCompleted < adventureEntity.adventureId) {
-                    characterAdventureDao.upsert(CharacterAdventureEntity(adventureEntity.cardName, adventure.partnerId, adventureEntity.adventureId))
-                }
-            }
+            // function so we don't lose references in coroutine scope during finishZone
+            markCompletion(adventure.currentAdventureEntity(), adventure.partnerId)
         }
         adventure.finishZone(battleResult == BattleResult.WIN)
+    }
+
+    fun markCompletion(adventureEntity: AdventureEntity, partnerId: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            if(!adventureEntity.cleared) {
+                // set global completion
+                val updated = adventureEntity.copy(cleared = true)
+                adventureEntityDao.update(updated)
+            }
+            // set card completion
+            val highestCompleted = characterAdventureDao.getByCharacterIdAndCardName(adventureEntity.characterId, adventureEntity.cardName)?.adventureId ?: -1
+            if(highestCompleted < adventureEntity.adventureId) {
+                characterAdventureDao.upsert(CharacterAdventureEntity(adventureEntity.cardName, partnerId, adventureEntity.adventureId))
+            }
+        }
     }
 
     fun notifyZoneCompletion(context: Context) {
