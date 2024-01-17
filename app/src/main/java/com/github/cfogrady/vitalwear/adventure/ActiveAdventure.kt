@@ -73,7 +73,7 @@ class ActiveAdventure(private val context: Context, private val service: Adventu
         val goalSteps = adventures[currentZone].steps
         startingStep = startingStep!! + goalSteps
         if(moveToNext) {
-            currentZone++
+            currentZone = (currentZone + 1) % adventures.size
         }
         internalZoneCompleted.value = false
         Handler.createAsync(Looper.getMainLooper()).postDelayed(this::checkSteps, 500)
