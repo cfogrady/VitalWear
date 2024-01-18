@@ -13,7 +13,7 @@ import com.github.cfogrady.vitalwear.util.BridgedSensorEventListener
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class ActiveAdventure(private val context: Context, private val service: AdventureService, private val adventures: List<AdventureEntity>, val backgrounds: List<Bitmap>, private var currentZone: Int, val partnerId: Int) : SensorEventListener, BridgedSensorEventListener {
+class ActiveAdventure(private val context: Context, private val service: AdventureService, private val adventures: List<AdventureEntity>, private val backgrounds: List<Bitmap>, private var currentZone: Int, val partnerId: Int) : SensorEventListener, BridgedSensorEventListener {
     companion object {
         const val TAG = "ActiveAdventure"
     }

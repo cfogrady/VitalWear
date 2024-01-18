@@ -116,7 +116,7 @@ class AdventureMenuScreenFactory(
                 context.startForegroundService(foregroundIntent)
                 adventureMenuState = AdventureMenuState.Go
             }
-            AdventureMenuState.Go -> Go(firmware = firmware, background = backgrounds[selectedAdventure!!.adventureId], characterSprites = character.characterSprites) {
+            AdventureMenuState.Go -> Go(firmware = firmware, background = backgrounds[selectedAdventure!!.walkingBackgroundId], characterSprites = character.characterSprites) {
                 onFinish.invoke()
             }
         }
