@@ -108,7 +108,7 @@ class AdventureMenuScreenFactory(
             ) {
                 adventureMenuState = AdventureMenuState.Ready
             }
-            AdventureMenuState.Ready -> Ready(firmware = firmware, background = backgrounds[selectedAdventure!!.adventureId]) {
+            AdventureMenuState.Ready -> Ready(firmware = firmware, background = backgrounds[selectedAdventure!!.bossBackgroundId]) {
                 val foregroundIntent = Intent(context, AdventureForegroundService::class.java)
                 foregroundIntent.putExtra(AdventureForegroundService.CARD_NAME, selectedAdventure!!.cardName)
                 foregroundIntent.putExtra(AdventureForegroundService.STARTING_ADVENTURE, selectedAdventure!!.adventureId)
