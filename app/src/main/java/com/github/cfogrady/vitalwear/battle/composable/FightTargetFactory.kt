@@ -45,7 +45,7 @@ class FightTargetFactory(
                     }
                     goScreenFactory.GoScreen(battleModel = battleModel) {
                         state = FightTargetState.ATTACKING
-                        postBattle = battleService.performBattle(battleModel, arrayOf(false, false, true, true, true))
+                        postBattle = battleService.performBattle(battleModel)
                         battleConclusion = postBattle!!.battle.battleResult
                     }
                 }
