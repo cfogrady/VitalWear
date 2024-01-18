@@ -66,52 +66,79 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
     @Composable
     private fun Attack(battleModel: PostBattleModel, isPartnerAttacking: Boolean, round: Int, finisher: () -> Unit) {
         var phase by remember { mutableStateOf(AttackPhase.SHOW_HP) }
-        val phaseUpdater = { newPhase: AttackPhase -> phase = newPhase}
         val direction = if(isPartnerAttacking) 1.0f else -1.0f
         val attackingCharacter = if(isPartnerAttacking) battleModel.partnerCharacter else battleModel.opponent
         val defendingCharacter = if(isPartnerAttacking) battleModel.opponent else battleModel.partnerCharacter
         val critical = round == attackingCharacter.battleStats.type
         val attackHit = if(isPartnerAttacking) battleModel.battle.partnerLandedHitOnRound(round) else battleModel.battle.enemyLandedHitOnRound(round)
+        val isSupportRound = battleModel.roundHasSupportAttack(round) && isPartnerAttacking
+        val wasSupported = battleModel.roundHasSupportAttack(round) && !isPartnerAttacking
         when(phase) {
             AttackPhase.SHOW_HP -> {
                 val remainingHpSprite = attackerHpRemainingSprite(battleModel, isPartnerAttacking, round)
                 ShowHP(
                     characterImg = attackingCharacter.battleSprites.idleBitmap,
                     hpRemainingSprite = remainingHpSprite,
-                    direction = direction,
-                    phaseUpdater = phaseUpdater
-                )
+                    direction = direction) {
+                    phase = if(isSupportRound) {
+                        AttackPhase.CUT_IN
+                    } else {
+                        AttackPhase.JUMP_BACK
+                    }
+                }
             }
             AttackPhase.JUMP_BACK -> {
                 JumpBack(
                     characterAttackImg = attackingCharacter.battleSprites.attackBitmap,
+                    supportAttackImg = if(isSupportRound) battleModel.supportCharacter?.attackBitmap else null,
                     direction = direction,
-                    critical = critical,
-                    phaseUpdater = phaseUpdater
-                )
+                    critical = critical) {
+                    phase = if(critical) {
+                        AttackPhase.CUT_IN
+                    } else {
+                        AttackPhase.ATTACK
+                    }
+                }
             }
             AttackPhase.CUT_IN -> {
-                CutIn(cutIn = attackingCharacter.battleSprites.splashBitmap, phaseUpdater = phaseUpdater)
+                val characterSplash: Bitmap
+                val nextPhase: AttackPhase
+                if(isSupportRound) {
+                    characterSplash = battleModel.supportCharacter!!.splashBitmap
+                    nextPhase = AttackPhase.JUMP_BACK
+                }
+                else {
+                    characterSplash = attackingCharacter.battleSprites.splashBitmap
+                    nextPhase = AttackPhase.ATTACK
+                }
+                CutIn(cutIn = characterSplash) {
+                    phase = nextPhase
+                }
             }
             AttackPhase.ATTACK -> {
                 Attack(
                     characterIdleImg = attackingCharacter.battleSprites.idleBitmap,
                     characterAttackImg = attackingCharacter.battleSprites.attackBitmap,
-                    attack = if(critical) attackingCharacter.battleSprites.strongProjectileBitmap else attackingCharacter.battleSprites.projectileBitmap ,
-                    direction = direction,
-                    phaseUpdater = phaseUpdater
-                )
+                    attack = if(critical || isSupportRound) attackingCharacter.battleSprites.strongProjectileBitmap else attackingCharacter.battleSprites.projectileBitmap,
+                    supportIdleImg = if(isSupportRound) battleModel.supportCharacter?.idleBitmap else null,
+                    supportAttackImg = if(isSupportRound) battleModel.supportCharacter?.attackBitmap else null,
+                    supportAttack = if(isSupportRound) battleModel.supportCharacter?.strongProjectileBitmap else null,
+                    direction = direction) {
+                    phase = AttackPhase.OPPONENT_RECEIVES_ATTACK
+                }
             }
             AttackPhase.OPPONENT_RECEIVES_ATTACK -> {
                 OpponentReceivesAttack(
                     characterIdleSprite = defendingCharacter.battleSprites.idleBitmap,
                     characterDodgeSprite = defendingCharacter.battleSprites.dodgeBitmap,
-                    attackSprite = if(critical) attackingCharacter.battleSprites.strongProjectileBitmap else attackingCharacter.battleSprites.projectileBitmap ,
+                    supportIdleSprite = if(wasSupported) battleModel.supportCharacter?.idleBitmap else null,
+                    attackSprite = if(critical || isSupportRound) attackingCharacter.battleSprites.strongProjectileBitmap else attackingCharacter.battleSprites.projectileBitmap,
+                    supportAttack = if(isSupportRound) battleModel.supportCharacter?.strongProjectileBitmap else null,
                     hitSprites = defendingCharacter.battleSprites.hits,
                     wasHit = attackHit,
-                    direction = direction*-1,
-                    phaseUpdater = phaseUpdater,
-                )
+                    direction = direction*-1) {
+                    phase = AttackPhase.OPPONENT_HP
+                }
             }
             AttackPhase.OPPONENT_HP -> {
                 val oldHpSprite = if(round == 0) fullHpSprite(battleModel, !isPartnerAttacking) else defenderHpRemainingSprite(battleModel, isPartnerAttacking, round-1)
@@ -152,7 +179,7 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
     }
 
     @Composable
-    fun ShowHP(characterImg: Bitmap, hpRemainingSprite: Bitmap, direction: Float, phaseUpdater: (AttackPhase) -> Unit) {
+    fun ShowHP(characterImg: Bitmap, hpRemainingSprite: Bitmap, direction: Float, onFinish: () -> Unit) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             bitmapScaler.ScaledBitmap(
                 bitmap = characterImg,
@@ -172,28 +199,41 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
                 modifier = Modifier.offset(y = backgroundHeight.times(PositionOffsetRatios.HEALTH_OFFSET_FROM_TOP)))
         }
         Handler(Looper.getMainLooper()!!).postDelayed({
-            phaseUpdater.invoke(AttackPhase.JUMP_BACK)
+            onFinish.invoke()
         }, 1000)
     }
 
     @Composable
-    fun JumpBack(characterAttackImg: Bitmap, direction: Float, critical: Boolean ,phaseUpdater: (AttackPhase) -> Unit) {
+    fun JumpBack(characterAttackImg: Bitmap, supportAttackImg: Bitmap?, direction: Float, critical: Boolean, onFinish: () -> Unit) {
         var verticalTarget by remember { mutableStateOf(0f)}
         var horizontalTarget by remember { mutableStateOf(0f) }
         val verticalOffset by animateFloatAsState(
             targetValue = verticalTarget,
             animationSpec = tween(durationMillis = 300, easing = LinearEasing),
-            finishedListener = {final -> verticalTarget = 0f}
+            finishedListener = {final -> verticalTarget = 0f}, label = ""
         )
         val horizontalOffset by animateFloatAsState(
             targetValue = horizontalTarget,
-            animationSpec = tween(durationMillis = 600, easing = LinearEasing)
+            animationSpec = tween(durationMillis = 600, easing = LinearEasing), label = ""
         )
         LaunchedEffect(true) {
             verticalTarget = 1f
             horizontalTarget = 1f
         }
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+            if(supportAttackImg != null) {
+                bitmapScaler.ScaledBitmap(
+                    bitmap = supportAttackImg,
+                    contentDescription = "Supporter",
+                    alignment = Alignment.BottomCenter,
+                    modifier = Modifier
+                        .offset(
+                            y = backgroundHeight.times(PositionOffsetRatios.SUPPORT_CHARACTER_OFFSET_FROM_BOTTOM + (-.15f * verticalOffset)),
+                            x = backgroundHeight.times(direction * (PositionOffsetRatios.CHARACTER_JUMP_BACK_POSITION * horizontalOffset))
+                        )
+                        .graphicsLayer(scaleX = direction)
+                )
+            }
             bitmapScaler.ScaledBitmap(
                 bitmap = characterAttackImg,
                 contentDescription = "Attacker",
@@ -207,33 +247,46 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
             )
         }
         Handler(Looper.getMainLooper()!!).postDelayed({
-            if(critical) {
-                phaseUpdater.invoke(AttackPhase.CUT_IN)
-            } else {
-                phaseUpdater.invoke(AttackPhase.ATTACK)
-            }
+            onFinish.invoke()
         }, 800)
     }
 
     @Composable
-    fun CutIn(cutIn: Bitmap, phaseUpdater: (AttackPhase) -> Unit) {
+    fun CutIn(cutIn: Bitmap, onFinish: () -> Unit) {
         Handler(Looper.getMainLooper()!!).postDelayed({
-            phaseUpdater.invoke(AttackPhase.ATTACK)
+            onFinish.invoke()
         }, 1000)
         bitmapScaler.ScaledBitmap(bitmap = cutIn, contentDescription = "Cut In")
     }
 
     @Composable
-    fun Attack(characterIdleImg: Bitmap, characterAttackImg: Bitmap, attack: Bitmap, direction: Float, phaseUpdater: (AttackPhase) -> Unit) {
+    fun Attack(characterIdleImg: Bitmap, characterAttackImg: Bitmap, attack: Bitmap, supportIdleImg: Bitmap?, supportAttackImg: Bitmap?, supportAttack: Bitmap?, direction: Float, onFinish: () -> Unit) {
         var idle by remember { mutableStateOf(true) }
+        var supportIdle by remember { mutableStateOf(true) }
         var targetAttackOffset by remember { mutableStateOf(0f) }
+        var supportTargetAttackOffset by remember { mutableStateOf(0f) }
         val attackSpeed = remember {ADDITIONAL_OFFSET_TO_LEAVE_SCREEN * ATTACK_TIME_PER_SCREEN_HEIGHT}
         val attackOffset by animateFloatAsState(
             targetValue = targetAttackOffset,
-            animationSpec = tween(durationMillis = attackSpeed.toInt(), easing = LinearEasing)
+            animationSpec = tween(durationMillis = attackSpeed.toInt(), easing = LinearEasing),
+            label = ""
         ) {
             Handler(Looper.getMainLooper()!!).postDelayed({
-                phaseUpdater.invoke(AttackPhase.OPPONENT_RECEIVES_ATTACK)
+                if(supportAttack != null) {
+                    supportIdle = false
+                    supportTargetAttackOffset = 1f
+                } else {
+                    onFinish.invoke()
+                }
+            }, 0)
+        }
+        val supportAttackOffset by animateFloatAsState(
+            targetValue = supportTargetAttackOffset,
+            animationSpec = tween(durationMillis = attackSpeed.toInt(), easing = LinearEasing),
+            label = ""
+        ) {
+            Handler(Looper.getMainLooper()!!).postDelayed({
+                onFinish.invoke()
             }, 0)
         }
         Handler(Looper.getMainLooper()!!).postDelayed({
@@ -242,6 +295,19 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
         }, 500)
 
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+            if(supportIdleImg != null && supportAttackImg != null) {
+                bitmapScaler.ScaledBitmap(
+                    bitmap = if(supportIdle) supportIdleImg else supportAttackImg,
+                    contentDescription = "Supporter",
+                    alignment = Alignment.BottomCenter,
+                    modifier = Modifier
+                        .offset(
+                            y = backgroundHeight.times(PositionOffsetRatios.SUPPORT_CHARACTER_OFFSET_FROM_BOTTOM),
+                            x = backgroundHeight.times(direction * PositionOffsetRatios.CHARACTER_JUMP_BACK_POSITION)
+                        )
+                        .graphicsLayer(scaleX = direction)
+                )
+            }
             bitmapScaler.ScaledBitmap(
                 bitmap = if(idle) characterIdleImg else characterAttackImg,
                 contentDescription = "Attacker",
@@ -265,25 +331,48 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
                         .graphicsLayer(scaleX = direction)
                 )
             }
+            if(!supportIdle) {
+                bitmapScaler.ScaledBitmap(
+                    bitmap = supportAttack!!,
+                    contentDescription = "support attack",
+                    modifier = Modifier
+                        .offset(
+                            y = backgroundHeight.times(PositionOffsetRatios.SUPPORT_ATTACK_OFFSET_FROM_BOTTOM),
+                            x = backgroundHeight.times(direction * (PositionOffsetRatios.ATTACK_OFFSET_FROM_CENTER + ADDITIONAL_OFFSET_TO_LEAVE_SCREEN * supportAttackOffset))
+                        )
+                        .graphicsLayer(scaleX = direction)
+                )
+            }
         }
     }
 
     @Composable
-    fun OpponentReceivesAttack(characterIdleSprite: Bitmap, characterDodgeSprite: Bitmap, attackSprite: Bitmap, hitSprites: List<Bitmap>, direction: Float, wasHit: Boolean, phaseUpdater: (AttackPhase) -> Unit) {
+    fun OpponentReceivesAttack(characterIdleSprite: Bitmap, characterDodgeSprite: Bitmap, supportIdleSprite: Bitmap?, attackSprite: Bitmap, supportAttack: Bitmap?, hitSprites: List<Bitmap>, direction: Float, wasHit: Boolean, onFinish: () -> Unit) {
         val screenExitLocation = remember { ADDITIONAL_OFFSET_TO_LEAVE_SCREEN + PositionOffsetRatios.ATTACK_OFFSET_FROM_CENTER}
         var targetAttackOffset by remember { mutableStateOf(ADDITIONAL_OFFSET_TO_LEAVE_SCREEN + PositionOffsetRatios.ATTACK_OFFSET_FROM_CENTER) }
+        var targetSupportAttackOffset by remember { mutableStateOf(ADDITIONAL_OFFSET_TO_LEAVE_SCREEN + PositionOffsetRatios.ATTACK_OFFSET_FROM_CENTER) }
         var attackSpeed by remember { mutableStateOf(0) }
         var attackHitting by remember { mutableStateOf(false) }
+        var supportAttackLaunched by remember { mutableStateOf(false) }
         var dodging by remember { mutableStateOf(false) }
         var dodgingOffsetTarget by remember { mutableStateOf(PositionOffsetRatios.CHARACTER_OFFSET_FROM_BOTTOM) }
         val attackOffset by animateFloatAsState(
             targetValue = targetAttackOffset,
             animationSpec = tween(durationMillis = attackSpeed, easing = LinearEasing),
-            finishedListener = {fnished ->
+            finishedListener = { _ ->
                 if(wasHit) {
                     attackHitting = true
                 }
-            }
+            }, label = "main attack"
+        )
+        val supportAttackOffset by animateFloatAsState(
+            targetValue = targetSupportAttackOffset,
+            animationSpec = tween(durationMillis = attackSpeed, easing = LinearEasing),
+            finishedListener = { _ ->
+                if(wasHit) {
+                    attackHitting = true
+                }
+            }, label = "support attack"
         )
         val dodgeOffset by animateFloatAsState(
             targetValue = dodgingOffsetTarget,
@@ -292,12 +381,12 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
                 if(finished == PositionOffsetRatios.CHARACTER_OFFSET_FROM_BOTTOM) {
                     dodging = false;
                     Handler(Looper.getMainLooper()!!).postDelayed({
-                        phaseUpdater.invoke(AttackPhase.OPPONENT_HP)
+                        onFinish.invoke()
                     }, 500)
                 } else {
                     dodgingOffsetTarget = PositionOffsetRatios.CHARACTER_OFFSET_FROM_BOTTOM
                 }
-            }
+            }, label = ""
         )
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
@@ -314,10 +403,22 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
         }
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             if(!attackHitting) {
+                if(supportIdleSprite != null) {
+                    bitmapScaler.ScaledBitmap(
+                        bitmap = supportIdleSprite,
+                        contentDescription = "Receiver Support",
+                        alignment = Alignment.BottomCenter,
+                        modifier = Modifier
+                            .offset(
+                                y = backgroundHeight.times(PositionOffsetRatios.SUPPORT_CHARACTER_OFFSET_FROM_BOTTOM),
+                            )
+                            .graphicsLayer(scaleX = direction)
+                    )
+                }
                 if(wasHit) {
                     bitmapScaler.ScaledBitmap(
                         bitmap = if(dodging) characterDodgeSprite else characterIdleSprite,
-                        contentDescription = "AttackReceiver",
+                        contentDescription = "Attack Receiver",
                         alignment = Alignment.BottomCenter,
                         modifier = Modifier
                             .offset(
@@ -325,16 +426,29 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
                             )
                             .graphicsLayer(scaleX = direction)
                     )
-                    bitmapScaler.ScaledBitmap(
-                        bitmap = attackSprite,
-                        contentDescription = "attack",
-                        modifier = Modifier
-                            .offset(
-                                y = backgroundHeight.times(PositionOffsetRatios.ATTACK_OFFSET_FROM_BOTTOM),
-                                x = backgroundHeight.times(direction * attackOffset)
-                            )
-                            .graphicsLayer(scaleX = direction * -1.0f)
-                    )
+                    if(!supportAttackLaunched) {
+                        bitmapScaler.ScaledBitmap(
+                            bitmap = attackSprite,
+                            contentDescription = "attack",
+                            modifier = Modifier
+                                .offset(
+                                    y = backgroundHeight.times(PositionOffsetRatios.ATTACK_OFFSET_FROM_BOTTOM),
+                                    x = backgroundHeight.times(direction * attackOffset)
+                                )
+                                .graphicsLayer(scaleX = direction * -1.0f)
+                        )
+                    } else {
+                        bitmapScaler.ScaledBitmap(
+                            bitmap = supportAttack!!,
+                            contentDescription = "support attack",
+                            modifier = Modifier
+                                .offset(
+                                    y = backgroundHeight.times(PositionOffsetRatios.ATTACK_OFFSET_FROM_BOTTOM),
+                                    x = backgroundHeight.times(direction * supportAttackOffset)
+                                )
+                                .graphicsLayer(scaleX = direction * -1.0f)
+                        )
+                    }
                 } else {
                     bitmapScaler.ScaledBitmap(
                         bitmap = attackSprite,
@@ -360,7 +474,15 @@ class AttackScreenFactory(val bitmapScaler: BitmapScaler, val backgroundHeight: 
 
             } else {
                 Handler(Looper.getMainLooper()!!).postDelayed({
-                    phaseUpdater.invoke(AttackPhase.OPPONENT_HP)
+                    if(supportAttack == null) {
+                        onFinish.invoke()
+                    } else if (supportAttackLaunched) {
+                        onFinish.invoke()
+                    } else {
+                        attackHitting = false
+                        targetSupportAttackOffset = 0f
+                        supportAttackLaunched = true
+                    }
                 }, 1750)
                 bitmapScaler.AnimatedScaledBitmap(
                     bitmaps = hitSprites,

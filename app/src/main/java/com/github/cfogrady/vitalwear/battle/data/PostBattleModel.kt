@@ -6,6 +6,7 @@ import android.graphics.Bitmap
  * This class is meant to model a single instance of a battle.
  */
 class PostBattleModel(val partnerCharacter: BattleCharacter,
+                      val supportCharacter: SupportCharacter?,
                       val opponent: BattleCharacter,
                       val battle: Battle,
                       val background: Bitmap,
@@ -26,5 +27,9 @@ class PostBattleModel(val partnerCharacter: BattleCharacter,
         val hpPercent = hp.toFloat() / battle.startingPartnerHp
         val hpSpriteIdx = if(hpPercent == 0.0f) 0 else 1 + (hpPercent*5).toInt()
         return partnerRemainingHpSprites[hpSpriteIdx]
+    }
+
+    fun roundHasSupportAttack(round: Int): Boolean {
+        return round == battle.supportAttackRound
     }
 }

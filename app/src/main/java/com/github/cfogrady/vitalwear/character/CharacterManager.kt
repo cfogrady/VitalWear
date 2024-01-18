@@ -19,6 +19,8 @@ interface CharacterManager {
 
     suspend fun swapToCharacter(applicationContext: Context, selectedCharacterPreview : CharacterPreview)
 
+    suspend fun setToSupport(characterPreview: CharacterPreview)
+
     suspend fun updateSettings()
 
     fun deleteCharacter(characterPreview: CharacterPreview)

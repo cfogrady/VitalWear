@@ -5,7 +5,8 @@ class Battle(
     val startingPartnerHp: Int,
     val startingEnemyHp: Int,
     private val partnerHits: List<BattleRound>,
-    private val enemyHits: List<BattleRound>
+    private val enemyHits: List<BattleRound>,
+    val supportAttackRound: Int?
 ) {
     fun partnerHpAfterRound(round: Int): Int {
         return partnerHits[round].remainingHp.coerceAtLeast(0)

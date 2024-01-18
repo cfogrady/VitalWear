@@ -2,7 +2,7 @@ package com.github.cfogrady.vitalwear.character.data
 
 enum class CharacterState {
     SYNCED,
-    ABANDONED,
-    BACKUP,
-    SLEEP
+    SUPPORT,
+    @Deprecated("Replaced with STORED") BACKUP,
+    STORED,
 }

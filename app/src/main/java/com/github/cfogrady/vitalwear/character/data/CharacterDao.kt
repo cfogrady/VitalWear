@@ -10,11 +10,14 @@ interface CharacterDao {
     @Query("select * from character order by last_update desc")
     fun getCharactersOrderByRecent(): List<CharacterEntity>
 
-    @Query("select * from character where state <> :state")
-    fun getCharactersByNotState(state: CharacterState) : List<CharacterEntity>
+    @Query("select * from character where state = :state")
+    fun getCharactersByState(state: CharacterState) : List<CharacterEntity>
 
     @Update
     fun update(characterEntity: CharacterEntity)
+
+    @Update
+    fun updateMany(characterEntities: Collection<CharacterEntity>)
 
     @Insert
     fun insert(characterEntity: CharacterEntity) : Long

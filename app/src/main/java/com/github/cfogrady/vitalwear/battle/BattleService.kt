@@ -8,6 +8,8 @@ import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.battle.data.*
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
+import com.github.cfogrady.vitalwear.character.data.CharacterDao
+import com.github.cfogrady.vitalwear.character.data.CharacterState
 import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.common.card.CardType
@@ -38,8 +40,10 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
                     private val random: Random,
                     private val cardSettingsDao: CardSettingsDao,
                     private val cardMetaEntityDao: CardMetaEntityDao,
+                    private val characterDao: CharacterDao,
 ) {
     companion object {
+        const val TAG = "BattleService"
     }
 
     fun createBattleModel(context: Context, battleTargetInfo: BattleCharacterInfo): PreBattleModel {
@@ -51,10 +55,40 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         val battleSpriteLoader = CardBattleSpriteLoader(context, cardSpritesIO, targetCard.cardName)
         return PreBattleModel(
             partnerBattleCharacter,
+            fetchSupportCharacter(context, firmware, partnerCharacter.cardMetaEntity.franchise),
             battleTarget,
             battleSpriteLoader.getBackground(),
             battleSpriteLoader.getReadyIcon(),
             battleSpriteLoader.getGoIcon(),
+        )
+    }
+
+    private fun fetchSupportCharacter(context: Context, firmware: Firmware, franchiseId: Int?): SupportCharacter? {
+        val characters = characterDao.getCharactersByState(CharacterState.SUPPORT)
+        if(characters.isEmpty()) {
+            return null
+        } else if(characters.size > 1) {
+            Log.w(TAG, "Multiple support characters found!")
+        }
+        val character = characters[0]
+        val card = cardMetaEntityDao.getByName(character.cardFile)
+        if(franchiseId != null && franchiseId != card.franchise) {
+            Log.i(TAG, "Partner is franchise $franchiseId, but support is ${card.franchise}")
+            return null
+        }
+        val species = speciesEntityDao.getCharacterByCardAndCharacterId(character.cardFile, character.slotId)
+        if(species.phase < 2) {
+            Log.i(TAG, "Support isn't grown enough to support. Phase: ${species.phase}")
+            return null
+        }
+        return SupportCharacter(
+            species.bp + character.trainedBp,
+            species.ap + character.trainedAp,
+            species.hp + character.trainedHp,
+            characterSpritesIO.loadCharacterBitmapFile(context, species.spriteDirName, CharacterSpritesIO.IDLE1),
+            characterSpritesIO.loadCharacterBitmapFile(context, species.spriteDirName, CharacterSpritesIO.ATTACK),
+            characterSpritesIO.loadCharacterBitmapFile(context, species.spriteDirName, CharacterSpritesIO.SPLASH),
+            getLargeAttackSprite(context, character.cardFile, firmware, species.criticalAttackId)
         )
     }
 
@@ -68,6 +102,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         val battleSpriteLoader = if (partnerCharacter.isBEM()) CardBattleSpriteLoader(context, cardSpritesIO, partnerCharacter.cardName()) else FirmwareBattleSpriteLoader(firmware)
         return PreBattleModel(
             partnerBattleCharacter,
+            fetchSupportCharacter(context, firmware, partnerCharacter.cardMetaEntity.franchise),
             randomOpponent,
             battleSpriteLoader.getBackground(),
             battleSpriteLoader.getReadyIcon(),
@@ -75,7 +110,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         )
     }
 
-    fun buildTargetFromInfo(context: Context, cardMetaEntity: CardMetaEntity, battleTargetInfo: BattleCharacterInfo): BattleCharacter {
+    private fun buildTargetFromInfo(context: Context, cardMetaEntity: CardMetaEntity, battleTargetInfo: BattleCharacterInfo): BattleCharacter {
         val speciesEntity = speciesEntityDao.getCharacterByCardAndCharacterId(battleTargetInfo.cardName, battleTargetInfo.characterId)
         val battleStats =
         if(battleTargetInfo.hp == null || battleTargetInfo.ap == null || battleTargetInfo.bp == null || battleTargetInfo.attack == null || battleTargetInfo.critical == null) {
@@ -87,10 +122,10 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         return BattleCharacter(battleStats, battleSprites)
     }
 
-    fun performBattle(preBattleModel: PreBattleModel): PostBattleModel {
+    fun performBattle(preBattleModel: PreBattleModel, preDeterminedHits: Array<Boolean> = emptyArray()): PostBattleModel {
         val partnerCharacter = characterManager.getCharacterFlow().value!!
         val firmware = firmwareManager.getFirmware().value!!
-        val battle = battleLogic.performBattle(preBattleModel)
+        val battle = battleLogic.performBattle(preBattleModel, preDeterminedHits)
         partnerCharacter.characterStats.totalBattles++
         partnerCharacter.characterStats.currentPhaseBattles++
         if(battle.battleResult == BattleResult.WIN) {
@@ -110,6 +145,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         saveService.saveAsync()
         return PostBattleModel(
             preBattleModel.partnerCharacter,
+            preBattleModel.supportCharacter,
             preBattleModel.opponent,
             battle,
             preBattleModel.background,

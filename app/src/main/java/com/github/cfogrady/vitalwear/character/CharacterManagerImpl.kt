@@ -71,7 +71,7 @@ class CharacterManagerImpl(
     private fun loadActiveCharacter(applicationContext: Context) : BEMCharacter? {
         Log.i(TAG, "Loading active character")
         // replace this with a table for activePartner and fetch by character id
-        val activeCharacterStats = characterDao.getCharactersByNotState(CharacterState.BACKUP)
+        val activeCharacterStats = characterDao.getCharactersByState(CharacterState.SYNCED)
         if(activeCharacterStats.isNotEmpty()) {
             val characterStats = activeCharacterStats[0]
             val settings = characterSettingsDao.getByCharacterId(characterStats.id)
@@ -231,7 +231,7 @@ class CharacterManagerImpl(
             }
             val currentCharacter = activeCharacterFlow.value
             if(currentCharacter != null) {
-                currentCharacter.characterStats.state = CharacterState.BACKUP
+                currentCharacter.characterStats.state = CharacterState.STORED
                 updateCharacter(currentCharacter.characterStats)
                 bemUpdater.cancel()
             }
@@ -242,6 +242,23 @@ class CharacterManagerImpl(
                 complicationRefreshService.refreshVitalsComplication()
             }
             bemUpdater.setupTransformationChecker(selectedCharacter)
+        }
+    }
+
+    override suspend fun setToSupport(
+        characterPreview: CharacterPreview
+    ) {
+        withContext(Dispatchers.IO) {
+            val characters = characterDao.getCharactersByState(CharacterState.SUPPORT)
+            if(characters.isNotEmpty()) {
+                for (character in characters) {
+                    character.state = CharacterState.STORED
+                }
+                characterDao.updateMany(characters)
+            }
+            val newSupportCharacter = characterDao.getCharacterById(characterPreview.characterId)
+            newSupportCharacter.state = CharacterState.SUPPORT
+            characterDao.update(newSupportCharacter)
         }
     }
 

@@ -10,7 +10,7 @@ class BEMBattleLogic(private val random: Random) {
         const val TAG = "BEMBattleLogic"
     }
 
-    fun performBattle(battle: PreBattleModel): Battle {
+    fun performBattle(battle: PreBattleModel, preDeterminedHits: Array<Boolean> = emptyArray()): Battle {
         val partnerCharacter = battle.partnerCharacter
         val opponent = battle.opponent
         var playerHp = (partnerCharacter.hp() * getVitalBonusPercent(partnerCharacter.vitals())).toInt()
@@ -23,11 +23,23 @@ class BEMBattleLogic(private val random: Random) {
         var round = 0
         val playerRounds = ArrayList<BattleRound>(5)
         val opponentRounds = ArrayList<BattleRound>(5)
+        var supportAttackRound: Int? = null
         while(round < 5 && playerHp > 0 && opponentHp > 0) {
             val hitRoll = random.nextInt(100)
-            if(hitRoll <= playerHitRateChance) {
+            val playerHits = if(preDeterminedHits.size > round) preDeterminedHits[round] else hitRoll <= playerHitRateChance
+            if(playerHits) {
                 val critical = round == partnerCharacter.battleStats.type
-                val damage = if(critical) playerAp * 2 else playerAp
+                val damage = if(battle.supportCharacter != null &&
+                    !critical &&
+                    playerHp.toFloat()/startingPartnerHp.toFloat() <= 0.5f &&
+                    supportAttackRound == null
+                    ) {
+                    supportAttackRound = round
+                    (playerAp * 2) + (battle.supportCharacter.ap * 2)
+                }
+                else if(critical)
+                    playerAp * 2
+                else playerAp
                 Log.d(TAG, "Play hit on round $round. AP: $playerAp. Critical: $critical. OpponentHp Before $opponentHp and After ${opponentHp - damage}")
                 opponentHp -= damage
                 playerRounds.add(BattleRound(true, playerHp))
@@ -35,7 +47,7 @@ class BEMBattleLogic(private val random: Random) {
             } else {
                 val critical = round == opponent.battleStats.type
                 val damage = if(critical) opponentAp * 2 else opponentAp
-                Log.d(TAG, "Opponent hit on round $round. AP: $opponentAp. Critical: $critical. OpponentHp Before $playerHp and After ${playerHp - damage}")
+                Log.d(TAG, "Opponent hit on round $round. AP: $opponentAp. Critical: $critical. PlayerHp Before $playerHp and After ${playerHp - damage}")
                 playerHp -= damage
                 playerRounds.add(BattleRound(false, playerHp))
                 opponentRounds.add(BattleRound(true, opponentHp))
@@ -43,7 +55,7 @@ class BEMBattleLogic(private val random: Random) {
             round++
         }
         val result = if(playerHp >= opponentHp) BattleResult.WIN else BattleResult.LOSE
-        return Battle(result, startingPartnerHp, startingOpponentHp, playerRounds, opponentRounds)
+        return Battle(result, startingPartnerHp, startingOpponentHp, playerRounds, opponentRounds, supportAttackRound)
     }
 
     private fun getVitalBonusPercent(vitals: Int): Float {

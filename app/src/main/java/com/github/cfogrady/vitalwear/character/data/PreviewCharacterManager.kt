@@ -24,7 +24,7 @@ class PreviewCharacterManager(private val characterDao: CharacterDao, private va
         val previewCharacters = ArrayList<CharacterPreview>()
         for(character in characters) {
             val idleBitmap = bitmapsByCardNameAndSlotId.get(character.cardFile)!!.get(character.slotId)
-            previewCharacters.add(CharacterPreview(character.cardFile, character.slotId, character.id, idleBitmap))
+            previewCharacters.add(CharacterPreview(character.cardFile, character.slotId, character.id, character.state, idleBitmap))
         }
         Log.i(com.github.cfogrady.vitalwear.character.TAG, "Ready")
         return previewCharacters
