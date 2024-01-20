@@ -6,7 +6,7 @@ import android.graphics.Bitmap
  * This class is meant to model a single instance of a battle.
  */
 class PostBattleModel(val partnerCharacter: BattleCharacter,
-                      val supportCharacter: SupportCharacter?,
+                      val supportCharacter: BattleSupportCharacter?,
                       val opponent: BattleCharacter,
                       val battle: Battle,
                       val background: Bitmap,

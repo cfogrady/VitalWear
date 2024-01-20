@@ -1,9 +1,12 @@
 package com.github.cfogrady.vitalwear.character.data
 
+import com.github.cfogrady.vitalwear.character.transformation.ExpectedTransformation
+import com.github.cfogrady.vitalwear.character.transformation.TransformationOption
 import com.github.cfogrady.vitalwear.common.card.CardType
-import com.github.cfogrady.vitalwear.common.card.db.AdventureEntityDao
+import com.github.cfogrady.vitalwear.common.card.db.AttributeFusionEntity
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntity
+import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntity
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.settings.CharacterSettingsEntity
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,11 +21,13 @@ class BEMCharacter(
     val speciesStats : SpeciesEntity,
     val transformationWaitTimeSeconds: Long,
     val transformationOptions: List<TransformationOption>,
+    val attributeFusionEntity: AttributeFusionEntity?,
+    val specificFusionOptions: List<SpecificFusionEntity>,
     val settings: CharacterSettingsEntity,
     private val currentTimeProvider: ()->LocalDateTime = LocalDateTime::now
 ) {
-    private var _readyToTransform = MutableStateFlow<Optional<TransformationOption>>(Optional.empty())
-    var readyToTransform : StateFlow<Optional<TransformationOption>> = _readyToTransform
+    private var _readyToTransform = MutableStateFlow<ExpectedTransformation?>(null)
+    var readyToTransform : StateFlow<ExpectedTransformation?> = _readyToTransform
     var activityIdx : Int = 1
 
     companion object {
@@ -55,14 +60,14 @@ class BEMCharacter(
         )
     }
 
-    fun popTransformationOption(): Optional<TransformationOption> {
+    fun popTransformationOption(): ExpectedTransformation? {
         characterStats.timeUntilNextTransformation = transformationWaitTimeSeconds
         val option = readyToTransform.value
-        _readyToTransform.tryEmit(Optional.empty())
+        _readyToTransform.tryEmit(null)
         return option
     }
 
-    private fun hasValidTransformation(highestAdventureCompleted: Int?): Optional<TransformationOption> {
+    private fun hasValidTransformation(highestAdventureCompleted: Int?): TransformationOption? {
         for(transformationOption in transformationOptions) {
             if((transformationOption.requiredAdventureCompleted ?: -1) > (highestAdventureCompleted
                     ?: -1)
@@ -81,22 +86,53 @@ class BEMCharacter(
             if(transformationOption.requiredWinRatio > characterStats.currentPhaseWinRatio()) {
                 continue
             }
-            return Optional.of(transformationOption)
+            return transformationOption
         }
-        return Optional.empty()
+        return null
     }
 
     private var lastTransformationCheck = LocalDateTime.MIN
 
-    fun prepCharacterTransformation(highestAdventureCompleted: Int?) {
+    fun prepCharacterTransformation(support: SupportCharacter?, highestAdventureCompleted: Int?) {
         lastTransformationCheck = LocalDateTime.now()
         val characterStats = characterStats
+        checkFusion(support)?.let {
+            _readyToTransform.tryEmit(it)
+            return
+        }
         val transformationOption = hasValidTransformation(highestAdventureCompleted)
-        if(transformationOption.isPresent) {
-            _readyToTransform.tryEmit(transformationOption)
+        if(transformationOption != null) {
+            _readyToTransform.tryEmit(transformationOption.toExpectedTransformation())
         } else {
             characterStats.timeUntilNextTransformation = transformationWaitTimeSeconds
         }
+    }
+
+    private fun checkFusion(support: SupportCharacter?) : ExpectedTransformation? {
+        if(support == null) {
+            return null
+        }
+        for(fusionOption in specificFusionOptions) {
+            if(specificFusionMatch(fusionOption, support)) {
+                return ExpectedTransformation(fusionOption.toCharacterId, true)
+            }
+        }
+        if(support.phase != speciesStats.phase) {
+            attributeFusionEntity?.let {
+                val result = attributeFusionEntity.getResultForAttribute(support.attribute)
+                result?.let {
+                    return ExpectedTransformation(result, true)
+                }
+            }
+        }
+        return null
+    }
+
+    private fun specificFusionMatch(specificFusionEntity: SpecificFusionEntity, support: SupportCharacter): Boolean {
+        if (specificFusionEntity.supportCardId != support.cardId) {
+            return false
+        }
+        return specificFusionEntity.supportCharacterId == support.slotId
     }
 
     fun totalBp(): Int {

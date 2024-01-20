@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 
 class PreBattleModel(
     val partnerCharacter: BattleCharacter,
-    val supportCharacter: SupportCharacter?,
+    val supportCharacter: BattleSupportCharacter?,
     val opponent: BattleCharacter,
     val background: Bitmap,
     val readySprite: Bitmap,

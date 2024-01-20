@@ -30,8 +30,9 @@ class BemTransformationWorker (
             CoroutineScope(Dispatchers.IO).launch {
                 val adventures = adventureEntityDao.getByCard(character.cardName())
                 val highestCompleted = AdventureEntity.highestAdventureCompleted(adventures)
+                // get support... maybe move to characterManager
                 character.prepCharacterTransformation(highestCompleted)
-                if(character.readyToTransform.value.isPresent) {
+                if(character.readyToTransform.value != null) {
                     notificationChannelManager.sendGenericNotification(context, "Transformation!", "Character is ready for transformation", NotificationChannelManager.TRANSFORMATION_READY_ID)
                 } else {
                     bemUpdater.setupTransformationChecker(character)

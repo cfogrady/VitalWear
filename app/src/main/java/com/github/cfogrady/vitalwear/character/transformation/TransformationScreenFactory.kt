@@ -37,21 +37,25 @@ class TransformationScreenFactory(
         var character = characterManager.getCurrentCharacter()!!
         val firmware by firmwareManager.getFirmware().collectAsState()
         val transformationFirmwareSprites = firmware!!.transformationFirmwareSprites
-        val transformationOption = remember { character.popTransformationOption().get() }
-        LaunchedEffect(key1 = transformationOption) {
+        val expectedTransformation = remember { character.popTransformationOption() }
+        LaunchedEffect(key1 = expectedTransformation) {
             // assume we click back and need to setup the next check
             bemUpdater.setupTransformationChecker(character)
         }
 
         vitalBoxFactory.VitalBox {
             when(transformationProgress) {
+                // In Jogress, this is:
+                // 1) Idle until confirm + a few beats
+                // 2) attack sprite fly  to center
+                // 3) rapid back and forth between original character attack poses and new character attack pose
                 TransformationState.POWER_INCREASING -> PowerIncreasing(character, transformationFirmwareSprites) {
                     transformationProgress = TransformationState.NEW_CHARACTER
                 }
                 TransformationState.NEW_CHARACTER -> NewCharacter(
                     firmwareSprites = transformationFirmwareSprites
                 ) {
-                    character = characterManager.doActiveCharacterTransformation(context, transformationOption)
+                    character = characterManager.doActiveCharacterTransformation(context, expectedTransformation!!)
                     transformationProgress = TransformationState.SPLASH
                 }
                 TransformationState.SPLASH -> Splash(partner = character) {

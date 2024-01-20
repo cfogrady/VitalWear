@@ -4,15 +4,18 @@ import android.content.Context
 import android.util.Log
 import com.github.cfogrady.vitalwear.adventure.data.CharacterAdventureDao
 import com.github.cfogrady.vitalwear.character.data.*
+import com.github.cfogrady.vitalwear.character.transformation.ExpectedTransformation
+import com.github.cfogrady.vitalwear.character.transformation.TransformationOption
 import com.github.cfogrady.vitalwear.character.transformation.history.TransformationHistoryDao
 import com.github.cfogrady.vitalwear.character.transformation.history.TransformationHistoryEntity
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
 import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
-import com.github.cfogrady.vitalwear.common.card.db.AdventureEntityDao
+import com.github.cfogrady.vitalwear.common.card.db.AttributeFusionEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntityDao
+import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.TransformationEntityDao
 import com.github.cfogrady.vitalwear.settings.CharacterSettingsDao
 import com.github.cfogrady.vitalwear.settings.CharacterSettingsEntity
@@ -39,6 +42,8 @@ class CharacterManagerImpl(
     private val characterSettingsDao: CharacterSettingsDao,
     private val characterAdventureDao: CharacterAdventureDao,
     private val transformationHistoryDao: TransformationHistoryDao,
+    private val attributeFusionEntityDao: AttributeFusionEntityDao,
+    private val specificFusionEntityDao: SpecificFusionEntityDao,
 ) : CharacterManager {
     private val activeCharacterFlow = MutableStateFlow(BEMCharacter.DEFAULT_CHARACTER)
     private lateinit var bemUpdater: BEMUpdater
@@ -117,7 +122,36 @@ class CharacterManagerImpl(
         return transformationOptions
     }
 
-    override fun doActiveCharacterTransformation(applicationContext: Context, transformationOption: TransformationOption) : BEMCharacter {
+    override suspend fun fetchSupportCharacter(): SupportCharacter? {
+        return withContext(Dispatchers.IO) {
+            val supports = characterDao.getCharactersByState(CharacterState.SUPPORT)
+            if(supports.isEmpty()) {
+                null
+            } else {
+                if(supports.size > 1) {
+                    Log.w(TAG, "Multiple support characters found!")
+                }
+                val support = supports[0]
+                val card = cardMetaEntityDao.getByName(support.cardFile)
+                val species = speciesEntityDao.getCharacterByCardAndCharacterId(support.cardFile, support.slotId)
+                SupportCharacter(
+                    support.cardFile,
+                    card.cardId,
+                    card.franchise,
+                    support.slotId,
+                    species.attribute,
+                    species.phase,
+                    species.bp + support.trainedBp,
+                    species.ap + support.trainedAp,
+                    species.hp + support.trainedHp,
+                    species.criticalAttackId,
+                    species.spriteDirName
+                    )
+            }
+        }
+    }
+
+    override fun doActiveCharacterTransformation(applicationContext: Context, transformationOption: ExpectedTransformation) : BEMCharacter {
         val actualCharacter = activeCharacterFlow.value!!
         val transformedCharacter = buildBEMCharacter(applicationContext, actualCharacter.cardMetaEntity, transformationOption.slotId, actualCharacter.settings) {
             actualCharacter.characterStats
@@ -160,7 +194,7 @@ class CharacterManagerImpl(
     override fun createNewCharacter(applicationContext: Context, cardMetaEntity: CardMetaEntity) {
         val currentCharacter = activeCharacterFlow.value
         if(currentCharacter != null) {
-            currentCharacter.characterStats.state = CharacterState.BACKUP
+            currentCharacter.characterStats.state = CharacterState.STORED
             updateCharacter(currentCharacter.characterStats)
             bemUpdater.cancel()
         }
@@ -184,7 +218,9 @@ class CharacterManagerImpl(
         val speciesEntity = speciesEntityDao.getCharacterByCardAndCharacterId(cardName, slotId)
         val bitmaps = characterSpritesIO.loadCharacterSprites(applicationContext, speciesEntity.spriteDirName)
         val transformationOptions = transformationOptions(applicationContext, cardName, slotId)
-        return BEMCharacter(cardMetaEntity, bitmaps, characterEntity, speciesEntity, transformationTime, transformationOptions, settings)
+        val attributeFusionEntity = attributeFusionEntityDao.findByCardAndSpeciesId(cardName, slotId)
+        val specificFusionOptions = specificFusionEntityDao.findByCardAndSpeciesId(cardName, slotId)
+        return BEMCharacter(cardMetaEntity, bitmaps, characterEntity, speciesEntity, transformationTime, transformationOptions, attributeFusionEntity, specificFusionOptions, settings)
     }
 
     private val totalTrainingTime = 100L*60L*60L //100 hours * 60min/hr * 60sec/min = total seconds

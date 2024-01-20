@@ -22,10 +22,9 @@ import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
-import com.github.cfogrady.vitalwear.character.data.TransformationOption
+import com.github.cfogrady.vitalwear.character.transformation.TransformationOption
 import com.github.cfogrady.vitalwear.character.transformation.TransformationFirmwareSprites
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntity
-import com.github.cfogrady.vitalwear.common.card.db.AdventureEntityDao
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber

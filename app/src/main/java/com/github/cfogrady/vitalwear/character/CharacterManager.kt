@@ -4,7 +4,8 @@ import android.content.Context
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterPreview
-import com.github.cfogrady.vitalwear.character.data.TransformationOption
+import com.github.cfogrady.vitalwear.character.data.SupportCharacter
+import com.github.cfogrady.vitalwear.character.transformation.ExpectedTransformation
 import kotlinx.coroutines.flow.StateFlow
 
 interface CharacterManager {
@@ -13,7 +14,8 @@ interface CharacterManager {
 
     fun getCharacterFlow() : StateFlow<BEMCharacter?>
 
-    fun doActiveCharacterTransformation(applicationContext: Context, transformationOption: TransformationOption) : BEMCharacter
+    suspend fun fetchSupportCharacter(): SupportCharacter?
+    fun doActiveCharacterTransformation(applicationContext: Context, transformationOption: ExpectedTransformation) : BEMCharacter
 
     fun createNewCharacter(applicationContext: Context, cardMetaEntity: CardMetaEntity)
 

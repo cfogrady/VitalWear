@@ -46,7 +46,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         const val TAG = "BattleService"
     }
 
-    fun createBattleModel(context: Context, battleTargetInfo: BattleCharacterInfo): PreBattleModel {
+    suspend fun createBattleModel(context: Context, battleTargetInfo: BattleCharacterInfo): PreBattleModel {
         val partnerCharacter = characterManager.getCharacterFlow().value!!
         val firmware = firmwareManager.getFirmware().value!!
         val partnerBattleCharacter = battleCharacterFromBemCharacter(context, partnerCharacter)
@@ -63,36 +63,27 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         )
     }
 
-    private fun fetchSupportCharacter(context: Context, firmware: Firmware, franchiseId: Int?): SupportCharacter? {
-        val characters = characterDao.getCharactersByState(CharacterState.SUPPORT)
-        if(characters.isEmpty()) {
-            return null
-        } else if(characters.size > 1) {
-            Log.w(TAG, "Multiple support characters found!")
-        }
-        val character = characters[0]
-        val card = cardMetaEntityDao.getByName(character.cardFile)
-        if(franchiseId != null && franchiseId != card.franchise) {
-            Log.i(TAG, "Partner is franchise $franchiseId, but support is ${card.franchise}")
+    private suspend fun fetchSupportCharacter(context: Context, firmware: Firmware, franchiseId: Int?): BattleSupportCharacter? {
+        val support = characterManager.fetchSupportCharacter() ?: return null
+        if(franchiseId != null && franchiseId != support.franchiseId) {
+            Log.i(TAG, "Partner is franchise $franchiseId, but support is ${support.franchiseId}")
             return null
         }
-        val species = speciesEntityDao.getCharacterByCardAndCharacterId(character.cardFile, character.slotId)
-        if(species.phase < 2) {
-            Log.i(TAG, "Support isn't grown enough to support. Phase: ${species.phase}")
+        if(support.phase < 2) {
+            Log.i(TAG, "Support isn't grown enough to support. Phase: ${support.phase}")
             return null
         }
-        return SupportCharacter(
-            species.bp + character.trainedBp,
-            species.ap + character.trainedAp,
-            species.hp + character.trainedHp,
-            characterSpritesIO.loadCharacterBitmapFile(context, species.spriteDirName, CharacterSpritesIO.IDLE1),
-            characterSpritesIO.loadCharacterBitmapFile(context, species.spriteDirName, CharacterSpritesIO.ATTACK),
-            characterSpritesIO.loadCharacterBitmapFile(context, species.spriteDirName, CharacterSpritesIO.SPLASH),
-            getLargeAttackSprite(context, character.cardFile, firmware, species.criticalAttackId)
+        val spriteDir = support.spriteDirName
+        return BattleSupportCharacter(
+            support,
+            characterSpritesIO.loadCharacterBitmapFile(context, spriteDir, CharacterSpritesIO.IDLE1),
+            characterSpritesIO.loadCharacterBitmapFile(context, spriteDir, CharacterSpritesIO.ATTACK),
+            characterSpritesIO.loadCharacterBitmapFile(context, spriteDir, CharacterSpritesIO.SPLASH),
+            getLargeAttackSprite(context, support.cardName, firmware, support.criticalAttackId)
         )
     }
 
-    fun createBattleModel(context: Context): PreBattleModel {
+    suspend fun createBattleModel(context: Context): PreBattleModel {
         val partnerCharacter = characterManager.getCharacterFlow().value!!
         val firmware = firmwareManager.getFirmware().value!!
         val partnerBattleCharacter = battleCharacterFromBemCharacter(context, partnerCharacter)

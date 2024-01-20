@@ -16,4 +16,14 @@ data class AttributeFusionEntity(
     companion object {
         const val TABLE = "attribute_fusion"
     }
+
+    fun getResultForAttribute(attribute: Int): Int? {
+        return when(attribute) {
+            1 -> attribute1Result
+            2 -> attribute2Result
+            3 -> attribute3Result
+            4 -> attribute4Result
+            else -> null
+        }
+    }
 }
