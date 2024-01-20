@@ -231,7 +231,9 @@ class CharacterManagerImpl(
             }
             val currentCharacter = activeCharacterFlow.value
             if(currentCharacter != null) {
-                currentCharacter.characterStats.state = CharacterState.STORED
+                currentCharacter.characterStats.state =
+                    if(selectedCharacterPreview.state == CharacterState.SUPPORT) CharacterState.SUPPORT
+                    else CharacterState.STORED
                 updateCharacter(currentCharacter.characterStats)
                 bemUpdater.cancel()
             }

@@ -7,18 +7,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.VerticalPager
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -34,7 +29,6 @@ import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.settings.SettingsActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 const val TAG = "CharacterSelectActivity"
@@ -90,7 +84,7 @@ class CharacterSelectActivity : ComponentActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun PagedCharacterSelectionMenu(characters: List<CharacterPreview>, firmware: Firmware, newCharacterLauncher: () -> Unit) {
-        var options = characters.toMutableStateList()
+        val options = characters.toMutableStateList()
         (application as VitalWearApp).vitalBoxFactory.VitalBox {
             val background = (application as VitalWearApp).backgroundManager.selectedBackground.value!!
             (application as VitalWearApp).bitmapScaler.ScaledBitmap(
@@ -132,10 +126,7 @@ class CharacterSelectActivity : ComponentActivity() {
         if(showMenu) {
             Column(modifier = Modifier.fillMaxSize().clickable { showMenu = false }, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceAround) {
                 Button(onClick = {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        characterManager.swapToCharacter(applicationContext, character)
-                        finish()
-                    }
+                    swapToCharacter(character)
                 }) {
                     Text(text = "Select", Modifier.padding(10.dp))
                 }
@@ -160,10 +151,7 @@ class CharacterSelectActivity : ComponentActivity() {
                     .combinedClickable(onLongClick = {
                         showMenu = true
                     }, onClick = {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            characterManager.swapToCharacter(applicationContext, character)
-                            finish()
-                        }
+                        swapToCharacter(character)
                     })) {
                 if(character.state == CharacterState.SUPPORT) {
                     (application as VitalWearApp).bitmapScaler.ScaledBitmap(
@@ -185,5 +173,12 @@ class CharacterSelectActivity : ComponentActivity() {
             return false
         }
         return result.data!!.getBooleanExtra(NEW_CHARACTER_SELECTED_FLAG, false)
+    }
+
+    private fun swapToCharacter(character: CharacterPreview) {
+        CoroutineScope(Dispatchers.IO).launch {
+            characterManager.swapToCharacter(applicationContext, character)
+            finish()
+        }
     }
 }
