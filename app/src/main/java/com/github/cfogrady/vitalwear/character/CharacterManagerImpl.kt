@@ -1,6 +1,7 @@
 package com.github.cfogrady.vitalwear.character
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.util.Log
 import com.github.cfogrady.vitalwear.adventure.data.CharacterAdventureDao
 import com.github.cfogrady.vitalwear.character.data.*
@@ -106,7 +107,7 @@ class CharacterManagerImpl(
     private fun transformationOptions(applicationContext: Context, cardName: String, slotId: Int) : List<TransformationOption> {
         val transformationOptions = ArrayList<TransformationOption>()
         for(transformationEntity in transformationEntityDao.getByCardAndFromCharacterIdWithToCharDir(cardName, slotId)) {
-            val idleSprite = characterSpritesIO.loadCharacterSpriteFile(applicationContext, transformationEntity.toCharDir, CharacterSpritesIO.IDLE1)
+            val idleSprite = characterSpritesIO.loadCharacterSpriteFile(applicationContext, transformationEntity.toCharDir, CharacterSpritesIO.IDLE1)!!
             val idleBitmap = spriteBitmapConverter.getBitmap(idleSprite)
             transformationOptions.add(
                 TransformationOption(idleBitmap,
@@ -122,7 +123,7 @@ class CharacterManagerImpl(
         return transformationOptions
     }
 
-    override suspend fun fetchSupportCharacter(): SupportCharacter? {
+    override suspend fun fetchSupportCharacter(context: Context): SupportCharacter? {
         return withContext(Dispatchers.IO) {
             val supports = characterDao.getCharactersByState(CharacterState.SUPPORT)
             if(supports.isEmpty()) {
@@ -134,6 +135,9 @@ class CharacterManagerImpl(
                 val support = supports[0]
                 val card = cardMetaEntityDao.getByName(support.cardFile)
                 val species = speciesEntityDao.getCharacterByCardAndCharacterId(support.cardFile, support.slotId)
+                val idle1 = characterSpritesIO.loadCharacterBitmapFile(context, species.spriteDirName, CharacterSpritesIO.IDLE1)!!
+                val idle2 = characterSpritesIO.loadCharacterBitmapFile(context, species.spriteDirName, CharacterSpritesIO.IDLE2)!!
+                val attack = characterSpritesIO.loadCharacterBitmapFile(context, species.spriteDirName, CharacterSpritesIO.ATTACK) ?: idle2
                 SupportCharacter(
                     support.cardFile,
                     card.cardId,
@@ -145,7 +149,10 @@ class CharacterManagerImpl(
                     species.ap + support.trainedAp,
                     species.hp + support.trainedHp,
                     species.criticalAttackId,
-                    species.spriteDirName
+                    species.spriteDirName,
+                    idle1,
+                    idle2,
+                    attack,
                     )
             }
         }
@@ -323,6 +330,14 @@ class CharacterManagerImpl(
             characterAdventureDao.deleteByCharacterId(characterPreview.characterId)
             transformationHistoryDao.deleteByCharacterId(characterPreview.characterId)
             characterDao.deleteById(characterPreview.characterId)
+        }
+    }
+
+    override suspend fun getCharacterBitmap(context: Context, cardName: String, slotId: Int, sprite: String, backupSprite: String): Bitmap {
+        return withContext(Dispatchers.IO) {
+            val species = speciesEntityDao.getCharacterByCardAndCharacterId(cardName, slotId)
+            characterSpritesIO.loadCharacterBitmapFile(context, species.spriteDirName, sprite) ?:
+            characterSpritesIO.loadCharacterBitmapFile(context, species.spriteDirName, backupSprite)!!
         }
     }
 }

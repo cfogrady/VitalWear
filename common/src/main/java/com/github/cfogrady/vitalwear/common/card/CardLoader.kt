@@ -257,7 +257,7 @@ class CardLoader(
     }
 
     private fun collision(applicationContext: Context, characterDir: String, newSplash: Sprite): Boolean {
-        val existingSprite = characterSpritesIO.loadCharacterSpriteFile(applicationContext, characterDir, CharacterSpritesIO.SPLASH)
+        val existingSprite = characterSpritesIO.loadCharacterSpriteFile(applicationContext, characterDir, CharacterSpritesIO.SPLASH)!!
         if(existingSprite.width != newSplash.width || existingSprite.height != newSplash.height) {
             Log.e(TAG, "Splash images have wrong dimensions!")
             return true

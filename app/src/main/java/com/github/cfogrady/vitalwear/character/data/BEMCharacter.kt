@@ -1,6 +1,8 @@
 package com.github.cfogrady.vitalwear.character.data
 
+import android.util.Log
 import com.github.cfogrady.vitalwear.character.transformation.ExpectedTransformation
+import com.github.cfogrady.vitalwear.character.transformation.FusionTransformation
 import com.github.cfogrady.vitalwear.character.transformation.TransformationOption
 import com.github.cfogrady.vitalwear.common.card.CardType
 import com.github.cfogrady.vitalwear.common.card.db.AttributeFusionEntity
@@ -31,6 +33,7 @@ class BEMCharacter(
     var activityIdx : Int = 1
 
     companion object {
+        const val TAG = "BEMCharacter"
         const val MAX_VITALS = 9999
         val DEFAULT_CHARACTER: BEMCharacter? = null
     }
@@ -41,6 +44,12 @@ class BEMCharacter(
 
     fun cardName(): String {
         return cardMetaEntity.cardName
+    }
+
+    fun hasPotentialTransformations(): Boolean {
+        return transformationOptions.isNotEmpty() ||
+                specificFusionOptions.isNotEmpty() ||
+                (attributeFusionEntity?.hasPossibleResults() ?: false)
     }
 
     fun canIncreaseStats(): Boolean {
@@ -96,7 +105,9 @@ class BEMCharacter(
     fun prepCharacterTransformation(support: SupportCharacter?, highestAdventureCompleted: Int?) {
         lastTransformationCheck = LocalDateTime.now()
         val characterStats = characterStats
+        Log.i(TAG, "Checking transformations")
         checkFusion(support)?.let {
+            Log.i(TAG, "Fusion Option Available")
             _readyToTransform.tryEmit(it)
             return
         }
@@ -114,14 +125,14 @@ class BEMCharacter(
         }
         for(fusionOption in specificFusionOptions) {
             if(specificFusionMatch(fusionOption, support)) {
-                return ExpectedTransformation(fusionOption.toCharacterId, true)
+                return FusionTransformation(fusionOption.toCharacterId, support.idleSprite, support.idle2Sprite, support.attackSprite)
             }
         }
         if(support.phase != speciesStats.phase) {
             attributeFusionEntity?.let {
                 val result = attributeFusionEntity.getResultForAttribute(support.attribute)
                 result?.let {
-                    return ExpectedTransformation(result, true)
+                    return FusionTransformation(result, support.idleSprite, support.idle2Sprite, support.attackSprite)
                 }
             }
         }

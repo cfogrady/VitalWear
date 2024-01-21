@@ -11,12 +11,13 @@ class TransformationActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val transformationScreenFactory = (applicationContext as VitalWearApp).transformationScreenFactory
-        val notificationChannelManager = (applicationContext as VitalWearApp).notificationChannelManager
+        val transformationScreenFactory = (application as VitalWearApp).transformationScreenFactory
+        val notificationChannelManager = (application as VitalWearApp).notificationChannelManager
+        val character = (application as VitalWearApp).characterManager.getCurrentCharacter()!!
         notificationChannelManager.cancelNotification(NotificationChannelManager.TRANSFORMATION_READY_ID)
         setContent {
             KeepScreenOn()
-            transformationScreenFactory.RunTransformation(applicationContext){
+            transformationScreenFactory.RunTransformation(applicationContext, character){
                 finish()
             }
         }

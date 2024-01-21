@@ -27,13 +27,20 @@ class CharacterSpritesIO(private val spriteFileIO: SpriteFileIO, private val spr
         const val SPLASH = "splash.img"
     }
 
-    fun loadCharacterBitmapFile(applicationContext: Context, characterDir: String, spriteFile: String): Bitmap {
-        return spriteBitmapConverter.getBitmap(loadCharacterSpriteFile(applicationContext, characterDir, spriteFile))
+    fun loadCharacterBitmapFile(applicationContext: Context, characterDir: String, spriteFile: String): Bitmap? {
+        loadCharacterSpriteFile(applicationContext, characterDir, spriteFile)?.let {
+            return spriteBitmapConverter.getBitmap(it)
+        }
+        return null
     }
 
-    fun loadCharacterSpriteFile(applicationContext: Context, characterDir: String, spriteFile: String): Sprite {
+    fun loadCharacterSpriteFile(applicationContext: Context, characterDir: String, spriteFile: String): Sprite? {
         val file = File(applicationContext.filesDir, "${SpriteFileIO.LIBRARY_DIR}/$CHARACTERS/$characterDir/$spriteFile")
-        return spriteFileIO.loadSpriteFile(file)
+        if(file.exists()) {
+            return spriteFileIO.loadSpriteFile(file)
+        } else {
+            return null
+        }
     }
 
     fun characterSpritesExist(applicationContext: Context, characterDir: String): Boolean {
@@ -156,7 +163,7 @@ class CharacterSpritesIO(private val spriteFileIO: SpriteFileIO, private val spr
         val downSprite = spriteFileIO.loadSpriteFile(downFile)
         sprites.add(spriteBitmapConverter.getBitmap(downSprite))
         val attackFile = File(rootCharDir, ATTACK)
-        val attackSprite = loadSpriteOrDefault(attackFile, idle1Sprite)
+        val attackSprite = loadSpriteOrDefault(attackFile, idle2Sprite)
         sprites.add(spriteBitmapConverter.getBitmap(attackSprite))
         val dodgeFile = File(rootCharDir, DODGE)
         val dodgeSprite = loadSpriteOrDefault(dodgeFile, idle1Sprite)

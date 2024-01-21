@@ -64,7 +64,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
     }
 
     private suspend fun fetchSupportCharacter(context: Context, firmware: Firmware, franchiseId: Int?): BattleSupportCharacter? {
-        val support = characterManager.fetchSupportCharacter() ?: return null
+        val support = characterManager.fetchSupportCharacter(context) ?: return null
         if(franchiseId != null && franchiseId != support.franchiseId) {
             Log.i(TAG, "Partner is franchise $franchiseId, but support is ${support.franchiseId}")
             return null
@@ -76,9 +76,9 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         val spriteDir = support.spriteDirName
         return BattleSupportCharacter(
             support,
-            characterSpritesIO.loadCharacterBitmapFile(context, spriteDir, CharacterSpritesIO.IDLE1),
-            characterSpritesIO.loadCharacterBitmapFile(context, spriteDir, CharacterSpritesIO.ATTACK),
-            characterSpritesIO.loadCharacterBitmapFile(context, spriteDir, CharacterSpritesIO.SPLASH),
+            characterSpritesIO.loadCharacterBitmapFile(context, spriteDir, CharacterSpritesIO.IDLE1)!!,
+            characterSpritesIO.loadCharacterBitmapFile(context, spriteDir, CharacterSpritesIO.ATTACK)!!,
+            characterSpritesIO.loadCharacterBitmapFile(context, spriteDir, CharacterSpritesIO.SPLASH)!!,
             getLargeAttackSprite(context, support.cardName, firmware, support.criticalAttackId)
         )
     }
@@ -163,13 +163,13 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         val projectileSprite = getSmallAttackSprite(context, speciesEntity.cardName, firmware, smallAttackId)
         val largeProjectileSprite = getLargeAttackSprite(context, speciesEntity.cardName, firmware, largeAttackId)
         return BattleSprites(
-            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.NAME),
-            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.IDLE1),
-            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.ATTACK),
-            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.DODGE),
-            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.WIN),
-            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.DOWN),
-            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.SPLASH),
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.NAME)!!,
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.IDLE1)!!,
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.ATTACK)!!,
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.DODGE)!!,
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.WIN)!!,
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.DOWN)!!,
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.SPLASH)!!,
             projectileSprite,
             largeProjectileSprite,
             getHitSprite(context, speciesEntity.cardName, hasCardHits, firmware)

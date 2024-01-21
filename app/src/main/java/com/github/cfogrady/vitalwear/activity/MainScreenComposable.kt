@@ -132,7 +132,7 @@ class MainScreenComposable(
     @Composable
     fun DailyScreen(firmware: Firmware, character: BEMCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
         val readyToTransform by character.readyToTransform.collectAsState()
-        if (readyToTransform.isPresent) {
+        if (readyToTransform != null) {
             activityLaunchers.transformLauncher.invoke()
         }
         val padding = imageScaler.getPadding()

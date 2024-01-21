@@ -35,7 +35,7 @@ class BEMBattleLogic(private val random: Random) {
                     supportAttackRound == null
                     ) {
                     supportAttackRound = round
-                    (playerAp * 2) + (battle.supportCharacter.ap * 2)
+                    (playerAp * 2) + (battle.supportCharacter.stats.totalAp * 2)
                 }
                 else if(critical)
                     playerAp * 2

@@ -1,5 +1,7 @@
 package com.github.cfogrady.vitalwear.character.data
 
+import android.graphics.Bitmap
+
 class SupportCharacter(
     val cardName: String,
     val cardId: Int,
@@ -11,5 +13,8 @@ class SupportCharacter(
     val totalAp: Int,
     val totalHp: Int,
     val criticalAttackId: Int,
-    val spriteDirName: String) {
+    val spriteDirName: String,
+    val idleSprite: Bitmap,
+    val idle2Sprite: Bitmap,
+    val attackSprite: Bitmap) {
 }

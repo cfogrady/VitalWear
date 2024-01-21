@@ -22,7 +22,7 @@ class BEMUpdater(val context: Context) {
     fun setupTransformationChecker(character: BEMCharacter, workManager: WorkManager = WorkManager.getInstance(context)) {
         cancel(workManager)
         Log.i(WORK_TAG, "Setup Transformation Check")
-        if(character.transformationOptions.isNotEmpty()) { //don't queue up if no transformations are possible
+        if(character.hasPotentialTransformations()) { //don't queue up if no transformations are possible
             val durationUntilTransformUpdate = Duration.ofSeconds(character.characterStats.timeUntilNextTransformation)
             Log.i(WORK_TAG, "Queue Transform Update after $durationUntilTransformUpdate")
             val transformWorkRequest = OneTimeWorkRequestBuilder<BemTransformationWorker>()

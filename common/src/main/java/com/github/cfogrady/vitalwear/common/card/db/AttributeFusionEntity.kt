@@ -17,6 +17,13 @@ data class AttributeFusionEntity(
         const val TABLE = "attribute_fusion"
     }
 
+    fun hasPossibleResults(): Boolean {
+        return attribute1Result != null ||
+                attribute2Result != null ||
+                attribute3Result != null ||
+                attribute4Result != null
+    }
+
     fun getResultForAttribute(attribute: Int): Int? {
         return when(attribute) {
             1 -> attribute1Result
