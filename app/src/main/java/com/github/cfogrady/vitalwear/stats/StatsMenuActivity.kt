@@ -7,6 +7,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -89,7 +90,8 @@ class StatsMenuActivity : ComponentActivity() {
                 contentDescription = "Background",
                 alignment = Alignment.BottomCenter
             )
-            VerticalPager(pageCount = 1 + partner.transformationOptions.size) {rootPage ->
+            val pagerState = rememberPagerState(pageCount = {1 + partner. transformationOptions.size})
+            VerticalPager(state = pagerState) {rootPage ->
                 when(rootPage) {
                     0 -> {
                         PartnerStats(initialPage = initialStatsPage, partner = partner)
@@ -113,11 +115,11 @@ class StatsMenuActivity : ComponentActivity() {
     @Composable
     private fun PartnerStats(initialPage: MutableState<Int>, partner: BEMCharacter) {
         val scrollingNameFactory = remember { (application as VitalWearApp).scrollingNameFactory }
-        val state = remember {PagerState(initialPage.value)}
+        val pagerState = rememberPagerState(initialPage = initialPage.value, pageCount = {4})
         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally) {
             scrollingNameFactory.ScrollingName(name = partner.characterSprites.sprites[CharacterSprites.NAME])
             bitmapScaler.ScaledBitmap(bitmap = partner.characterSprites.sprites[CharacterSprites.IDLE_1], contentDescription = "Partner")
-            VerticalPager(state = state, pageCount = 4) { page ->
+            VerticalPager(state = pagerState) { page ->
                 initialPage.value = page
                 when (page) {
                     0 -> {

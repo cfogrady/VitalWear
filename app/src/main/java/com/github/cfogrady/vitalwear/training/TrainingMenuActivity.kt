@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,7 +50,8 @@ class TrainingMenuActivity : ComponentActivity() {
             val background = backgroundManager.selectedBackground.value!!
             vitalBoxFactory.VitalBox {
                 bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
-                VerticalPager(pageCount = 4) { page ->
+                val pagerState = rememberPagerState(pageCount = {4})
+                VerticalPager(state = pagerState) { page ->
                     when (page) {
                         0 -> {
                             val trainingType = TrainingType.SQUAT

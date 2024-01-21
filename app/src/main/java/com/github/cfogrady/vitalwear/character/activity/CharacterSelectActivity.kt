@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -91,7 +92,8 @@ class CharacterSelectActivity : ComponentActivity() {
                 bitmap = background,
                 contentDescription = "background"
             )
-            VerticalPager(pageCount = options.size + 1) {
+            val pagerState = rememberPagerState(pageCount = {options.size + 1})
+            VerticalPager(state = pagerState) {
                 if(it == 0) {
                     Box(modifier = Modifier
                         .fillMaxSize()

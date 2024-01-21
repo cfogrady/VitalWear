@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -74,7 +75,8 @@ class AdventureScreenFactory(
         }
         vitalBoxFactory.VitalBox {
             bitmapScaler.ScaledBitmap(bitmap = adventure.currentBackground(), contentDescription = "background")
-            VerticalPager(pageCount = 2) {
+            val pagerState = rememberPagerState(pageCount = {2})
+            VerticalPager(state = pagerState) {
                 when(it) {
                     0 -> PartnerScreen(firmware = firmware, partner = partner, steps = stepsToGoal, goal = adventure.goal())
                     1 -> CancelScreen(context, firmware)

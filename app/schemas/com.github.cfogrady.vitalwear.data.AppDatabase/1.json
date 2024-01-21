@@ -1,0 +1,725 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "4c9538539c197705178fe958dc29cb40",
+    "entities": [
+      {
+        "tableName": "character",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `state` TEXT NOT NULL, `card_file` TEXT NOT NULL, `slot_id` INTEGER NOT NULL, `last_update` INTEGER NOT NULL, `vitals` INTEGER NOT NULL, `training_time_remaining` INTEGER NOT NULL, `has_transformations` INTEGER NOT NULL, `time_until_next_transformation` INTEGER NOT NULL, `trained_bp` INTEGER NOT NULL, `trained_hp` INTEGER NOT NULL, `trained_ap` INTEGER NOT NULL, `trained_pp` INTEGER NOT NULL, `injured` INTEGER NOT NULL, `lost_battles_injured` INTEGER NOT NULL, `accumulated_daily_injuries` INTEGER NOT NULL, `total_battles` INTEGER NOT NULL, `current_phase_battles` INTEGER NOT NULL, `total_wins` INTEGER NOT NULL, `current_phase_wins` INTEGER NOT NULL, `mood` INTEGER NOT NULL, `dead` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "state",
+            "columnName": "state",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cardFile",
+            "columnName": "card_file",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "slotId",
+            "columnName": "slot_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUpdate",
+            "columnName": "last_update",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vitals",
+            "columnName": "vitals",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "trainingTimeRemainingInSeconds",
+            "columnName": "training_time_remaining",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hasTransformations",
+            "columnName": "has_transformations",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeUntilNextTransformation",
+            "columnName": "time_until_next_transformation",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "trainedBp",
+            "columnName": "trained_bp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "trainedHp",
+            "columnName": "trained_hp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "trainedAp",
+            "columnName": "trained_ap",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "trainedPP",
+            "columnName": "trained_pp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "injured",
+            "columnName": "injured",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lostBattlesInjured",
+            "columnName": "lost_battles_injured",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "accumulatedDailyInjuries",
+            "columnName": "accumulated_daily_injuries",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalBattles",
+            "columnName": "total_battles",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentPhaseBattles",
+            "columnName": "current_phase_battles",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalWins",
+            "columnName": "total_wins",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentPhaseWins",
+            "columnName": "current_phase_wins",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mood",
+            "columnName": "mood",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dead",
+            "columnName": "dead",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "species",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cardName` TEXT NOT NULL, `characterId` INTEGER NOT NULL, `phase` INTEGER NOT NULL, `attribute` INTEGER NOT NULL, `type` INTEGER NOT NULL, `attackId` INTEGER NOT NULL, `criticalAttackId` INTEGER NOT NULL, `dpStars` INTEGER NOT NULL, `bp` INTEGER NOT NULL, `hp` INTEGER NOT NULL, `ap` INTEGER NOT NULL, `battlePool1` INTEGER NOT NULL, `battlePool2` INTEGER NOT NULL, `battlePool3` INTEGER NOT NULL, `spriteDirName` TEXT NOT NULL, `raised` INTEGER NOT NULL, PRIMARY KEY(`cardName`, `characterId`))",
+        "fields": [
+          {
+            "fieldPath": "cardName",
+            "columnName": "cardName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "characterId",
+            "columnName": "characterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "phase",
+            "columnName": "phase",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attribute",
+            "columnName": "attribute",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attackId",
+            "columnName": "attackId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "criticalAttackId",
+            "columnName": "criticalAttackId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dpStars",
+            "columnName": "dpStars",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bp",
+            "columnName": "bp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hp",
+            "columnName": "hp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ap",
+            "columnName": "ap",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "battlePool1",
+            "columnName": "battlePool1",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "battlePool2",
+            "columnName": "battlePool2",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "battlePool3",
+            "columnName": "battlePool3",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spriteDirName",
+            "columnName": "spriteDirName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "raised",
+            "columnName": "raised",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "cardName",
+            "characterId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "card_meta",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cardName` TEXT NOT NULL, `cardId` INTEGER NOT NULL, `cardChecksum` INTEGER NOT NULL, `cardType` TEXT NOT NULL, `franchise` INTEGER NOT NULL, PRIMARY KEY(`cardName`))",
+        "fields": [
+          {
+            "fieldPath": "cardName",
+            "columnName": "cardName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cardId",
+            "columnName": "cardId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cardChecksum",
+            "columnName": "cardChecksum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cardType",
+            "columnName": "cardType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "franchise",
+            "columnName": "franchise",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "cardName"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "transformation",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cardName` TEXT NOT NULL, `fromCharacterId` INTEGER NOT NULL, `toCharacterId` INTEGER NOT NULL, `timeToTransformationMinutes` INTEGER NOT NULL, `requiredVitals` INTEGER NOT NULL, `requiredPp` INTEGER NOT NULL, `requiredBattles` INTEGER NOT NULL, `requiredWinRatio` INTEGER NOT NULL, `minAdventureCompletionRequired` INTEGER, `isSecret` INTEGER NOT NULL, `sortOrder` INTEGER NOT NULL, PRIMARY KEY(`cardName`, `fromCharacterId`, `toCharacterId`))",
+        "fields": [
+          {
+            "fieldPath": "cardName",
+            "columnName": "cardName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fromCharacterId",
+            "columnName": "fromCharacterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "toCharacterId",
+            "columnName": "toCharacterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeToTransformationMinutes",
+            "columnName": "timeToTransformationMinutes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requiredVitals",
+            "columnName": "requiredVitals",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requiredPp",
+            "columnName": "requiredPp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requiredBattles",
+            "columnName": "requiredBattles",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requiredWinRatio",
+            "columnName": "requiredWinRatio",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "minAdventureCompletionRequired",
+            "columnName": "minAdventureCompletionRequired",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isSecret",
+            "columnName": "isSecret",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sortOrder",
+            "columnName": "sortOrder",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "cardName",
+            "fromCharacterId",
+            "toCharacterId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "adventure",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cardName` TEXT NOT NULL, `adventureId` INTEGER NOT NULL, `steps` INTEGER NOT NULL, `characterId` INTEGER NOT NULL, `bp` INTEGER, `hp` INTEGER, `ap` INTEGER, `attackId` INTEGER, `criticalAttackId` INTEGER, `walkingBackgroundId` INTEGER NOT NULL, `bossBackgroundId` INTEGER NOT NULL, `hiddenBoss` INTEGER NOT NULL, `characterIdJoined` INTEGER, `cleared` INTEGER NOT NULL, PRIMARY KEY(`cardName`, `adventureId`))",
+        "fields": [
+          {
+            "fieldPath": "cardName",
+            "columnName": "cardName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "adventureId",
+            "columnName": "adventureId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "steps",
+            "columnName": "steps",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "characterId",
+            "columnName": "characterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bp",
+            "columnName": "bp",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hp",
+            "columnName": "hp",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ap",
+            "columnName": "ap",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "attackId",
+            "columnName": "attackId",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "criticalAttackId",
+            "columnName": "criticalAttackId",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "walkingBackgroundId",
+            "columnName": "walkingBackgroundId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bossBackgroundId",
+            "columnName": "bossBackgroundId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hiddenBoss",
+            "columnName": "hiddenBoss",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "characterIdJoined",
+            "columnName": "characterIdJoined",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cleared",
+            "columnName": "cleared",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "cardName",
+            "adventureId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "attribute_fusion",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cardName` TEXT NOT NULL, `fromCharacterId` INTEGER NOT NULL, `attribute1Result` INTEGER, `attribute2Result` INTEGER, `attribute3Result` INTEGER, `attribute4Result` INTEGER, PRIMARY KEY(`cardName`, `fromCharacterId`))",
+        "fields": [
+          {
+            "fieldPath": "cardName",
+            "columnName": "cardName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fromCharacterId",
+            "columnName": "fromCharacterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attribute1Result",
+            "columnName": "attribute1Result",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "attribute2Result",
+            "columnName": "attribute2Result",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "attribute3Result",
+            "columnName": "attribute3Result",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "attribute4Result",
+            "columnName": "attribute4Result",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "cardName",
+            "fromCharacterId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "specific_fusion",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cardName` TEXT NOT NULL, `fromCharacterId` INTEGER NOT NULL, `toCharacterId` INTEGER NOT NULL, `supportCardId` INTEGER NOT NULL, `supportCharacterId` INTEGER NOT NULL, PRIMARY KEY(`cardName`, `fromCharacterId`, `toCharacterId`, `supportCardId`, `supportCharacterId`))",
+        "fields": [
+          {
+            "fieldPath": "cardName",
+            "columnName": "cardName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fromCharacterId",
+            "columnName": "fromCharacterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "toCharacterId",
+            "columnName": "toCharacterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "supportCardId",
+            "columnName": "supportCardId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "supportCharacterId",
+            "columnName": "supportCharacterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "cardName",
+            "fromCharacterId",
+            "toCharacterId",
+            "supportCardId",
+            "supportCharacterId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "character_settings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`character_id` INTEGER NOT NULL, `train_in_background` INTEGER NOT NULL, `allowed_battles` TEXT NOT NULL, PRIMARY KEY(`character_id`))",
+        "fields": [
+          {
+            "fieldPath": "characterId",
+            "columnName": "character_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "trainInBackground",
+            "columnName": "train_in_background",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "allowedBattles",
+            "columnName": "allowed_battles",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "character_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "character_adventures",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cardName` TEXT NOT NULL, `characterId` INTEGER NOT NULL, `adventureId` INTEGER NOT NULL, PRIMARY KEY(`cardName`, `characterId`))",
+        "fields": [
+          {
+            "fieldPath": "cardName",
+            "columnName": "cardName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "characterId",
+            "columnName": "characterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "adventureId",
+            "columnName": "adventureId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "cardName",
+            "characterId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "transformation_history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`characterId` INTEGER NOT NULL, `phase` INTEGER NOT NULL, `cardName` TEXT NOT NULL, `speciesId` INTEGER NOT NULL, PRIMARY KEY(`characterId`, `phase`))",
+        "fields": [
+          {
+            "fieldPath": "characterId",
+            "columnName": "characterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "phase",
+            "columnName": "phase",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cardName",
+            "columnName": "cardName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "speciesId",
+            "columnName": "speciesId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "characterId",
+            "phase"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "card_settings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`card_name` TEXT NOT NULL, `appear_in_global_battles` INTEGER NOT NULL, PRIMARY KEY(`card_name`))",
+        "fields": [
+          {
+            "fieldPath": "cardName",
+            "columnName": "card_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appearInGlobalBattles",
+            "columnName": "appear_in_global_battles",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "card_name"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4c9538539c197705178fe958dc29cb40')"
+    ]
+  }
+}

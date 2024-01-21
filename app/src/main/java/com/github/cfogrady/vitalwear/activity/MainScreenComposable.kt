@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -98,7 +99,10 @@ class MainScreenComposable(
     fun BackgroundTraining(firmware: Firmware, character: BEMCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
         vitalBoxFactory.VitalBox {
             bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
-            VerticalPager(pageCount = 2) { page ->
+            val pagerState = rememberPagerState(pageCount = {
+                2
+            })
+            VerticalPager(state = pagerState) { page ->
                 when (page) {
                     0 -> {
                         Box(modifier = Modifier.fillMaxSize()) {
@@ -140,7 +144,10 @@ class MainScreenComposable(
             .padding(padding)
             .fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
-            VerticalPager(pageCount = 8) {page ->
+            val pagerState = rememberPagerState(pageCount = {
+                8
+            })
+            VerticalPager(state = pagerState) {page ->
                 when(page) {
                     0 -> {
                         partnerScreenComposable.PartnerScreen(

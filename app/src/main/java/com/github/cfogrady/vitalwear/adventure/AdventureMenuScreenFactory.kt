@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -164,18 +165,17 @@ class AdventureMenuScreenFactory(
         onZoneSelected: (AdventureEntity) -> Unit ) {
         var loaded by remember { mutableStateOf(false) }
         var adventures by remember { mutableStateOf(listOf<AdventureEntity>()) }
-        var pageState by remember { mutableStateOf(PagerState(0)) }
         if(!loaded) {
             Loading {
                 val currentMax = adventureService.getCurrentMaxAdventure(partner.characterStats.id, cardMetaEntity.cardName)
                 adventures = adventureService.getAdventureOptions(cardMetaEntity.cardName).subList(0, currentMax+1)
-                pageState = PagerState(adventures.size-1)
                 loaded = true
             }
         } else {
+            val pagerState = rememberPagerState(initialPage = 0, pageCount = {adventures.size})
             val bitmapScaler = bitmapScaler
             vitalBoxFactory.VitalBox {
-                VerticalPager(state = pageState, pageCount = adventures.size) {
+                VerticalPager(state = pagerState) {
                     val adventure = adventures[it]
                     bitmapScaler.ScaledBitmap(
                         bitmap = backgrounds[adventure.walkingBackgroundId],
