@@ -40,7 +40,7 @@ class StatsMenuActivity : ComponentActivity() {
         const val TRANSFORMATION_ICON_COLUMN_WEIGHT = 0.3f
         const val TRANSFORMATION_VALUE_COLUMN_WEIGHT = 0.7f
         val TRANSFORMATION_ROW_PADDING = 10.dp
-        val STAT_SIZE = 2.2.em
+        val STAT_SIZE = 1.8.em
     }
 
     lateinit var characterManager: CharacterManager
@@ -179,7 +179,7 @@ class StatsMenuActivity : ComponentActivity() {
                     Text(text = "NEXT", fontSize = 2.em, fontStyle = FontStyle.Italic)
                     bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.star, contentDescription = "star")
                 } else {
-                    Text(text = "NEXT", fontSize = 2.5.em, fontStyle = FontStyle.Italic)
+                    Text(text = "NEXT", fontSize = 2.em, fontStyle = FontStyle.Italic)
                 }
             }
             if(locked) {
