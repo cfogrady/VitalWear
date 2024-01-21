@@ -76,7 +76,7 @@ class BEMCharacter(
         return option
     }
 
-    private fun hasValidTransformation(highestAdventureCompleted: Int?): TransformationOption? {
+    fun hasValidTransformation(highestAdventureCompleted: Int?): TransformationOption? {
         for(transformationOption in transformationOptions) {
             if((transformationOption.requiredAdventureCompleted ?: -1) > (highestAdventureCompleted
                     ?: -1)

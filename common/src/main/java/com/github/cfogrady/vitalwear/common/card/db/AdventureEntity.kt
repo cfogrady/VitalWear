@@ -2,6 +2,7 @@ package com.github.cfogrady.vitalwear.common.card.db
 
 import androidx.room.Entity
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntity.Companion.TABLE
+import kotlin.math.max
 
 @Entity(tableName = TABLE, primaryKeys = ["cardName", "adventureId"])
 data class AdventureEntity(
@@ -27,7 +28,7 @@ data class AdventureEntity(
             var highestCompleted: Int? = null
             for(adventure in adventures) {
                 if(adventure.cleared) {
-                    highestCompleted = adventure.adventureId
+                    highestCompleted = max(adventure.adventureId, highestCompleted ?: -1)
                 }
             }
             return highestCompleted

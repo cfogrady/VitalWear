@@ -29,6 +29,8 @@ import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.firmware.Firmware
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 
 class StatsMenuActivity : ComponentActivity() {
@@ -38,6 +40,7 @@ class StatsMenuActivity : ComponentActivity() {
         const val TRANSFORMATION_ICON_COLUMN_WEIGHT = 0.3f
         const val TRANSFORMATION_VALUE_COLUMN_WEIGHT = 0.7f
         val TRANSFORMATION_ROW_PADDING = 10.dp
+        val STAT_SIZE = 2.2.em
     }
 
     lateinit var characterManager: CharacterManager
@@ -67,11 +70,17 @@ class StatsMenuActivity : ComponentActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun StatsMenu(highestCompletedAdventure: Int?) {
+        var currentOption by remember { mutableStateOf<TransformationOption?>(null) }
+        val partner = remember { characterManager.getCurrentCharacter()!! }
         LaunchedEffect(true) {
             characterManager.getCharacterFlow().value!!.characterStats.updateTimeStamps(LocalDateTime.now())
+            withContext(Dispatchers.IO) {
+                val highestCompletedAdventureOnCard = AdventureEntity.highestAdventureCompleted((application as VitalWearApp).database.adventureEntityDao().getByCard(partner.cardName()))
+                currentOption = partner.hasValidTransformation(highestCompletedAdventureOnCard)
+            }
         }
         val background = remember { backgroundManager.selectedBackground.value!! }
-        val partner = remember { characterManager.getCharacterFlow().value!! }
+
         val initialStatsPage = remember { mutableStateOf(0) }
 
         vitalBoxFactory.VitalBox {
@@ -91,7 +100,7 @@ class StatsMenuActivity : ComponentActivity() {
                             firmwareSprites = firmware.transformationFirmwareSprites,
                             bemCharacter = partner,
                             transformationOption = potentialOption,
-                            expectedTransformation = false,
+                            expectedTransformation = currentOption == potentialOption,
                             locked = (potentialOption.requiredAdventureCompleted ?: -1) > (highestCompletedAdventure ?: -1)
                         )
                     }
@@ -104,7 +113,7 @@ class StatsMenuActivity : ComponentActivity() {
     @Composable
     private fun PartnerStats(initialPage: MutableState<Int>, partner: BEMCharacter) {
         val scrollingNameFactory = remember { (application as VitalWearApp).scrollingNameFactory }
-        var state = remember {PagerState(initialPage.value)}
+        val state = remember {PagerState(initialPage.value)}
         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally) {
             scrollingNameFactory.ScrollingName(name = partner.characterSprites.sprites[CharacterSprites.NAME])
             bitmapScaler.ScaledBitmap(bitmap = partner.characterSprites.sprites[CharacterSprites.IDLE_1], contentDescription = "Partner")
@@ -121,7 +130,7 @@ class StatsMenuActivity : ComponentActivity() {
                         Stats(partner)
                     }
                     3 -> {
-                        TransformationFulfilment(partner)
+                        TransformationFulfilment(partner, firmware.transformationFirmwareSprites)
                     }
                 }
             }
@@ -134,12 +143,11 @@ class StatsMenuActivity : ComponentActivity() {
         val displayTimeRemaining = formatNumber(timeRemaining.toInt(), 2)
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             Row(modifier = Modifier.padding(top = 5.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.Start) {
-                Text("LIMIT", fontSize = 2.em, fontStyle = FontStyle.Italic)
-                Text(text = displayTimeRemaining, fontWeight = FontWeight.Bold, fontSize = 3.em, fontStyle = FontStyle.Italic)
-                Text(timeUnit)
+                Text("LIMIT", fontSize = 3.em, fontStyle = FontStyle.Italic)
+                Text(text = "$displayTimeRemaining$timeUnit", fontWeight = FontWeight.Bold, fontSize = 3.5.em, fontStyle = FontStyle.Italic)
             }
-            Row(modifier = Modifier.padding(top = 5.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.Start) {
-                Text("RANK")
+            Row(modifier = Modifier.padding(top = 3.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.Start) {
+                Text("RANK", fontSize = 3.em)
             }
         }
     }
@@ -147,7 +155,7 @@ class StatsMenuActivity : ComponentActivity() {
     @Composable
     private fun PhaseAndAttribute(partner: BEMCharacter) {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("PHASE ${partner.speciesStats.phase+1}", fontSize = 2.em, fontStyle = FontStyle.Italic)
+            Text("PHASE ${partner.speciesStats.phase+1}", fontSize = 3.em, fontStyle = FontStyle.Italic)
             Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.SpaceBetween) {
                 val attribute = when(partner.speciesStats.attribute) {
                     0 -> "NONE"
@@ -157,7 +165,7 @@ class StatsMenuActivity : ComponentActivity() {
                     4 -> "FREE"
                     else -> "UNKNOWN"
                 }
-                Text(text = attribute)
+                Text(text = attribute, fontSize = 3.em)
             }
         }
     }
@@ -171,7 +179,7 @@ class StatsMenuActivity : ComponentActivity() {
                     Text(text = "NEXT", fontSize = 2.em, fontStyle = FontStyle.Italic)
                     bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.star, contentDescription = "star")
                 } else {
-                    Text(text = "NEXT", fontSize = 2.em, fontStyle = FontStyle.Italic)
+                    Text(text = "NEXT", fontSize = 2.5.em, fontStyle = FontStyle.Italic)
                 }
             }
             if(locked) {
@@ -179,101 +187,106 @@ class StatsMenuActivity : ComponentActivity() {
             } else {
                 bitmapScaler.ScaledBitmap(bitmap = transformationOption.sprite, contentDescription = "Potential Transformation")
             }
+            val timeUnit = if(bemCharacter.characterStats.timeUntilNextTransformation >= 60*60) 'h'
+            else 'm'
+            val timeRemaining = if(timeUnit == 'h') bemCharacter.characterStats.timeUntilNextTransformation/(60*60)
+            else bemCharacter.characterStats.timeUntilNextTransformation/60
             Row(modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
-                //TODO: Add minutes (m)
                 bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.hourglass, contentDescription = "time icon", modifier = Modifier.weight(
                     TRANSFORMATION_ICON_COLUMN_WEIGHT))
-                Text(text = "${formatNumber(bemCharacter.characterStats.timeUntilNextTransformation.toInt()/3600, 2)}h", textAlign = TextAlign.Right, modifier = Modifier.weight(
+                Text(text = "${formatNumber(timeRemaining.toInt(), 2)}$timeUnit", textAlign = TextAlign.Right, modifier = Modifier.weight(
                     TRANSFORMATION_VALUE_COLUMN_WEIGHT))
             }
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
-                bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.vitalsIcon, contentDescription = "vitals icon", modifier = Modifier.weight(
-                    TRANSFORMATION_ICON_COLUMN_WEIGHT))
-                Text(text = formatNumber(transformationOption.requiredVitals, 4), textAlign = TextAlign.Right, modifier = Modifier.weight(
-                    TRANSFORMATION_VALUE_COLUMN_WEIGHT))
-            }
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
-                bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.battlesIcon, contentDescription = "battles icon", modifier = Modifier.weight(
-                    TRANSFORMATION_ICON_COLUMN_WEIGHT))
-                Text(text = formatNumber(transformationOption.requiredBattles, 3), textAlign = TextAlign.Right, modifier = Modifier.weight(
-                    TRANSFORMATION_VALUE_COLUMN_WEIGHT))
-            }
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
-                bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.winRatioIcon, contentDescription = "win ratio icon", modifier = Modifier.weight(
-                    TRANSFORMATION_ICON_COLUMN_WEIGHT))
-                Text(text = "${formatNumber(transformationOption.requiredWinRatio, 3)}%", textAlign = TextAlign.Right, modifier = Modifier.weight(
-                    TRANSFORMATION_VALUE_COLUMN_WEIGHT))
-            }
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
-                bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.ppIcon, contentDescription = "pp icon", modifier = Modifier.weight(
-                    TRANSFORMATION_ICON_COLUMN_WEIGHT))
-                Row(modifier = Modifier.weight(TRANSFORMATION_VALUE_COLUMN_WEIGHT), horizontalArrangement = Arrangement.End) {
-                    bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.squatIcon, contentDescription = "squat icon")
-                    Text(text = "${formatNumber(transformationOption.requiredPp, 3)}", textAlign = TextAlign.Right)
-                }
+            TransformationStats(
+                firmwareSprites,
+                transformationOption.requiredVitals,
+                transformationOption.requiredBattles,
+                transformationOption.requiredWinRatio,
+                transformationOption.requiredPp,
+                vitalsColor = if(bemCharacter.characterStats.vitals >= transformationOption.requiredVitals) Color.Yellow else Color.White,
+                battlesColor = if(bemCharacter.characterStats.currentPhaseBattles >= transformationOption.requiredBattles) Color.Yellow else Color.White,
+                winRatioColor = if(bemCharacter.characterStats.currentPhaseWinRatio() >= transformationOption.requiredWinRatio) Color.Yellow else Color.White,
+                ppColor = if(bemCharacter.characterStats.trainedPP >= transformationOption.requiredPp) Color.Yellow else Color.White,
+                )
+        }
+    }
+
+    @Composable
+    private fun TransformationStats(firmwareSprites: TransformationFirmwareSprites, vitals: Int, battles: Int, winRatio: Int, pp: Int, vitalsColor: Color = Color.White,  battlesColor: Color = Color.White, winRatioColor: Color = Color.White, ppColor: Color = Color.White) {
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
+            bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.vitalsIcon, contentDescription = "vitals icon", modifier = Modifier.weight(
+                TRANSFORMATION_ICON_COLUMN_WEIGHT))
+            Text(text = formatNumber(vitals, 4), color = vitalsColor, textAlign = TextAlign.Right, modifier = Modifier.weight(
+                TRANSFORMATION_VALUE_COLUMN_WEIGHT))
+        }
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
+            bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.battlesIcon, contentDescription = "battles icon", modifier = Modifier.weight(
+                TRANSFORMATION_ICON_COLUMN_WEIGHT))
+            Text(text = formatNumber(battles, 3), color = battlesColor, textAlign = TextAlign.Right, modifier = Modifier.weight(
+                TRANSFORMATION_VALUE_COLUMN_WEIGHT))
+        }
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
+            bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.winRatioIcon, contentDescription = "win ratio icon", modifier = Modifier.weight(
+                TRANSFORMATION_ICON_COLUMN_WEIGHT))
+            Text(text = "${formatNumber(winRatio, 3)}%", color = winRatioColor, textAlign = TextAlign.Right, modifier = Modifier.weight(
+                TRANSFORMATION_VALUE_COLUMN_WEIGHT))
+        }
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
+            bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.ppIcon, contentDescription = "pp icon", modifier = Modifier.weight(
+                TRANSFORMATION_ICON_COLUMN_WEIGHT))
+            Row(modifier = Modifier.weight(TRANSFORMATION_VALUE_COLUMN_WEIGHT), horizontalArrangement = Arrangement.End) {
+                bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.squatIcon, contentDescription = "squat icon")
+                Text(text = formatNumber(pp, 3), color = ppColor, textAlign = TextAlign.Right)
             }
         }
     }
 
     @Composable
     private fun Stats(partner: BEMCharacter) {
-        Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(15.dp, 0.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
-                Text("BP", fontSize = 1.5.em)
-                Text(partner.speciesStats.displayBp(), fontSize = 1.5.em)
+                Text("BP", fontSize = STAT_SIZE, modifier = Modifier.weight(.5f), textAlign = TextAlign.Left)
+                Text(partner.speciesStats.displayBp(), fontSize = STAT_SIZE, modifier = Modifier.weight(.5f), textAlign = TextAlign.Right)
             }
             Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
-                Text("   ", fontSize = 1.5.em)
-                Text(formatNumber(partner.characterStats.trainedBp, 4), color = Color.Yellow, fontSize = 1.5.em)
+                Text("", modifier = Modifier.weight(.5f))
+                Text(formatNumber(partner.characterStats.trainedBp, 3), color = Color.Yellow, fontSize = STAT_SIZE, modifier = Modifier.weight(.5f), textAlign = TextAlign.Right)
             }
             Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
-                Text("HP", fontSize = 1.5.em)
-                Text(partner.speciesStats.displayHp(), fontSize = 1.5.em)
+                Text("HP", fontSize = STAT_SIZE, modifier = Modifier.weight(.5f), textAlign = TextAlign.Left)
+                Text(partner.speciesStats.displayHp(), fontSize = STAT_SIZE, modifier = Modifier.weight(.5f), textAlign = TextAlign.Right)
             }
             Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
-                Text("   ", fontSize = 1.5.em)
-                Text(formatNumber(partner.characterStats.trainedHp, 4), color = Color.Yellow, fontSize = 1.5.em)
+                Text("", modifier = Modifier.weight(.5f))
+                Text(formatNumber(partner.characterStats.trainedHp, 3), color = Color.Yellow, fontSize = STAT_SIZE, modifier = Modifier.weight(.5f), textAlign = TextAlign.Right)
             }
             Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
-                Text("AP", fontSize = 1.5.em)
-                Text(partner.speciesStats.displayAp(), fontSize = 1.5.em)
+                Text("AP", fontSize = STAT_SIZE, modifier = Modifier.weight(.5f))
+                Text(partner.speciesStats.displayAp(), fontSize = STAT_SIZE, modifier = Modifier.weight(.5f), textAlign = TextAlign.Right)
             }
             Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
-                Text("   ", fontSize = 1.5.em)
-                Text(formatNumber(partner.characterStats.trainedAp, 4), color = Color.Yellow, fontSize = 1.5.em)
+                Text("", modifier = Modifier.weight(.5f))
+                Text(formatNumber(partner.characterStats.trainedAp, 3), color = Color.Yellow, fontSize = STAT_SIZE, modifier = Modifier.weight(.5f), textAlign = TextAlign.Right)
             }
         }
     }
 
     @Composable
-    fun TransformationFulfilment(partner: BEMCharacter) {
+    fun TransformationFulfilment(partner: BEMCharacter, firmwareSprites: TransformationFirmwareSprites) {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
-                Text("Vitals", fontSize = 1.5.em)
-                Text(formatNumber(partner.characterStats.vitals, 4), fontSize = 1.5.em)
-            }
-            Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
-                Text("Battles", fontSize = 1.5.em)
-                Text(formatNumber(partner.characterStats.currentPhaseBattles, 4), fontSize = 1.5.em)
-            }
-            Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
-                Text("Win Ratio", fontSize = 1.5.em)
-                Text("${partner.characterStats.currentPhaseWinRatio()}%", fontSize = 1.5.em)
-            }
-            Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
-                Text("PP", fontSize = 1.5.em)
-                Text(formatNumber(partner.characterStats.trainedPP, 3), fontSize = 1.5.em)
-            }
+            TransformationStats(firmwareSprites = firmwareSprites, vitals = partner.characterStats.vitals, battles = partner.characterStats.currentPhaseBattles, winRatio = partner.characterStats.currentPhaseWinRatio(), pp = partner.characterStats.trainedPP)
         }
     }
 
