@@ -149,7 +149,7 @@ class CharacterSelectActivity : ComponentActivity() {
             Column(horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .combinedClickable(onLongClick = {
                         showMenu = true
                     }, onClick = {

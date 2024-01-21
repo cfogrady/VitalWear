@@ -8,6 +8,7 @@ import android.os.Looper
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -172,33 +173,35 @@ class AdventureMenuScreenFactory(
                 loaded = true
             }
         } else {
-            val pagerState = rememberPagerState(initialPage = 0, pageCount = {adventures.size})
+            val pagerState = rememberPagerState(pageCount = {adventures.size})
             val bitmapScaler = bitmapScaler
             vitalBoxFactory.VitalBox {
                 VerticalPager(state = pagerState) {
                     val adventure = adventures[it]
-                    bitmapScaler.ScaledBitmap(
-                        bitmap = backgrounds[adventure.walkingBackgroundId],
-                        contentDescription = "background"
-                    )
-                    Column(modifier = Modifier
-                        .fillMaxSize()
-                        .clickable {
-                            onZoneSelected.invoke(adventure)
-                        }, verticalArrangement = Arrangement.SpaceAround, horizontalAlignment = Alignment.CenterHorizontally) {
-                        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                            bitmapScaler.ScaledBitmap(
-                                bitmap = firmware.adventureFirmwareSprites.advImage,
-                                contentDescription = "adv text"
-                            )
-                            bitmapScaler.ScaledBitmap(
-                                bitmap = firmware.adventureFirmwareSprites.missionImage,
-                                contentDescription = "mission text"
-                            )
+                    Box {
+                        bitmapScaler.ScaledBitmap(
+                            bitmap = backgrounds[adventure.walkingBackgroundId],
+                            contentDescription = "background"
+                        )
+                        Column(modifier = Modifier
+                            .fillMaxSize()
+                            .clickable {
+                                onZoneSelected.invoke(adventure)
+                            }, verticalArrangement = Arrangement.SpaceAround, horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                                bitmapScaler.ScaledBitmap(
+                                    bitmap = firmware.adventureFirmwareSprites.advImage,
+                                    contentDescription = "adv text"
+                                )
+                                bitmapScaler.ScaledBitmap(
+                                    bitmap = firmware.adventureFirmwareSprites.missionImage,
+                                    contentDescription = "mission text"
+                                )
+                            }
+                            bitmapScaler.ScaledBitmap(bitmap = cardIcon, contentDescription = "card icon")
+                            bitmapScaler.ScaledBitmap(bitmap = firmware.adventureFirmwareSprites.stageImage, contentDescription = "stage text")
+                            Text(text = formatNumber(it+1, 2), fontWeight = FontWeight.Bold, fontSize = 3.em)
                         }
-                        bitmapScaler.ScaledBitmap(bitmap = cardIcon, contentDescription = "card icon")
-                        bitmapScaler.ScaledBitmap(bitmap = firmware.adventureFirmwareSprites.stageImage, contentDescription = "stage text")
-                        Text(text = formatNumber(it+1, 2), fontWeight = FontWeight.Bold, fontSize = 3.em)
                     }
                 }
             }
