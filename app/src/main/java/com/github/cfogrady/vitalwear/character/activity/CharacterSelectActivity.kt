@@ -100,7 +100,7 @@ class CharacterSelectActivity : ComponentActivity() {
                     }
                 } else {
                     val character = options[it - 1]
-                    PreviewCharacter(star = firmware.transformationFirmwareSprites.star, character = character, onSetSupport =  {
+                    PreviewCharacter(support = firmware.characterFirmwareSprites.supportIcon, character = character, onSetSupport =  {
                         CoroutineScope(Dispatchers.IO).launch {
                             characterManager.setToSupport(character)
                             for( i in 0 until options.size) {
@@ -121,7 +121,7 @@ class CharacterSelectActivity : ComponentActivity() {
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    private fun PreviewCharacter(star: Bitmap, character: CharacterPreview, onSetSupport: ()->Unit, onDelete: ()->Unit) {
+    private fun PreviewCharacter(support: Bitmap, character: CharacterPreview, onSetSupport: ()->Unit, onDelete: ()->Unit) {
         var showMenu by remember { mutableStateOf(false) }
         if(showMenu) {
             Column(modifier = Modifier.fillMaxSize().clickable { showMenu = false }, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceAround) {
@@ -144,8 +144,8 @@ class CharacterSelectActivity : ComponentActivity() {
                 }
             }
         } else {
-            Row(verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.Center,
+            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
                     .combinedClickable(onLongClick = {
@@ -153,16 +153,16 @@ class CharacterSelectActivity : ComponentActivity() {
                     }, onClick = {
                         swapToCharacter(character)
                     })) {
-                if(character.state == CharacterState.SUPPORT) {
-                    (application as VitalWearApp).bitmapScaler.ScaledBitmap(
-                        bitmap = star,
-                        contentDescription = "Support"
-                    )
-                }
                 (application as VitalWearApp).bitmapScaler.ScaledBitmap(
                     bitmap = character.idle,
                     contentDescription = "Character"
                 )
+                if(character.state == CharacterState.SUPPORT) {
+                    (application as VitalWearApp).bitmapScaler.ScaledBitmap(
+                        bitmap = support,
+                        contentDescription = "Support"
+                    )
+                }
             }
         }
     }

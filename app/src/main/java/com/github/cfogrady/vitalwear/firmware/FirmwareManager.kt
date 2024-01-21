@@ -73,6 +73,7 @@ const val MISSION_IDX = 205
 const val FAILED_IDX = 176
 const val GOOD_IDX = 184
 const val GREAT_IDX = 185
+const val SUPPORT_IDX = 408
 const val BP_IDX = 409
 const val HP_IDX = 410
 const val AP_IDX = 411
@@ -189,7 +190,8 @@ class FirmwareManager(
     private fun characterFirmwareSprites(sprites: List<Sprite>): CharacterFirmwareSprites {
         val stepsIcon = spriteBitmapConverter.getBitmap(sprites[STEPS_ICON])
         val vitalsIcon = spriteBitmapConverter.getBitmap(sprites[VITALS_ICON])
-        return CharacterFirmwareSprites(stepsIcon, vitalsIcon)
+        val supportIcon = spriteBitmapConverter.getBitmap(sprites[SUPPORT_IDX])
+        return CharacterFirmwareSprites(stepsIcon, vitalsIcon, supportIcon)
     }
 
     private fun emoteFirmwareSprites(sprites: List<Sprite>) : EmoteFirmwareSprites {

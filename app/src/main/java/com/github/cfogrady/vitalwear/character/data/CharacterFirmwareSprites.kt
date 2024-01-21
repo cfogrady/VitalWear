@@ -5,4 +5,5 @@ import android.graphics.Bitmap
 class CharacterFirmwareSprites(
     val stepsIcon: Bitmap,
     val vitalsIcon: Bitmap,
+    val supportIcon: Bitmap,
 )
