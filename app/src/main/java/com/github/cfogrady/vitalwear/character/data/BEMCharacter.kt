@@ -128,7 +128,7 @@ class BEMCharacter(
                 return FusionTransformation(fusionOption.toCharacterId, support.idleSprite, support.idle2Sprite, support.attackSprite)
             }
         }
-        if(support.phase != speciesStats.phase) {
+        if(support.phase == speciesStats.phase) {
             attributeFusionEntity?.let {
                 val result = attributeFusionEntity.getResultForAttribute(support.attribute)
                 result?.let {
