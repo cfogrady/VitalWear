@@ -1,5 +1,6 @@
 package com.github.cfogrady.vitalwear.data
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -22,6 +23,7 @@ import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.TransformationEntity
 import com.github.cfogrady.vitalwear.common.card.db.TransformationEntityDao
 import com.github.cfogrady.vitalwear.common.data.LocalDateTimeConverters
+import com.github.cfogrady.vitalwear.common.data.migrations.DropClearedFromAdventure
 import com.github.cfogrady.vitalwear.settings.CardSettingsDao
 import com.github.cfogrady.vitalwear.settings.CardSettingsEntity
 import com.github.cfogrady.vitalwear.settings.CharacterSettingsDao
@@ -39,7 +41,10 @@ import com.github.cfogrady.vitalwear.settings.CharacterSettingsEntity
     CharacterAdventureEntity::class,
     TransformationHistoryEntity::class,
     CardSettingsEntity::class],
-    version = 1)
+    version = 3,
+    autoMigrations = [
+        AutoMigration(from = 2, to = 3, spec = DropClearedFromAdventure::class)
+    ])
 @TypeConverters(LocalDateTimeConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun characterDao(): CharacterDao

@@ -15,5 +15,4 @@ class WorkProviderDependencies(
     val dailyStepHandler: DailyStepHandler,
     val saveService: SaveService,
     val sharedPreferences: SharedPreferences,
-    val adventureEntityDao: AdventureEntityDao,
 )

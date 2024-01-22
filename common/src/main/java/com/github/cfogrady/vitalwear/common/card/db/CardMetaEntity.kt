@@ -13,10 +13,11 @@ data class CardMetaEntity(
     val cardChecksum: Int,
     val cardType: CardType,
     val franchise: Int,
+    val maxAdventureCompletion: Int?,
 ) {
     companion object {
         const val TAG = "CardMetaEntity"
         const val TABLE = "card_meta"
-        val EMPTY_CARD_META = CardMetaEntity("NONE", 0, 0, CardType.BEM, 0)
+        val EMPTY_CARD_META = CardMetaEntity("NONE", 0, 0, CardType.BEM, 0, null)
     }
 }

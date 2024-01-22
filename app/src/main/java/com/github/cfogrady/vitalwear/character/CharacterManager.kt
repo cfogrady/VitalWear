@@ -29,5 +29,11 @@ interface CharacterManager {
 
     fun deleteCharacter(characterPreview: CharacterPreview)
 
+    /**
+     * Checks to see if the currentCharacter is from the same card. If not do nothing. If so,
+     * set the currentCharacter's cardMeta to the new cardMeta
+     */
+    fun maybeUpdateCardMeta(cardMetaEntity: CardMetaEntity)
+
     suspend fun getCharacterBitmap(context: Context, cardName: String, slotId: Int, sprite: String, backupSprite: String = CharacterSpritesIO.IDLE1): Bitmap
 }

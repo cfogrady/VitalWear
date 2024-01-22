@@ -20,6 +20,11 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
 
+    sourceSets {
+        // Adds exported schema location as test app assets.
+        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
+    }
+
     // For Kotlin projects
     kotlinOptions {
         jvmTarget = "11"
@@ -34,7 +39,7 @@ android {
         targetSdk 34
         versionCode 5
         versionName "0.0.5"
-
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -100,6 +105,8 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     // To use Kotlin Symbol Processing (KSP)
     ksp "androidx.room:room-compiler:$room_version"
+    // To Test Room migrations
+    androidTestImplementation "androidx.room:room-testing:$room_version"
 
     //VB-Dim-Reader library
     implementation "com.github.cfogrady:vb-dim-reader:$vb_dim_reader_version"

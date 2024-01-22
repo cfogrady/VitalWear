@@ -26,6 +26,11 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    sourceSets {
+        // Adds exported schema location as test app assets.
+        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
+    }
+
     buildTypes {
         release {
             minifyEnabled true
@@ -88,4 +93,6 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     // To use Kotlin Symbol Processing (KSP)
     ksp "androidx.room:room-compiler:$room_version"
+    // To Test Room migrations
+    androidTestImplementation "androidx.room:room-testing:$room_version"
 }

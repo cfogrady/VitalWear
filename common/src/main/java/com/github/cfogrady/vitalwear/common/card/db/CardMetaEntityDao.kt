@@ -13,6 +13,9 @@ interface CardMetaEntityDao {
     @Query("select * from ${CardMetaEntity.TABLE} where cardName = :cardName limit 1")
     fun getByName(cardName: String): CardMetaEntity
 
+    @Update
+    fun update(cardMetaEntity: CardMetaEntity)
+
     @Insert
     fun insert(cardMetaEntity: CardMetaEntity)
 }

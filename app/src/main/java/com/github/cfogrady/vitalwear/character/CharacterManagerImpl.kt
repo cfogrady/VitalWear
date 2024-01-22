@@ -333,6 +333,12 @@ class CharacterManagerImpl(
         }
     }
 
+    override fun maybeUpdateCardMeta(cardMetaEntity: CardMetaEntity) {
+        if(activeCharacterFlow.value?.cardMetaEntity?.cardName == cardMetaEntity.cardName) {
+            activeCharacterFlow.value = activeCharacterFlow.value?.copy(cardMetaEntity = cardMetaEntity)
+        }
+    }
+
     override suspend fun getCharacterBitmap(context: Context, cardName: String, slotId: Int, sprite: String, backupSprite: String): Bitmap {
         return withContext(Dispatchers.IO) {
             val species = speciesEntityDao.getCharacterByCardAndCharacterId(cardName, slotId)

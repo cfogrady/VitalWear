@@ -1,5 +1,6 @@
 package com.github.cfogrady.vitalwear.data
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -18,6 +19,7 @@ import com.github.cfogrady.vitalwear.common.card.db.TransformationEntityDao
 import com.github.cfogrady.vitalwear.card.ValidatedCardEntity
 import com.github.cfogrady.vitalwear.card.ValidatedCardEntityDao
 import com.github.cfogrady.vitalwear.common.data.LocalDateTimeConverters
+import com.github.cfogrady.vitalwear.common.data.migrations.DropClearedFromAdventure
 
 @Database(entities = [
     SpeciesEntity::class,
@@ -27,7 +29,10 @@ import com.github.cfogrady.vitalwear.common.data.LocalDateTimeConverters
     AttributeFusionEntity::class,
     SpecificFusionEntity::class,
     ValidatedCardEntity::class],
-    version = 1)
+    version = 3,
+    autoMigrations = [
+        AutoMigration(from = 2, to = 3, spec = DropClearedFromAdventure::class)
+    ])
 @TypeConverters(LocalDateTimeConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun speciesEntityDao(): SpeciesEntityDao

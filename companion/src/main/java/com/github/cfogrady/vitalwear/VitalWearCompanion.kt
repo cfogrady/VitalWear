@@ -10,6 +10,7 @@ import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
 import com.github.cfogrady.vitalwear.common.card.SpriteFileIO
 import com.github.cfogrady.vitalwear.card.ValidatedCardManager
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
+import com.github.cfogrady.vitalwear.common.data.migrations.CreateAndPopulateMaxAdventureCompletionCardMeta
 import com.github.cfogrady.vitalwear.data.AppDatabase
 
 class VitalWearCompanion : Application() {
@@ -23,7 +24,8 @@ class VitalWearCompanion : Application() {
     }
 
     private fun buildDependencies() {
-        val database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "VitalWear").build()
+        val database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "VitalWear")
+            .addMigrations(CreateAndPopulateMaxAdventureCompletionCardMeta()).build()
         cardMetaEntityDao = database.cardMetaEntityDao()
         val spritesFileIO = SpriteFileIO()
         val spriteBitmapConverter = SpriteBitmapConverter()

@@ -37,6 +37,7 @@ import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
 import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
 import com.github.cfogrady.vitalwear.common.card.SpriteFileIO
+import com.github.cfogrady.vitalwear.common.data.migrations.CreateAndPopulateMaxAdventureCompletionCardMeta
 import com.github.cfogrady.vitalwear.data.AppDatabase
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.complications.PartnerComplicationState
@@ -119,7 +120,8 @@ class VitalWearApp : Application(), Configuration.Provider {
 
     private fun buildDependencies() {
         //TODO: Remove allowMainThread before release
-        database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "VitalWear").allowMainThreadQueries().build()
+        database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "VitalWear")
+            .addMigrations(CreateAndPopulateMaxAdventureCompletionCardMeta()).allowMainThreadQueries().build()
         //TODO: Should replace sharedPreferences with datastore (see https://developer.android.com/training/data-storage/shared-preferences)
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -162,7 +164,7 @@ class VitalWearApp : Application(), Configuration.Provider {
 
         transformationScreenFactory = TransformationScreenFactory(characterManager, backgroundHeight, firmwareManager, bitmapScaler, vitalBoxFactory, bemUpdater)
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService)
-        adventureService = AdventureService(gameState, database.adventureEntityDao(), cardSpriteIO, notificationChannelManager, database.characterAdventureDao(), sensorManager)
+        adventureService = AdventureService(gameState, database.cardMetaEntityDao(), characterManager, database.adventureEntityDao(), cardSpriteIO, notificationChannelManager, database.characterAdventureDao(), sensorManager)
         val adventureScreenFactory = AdventureScreenFactory(adventureService, vitalBoxFactory, bitmapScaler, backgroundHeight)
         mainScreenComposable = MainScreenComposable(gameState, characterManager, saveService, firmwareManager, backgroundManager, backgroundTrainingScreenFactory, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory, adventureScreenFactory)
         val cardCharacterImageService = CardCharacterImageService(database.speciesEntityDao(), characterSpritesIO)
@@ -181,7 +183,6 @@ class VitalWearApp : Application(), Configuration.Provider {
             stepService,
             saveService,
             sharedPreferences,
-            database.adventureEntityDao()
         )
         return Configuration.Builder().setWorkerFactory(VitalWearWorkerFactory(workProviderDependencies)).build()
     }

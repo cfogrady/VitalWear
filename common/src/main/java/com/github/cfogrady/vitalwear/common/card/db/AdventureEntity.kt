@@ -19,19 +19,8 @@ data class AdventureEntity(
     val bossBackgroundId: Int,
     val hiddenBoss: Boolean,
     val characterIdJoined: Int?,
-    val cleared: Boolean,
 ) {
     companion object {
         const val TABLE = "adventure"
-
-        fun highestAdventureCompleted(adventures: List<AdventureEntity>): Int? {
-            var highestCompleted: Int? = null
-            for(adventure in adventures) {
-                if(adventure.cleared) {
-                    highestCompleted = max(adventure.adventureId, highestCompleted ?: -1)
-                }
-            }
-            return highestCompleted
-        }
     }
 }

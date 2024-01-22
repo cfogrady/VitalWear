@@ -8,9 +8,11 @@ import android.util.Log
 import com.github.cfogrady.vitalwear.adventure.data.CharacterAdventureDao
 import com.github.cfogrady.vitalwear.adventure.data.CharacterAdventureEntity
 import com.github.cfogrady.vitalwear.battle.data.BattleResult
+import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntity
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntityDao
+import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 import com.github.cfogrady.vitalwear.steps.AccelerometerToStepSensor
@@ -24,6 +26,8 @@ import java.lang.IllegalStateException
 
 class AdventureService(
     private val gameStateFlow: MutableStateFlow<GameState>,
+    private val cardMetaEntityDao: CardMetaEntityDao,
+    private val characterManager: CharacterManager,
     private val adventureEntityDao: AdventureEntityDao,
     private val cardSpritesIO: CardSpritesIO,
     private val notificationChannelManager: NotificationChannelManager,
@@ -91,12 +95,14 @@ class AdventureService(
 
     fun markCompletion(adventureEntity: AdventureEntity, partnerId: Int) {
         CoroutineScope(Dispatchers.IO).launch {
-            if(!adventureEntity.cleared) {
-                // set global completion
-                val updated = adventureEntity.copy(cleared = true)
-                adventureEntityDao.update(updated)
+            val cardMeta = cardMetaEntityDao.getByName(adventureEntity.cardName)
+            val maxAdventureCompletedForCard = cardMeta.maxAdventureCompletion ?: -1
+            if(maxAdventureCompletedForCard < adventureEntity.adventureId) {
+                val updated = cardMeta.copy(maxAdventureCompletion = adventureEntity.adventureId)
+                cardMetaEntityDao.update(updated)
+                characterManager.maybeUpdateCardMeta(updated)
             }
-            // set card completion
+            // set character card completion
             val highestCompleted = characterAdventureDao.getByCharacterIdAndCardName(adventureEntity.characterId, adventureEntity.cardName)?.adventureId ?: -1
             if(highestCompleted < adventureEntity.adventureId) {
                 characterAdventureDao.upsert(CharacterAdventureEntity(adventureEntity.cardName, partnerId, adventureEntity.adventureId))

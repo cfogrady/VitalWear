@@ -76,7 +76,7 @@ class CardLoader(
             cardType = CardType.BEM
             franchise = card.header.franchiseId
         }
-        val cardMetaEntity = CardMetaEntity(cardName, card.header.dimId, card.checksum, cardType, franchise)
+        val cardMetaEntity = CardMetaEntity(cardName, card.header.dimId, card.checksum, cardType, franchise, null)
         cardMetaEntityDao.insert(cardMetaEntity)
     }
 
@@ -143,40 +143,38 @@ class CardLoader(
             if(cardAdventure is BemAdventureLevel) {
                 adventureEntities.add(
                     AdventureEntity(
-                    cardName,
-                    idx,
-                    cardAdventure.steps,
-                    cardAdventure.bossCharacterIndex,
-                    cardAdventure.bossDp,
-                    cardAdventure.bossHp,
-                    cardAdventure.bossAp,
-                    cardAdventure.smallAttackId,
-                    cardAdventure.bigAttackId,
-                    cardAdventure.background1,
-                    cardAdventure.background2,
-                    cardAdventure.showBossIdentity == 2,
-                    if(cardAdventure.giftCharacterIndex == DimReader.NONE_VALUE) null else cardAdventure.giftCharacterIndex,
-                        false
-                )
+                        cardName,
+                        idx,
+                        cardAdventure.steps,
+                        cardAdventure.bossCharacterIndex,
+                        cardAdventure.bossDp,
+                        cardAdventure.bossHp,
+                        cardAdventure.bossAp,
+                        cardAdventure.smallAttackId,
+                        cardAdventure.bigAttackId,
+                        cardAdventure.background1,
+                        cardAdventure.background2,
+                        cardAdventure.showBossIdentity == 2,
+                        if(cardAdventure.giftCharacterIndex == DimReader.NONE_VALUE) null else cardAdventure.giftCharacterIndex
+                    )
                 )
             } else {
                 adventureEntities.add(
                     AdventureEntity(
-                    cardName,
-                    idx,
-                    cardAdventure.steps,
-                    cardAdventure.bossCharacterIndex,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    0,
-                    0,
-                    false,
-                    null,
-                        false
-                )
+                        cardName,
+                        idx,
+                        cardAdventure.steps,
+                        cardAdventure.bossCharacterIndex,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        0,
+                        0,
+                        false,
+                        null,
+                    )
                 )
             }
         }

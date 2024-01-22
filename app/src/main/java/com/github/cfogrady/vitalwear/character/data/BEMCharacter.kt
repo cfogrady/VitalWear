@@ -38,27 +38,27 @@ class BEMCharacter(
         val DEFAULT_CHARACTER: BEMCharacter? = null
     }
 
-    fun clone(
-        cardMetaEntityCopy: CardMetaEntity = cardMetaEntity,
-        characterSpritesCopy: CharacterSprites = characterSprites,
-        characterStatsCopy: CharacterEntity = characterStats,
-        speciesStatsCopy : SpeciesEntity = speciesStats,
-        transformationWaitTimeSecondsCopy: Long = transformationWaitTimeSeconds,
-        transformationOptionsCopy: List<TransformationOption> = transformationOptions,
-        attributeFusionEntityCopy: AttributeFusionEntity? = attributeFusionEntity,
-        specificFusionOptionsCopy: List<SpecificFusionEntity> = specificFusionOptions,
-        settingsCopy: CharacterSettingsEntity = settings,
+    fun copy(
+        cardMetaEntity: CardMetaEntity = this.cardMetaEntity,
+        characterSprites: CharacterSprites = this.characterSprites,
+        characterStats: CharacterEntity = this.characterStats,
+        speciesStats : SpeciesEntity = this.speciesStats,
+        transformationWaitTimeSeconds: Long = this.transformationWaitTimeSeconds,
+        transformationOptions: List<TransformationOption> = this.transformationOptions,
+        attributeFusionEntity: AttributeFusionEntity? = this.attributeFusionEntity,
+        specificFusionOptions: List<SpecificFusionEntity> = this.specificFusionOptions,
+        settings: CharacterSettingsEntity = this.settings,
         ): BEMCharacter {
         return BEMCharacter(
-            cardMetaEntityCopy,
-            characterSpritesCopy,
-            characterStatsCopy,
-            speciesStatsCopy,
-            transformationWaitTimeSecondsCopy,
-            transformationOptionsCopy,
-            attributeFusionEntityCopy,
-            specificFusionOptionsCopy,
-            settingsCopy,
+            cardMetaEntity,
+            characterSprites,
+            characterStats,
+            speciesStats,
+            transformationWaitTimeSeconds,
+            transformationOptions,
+            attributeFusionEntity,
+            specificFusionOptions,
+            settings,
             _readyToTransform = _readyToTransform,
             activityIdx = activityIdx,
             lastTransformationCheck = lastTransformationCheck,
@@ -103,9 +103,9 @@ class BEMCharacter(
         return option
     }
 
-    fun hasValidTransformation(highestAdventureCompleted: Int?): TransformationOption? {
+    fun hasValidTransformation(): TransformationOption? {
         for(transformationOption in transformationOptions) {
-            if((transformationOption.requiredAdventureCompleted ?: -1) > (highestAdventureCompleted
+            if((transformationOption.requiredAdventureCompleted ?: -1) > (cardMetaEntity.maxAdventureCompletion
                     ?: -1)
             ) {
                 continue
@@ -127,7 +127,7 @@ class BEMCharacter(
         return null
     }
 
-    fun prepCharacterTransformation(support: SupportCharacter?, highestAdventureCompleted: Int?) {
+    fun prepCharacterTransformation(support: SupportCharacter?) {
         lastTransformationCheck = LocalDateTime.now()
         val characterStats = characterStats
         Log.i(TAG, "Checking transformations")
@@ -136,7 +136,7 @@ class BEMCharacter(
             _readyToTransform.tryEmit(it)
             return
         }
-        val transformationOption = hasValidTransformation(highestAdventureCompleted)
+        val transformationOption = hasValidTransformation()
         if(transformationOption != null) {
             _readyToTransform.tryEmit(transformationOption.toExpectedTransformation())
         } else {
