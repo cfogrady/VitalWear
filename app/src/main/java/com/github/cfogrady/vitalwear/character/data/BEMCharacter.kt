@@ -14,7 +14,6 @@ import com.github.cfogrady.vitalwear.settings.CharacterSettingsEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDateTime
-import java.util.*
 
 class BEMCharacter(
     val cardMetaEntity: CardMetaEntity,
@@ -23,19 +22,47 @@ class BEMCharacter(
     val speciesStats : SpeciesEntity,
     val transformationWaitTimeSeconds: Long,
     val transformationOptions: List<TransformationOption>,
-    val attributeFusionEntity: AttributeFusionEntity?,
-    val specificFusionOptions: List<SpecificFusionEntity>,
+    private val attributeFusionEntity: AttributeFusionEntity?,
+    private val specificFusionOptions: List<SpecificFusionEntity>,
     val settings: CharacterSettingsEntity,
+    private val _readyToTransform: MutableStateFlow<ExpectedTransformation?> = MutableStateFlow<ExpectedTransformation?>(null),
+    var activityIdx : Int = 1,
+    private var lastTransformationCheck: LocalDateTime = LocalDateTime.MIN,
     private val currentTimeProvider: ()->LocalDateTime = LocalDateTime::now
 ) {
-    private var _readyToTransform = MutableStateFlow<ExpectedTransformation?>(null)
-    var readyToTransform : StateFlow<ExpectedTransformation?> = _readyToTransform
-    var activityIdx : Int = 1
+    val readyToTransform : StateFlow<ExpectedTransformation?> = _readyToTransform
 
     companion object {
         const val TAG = "BEMCharacter"
         const val MAX_VITALS = 9999
         val DEFAULT_CHARACTER: BEMCharacter? = null
+    }
+
+    fun clone(
+        cardMetaEntityCopy: CardMetaEntity = cardMetaEntity,
+        characterSpritesCopy: CharacterSprites = characterSprites,
+        characterStatsCopy: CharacterEntity = characterStats,
+        speciesStatsCopy : SpeciesEntity = speciesStats,
+        transformationWaitTimeSecondsCopy: Long = transformationWaitTimeSeconds,
+        transformationOptionsCopy: List<TransformationOption> = transformationOptions,
+        attributeFusionEntityCopy: AttributeFusionEntity? = attributeFusionEntity,
+        specificFusionOptionsCopy: List<SpecificFusionEntity> = specificFusionOptions,
+        settingsCopy: CharacterSettingsEntity = settings,
+        ): BEMCharacter {
+        return BEMCharacter(
+            cardMetaEntityCopy,
+            characterSpritesCopy,
+            characterStatsCopy,
+            speciesStatsCopy,
+            transformationWaitTimeSecondsCopy,
+            transformationOptionsCopy,
+            attributeFusionEntityCopy,
+            specificFusionOptionsCopy,
+            settingsCopy,
+            _readyToTransform = _readyToTransform,
+            activityIdx = activityIdx,
+            lastTransformationCheck = lastTransformationCheck,
+        )
     }
 
     fun isBEM() : Boolean {
@@ -99,8 +126,6 @@ class BEMCharacter(
         }
         return null
     }
-
-    private var lastTransformationCheck = LocalDateTime.MIN
 
     fun prepCharacterTransformation(support: SupportCharacter?, highestAdventureCompleted: Int?) {
         lastTransformationCheck = LocalDateTime.now()
