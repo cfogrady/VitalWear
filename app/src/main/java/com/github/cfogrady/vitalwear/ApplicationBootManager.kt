@@ -1,7 +1,7 @@
 package com.github.cfogrady.vitalwear
 
 import android.content.Context
-import com.github.cfogrady.vitalwear.character.BEMUpdater
+import com.github.cfogrady.vitalwear.character.VBUpdater
 import com.github.cfogrady.vitalwear.character.CharacterManagerImpl
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.debug.ExceptionService
@@ -13,7 +13,7 @@ import java.time.LocalDate
 
 class ApplicationBootManager(private val characterManager: CharacterManagerImpl,
                              private val stepService: SensorStepService,
-                             private val bemUpdater: BEMUpdater,
+                             private val vbUpdater: VBUpdater,
                              private val saveService: SaveService,
                              private val notificationChannelManager: NotificationChannelManager,
                              private val complicationRefreshService: ComplicationRefreshService,
@@ -24,8 +24,8 @@ class ApplicationBootManager(private val characterManager: CharacterManagerImpl,
         GlobalScope.launch {
             try {
                 // characterManager init will load WorkManager configuration
-                characterManager.init(context, bemUpdater)
-                bemUpdater.scheduleExactMoodUpdates()
+                characterManager.init(context, vbUpdater)
+                vbUpdater.scheduleExactMoodUpdates()
                 if(stepService.handleBoot(LocalDate.now())) {
                     saveService.save()
                 }

@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.wear.compose.material.Text
+import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
@@ -22,7 +23,7 @@ class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private va
     }
 
     @Composable
-    fun PartnerScreen(character: BEMCharacter, firmware: CharacterFirmwareSprites) {
+    fun PartnerScreen(character: VBCharacter, firmware: CharacterFirmwareSprites) {
         val emojiHeight = 5.dp //imageScaler
         val now = LocalDateTime.now()
         val manyStepListener = remember {

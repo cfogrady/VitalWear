@@ -9,6 +9,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.activity.SELECTED_FILE
+import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.firmware.Firmware
@@ -20,7 +21,7 @@ class TrainingActivity : ComponentActivity() {
     }
 
     private lateinit var trainingScreenFactory: TrainingScreenFactory
-    private lateinit var partner: BEMCharacter
+    private lateinit var partner: VBCharacter
     private lateinit var firmware: Firmware
     private lateinit var background: Bitmap
 

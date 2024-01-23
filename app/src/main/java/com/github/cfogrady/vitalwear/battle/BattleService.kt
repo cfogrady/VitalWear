@@ -7,6 +7,7 @@ import com.github.cfogrady.vb.dim.card.DimReader
 import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.battle.data.*
 import com.github.cfogrady.vitalwear.character.CharacterManager
+import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterDao
 import com.github.cfogrady.vitalwear.character.data.CharacterState
@@ -176,7 +177,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         )
     }
 
-    private fun battleCharacterFromBemCharacter(context: Context, character: BEMCharacter): BattleCharacter {
+    private fun battleCharacterFromBemCharacter(context: Context, character: VBCharacter): BattleCharacter {
         val firmware = firmwareManager.getFirmware().value!!
         val smallAttackId = character.speciesStats.attackId
         val largeAttackId = character.speciesStats.criticalAttackId

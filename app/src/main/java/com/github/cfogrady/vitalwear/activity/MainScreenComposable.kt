@@ -25,6 +25,7 @@ import com.github.cfogrady.vitalwear.*
 import com.github.cfogrady.vitalwear.R
 import com.github.cfogrady.vitalwear.adventure.AdventureScreenFactory
 import com.github.cfogrady.vitalwear.character.CharacterManager
+import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
@@ -72,7 +73,7 @@ class MainScreenComposable(
     }
 
     @Composable
-    fun EverythingLoadedScreen(firmwareData: StateFlow<Firmware?>, activeCharacterData: StateFlow<BEMCharacter?>, backgroundData: LiveData<Bitmap>, activityLaunchers: ActivityLaunchers) {
+    fun EverythingLoadedScreen(firmwareData: StateFlow<Firmware?>, activeCharacterData: StateFlow<VBCharacter?>, backgroundData: LiveData<Bitmap>, activityLaunchers: ActivityLaunchers) {
         val firmware by firmwareData.collectAsState()
         val character by activeCharacterData.collectAsState()
         val background by backgroundData.observeAsState()
@@ -96,7 +97,7 @@ class MainScreenComposable(
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun BackgroundTraining(firmware: Firmware, character: BEMCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
+    fun BackgroundTraining(firmware: Firmware, character: VBCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
         vitalBoxFactory.VitalBox {
             bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
             val pagerState = rememberPagerState(pageCount = {
@@ -134,7 +135,7 @@ class MainScreenComposable(
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun DailyScreen(firmware: Firmware, character: BEMCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
+    fun DailyScreen(firmware: Firmware, character: VBCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
         val readyToTransform by character.readyToTransform.collectAsState()
         if (readyToTransform != null) {
             activityLaunchers.transformLauncher.invoke()

@@ -92,8 +92,10 @@ class CardLoader(
             }
         } else if(card is DimCard) {
             for((index, character) in card.characterStats.characterEntries.withIndex()) {
+                val characterSprites = spritesByCharacterId[index]
                 val background = getBackgroundSprite(spritesByCharacterId[index])
                 val spriteDir = if(uniqueSprites) getUniqueSprites(cardName, index) else getBackgroundHash(applicationContext, cardName, index, card, background)
+                characterSpritesIO.saveSpritesFromCard(applicationContext, true, character.stage, characterSprites, spriteDir)
                 speciesEntities.add(createSpecies(cardName, index, character, character.dpStars, 0, spriteDir))
             }
         }

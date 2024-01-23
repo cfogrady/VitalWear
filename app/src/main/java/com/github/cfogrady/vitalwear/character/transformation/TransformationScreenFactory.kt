@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -13,18 +12,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.unit.Dp
 import com.github.cfogrady.vitalwear.Loading
-import com.github.cfogrady.vitalwear.character.BEMUpdater
+import com.github.cfogrady.vitalwear.character.VBUpdater
 import com.github.cfogrady.vitalwear.character.CharacterManager
-import com.github.cfogrady.vitalwear.character.data.BEMCharacter
+import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
-import kotlinx.coroutines.withContext
 
 class TransformationScreenFactory(
     private val characterManager: CharacterManager,
@@ -32,7 +29,7 @@ class TransformationScreenFactory(
     private val firmwareManager: FirmwareManager,
     private val bitmapScaler: BitmapScaler,
     private val vitalBoxFactory: VitalBoxFactory,
-    private val bemUpdater: BEMUpdater,
+    private val bemUpdater: VBUpdater,
 ) {
 
     companion object {
@@ -49,7 +46,7 @@ class TransformationScreenFactory(
     }
 
     @Composable
-    fun RunTransformation(context: Context, initialCharacter: BEMCharacter, onFinish: () -> Unit) {
+    fun RunTransformation(context: Context, initialCharacter: VBCharacter, onFinish: () -> Unit) {
         var character = initialCharacter
         val transformation = character.popTransformationOption()!!
         var transformationProgress by remember {
@@ -94,7 +91,7 @@ class TransformationScreenFactory(
     }
 
     @Composable
-    fun FusionPair(context: Context, partner: BEMCharacter, transformation: FusionTransformation, firmwareSprites: TransformationFirmwareSprites, onFinish: () -> Unit) {
+    fun FusionPair(context: Context, partner: VBCharacter, transformation: FusionTransformation, firmwareSprites: TransformationFirmwareSprites, onFinish: () -> Unit) {
         var fusionPhase by remember { mutableStateOf(1) }
         var newCharacterAttack by remember { mutableStateOf<Bitmap?>(null) }
         LaunchedEffect(true) {
@@ -126,7 +123,7 @@ class TransformationScreenFactory(
     }
 
     @Composable
-    fun FusionIdle(partner: BEMCharacter, transformation: FusionTransformation, firmwareSprites: TransformationFirmwareSprites, onFinish: () -> Unit) {
+    fun FusionIdle(partner: VBCharacter, transformation: FusionTransformation, firmwareSprites: TransformationFirmwareSprites, onFinish: () -> Unit) {
         var characterSprite by remember { mutableStateOf(partner.characterSprites.sprites[CharacterSprites.IDLE_1]) }
         var supportSprite by remember { mutableStateOf(transformation.supportIdle) }
         var pulseSprite by remember { mutableStateOf(firmwareSprites.weakPulse) }
@@ -257,7 +254,7 @@ class TransformationScreenFactory(
     }
 
     @Composable
-    fun PowerIncreasing(partner: BEMCharacter, firmwareSprites: TransformationFirmwareSprites, onFinish: () -> Unit) {
+    fun PowerIncreasing(partner: VBCharacter, firmwareSprites: TransformationFirmwareSprites, onFinish: () -> Unit) {
         /*
         Black screen with Heartbeat above idle partner
         6 iterations of weal pulse then strong pulse
@@ -310,7 +307,7 @@ class TransformationScreenFactory(
     }
 
     @Composable
-    fun Splash(partner: BEMCharacter, onFinish: () -> Unit) {
+    fun Splash(partner: VBCharacter, onFinish: () -> Unit) {
         LaunchedEffect(key1 = true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
                 onFinish.invoke()
@@ -320,7 +317,7 @@ class TransformationScreenFactory(
     }
 
     @Composable
-    fun LightOfTransformation(partner: BEMCharacter, firmwareSprites: TransformationFirmwareSprites, onFinish: () -> Unit) {
+    fun LightOfTransformation(partner: VBCharacter, firmwareSprites: TransformationFirmwareSprites, onFinish: () -> Unit) {
         /*
         Light background with
         3 times

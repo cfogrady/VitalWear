@@ -20,6 +20,7 @@ import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.BackgroundManager
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.CharacterManager
+import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.character.transformation.TransformationOption
@@ -105,7 +106,7 @@ class StatsMenuActivity : ComponentActivity() {
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    private fun PartnerStats(initialPage: MutableState<Int>, partner: BEMCharacter) {
+    private fun PartnerStats(initialPage: MutableState<Int>, partner: VBCharacter) {
         val scrollingNameFactory = remember { (application as VitalWearApp).scrollingNameFactory }
         val pagerState = rememberPagerState(initialPage = initialPage.value, pageCount = {4})
         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -132,7 +133,7 @@ class StatsMenuActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun LimitAndRank(partner: BEMCharacter) {
+    private fun LimitAndRank(partner: VBCharacter) {
         val (timeRemaining, timeUnit) = timeRemaining(partner)
         val displayTimeRemaining = formatNumber(timeRemaining.toInt(), 2)
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -147,7 +148,7 @@ class StatsMenuActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun PhaseAndAttribute(partner: BEMCharacter) {
+    private fun PhaseAndAttribute(partner: VBCharacter) {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             Text("PHASE ${partner.speciesStats.phase+1}", fontSize = 3.em, fontStyle = FontStyle.Italic)
             Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.SpaceBetween) {
@@ -165,7 +166,7 @@ class StatsMenuActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun PotentialTransformation(firmwareSprites: TransformationFirmwareSprites, bemCharacter: BEMCharacter, transformationOption: TransformationOption, expectedTransformation: Boolean, locked: Boolean) {
+    private fun PotentialTransformation(firmwareSprites: TransformationFirmwareSprites, bemCharacter: VBCharacter, transformationOption: TransformationOption, expectedTransformation: Boolean, locked: Boolean) {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
             Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                 if(expectedTransformation) {
@@ -246,7 +247,7 @@ class StatsMenuActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun Stats(partner: BEMCharacter) {
+    private fun Stats(partner: VBCharacter) {
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(15.dp, 0.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -278,7 +279,7 @@ class StatsMenuActivity : ComponentActivity() {
     }
 
     @Composable
-    fun TransformationFulfilment(partner: BEMCharacter, firmwareSprites: TransformationFirmwareSprites) {
+    fun TransformationFulfilment(partner: VBCharacter, firmwareSprites: TransformationFirmwareSprites) {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             TransformationStats(firmwareSprites = firmwareSprites, vitals = partner.characterStats.vitals, battles = partner.characterStats.currentPhaseBattles, winRatio = partner.characterStats.currentPhaseWinRatio(), pp = partner.characterStats.trainedPP)
         }
@@ -286,7 +287,7 @@ class StatsMenuActivity : ComponentActivity() {
 
 
 
-    private fun timeRemaining(partner: BEMCharacter) : Pair<Long, String> {
+    private fun timeRemaining(partner: VBCharacter) : Pair<Long, String> {
         val timeRemainingMinutes = partner.characterStats.trainingTimeRemainingInSeconds/60
         if(timeRemainingMinutes < 0) {
             // this really shouldn't happen

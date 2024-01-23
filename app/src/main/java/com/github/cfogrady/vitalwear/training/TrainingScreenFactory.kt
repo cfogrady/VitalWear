@@ -13,7 +13,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.em
 import androidx.wear.compose.material.Text
-import com.github.cfogrady.vitalwear.character.data.BEMCharacter
+import com.github.cfogrady.vitalwear.character.StatType
+import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.common.composable.util.KeepScreenOn
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
@@ -45,11 +46,11 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
     }
 
     @Composable
-    fun ExerciseScreen(context: Context, partner: BEMCharacter, firmware: Firmware, background: Bitmap, exerciseType: TrainingType, finishedToMenu: (Boolean) -> Unit) {
+    fun ExerciseScreen(context: Context, partner: VBCharacter, firmware: Firmware, background: Bitmap, trainingType: TrainingType, finishedToMenu: (Boolean) -> Unit) {
         KeepScreenOn()
         var trainingState by remember { mutableStateOf(TrainingState.READY) }
         var trainingResult by remember { mutableStateOf(TrainingResult.FAIL) }
-        var statIncease by remember { mutableStateOf(0) }
+        var statIncease by remember { mutableStateOf(TrainingStatChanges(trainingType.affectedStat, 0)) }
         vitalBoxFactory.VitalBox {
             bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background")
             when(trainingState) {
@@ -62,7 +63,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
                     Go(partner, firmware) {
                         if(partner.settings.trainInBackground) {
                             gameStateFlow.value = GameState.TRAINING
-                            trainingService.startBackgroundTraining(context, exerciseType)
+                            trainingService.startBackgroundTraining(context, trainingType)
                             finishedToMenu.invoke(false)
                         } else {
                             trainingState = TrainingState.EXERCISE
@@ -70,20 +71,20 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
                     }
                 }
                 TrainingState.EXERCISE -> {
-                    val trainingListener = remember { trainingService.startTraining(exerciseType) }
+                    val trainingListener = remember { trainingService.startTraining(trainingType) }
                     DisposableEffect(key1 = true) {
                         onDispose {
                             trainingListener.unregister()
                         }
                     }
-                    Exercise(partner = partner, firmware = firmware, trainingListener.progressFlow(), durationSeconds = exerciseType.durationSeconds) {
+                    Exercise(partner = partner, firmware = firmware, trainingListener.progressFlow(), durationSeconds = trainingType.durationSeconds) {
                         val points = trainingListener.getPoints()
                         if(points == 4) {
-                            statIncease = trainingService.increaseStats(partner, exerciseType, true)
+                            statIncease = trainingService.increaseStats(partner, trainingType, true)
                             trainingState = TrainingState.CLEAR
                             trainingResult = TrainingResult.GREAT
                         } else if(points >= 1) {
-                            statIncease = trainingService.increaseStats(partner, exerciseType, false)
+                            statIncease = trainingService.increaseStats(partner, trainingType, false)
                             trainingState = TrainingState.CLEAR
                             trainingResult = TrainingResult.GOOD
                         } else {
@@ -103,7 +104,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
                     }
                 }
                 TrainingState.RESULT -> {
-                    Result(partner, firmware, exerciseType, trainingResult, statIncease) {
+                    Result(partner, firmware, trainingResult, statIncease) {
                         finishedToMenu.invoke(true)
                     }
                 }
@@ -129,7 +130,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
     }
 
     @Composable
-    private fun Go(partner: BEMCharacter, firmware: Firmware, finished:() -> Unit) {
+    private fun Go(partner: VBCharacter, firmware: Firmware, finished:() -> Unit) {
         var charaterSprite by remember { mutableStateOf(partner.characterSprites.sprites[CharacterSprites.IDLE_1]) }
         Handler(Looper.getMainLooper()!!).postDelayed({
             charaterSprite = partner.characterSprites.sprites[CharacterSprites.WIN]
@@ -148,7 +149,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
     }
 
     @Composable
-    private fun Exercise(partner: BEMCharacter, firmware: Firmware, progressFlow: StateFlow<Float>, durationSeconds: Int, finished:() -> Unit) {
+    private fun Exercise(partner: VBCharacter, firmware: Firmware, progressFlow: StateFlow<Float>, durationSeconds: Int, finished:() -> Unit) {
         val characterSprites = arrayListOf(partner.characterSprites.sprites[CharacterSprites.TRAIN_1],
             partner.characterSprites.sprites[CharacterSprites.TRAIN_2])
         val sweatIcon = firmware.emoteFirmwareSprites.sweatEmote
@@ -198,7 +199,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
     }
 
     @Composable
-    fun Clear(partner: BEMCharacter, firmware: Firmware, finished: () -> Unit) {
+    fun Clear(partner: VBCharacter, firmware: Firmware, finished: () -> Unit) {
         val characterAnimation = remember {Lists.newArrayList(partner.characterSprites.sprites[CharacterSprites.IDLE_1], partner.characterSprites.sprites[CharacterSprites.WIN])}
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
@@ -217,7 +218,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
     }
 
     @Composable
-    fun Fail(partner: BEMCharacter, firmware: Firmware, finished: () -> Unit) {
+    fun Fail(partner: VBCharacter, firmware: Firmware, finished: () -> Unit) {
         val characterAnimation = remember {Lists.newArrayList(partner.characterSprites.sprites[CharacterSprites.IDLE_1], partner.characterSprites.sprites[CharacterSprites.DOWN])}
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
@@ -235,7 +236,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
     }
 
     @Composable
-    fun Result(partner: BEMCharacter, firmware: Firmware, exerciseType: TrainingType, trainingResult: TrainingResult, statChange: Int, finished: () -> Unit) {
+    fun Result(partner: VBCharacter, firmware: Firmware, trainingResult: TrainingResult, statChange: TrainingStatChanges, finished: () -> Unit) {
         val characterAnimation = remember {Lists.newArrayList(partner.characterSprites.sprites[CharacterSprites.IDLE_1], partner.characterSprites.sprites[CharacterSprites.WIN])}
         val resultIcon = remember {if(trainingResult == TrainingResult.GREAT) firmware.trainingFirmwareSprites.greatIcon else firmware.trainingFirmwareSprites.goodIcon}
         LaunchedEffect(true) {
@@ -246,7 +247,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
             Column(modifier = Modifier.offset(y = backgroundHeight.times(.3f)), horizontalAlignment = Alignment.CenterHorizontally) {
                 bitmapScaler.ScaledBitmap(bitmap = resultIcon, contentDescription = "result")
-                ResultTextRow(exerciseType = exerciseType, statChange, trainingFirmwareSprites = firmware.trainingFirmwareSprites)
+                ResultTextRow(statChange, trainingFirmwareSprites = firmware.trainingFirmwareSprites)
             }
         }
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
@@ -255,19 +256,19 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
     }
 
     @Composable
-    fun ResultTextRow(exerciseType: TrainingType, statChange: Int, trainingFirmwareSprites: TrainingFirmwareSprites) {
+    fun ResultTextRow(statChange: TrainingStatChanges, trainingFirmwareSprites: TrainingFirmwareSprites) {
         val typeIcon = remember {
-            when(exerciseType) {
-                TrainingType.SQUAT -> trainingFirmwareSprites.ppIcon
-                TrainingType.CRUNCH -> trainingFirmwareSprites.hpIcon
-                TrainingType.PUNCH -> trainingFirmwareSprites.apIcon
-                TrainingType.DASH -> trainingFirmwareSprites.bpIcon
+            when(statChange.stat) {
+                StatType.PP -> trainingFirmwareSprites.ppIcon
+                StatType.HP -> trainingFirmwareSprites.hpIcon
+                StatType.AP -> trainingFirmwareSprites.apIcon
+                StatType.BP -> trainingFirmwareSprites.bpIcon
             }
         }
-        val digits = if(statChange >= 100) 3 else 2
+        val digits = if(statChange.increase >= 100) 3 else 2
         Row(verticalAlignment = Alignment.CenterVertically) {
             bitmapScaler.ScaledBitmap(bitmap = typeIcon, contentDescription = "result")
-            Text(text = "+${formatNumber(statChange, digits)}", color = Color.Yellow, fontWeight = FontWeight.Bold, fontSize = 3.em)
+            Text(text = "+${formatNumber(statChange.increase, digits)}", color = Color.Yellow, fontWeight = FontWeight.Bold, fontSize = 3.em)
         }
     }
 }

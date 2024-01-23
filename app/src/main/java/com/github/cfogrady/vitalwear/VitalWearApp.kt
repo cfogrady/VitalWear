@@ -24,7 +24,7 @@ import com.github.cfogrady.vitalwear.battle.data.BEMBattleLogic
 import com.github.cfogrady.vitalwear.battle.BattleService
 import com.github.cfogrady.vitalwear.card.AppCardLoader
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
-import com.github.cfogrady.vitalwear.character.BEMUpdater
+import com.github.cfogrady.vitalwear.character.VBUpdater
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.CharacterManagerImpl
 import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
@@ -101,7 +101,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var adventureMenuScreenFactory: AdventureMenuScreenFactory
     lateinit var adventureService: AdventureService
     private lateinit var applicationBootManager: ApplicationBootManager
-    private lateinit var bemUpdater: BEMUpdater
+    private lateinit var vbUpdater: VBUpdater
     var backgroundHeight = 0.dp
     val gameState = MutableStateFlow(GameState.IDLE)
 
@@ -136,7 +136,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         stepService = SensorStepService(sharedPreferences, sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService))
         heartRateService = HeartRateService(sensorManager, sensorThreadHandler)
         moodBroadcastReceiver = MoodBroadcastReceiver(BEMMoodUpdater(heartRateService, stepService), characterManager)
-        bemUpdater = BEMUpdater(applicationContext)
+        vbUpdater = VBUpdater(applicationContext)
         saveService = SaveService(characterManager as CharacterManagerImpl, stepService, sharedPreferences)
         trainingService = TrainingService(sensorManager, heartRateService, saveService)
         shutdownManager = ShutdownManager(saveService)
@@ -162,7 +162,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         trainingScreenFactory = TrainingScreenFactory(vitalBoxFactory, bitmapScaler, backgroundHeight, trainingService, gameState)
         backgroundTrainingScreenFactory = BackgroundTrainingScreenFactory(trainingScreenFactory, trainingService)
 
-        transformationScreenFactory = TransformationScreenFactory(characterManager, backgroundHeight, firmwareManager, bitmapScaler, vitalBoxFactory, bemUpdater)
+        transformationScreenFactory = TransformationScreenFactory(characterManager, backgroundHeight, firmwareManager, bitmapScaler, vitalBoxFactory, vbUpdater)
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService)
         adventureService = AdventureService(gameState, database.cardMetaEntityDao(), characterManager, database.adventureEntityDao(), cardSpriteIO, notificationChannelManager, database.characterAdventureDao(), sensorManager)
         val adventureScreenFactory = AdventureScreenFactory(adventureService, vitalBoxFactory, bitmapScaler, backgroundHeight)
@@ -170,7 +170,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val cardCharacterImageService = CardCharacterImageService(database.speciesEntityDao(), characterSpritesIO)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardCharacterImageService)
         shutdownReceiver = ShutdownReceiver(shutdownManager)
-        applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, bemUpdater, saveService, notificationChannelManager, complicationRefreshService)
+        applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, vbUpdater, saveService, notificationChannelManager, complicationRefreshService)
         adventureMenuScreenFactory = AdventureMenuScreenFactory(cardSpriteIO, database.cardMetaEntityDao(), adventureService, vitalBoxFactory, characterSpritesIO, database.speciesEntityDao(), bitmapScaler, backgroundHeight)
     }
 
@@ -179,7 +179,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val workProviderDependencies = WorkProviderDependencies(
             characterManager,
             notificationChannelManager,
-            bemUpdater,
+            vbUpdater,
             stepService,
             saveService,
             sharedPreferences,
