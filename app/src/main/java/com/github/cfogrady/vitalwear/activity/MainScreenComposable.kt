@@ -117,14 +117,14 @@ class MainScreenComposable(
                                 .clickable {
                                     activityLaunchers.stopBackgroundTrainingLauncher.invoke()
                                 },
-                            verticalArrangement = Arrangement.Center,
+                            verticalArrangement = Arrangement.SpaceAround,
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             bitmapScaler.ScaledBitmap(
-                                bitmap = firmware.menuFirmwareSprites.stopIcon,
+                                bitmap = firmware.menuFirmwareSprites.stopText,
                                 contentDescription = "stop")
                             bitmapScaler.ScaledBitmap(
-                                bitmap = firmware.menuFirmwareSprites.trainingIcon,
+                                bitmap = firmware.menuFirmwareSprites.stopIcon,
                                 contentDescription = "training")
                         }
                     }

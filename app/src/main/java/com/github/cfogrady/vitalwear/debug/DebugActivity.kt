@@ -39,7 +39,7 @@ class DebugActivity : ComponentActivity() {
             (application as VitalWearApp).exceptionService.logOutExceptions()
         }
         var debugMenuSelection by remember { mutableStateOf(DebugScreens.DEBUG_MENU) }
-        val debugOptions = remember { DebugScreens.values().filter { it != DebugScreens.DEBUG_MENU } }
+        val debugOptions = remember { DebugScreens.entries.filter { it != DebugScreens.DEBUG_MENU } }
         when(debugMenuSelection) {
             DebugScreens.DEBUG_MENU -> {
                 ScalingLazyColumn(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()) {

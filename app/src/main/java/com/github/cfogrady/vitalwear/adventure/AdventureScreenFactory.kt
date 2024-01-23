@@ -122,14 +122,14 @@ class AdventureScreenFactory(
                 .clickable {
                     adventureService.stopAdventure(context)
                 },
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.SpaceAround,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             bitmapScaler.ScaledBitmap(
-                bitmap = firmware.menuFirmwareSprites.stopIcon,
+                bitmap = firmware.menuFirmwareSprites.stopText,
                 contentDescription = "stop")
             bitmapScaler.ScaledBitmap(
-                bitmap = firmware.menuFirmwareSprites.adventureIcon,
+                bitmap = firmware.menuFirmwareSprites.stopIcon,
                 contentDescription = "adventure")
         }
     }
