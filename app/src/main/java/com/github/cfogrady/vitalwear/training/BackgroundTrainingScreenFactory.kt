@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.character.CharacterManager
+import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
@@ -42,7 +43,7 @@ class BackgroundTrainingScreenFactory(
     private val trainingService: TrainingService,
 ) {
     @Composable
-    fun BackgroundTraining(partner: BEMCharacter, firmware: Firmware) {
+    fun BackgroundTraining(partner: VBCharacter, firmware: Firmware) {
         val trainingSprites = GameState.TRAINING.bitmaps(partner)
         val swearIcon = firmware.emoteFirmwareSprites.sweatEmote
         if(trainingService.backgroundTrainingProgressTracker == null) {
@@ -66,7 +67,7 @@ class BackgroundTrainingScreenFactory(
     }
 
     @Composable
-    fun EndTraining(context: Context, partner: BEMCharacter, firmware: Firmware, onFinish: () -> Unit) {
+    fun EndTraining(context: Context, partner: VBCharacter, firmware: Firmware, onFinish: () -> Unit) {
         val results = remember {
             trainingService.stopBackgroundTraining(context)
         }

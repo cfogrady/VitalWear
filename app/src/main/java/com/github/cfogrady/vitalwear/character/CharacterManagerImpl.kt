@@ -9,6 +9,7 @@ import com.github.cfogrady.vitalwear.character.transformation.ExpectedTransforma
 import com.github.cfogrady.vitalwear.character.transformation.TransformationOption
 import com.github.cfogrady.vitalwear.character.transformation.history.TransformationHistoryDao
 import com.github.cfogrady.vitalwear.character.transformation.history.TransformationHistoryEntity
+import com.github.cfogrady.vitalwear.common.card.CardType
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
 import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
@@ -46,11 +47,11 @@ class CharacterManagerImpl(
     private val attributeFusionEntityDao: AttributeFusionEntityDao,
     private val specificFusionEntityDao: SpecificFusionEntityDao,
 ) : CharacterManager {
-    private val activeCharacterFlow = MutableStateFlow(BEMCharacter.DEFAULT_CHARACTER)
-    private lateinit var bemUpdater: BEMUpdater
+    private val activeCharacterFlow = MutableStateFlow<VBCharacter?>(null)
+    private lateinit var bemUpdater: VBUpdater
     override val initialized = MutableStateFlow(false)
 
-    suspend fun init(applicationContext: Context, bemUpdater: BEMUpdater) {
+    suspend fun init(applicationContext: Context, vbUpdater: VBUpdater) {
         Log.i(TAG, "Initializing character manager")
         this.bemUpdater = bemUpdater
         withContext(Dispatchers.IO) {
@@ -58,7 +59,7 @@ class CharacterManagerImpl(
             if(character != null) {
                 withContext(Dispatchers.Main) {
                     activeCharacterFlow.value = character
-                    bemUpdater.setupTransformationChecker(character)
+                    vbUpdater.setupTransformationChecker(character)
                 }
             }
             initialized.value = true
@@ -66,15 +67,15 @@ class CharacterManagerImpl(
         }
     }
 
-    override fun getCurrentCharacter(): BEMCharacter? {
+    override fun getCurrentCharacter(): VBCharacter? {
         return activeCharacterFlow.value
     }
 
-    override fun getCharacterFlow() : StateFlow<BEMCharacter?> {
+    override fun getCharacterFlow() : StateFlow<VBCharacter?> {
         return activeCharacterFlow
     }
 
-    private fun loadActiveCharacter(applicationContext: Context) : BEMCharacter? {
+    private fun loadActiveCharacter(applicationContext: Context) : VBCharacter? {
         Log.i(TAG, "Loading active character")
         // replace this with a table for activePartner and fetch by character id
         val activeCharacterStats = characterDao.getCharactersByState(CharacterState.SYNCED)
@@ -158,7 +159,7 @@ class CharacterManagerImpl(
         }
     }
 
-    override fun doActiveCharacterTransformation(applicationContext: Context, transformationOption: ExpectedTransformation) : BEMCharacter {
+    override fun doActiveCharacterTransformation(applicationContext: Context, transformationOption: ExpectedTransformation) : VBCharacter {
         val actualCharacter = activeCharacterFlow.value!!
         val transformedCharacter = buildBEMCharacter(applicationContext, actualCharacter.cardMetaEntity, transformationOption.slotId, actualCharacter.settings) {
             actualCharacter.characterStats
@@ -212,10 +213,17 @@ class CharacterManagerImpl(
         complicationRefreshService.refreshVitalsComplication()
     }
 
-    private fun newCharacter(applicationContext: Context, cardMetaEntity: CardMetaEntity, slotId: Int) : BEMCharacter {
-        return buildBEMCharacter(applicationContext, cardMetaEntity, slotId, CharacterSettingsEntity.DEFAULT_SETTINGS) { transformationTime ->
-            newCharacterEntityFromCard(cardMetaEntity.cardName, slotId, transformationTime)
+    private fun newCharacter(applicationContext: Context, cardMetaEntity: CardMetaEntity, slotId: Int) : VBCharacter {
+        if(cardMetaEntity.cardType == CardType.BEM) {
+            return buildBEMCharacter(applicationContext, cardMetaEntity, slotId, CharacterSettingsEntity.DEFAULT_SETTINGS) { transformationTime ->
+                newCharacterEntityFromCard(cardMetaEntity.cardName, slotId, transformationTime)
+            }
+        } else {
+            return buildDIMCharacter(applicationContext, cardMetaEntity, slotId, CharacterSettingsEntity.DEFAULT_SETTINGS) { transformationTime ->
+                newCharacterEntityFromCard(cardMetaEntity.cardName, slotId, transformationTime)
+            }
         }
+
     }
 
     private fun buildBEMCharacter(applicationContext: Context, cardMetaEntity: CardMetaEntity, slotId: Int, settings: CharacterSettingsEntity, characterEntitySupplier: (Long) -> CharacterEntity): BEMCharacter {
@@ -228,6 +236,18 @@ class CharacterManagerImpl(
         val attributeFusionEntity = attributeFusionEntityDao.findByCardAndSpeciesId(cardName, slotId)
         val specificFusionOptions = specificFusionEntityDao.findByCardAndSpeciesId(cardName, slotId)
         return BEMCharacter(cardMetaEntity, bitmaps, characterEntity, speciesEntity, transformationTime, transformationOptions, attributeFusionEntity, specificFusionOptions, settings)
+    }
+
+    private fun buildDIMCharacter(applicationContext: Context, cardMetaEntity: CardMetaEntity, slotId: Int, settings: CharacterSettingsEntity, characterEntitySupplier: (Long) -> CharacterEntity): DIMCharacter {
+        val cardName = cardMetaEntity.cardName
+        val transformationTime = largestTransformationTimeSeconds(cardMetaEntity.cardName, slotId)
+        val characterEntity = characterEntitySupplier.invoke(transformationTime)
+        val speciesEntity = speciesEntityDao.getCharacterByCardAndCharacterId(cardName, slotId)
+        val bitmaps = characterSpritesIO.loadCharacterSprites(applicationContext, speciesEntity.spriteDirName)
+        val transformationOptions = transformationOptions(applicationContext, cardName, slotId)
+        val attributeFusionEntity = attributeFusionEntityDao.findByCardAndSpeciesId(cardName, slotId)
+        val specificFusionOptions = specificFusionEntityDao.findByCardAndSpeciesId(cardName, slotId)
+        return DIMCharacter(cardMetaEntity, bitmaps, characterEntity, speciesEntity, transformationTime, transformationOptions, attributeFusionEntity, specificFusionOptions, settings)
     }
 
     private val totalTrainingTime = 100L*60L*60L //100 hours * 60min/hr * 60sec/min = total seconds
@@ -334,8 +354,13 @@ class CharacterManagerImpl(
     }
 
     override fun maybeUpdateCardMeta(cardMetaEntity: CardMetaEntity) {
-        if(activeCharacterFlow.value?.cardMetaEntity?.cardName == cardMetaEntity.cardName) {
-            activeCharacterFlow.value = activeCharacterFlow.value?.copy(cardMetaEntity = cardMetaEntity)
+        val activeCharacter = activeCharacterFlow.value
+        if(activeCharacter?.cardMetaEntity?.cardName == cardMetaEntity.cardName) {
+            if(activeCharacter is BEMCharacter) {
+                activeCharacterFlow.value = activeCharacter.copy(cardMetaEntity = cardMetaEntity)
+            } else if(activeCharacter is DIMCharacter) {
+                activeCharacterFlow.value = activeCharacter.copy(cardMetaEntity = cardMetaEntity)
+            }
         }
     }
 

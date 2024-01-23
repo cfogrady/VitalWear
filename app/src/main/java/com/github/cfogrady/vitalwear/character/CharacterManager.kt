@@ -12,12 +12,12 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface CharacterManager {
     val initialized: StateFlow<Boolean>
-    fun getCurrentCharacter(): BEMCharacter?
+    fun getCurrentCharacter(): VBCharacter?
 
-    fun getCharacterFlow() : StateFlow<BEMCharacter?>
+    fun getCharacterFlow() : StateFlow<VBCharacter?>
 
     suspend fun fetchSupportCharacter(context: Context): SupportCharacter?
-    fun doActiveCharacterTransformation(applicationContext: Context, transformationOption: ExpectedTransformation) : BEMCharacter
+    fun doActiveCharacterTransformation(applicationContext: Context, transformationOption: ExpectedTransformation) : VBCharacter
 
     fun createNewCharacter(applicationContext: Context, cardMetaEntity: CardMetaEntity)
 

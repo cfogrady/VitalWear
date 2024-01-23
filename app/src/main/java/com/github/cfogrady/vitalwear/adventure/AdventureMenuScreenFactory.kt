@@ -36,6 +36,7 @@ import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.items
 import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.adventure.firmware.AdventureFirmwareSprites
+import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.activity.LOADING_TEXT
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
@@ -75,7 +76,7 @@ class AdventureMenuScreenFactory(
     }
 
     @Composable
-    fun AdventureMenuScreen(context: Context, firmware: Firmware, character: BEMCharacter, onFinish: () -> Unit) {
+    fun AdventureMenuScreen(context: Context, firmware: Firmware, character: VBCharacter, onFinish: () -> Unit) {
         var adventureMenuState by remember { mutableStateOf(AdventureMenuState.CardSelection) }
         var cardSelected by remember { mutableStateOf<CardMetaEntity?>(null) }
         var backgrounds by remember { mutableStateOf(emptyList<Bitmap>()) }
@@ -125,7 +126,7 @@ class AdventureMenuScreenFactory(
     }
 
     @Composable
-    fun CardSelection(partner: BEMCharacter, onCardSelected: (CardMetaEntity) -> Unit) {
+    fun CardSelection(partner: VBCharacter, onCardSelected: (CardMetaEntity) -> Unit) {
         var loaded by remember { mutableStateOf(false) }
         var cards by remember { mutableStateOf(ArrayList<CardMetaEntity>() as List<CardMetaEntity>) }
         LaunchedEffect(true) {
@@ -158,7 +159,7 @@ class AdventureMenuScreenFactory(
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun ZoneSelection(
-        partner: BEMCharacter,
+        partner: VBCharacter,
         firmware: Firmware,
         cardMetaEntity: CardMetaEntity,
         backgrounds: List<Bitmap>,

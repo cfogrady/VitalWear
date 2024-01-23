@@ -2,6 +2,7 @@ package com.github.cfogrady.vitalwear.vitals
 
 import android.util.Log
 import com.github.cfogrady.vitalwear.character.CharacterManager
+import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
@@ -66,16 +67,16 @@ class VitalService(private val characterManager: CharacterManager, private val c
         }
     }
 
-    private fun addVitals(character: BEMCharacter, newVitals: Int) {
+    private fun addVitals(character: VBCharacter, newVitals: Int) {
         character.addVitals(newVitals)
         complicationRefreshService.refreshVitalsComplication()
     }
 
-    private fun getCharacter() : BEMCharacter? {
+    private fun getCharacter() : VBCharacter? {
         return characterManager.getCurrentCharacter()
     }
 
-    private fun vitalGainModifier(character: BEMCharacter, vitals: Int) : Int {
+    private fun vitalGainModifier(character: VBCharacter, vitals: Int) : Int {
         if(character == BEMCharacter.DEFAULT_CHARACTER) {
             Log.w(SensorStepService.TAG, "Cannot apply vitals gain modifier for null active character.")
             return vitals

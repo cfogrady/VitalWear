@@ -6,8 +6,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import com.github.cfogrady.vitalwear.SaveService
-import com.github.cfogrady.vitalwear.character.data.BEMCharacter
-import com.github.cfogrady.vitalwear.character.data.CharacterEntity
+import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.debug.Debuggable
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import java.lang.IllegalStateException
@@ -95,51 +94,14 @@ class TrainingService (
         sensorManager.unregisterListener(sensorEventListener)
     }
 
-    fun increaseStats(partner: BEMCharacter, trainingType: TrainingType, great: Boolean): Int {
-        if(!partner.canIncreaseStats()) {
-            return 0
-        }
-        var statChange = trainingType.standardTrainingIncrease
-        if(great) {
-            statChange *= 2
-        }
-        statChange = applyIncreaseToStat(statChange, trainingType, partner.characterStats)
+    fun increaseStats(partner: VBCharacter, trainingType: TrainingType, great: Boolean): TrainingStatChanges {
+        val statChange = partner.increaseStats(trainingType, great)
         saveService.saveAsync()
         return statChange
     }
 
-    private fun applyIncreaseToStat(trainedIncrease: Int, trainingType: TrainingType, stats: CharacterEntity): Int {
-        var actualIncrease = trainedIncrease
-        when(trainingType) {
-            TrainingType.SQUAT -> {
-                actualIncrease = actualIncrease.coerceAtMost(99 - stats.trainedPP)
-                stats.trainedPP = stats.trainedPP + actualIncrease
-            }
-            TrainingType.CRUNCH -> {
-                actualIncrease = actualIncrease.coerceAtMost(999 - stats.trainedHp)
-                stats.trainedHp = stats.trainedHp + actualIncrease
-            }
-            TrainingType.PUNCH -> {
-                actualIncrease = actualIncrease.coerceAtMost(999 - stats.trainedAp)
-                stats.trainedAp = stats.trainedAp + actualIncrease
-            }
-            TrainingType.DASH -> {
-                actualIncrease = actualIncrease.coerceAtMost(999 - stats.trainedBp)
-                stats.trainedBp = stats.trainedBp + actualIncrease
-            }
-        }
-        return actualIncrease
-    }
-
-    fun increaseStatsFromMultipleTrainings(partner: BEMCharacter, backgroundTrainingResults: BackgroundTrainingResults): Int {
-        if(!partner.canIncreaseStats()) {
-            return 0
-        }
-        val trainingType = backgroundTrainingResults.trainingType
-        val standardStatIncrease = trainingType.standardTrainingIncrease
-        var statChange = standardStatIncrease * 2 * backgroundTrainingResults.great
-        statChange += standardStatIncrease * backgroundTrainingResults.good
-        statChange = applyIncreaseToStat(statChange, backgroundTrainingResults.trainingType, partner.characterStats)
+    fun increaseStatsFromMultipleTrainings(partner: VBCharacter, backgroundTrainingResults: BackgroundTrainingResults): TrainingStatChanges {
+        val statChange = partner.increaseStatsFromMultipleTrainings(backgroundTrainingResults)
         saveService.saveAsync()
         return statChange
     }

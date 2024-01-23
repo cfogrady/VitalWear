@@ -24,7 +24,7 @@ import com.github.cfogrady.vitalwear.battle.data.BEMBattleLogic
 import com.github.cfogrady.vitalwear.battle.BattleService
 import com.github.cfogrady.vitalwear.card.AppCardLoader
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
-import com.github.cfogrady.vitalwear.character.BEMUpdater
+import com.github.cfogrady.vitalwear.character.VBUpdater
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.CharacterManagerImpl
 import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
@@ -101,7 +101,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var adventureMenuScreenFactory: AdventureMenuScreenFactory
     lateinit var adventureService: AdventureService
     private lateinit var applicationBootManager: ApplicationBootManager
-    private lateinit var bemUpdater: BEMUpdater
+    private lateinit var bemUpdater: VBUpdater
     var backgroundHeight = 0.dp
     val gameState = MutableStateFlow(GameState.IDLE)
 
@@ -136,7 +136,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         stepService = SensorStepService(sharedPreferences, sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService))
         heartRateService = HeartRateService(sensorManager, sensorThreadHandler)
         moodBroadcastReceiver = MoodBroadcastReceiver(BEMMoodUpdater(heartRateService, stepService), characterManager)
-        bemUpdater = BEMUpdater(applicationContext)
+        bemUpdater = VBUpdater(applicationContext)
         saveService = SaveService(characterManager as CharacterManagerImpl, stepService, sharedPreferences)
         trainingService = TrainingService(sensorManager, heartRateService, saveService)
         shutdownManager = ShutdownManager(saveService)

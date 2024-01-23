@@ -1,6 +1,7 @@
 package com.github.cfogrady.vitalwear.character.mood
 
 import android.util.Log
+import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.steps.SensorStepService
@@ -16,7 +17,7 @@ class BEMMoodUpdater(private val heartRateService: HeartRateService, private val
         const val TAG = "BEMMoodUpdater"
     }
 
-    fun updateMood(character: BEMCharacter, now: LocalDateTime) {
+    fun updateMood(character: VBCharacter, now: LocalDateTime) {
         GlobalScope.launch {
             try {
                 stepService.addStepsToVitals()
@@ -31,7 +32,7 @@ class BEMMoodUpdater(private val heartRateService: HeartRateService, private val
         }
     }
 
-    private fun updateFromExerciseLevel(character: BEMCharacter, exerciseLevel: Int, now: LocalDateTime) {
+    private fun updateFromExerciseLevel(character: VBCharacter, exerciseLevel: Int, now: LocalDateTime) {
         when(exerciseLevel) {
             0 -> character.characterStats.mood -= 1
             2 -> character.characterStats.mood += 10
