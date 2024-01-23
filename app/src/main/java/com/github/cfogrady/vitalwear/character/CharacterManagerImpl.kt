@@ -48,12 +48,12 @@ class CharacterManagerImpl(
     private val specificFusionEntityDao: SpecificFusionEntityDao,
 ) : CharacterManager {
     private val activeCharacterFlow = MutableStateFlow<VBCharacter?>(null)
-    private lateinit var bemUpdater: VBUpdater
+    private lateinit var vbUpdater: VBUpdater
     override val initialized = MutableStateFlow(false)
 
     suspend fun init(applicationContext: Context, vbUpdater: VBUpdater) {
         Log.i(TAG, "Initializing character manager")
-        this.bemUpdater = bemUpdater
+        this.vbUpdater = vbUpdater
         withContext(Dispatchers.IO) {
             val character = loadActiveCharacter(applicationContext)
             if(character != null) {
@@ -84,16 +84,22 @@ class CharacterManagerImpl(
             val settings = characterSettingsDao.getByCharacterId(characterStats.id)
             return try {
                 val cardMetaEntity = cardMetaEntityDao.getByName(characterStats.cardFile)
-                buildBEMCharacter(applicationContext, cardMetaEntity, characterStats.slotId, settings) {
-                    characterStats
+                if(cardMetaEntity.cardType == CardType.BEM) {
+                    buildBEMCharacter(applicationContext, cardMetaEntity, characterStats.slotId, settings) {
+                        characterStats
+                    }
+                } else {
+                    buildDIMCharacter(applicationContext, cardMetaEntity, characterStats.slotId, settings) {
+                        characterStats
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Unable to load character! Act as if empty", e)
-                BEMCharacter.DEFAULT_CHARACTER
+                null
             }
         }
         Log.i(TAG, "No character to load")
-        return BEMCharacter.DEFAULT_CHARACTER
+        return null
     }
 
     private fun largestTransformationTimeSeconds(cardName: String, slotId: Int) : Long {
@@ -161,9 +167,13 @@ class CharacterManagerImpl(
 
     override fun doActiveCharacterTransformation(applicationContext: Context, transformationOption: ExpectedTransformation) : VBCharacter {
         val actualCharacter = activeCharacterFlow.value!!
-        val transformedCharacter = buildBEMCharacter(applicationContext, actualCharacter.cardMetaEntity, transformationOption.slotId, actualCharacter.settings) {
-            actualCharacter.characterStats
-        }
+        val transformedCharacter = if(actualCharacter is BEMCharacter)
+            buildBEMCharacter(applicationContext, actualCharacter.cardMetaEntity, transformationOption.slotId, actualCharacter.settings) {
+                actualCharacter.characterStats
+            }
+        else buildDIMCharacter(applicationContext, actualCharacter.cardMetaEntity, transformationOption.slotId, actualCharacter.settings) {
+                actualCharacter.characterStats
+            }
         transformedCharacter.characterStats.slotId = transformationOption.slotId
         transformedCharacter.characterStats.currentPhaseBattles = 0
         transformedCharacter.characterStats.currentPhaseWins = 0
@@ -176,9 +186,9 @@ class CharacterManagerImpl(
         }
         updateCharacter(transformedCharacter.characterStats)
         transformationHistoryDao.upsert(TransformationHistoryEntity(transformedCharacter.characterStats.id, transformedCharacter.speciesStats.phase, transformedCharacter.cardName(), transformedCharacter.characterStats.slotId ))
-        bemUpdater.cancel()
+        vbUpdater.cancel()
         activeCharacterFlow.value = transformedCharacter
-        bemUpdater.setupTransformationChecker(transformedCharacter)
+        vbUpdater.setupTransformationChecker(transformedCharacter)
         return transformedCharacter
     }
 
@@ -204,12 +214,12 @@ class CharacterManagerImpl(
         if(currentCharacter != null) {
             currentCharacter.characterStats.state = CharacterState.STORED
             updateCharacter(currentCharacter.characterStats)
-            bemUpdater.cancel()
+            vbUpdater.cancel()
         }
         val character = newCharacter(applicationContext, cardMetaEntity, 0)
         insertCharacter(character.characterStats, character.settings, character.speciesStats.phase)
         activeCharacterFlow.value = character
-        bemUpdater.setupTransformationChecker(character)
+        vbUpdater.setupTransformationChecker(character)
         complicationRefreshService.refreshVitalsComplication()
     }
 
@@ -289,7 +299,11 @@ class CharacterManagerImpl(
         withContext(Dispatchers.IO) {
             val cardMetaEntity = cardMetaEntityDao.getByName(selectedCharacterPreview.cardName)
             val settings = characterSettingsDao.getByCharacterId(selectedCharacterPreview.characterId)
-            val selectedCharacter = buildBEMCharacter(applicationContext, cardMetaEntity, selectedCharacterPreview.slotId, settings) {
+            val selectedCharacter = if(cardMetaEntity.cardType == CardType.BEM)
+                buildBEMCharacter(applicationContext, cardMetaEntity, selectedCharacterPreview.slotId, settings) {
+                    characterDao.getCharacterById(selectedCharacterPreview.characterId)
+                }
+            else buildDIMCharacter(applicationContext, cardMetaEntity, selectedCharacterPreview.slotId, settings) {
                 characterDao.getCharacterById(selectedCharacterPreview.characterId)
             }
             val currentCharacter = activeCharacterFlow.value
@@ -298,7 +312,7 @@ class CharacterManagerImpl(
                     if(selectedCharacterPreview.state == CharacterState.SUPPORT) CharacterState.SUPPORT
                     else CharacterState.STORED
                 updateCharacter(currentCharacter.characterStats)
-                bemUpdater.cancel()
+                vbUpdater.cancel()
             }
             selectedCharacter.characterStats.state = CharacterState.SYNCED
             updateCharacter(selectedCharacter.characterStats)
@@ -306,7 +320,7 @@ class CharacterManagerImpl(
                 activeCharacterFlow.value = selectedCharacter
                 complicationRefreshService.refreshVitalsComplication()
             }
-            bemUpdater.setupTransformationChecker(selectedCharacter)
+            vbUpdater.setupTransformationChecker(selectedCharacter)
         }
     }
 

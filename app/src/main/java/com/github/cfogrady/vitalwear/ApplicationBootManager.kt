@@ -13,7 +13,7 @@ import java.time.LocalDate
 
 class ApplicationBootManager(private val characterManager: CharacterManagerImpl,
                              private val stepService: SensorStepService,
-                             private val bemUpdater: VBUpdater,
+                             private val vbUpdater: VBUpdater,
                              private val saveService: SaveService,
                              private val notificationChannelManager: NotificationChannelManager,
                              private val complicationRefreshService: ComplicationRefreshService,
@@ -24,8 +24,8 @@ class ApplicationBootManager(private val characterManager: CharacterManagerImpl,
         GlobalScope.launch {
             try {
                 // characterManager init will load WorkManager configuration
-                characterManager.init(context, bemUpdater)
-                bemUpdater.scheduleExactMoodUpdates()
+                characterManager.init(context, vbUpdater)
+                vbUpdater.scheduleExactMoodUpdates()
                 if(stepService.handleBoot(LocalDate.now())) {
                     saveService.save()
                 }

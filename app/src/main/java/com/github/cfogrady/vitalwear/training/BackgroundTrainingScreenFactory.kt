@@ -94,7 +94,6 @@ class BackgroundTrainingScreenFactory(
             EndTrainingScreen.RESULTS -> trainingScreenFactory.Result(
                 partner = partner,
                 firmware = firmware,
-                exerciseType = results.trainingType,
                 trainingResult = results.resultType(),
                 statChange = statIncrease
             ) {
