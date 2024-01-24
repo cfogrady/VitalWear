@@ -3,7 +3,7 @@ package com.github.cfogrady.vitalwear.battle
 import android.graphics.Bitmap
 
 interface BattleSpriteLoader {
-    fun getBackground(): Bitmap
-    fun getReadyIcon(): Bitmap
-    fun getGoIcon(): Bitmap
+    suspend fun getBackground(): Bitmap
+    suspend fun getReadyIcon(): Bitmap
+    suspend fun getGoIcon(): Bitmap
 }

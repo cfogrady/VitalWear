@@ -8,9 +8,6 @@ import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.battle.data.*
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
-import com.github.cfogrady.vitalwear.character.data.BEMCharacter
-import com.github.cfogrady.vitalwear.character.data.CharacterDao
-import com.github.cfogrady.vitalwear.character.data.CharacterState
 import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.common.card.CardType
@@ -52,7 +49,10 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         val partnerBattleCharacter = battleCharacterFromBemCharacter(context, partnerCharacter)
         val targetCard = cardMetaEntityDao.getByName(battleTargetInfo.cardName)
         val battleTarget = buildTargetFromInfo(context, targetCard, battleTargetInfo)
-        val battleSpriteLoader = CardBattleSpriteLoader(context, cardSpritesIO, targetCard.cardName)
+        val battleSpriteLoader = if(targetCard.cardType == CardType.BEM)
+            BemBattleSpriteLoader(context, cardSpritesIO, targetCard.cardName, battleTargetInfo.battleBackground)
+        else
+            DimBattleSpriteLoader(context, firmware, cardSpritesIO, targetCard.cardName, battleTargetInfo.battleBackground)
         return PreBattleModel(
             partnerBattleCharacter,
             fetchSupportCharacter(context, firmware, partnerCharacter.cardMetaEntity.franchise),
@@ -90,7 +90,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         val hasCardHits = partnerCharacter.isBEM()
         val hasThirdBattlePool = partnerCharacter.isBEM()
         val randomOpponent = loadRandomTarget(context, partnerCharacter.cardName(), hasThirdBattlePool, hasCardHits, partnerCharacter.speciesStats.phase, partnerCharacter.settings.allowedBattles, partnerCharacter.cardMetaEntity.franchise)
-        val battleSpriteLoader = if (partnerCharacter.isBEM()) CardBattleSpriteLoader(context, cardSpritesIO, partnerCharacter.cardName()) else FirmwareBattleSpriteLoader(firmware)
+        val battleSpriteLoader = if (partnerCharacter.isBEM()) BemBattleSpriteLoader(context, cardSpritesIO, partnerCharacter.cardName()) else DimBattleSpriteLoader(context, firmware, cardSpritesIO, partnerCharacter.cardName())
         return PreBattleModel(
             partnerBattleCharacter,
             fetchSupportCharacter(context, firmware, partnerCharacter.cardMetaEntity.franchise),
