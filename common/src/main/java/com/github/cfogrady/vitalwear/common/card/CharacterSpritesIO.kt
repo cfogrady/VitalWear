@@ -2,8 +2,11 @@ package com.github.cfogrady.vitalwear.common.card
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Matrix
 import com.github.cfogrady.vb.dim.sprite.SpriteData
 import com.github.cfogrady.vb.dim.sprite.SpriteData.Sprite
+import com.github.cfogrady.vb.dim.sprite.SpriteData.SpriteDimensions
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import java.io.File
 
@@ -25,16 +28,23 @@ class CharacterSpritesIO(private val spriteFileIO: SpriteFileIO, private val spr
         const val ATTACK = "attack.img"
         const val DODGE = "dodge.img"
         const val SPLASH = "splash.img"
+
+        private const val STANDARD_WIDTH = 64
+        private const val STANDARD_HEIGHT = 56
     }
 
-    fun loadCharacterBitmapFile(applicationContext: Context, characterDir: String, spriteFile: String): Bitmap? {
+    fun loadCharacterBitmapFile(applicationContext: Context, characterDir: String, spriteFile: String, resize: Boolean = false): Bitmap? {
         loadCharacterSpriteFile(applicationContext, characterDir, spriteFile)?.let {
-            return spriteBitmapConverter.getBitmap(it)
+            val bitmap = spriteBitmapConverter.getBitmap(it)
+            if(resize && smallerThanStandardSize(it.spriteDimensions)) {
+                return makeStandardSized(bitmap)
+            }
+            return bitmap
         }
         return null
     }
 
-    fun loadCharacterSpriteFile(applicationContext: Context, characterDir: String, spriteFile: String): Sprite? {
+    internal fun loadCharacterSpriteFile(applicationContext: Context, characterDir: String, spriteFile: String): Sprite? {
         val file = File(applicationContext.filesDir, "${SpriteFileIO.LIBRARY_DIR}/$CHARACTERS/$characterDir/$spriteFile")
         if(file.exists()) {
             return spriteFileIO.loadSpriteFile(file)
@@ -118,59 +128,67 @@ class CharacterSpritesIO(private val spriteFileIO: SpriteFileIO, private val spr
         }
     }
 
-    private fun loadSpriteOrDefault(file: File, default: SpriteData.Sprite): SpriteData.Sprite {
+    private fun loadCharacterSpriteOrDefault(file: File, default: Bitmap): Bitmap {
         if(!file.exists()) {
             return default
         }
-        return spriteFileIO.loadSpriteFile(file)
+        return loadCharacterSprite(file)
+    }
+
+    private fun smallerThanStandardSize(dimensions: SpriteDimensions): Boolean {
+        return dimensions.width < STANDARD_WIDTH && dimensions.height < STANDARD_HEIGHT
+    }
+
+    private fun makeStandardSized(bitmap: Bitmap): Bitmap {
+        val standardSizedBitmap = Bitmap.createBitmap(STANDARD_WIDTH, STANDARD_HEIGHT, bitmap.getConfig())
+        val canvas = Canvas(standardSizedBitmap)
+        canvas.drawBitmap(bitmap, (64f-bitmap.width)/2f, 56f-bitmap.height, null)
+        return standardSizedBitmap
+    }
+
+    private fun loadCharacterSprite(file: File): Bitmap {
+        val sprite = spriteFileIO.loadSpriteFile(file)
+        val bitmap = spriteBitmapConverter.getBitmap(sprite)
+        if(smallerThanStandardSize(sprite.spriteDimensions)) {
+            return makeStandardSized(bitmap)
+        }
+        return bitmap
     }
 
     fun loadCharacterSprites(applicationContext: Context, characterDir: String) : CharacterSprites {
-        //TODO: optimize by using the same idle bitmap instead of recreating it for missing sprites
         val sprites = ArrayList<Bitmap>()
         val rootCharDir = getCharacterFileDir(applicationContext, characterDir)
         val nameFile = File(rootCharDir, NAME)
         val nameSprite = spriteFileIO.loadSpriteFile(nameFile)
         sprites.add(spriteBitmapConverter.getBitmap(nameSprite))
         val idleFile = File(rootCharDir, IDLE1)
-        val idle1Sprite = spriteFileIO.loadSpriteFile(idleFile)
-        sprites.add(spriteBitmapConverter.getBitmap(idle1Sprite))
+        val idle1Bitmap = loadCharacterSprite(idleFile)
+        sprites.add(idle1Bitmap)
         val idle2File = File(rootCharDir, IDLE2)
-        val idle2Sprite = spriteFileIO.loadSpriteFile(idle2File)
-        sprites.add(spriteBitmapConverter.getBitmap(idle2Sprite))
+        val idle2Bitmap = loadCharacterSprite(idle2File)
+        sprites.add(idle2Bitmap)
         val walk1File = File(rootCharDir, WALK1)
-        val walk1Sprite = spriteFileIO.loadSpriteFile(walk1File)
-        sprites.add(spriteBitmapConverter.getBitmap(walk1Sprite))
+        sprites.add(loadCharacterSprite(walk1File))
         val walk2File = File(rootCharDir, WALK2)
-        val walk2Sprite = loadSpriteOrDefault(walk2File, idle1Sprite)
-        sprites.add(spriteBitmapConverter.getBitmap(walk2Sprite))
+        sprites.add(loadCharacterSpriteOrDefault(walk2File, idle1Bitmap))
         val run1File = File(rootCharDir, RUN1)
-        val run1Sprite = loadSpriteOrDefault(run1File, idle1Sprite)
-        sprites.add(spriteBitmapConverter.getBitmap(run1Sprite))
+        sprites.add(loadCharacterSpriteOrDefault(run1File, idle1Bitmap))
         val run2File = File(rootCharDir, RUN2)
-        val run2Sprite = loadSpriteOrDefault(run2File, idle2Sprite)
-        sprites.add(spriteBitmapConverter.getBitmap(run2Sprite))
+        sprites.add(loadCharacterSpriteOrDefault(run2File, idle2Bitmap))
         val train1File = File(rootCharDir, TRAIN1)
-        val train1Sprite = loadSpriteOrDefault(train1File, idle1Sprite)
-        sprites.add(spriteBitmapConverter.getBitmap(train1Sprite))
+        sprites.add(loadCharacterSpriteOrDefault(train1File, idle1Bitmap))
         val train2File = File(rootCharDir, TRAIN2)
-        val train2Sprite = loadSpriteOrDefault(train2File, idle2Sprite)
-        sprites.add(spriteBitmapConverter.getBitmap(train2Sprite))
+        sprites.add(loadCharacterSpriteOrDefault(train2File, idle2Bitmap))
         val winFile = File(rootCharDir, WIN)
-        val winSprite = spriteFileIO.loadSpriteFile(winFile)
-        sprites.add(spriteBitmapConverter.getBitmap(winSprite))
+        sprites.add(loadCharacterSprite(winFile))
         val downFile = File(rootCharDir, DOWN)
-        val downSprite = spriteFileIO.loadSpriteFile(downFile)
-        sprites.add(spriteBitmapConverter.getBitmap(downSprite))
+        sprites.add(loadCharacterSprite(downFile))
         val attackFile = File(rootCharDir, ATTACK)
-        val attackSprite = loadSpriteOrDefault(attackFile, idle2Sprite)
-        sprites.add(spriteBitmapConverter.getBitmap(attackSprite))
+        sprites.add(loadCharacterSpriteOrDefault(attackFile, idle2Bitmap))
         val dodgeFile = File(rootCharDir, DODGE)
-        val dodgeSprite = loadSpriteOrDefault(dodgeFile, idle1Sprite)
-        sprites.add(spriteBitmapConverter.getBitmap(dodgeSprite))
+        sprites.add(loadCharacterSpriteOrDefault(dodgeFile, idle1Bitmap))
         val splashFile = File(rootCharDir, SPLASH)
-        val splashSprite = loadSpriteOrDefault(splashFile, idle1Sprite)
-        sprites.add(spriteBitmapConverter.getBitmap(splashSprite))
+        sprites.add(loadCharacterSpriteOrDefault(splashFile, idle1Bitmap))
         return CharacterSprites(sprites)
     }
 }

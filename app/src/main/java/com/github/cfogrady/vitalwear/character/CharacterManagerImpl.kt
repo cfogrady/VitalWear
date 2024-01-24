@@ -12,7 +12,6 @@ import com.github.cfogrady.vitalwear.character.transformation.history.Transforma
 import com.github.cfogrady.vitalwear.common.card.CardType
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
-import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
 import com.github.cfogrady.vitalwear.common.card.db.AttributeFusionEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
@@ -40,7 +39,6 @@ class CharacterManagerImpl(
     private val speciesEntityDao: SpeciesEntityDao,
     private val cardMetaEntityDao: CardMetaEntityDao,
     private val transformationEntityDao: TransformationEntityDao,
-    private val spriteBitmapConverter: SpriteBitmapConverter,
     private val characterSettingsDao: CharacterSettingsDao,
     private val characterAdventureDao: CharacterAdventureDao,
     private val transformationHistoryDao: TransformationHistoryDao,
@@ -114,8 +112,7 @@ class CharacterManagerImpl(
     private fun transformationOptions(applicationContext: Context, cardName: String, slotId: Int) : List<TransformationOption> {
         val transformationOptions = ArrayList<TransformationOption>()
         for(transformationEntity in transformationEntityDao.getByCardAndFromCharacterIdWithToCharDir(cardName, slotId)) {
-            val idleSprite = characterSpritesIO.loadCharacterSpriteFile(applicationContext, transformationEntity.toCharDir, CharacterSpritesIO.IDLE1)!!
-            val idleBitmap = spriteBitmapConverter.getBitmap(idleSprite)
+            val idleBitmap = characterSpritesIO.loadCharacterBitmapFile(applicationContext, transformationEntity.toCharDir, CharacterSpritesIO.IDLE1, resize = true)!!
             transformationOptions.add(
                 TransformationOption(idleBitmap,
                     transformationEntity.toCharacterId,

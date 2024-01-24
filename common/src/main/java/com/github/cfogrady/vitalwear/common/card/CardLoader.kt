@@ -262,11 +262,8 @@ class CardLoader(
             Log.e(TAG, "Splash images have wrong dimensions!")
             return true
         }
-        if(!Arrays.equals(existingSprite.pixelData, newSplash.pixelData)) {
-            return true
-        }
-        //this is the same data, not a collision
-        return false
+        // check if the data is the same instead of a collision
+        return !Arrays.equals(existingSprite.pixelData, newSplash.pixelData)
     }
 
     private fun getBackgroundSprite(sprites: List<Sprite>): Sprite {

@@ -41,7 +41,6 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
                     private val random: Random,
                     private val cardSettingsDao: CardSettingsDao,
                     private val cardMetaEntityDao: CardMetaEntityDao,
-                    private val characterDao: CharacterDao,
 ) {
     companion object {
         const val TAG = "BattleService"
@@ -165,11 +164,11 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         val largeProjectileSprite = getLargeAttackSprite(context, speciesEntity.cardName, firmware, largeAttackId)
         return BattleSprites(
             characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.NAME)!!,
-            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.IDLE1)!!,
-            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.ATTACK)!!,
-            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.DODGE)!!,
-            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.WIN)!!,
-            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.DOWN)!!,
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.IDLE1, resize = true)!!,
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.ATTACK, resize = true)!!,
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.DODGE, resize = true)!!,
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.WIN, resize = true)!!,
+            characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.DOWN, resize = true)!!,
             characterSpritesIO.loadCharacterBitmapFile(context, speciesEntity.spriteDirName, CharacterSpritesIO.SPLASH)!!,
             projectileSprite,
             largeProjectileSprite,

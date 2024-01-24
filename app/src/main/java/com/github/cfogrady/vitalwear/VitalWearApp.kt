@@ -127,7 +127,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationChannelManager = NotificationChannelManager(notificationManager)
         complicationRefreshService = ComplicationRefreshService(this, partnerComplicationState)
-        characterManager = CharacterManagerImpl(complicationRefreshService, database.characterDao(), characterSpritesIO, database.speciesEntityDao(), database.cardMetaEntityDao(), database.transformationEntityDao(), spriteBitmapConverter, database.characterSettingsDao(), database.characterAdventureDao(), database.transformationHistoryDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao())
+        characterManager = CharacterManagerImpl(complicationRefreshService, database.characterDao(), characterSpritesIO, database.speciesEntityDao(), database.cardMetaEntityDao(), database.transformationEntityDao(), database.characterSettingsDao(), database.characterAdventureDao(), database.transformationHistoryDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao())
         cardMetaEntityDao = database.cardMetaEntityDao()
         val commonCardLoader = CardLoader(characterSpritesIO, cardSpriteIO, cardMetaEntityDao, database.speciesEntityDao(), database.transformationEntityDao(), database.adventureEntityDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao(), DimReader())
         cardLoader = AppCardLoader(commonCardLoader, database.cardSettingsDao())
@@ -144,7 +144,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         backgroundManager = BackgroundManager(firmwareManager)
         val random = Random()
         val bemBattleLogic = BEMBattleLogic(random)
-        battleService = BattleService(cardSpriteIO, database.speciesEntityDao(), characterSpritesIO, characterManager, firmwareManager, bemBattleLogic, saveService, vitalService, random, database.cardSettingsDao(), database.cardMetaEntityDao(), database.characterDao())
+        battleService = BattleService(cardSpriteIO, database.speciesEntityDao(), characterSpritesIO, characterManager, firmwareManager, bemBattleLogic, saveService, vitalService, random, database.cardSettingsDao(), database.cardMetaEntityDao())
         imageScaler = ImageScaler(applicationContext.resources.displayMetrics, applicationContext.resources.configuration.isScreenRound)
         backgroundHeight = imageScaler.scaledDpValueFromPixels(ImageScaler.VB_HEIGHT.toInt())
         bitmapScaler = BitmapScaler(imageScaler)
