@@ -128,11 +128,9 @@ class LoadCardActivity : ComponentActivity() {
                 try {
                     Log.i(TAG, "Reading Card Name")
                     val cardName = getName(cardStream)
-                    val test = getName(cardStream)
                     val uniqueSprites = cardStream.read() != 0
-                    Log.i(TAG, "Importing card $cardName with $test tag")
+                    Log.i(TAG, "Importing card $cardName")
                     cardLoader.importCard(applicationContext, cardName, cardStream, uniqueSprites)
-                    // (applicationContext as VitalWearApp).notificationChannelManager.sendGenericNotification(applicationContext, "$cardName Import Success", "$cardName imported successfully")
                 } catch (e: Exception) {
                     Log.e(TAG, "Unable to load received card data", e)
                     loadCardStateFlow.value = LoadCardState.Error

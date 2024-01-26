@@ -245,8 +245,6 @@ class ImportCardActivity() : ComponentActivity() {
                 val cardWriter = DimWriter()
                 os.write(cardName.value.toByteArray(Charset.defaultCharset()))
                 os.write(0)
-                os.write("TEST".toByteArray(Charset.defaultCharset()))
-                os.write(0)
                 os.write(if(uniqueSprites.value) 1 else 0)
                 cardWriter.writeCard(card, os)
             }

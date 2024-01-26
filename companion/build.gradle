@@ -84,7 +84,7 @@ dependencies {
     runtimeOnly 'org.slf4j:slf4j-android:1.7.26'
 
     //Channel Client (data transfer)
-    implementation 'com.google.android.gms:play-services-wearable:17.1.0'
+    implementation 'com.google.android.gms:play-services-wearable:18.1.0'
 
     // Task.await() extension
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.4.3-native-mt"

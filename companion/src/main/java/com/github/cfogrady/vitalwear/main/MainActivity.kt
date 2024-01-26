@@ -25,6 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.nio.charset.Charset
 
@@ -76,7 +77,9 @@ class MainActivity : ComponentActivity() {
                     os.write("TEST".toByteArray(Charset.defaultCharset()))
                 }
                 channelClient.close(channel).await()
-                Toast.makeText(applicationContext, "Message sent", Toast.LENGTH_LONG).show()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(applicationContext, "Message sent", Toast.LENGTH_LONG).show()
+                }
             } catch (ioe: IOException) {
                 Log.e(TAG, "Failed to send message", ioe)
             }

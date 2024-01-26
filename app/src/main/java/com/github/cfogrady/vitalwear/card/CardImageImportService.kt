@@ -6,6 +6,7 @@ import com.github.cfogrady.vitalwear.common.communication.ChannelTypes
 import com.google.android.gms.common.util.IOUtils
 import com.google.android.gms.wearable.Channel
 import com.google.android.gms.wearable.ChannelClient
+import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.Wearable
 import com.google.android.gms.wearable.WearableListenerService
 import kotlinx.coroutines.CoroutineScope
@@ -26,7 +27,7 @@ class CardImageImportService  : WearableListenerService() {
         super.onCreate()
     }
 
-    fun onMessageChannel(channel: ChannelClient.Channel) {
+    private fun onMessageChannel(channel: ChannelClient.Channel) {
         val channelClient = Wearable.getChannelClient(this)
         val scope = CoroutineScope(Dispatchers.IO)
         scope.launch {
@@ -45,11 +46,16 @@ class CardImageImportService  : WearableListenerService() {
             onCardChannel(channel)
         } else if(channel.path == ChannelTypes.TEST_MESSAGE) {
             onMessageChannel(channel)
+        } else {
+            Log.i(TAG, "Unknown channel: ${channel.path}")
         }
-        Log.i(TAG, "Unknown channel: ${channel.path}")
     }
 
-    fun onCardChannel(channel: ChannelClient.Channel) {
+    override fun onMessageReceived(p0: MessageEvent) {
+        Log.i(TAG, "Message Received: ${p0.path}")
+    }
+
+    private fun onCardChannel(channel: ChannelClient.Channel) {
         Log.i(TAG, "Card channel opened")
         val channelClient = Wearable.getChannelClient(this)
         val scope = CoroutineScope(Dispatchers.IO)
