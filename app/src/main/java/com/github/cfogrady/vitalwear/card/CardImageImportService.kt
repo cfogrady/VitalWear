@@ -16,10 +16,12 @@ import java.io.InputStream
 import java.nio.charset.Charset
 
 class CardImageImportService  : WearableListenerService() {
-
-    override fun onChannelOpened(p0: Channel) {
-        super.onChannelOpened(p0)
-        Log.i(TAG, "Old Channel opened")
+    companion object {
+        private const val TAG = "FileReceiverListenerService"
+    }
+    override fun onCreate() {
+        Log.i(TAG, "Create CardImportService")
+        super.onCreate()
     }
 
     override fun onChannelOpened(channel: ChannelClient.Channel) {
@@ -46,10 +48,6 @@ class CardImageImportService  : WearableListenerService() {
             }
             channelClient.close(channel)
         }
-    }
-
-    companion object {
-        private const val TAG = "FileReceiverListenerService"
     }
 
     private fun getName(inputStream: InputStream): String {
