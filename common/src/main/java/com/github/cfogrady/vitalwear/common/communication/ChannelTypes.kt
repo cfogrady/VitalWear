@@ -4,5 +4,6 @@ class ChannelTypes {
     companion object {
         const val CARD_DATA = "com.github.cfogrady.vitalwear/CARD_DATA"
         const val FIRMWARE_DATA = "com.github.cfogrady.vitalwear/FIRMWARE_DATA"
+        const val TEST_MESSAGE = "com.github.cfogrady.vitalwear/MESSAGE"
     }
 }
