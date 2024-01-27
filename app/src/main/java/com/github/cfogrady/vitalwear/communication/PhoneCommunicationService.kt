@@ -3,7 +3,9 @@ package com.github.cfogrady.vitalwear.communication
 import android.util.Log
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.common.communication.ChannelTypes
+import com.github.cfogrady.vitalwear.firmware.FIRMWARE_FILE
 import com.google.android.gms.wearable.ChannelClient
+import com.google.android.gms.wearable.Wearable
 import com.google.android.gms.wearable.WearableListenerService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +29,11 @@ class PhoneCommunicationService  : WearableListenerService() {
                         val notificationCardName = result.cardName ?: "Card"
                         notificationChannelManager.sendGenericNotification(applicationContext, "$notificationCardName Import Failed", "")
                     }
+                }
+            }
+            ChannelTypes.FIRMWARE_DATA -> {
+                CoroutineScope(Dispatchers.IO).launch {
+                    (application as VitalWearApp).firmwareReceiver.importFirmwareFromChannel(applicationContext, channel)
                 }
             }
             else -> {
