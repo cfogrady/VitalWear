@@ -55,34 +55,6 @@ class MainActivity : ComponentActivity() {
             }) {
                 Text(text = "Import Firmware", color = Color.Cyan)
             }
-            Button(onClick = {
-                CoroutineScope(Dispatchers.IO).launch {
-                    sendMessage()
-                }
-            }) {
-                Text(text = "Send Test Message", color = Color.Cyan)
-            }
-        }
-    }
-
-    private suspend fun sendMessage() {
-        val channelClient = Wearable.getChannelClient(this)
-        val nodes = Wearable.getNodeClient(this).connectedNodes.await()
-        for (node in nodes) {
-            val channel = channelClient.openChannel(node.id, ChannelTypes.TEST_MESSAGE).await()
-            Log.i(ImportCardActivity.TAG, "Digiport open!")
-            try {
-                channelClient.getOutputStream(channel).await().use {os ->
-                    Log.i(ImportCardActivity.TAG, "Writing the card data!")
-                    os.write("TEST".toByteArray(Charset.defaultCharset()))
-                }
-                channelClient.close(channel).await()
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(applicationContext, "Message sent", Toast.LENGTH_LONG).show()
-                }
-            } catch (ioe: IOException) {
-                Log.e(TAG, "Failed to send message", ioe)
-            }
         }
     }
 }

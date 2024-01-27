@@ -23,6 +23,7 @@ import com.github.cfogrady.vitalwear.battle.composable.*
 import com.github.cfogrady.vitalwear.battle.data.BEMBattleLogic
 import com.github.cfogrady.vitalwear.battle.BattleService
 import com.github.cfogrady.vitalwear.card.AppCardLoader
+import com.github.cfogrady.vitalwear.card.CardReceiver
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.character.VBUpdater
 import com.github.cfogrady.vitalwear.character.CharacterManager
@@ -100,6 +101,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var vitalService: VitalService
     lateinit var adventureMenuScreenFactory: AdventureMenuScreenFactory
     lateinit var adventureService: AdventureService
+    lateinit var cardReceiver: CardReceiver
     private lateinit var applicationBootManager: ApplicationBootManager
     private lateinit var vbUpdater: VBUpdater
     var backgroundHeight = 0.dp
@@ -172,6 +174,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         shutdownReceiver = ShutdownReceiver(shutdownManager)
         applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, vbUpdater, saveService, notificationChannelManager, complicationRefreshService)
         adventureMenuScreenFactory = AdventureMenuScreenFactory(cardSpriteIO, database.cardMetaEntityDao(), adventureService, vitalBoxFactory, characterSpritesIO, database.speciesEntityDao(), bitmapScaler, backgroundHeight)
+        cardReceiver = CardReceiver(cardLoader)
     }
 
     override fun getWorkManagerConfiguration(): Configuration {
