@@ -4,20 +4,23 @@ import android.content.Context
 import android.util.Log
 import com.google.android.gms.wearable.ChannelClient
 import com.google.android.gms.wearable.Wearable
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.nio.charset.Charset
 
-class CardReceiver(val cardLoader: AppCardLoader) {
+class CardReceiver(private val cardLoader: AppCardLoader) {
 
     companion object {
         const val TAG = "CardReceiver"
     }
+
+    private val _cardsImported = MutableStateFlow(0)
+    val cardsImported: StateFlow<Int> = _cardsImported
 
     class ImportCardResult(val success: Boolean, val cardName: String?)
 
@@ -32,6 +35,7 @@ class CardReceiver(val cardLoader: AppCardLoader) {
                     val uniqueSprites = cardStream.read() != 0
                     cardLoader.importCard(context, cardName!!, cardStream, uniqueSprites)
                     success = true
+                    _cardsImported.value++
                 } catch (e: Exception) {
                     Log.e(TAG, "Unable to load received card data", e)
                 }

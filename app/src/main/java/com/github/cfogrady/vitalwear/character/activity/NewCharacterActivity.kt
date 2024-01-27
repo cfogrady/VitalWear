@@ -23,7 +23,6 @@ import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -39,7 +38,6 @@ class NewCharacterActivity : ComponentActivity() {
     lateinit var cardSpritesIO: CardSpritesIO
     lateinit var cardMetaEntityDao: CardMetaEntityDao
 
-    var newCardLoads = MutableStateFlow(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +51,7 @@ class NewCharacterActivity : ComponentActivity() {
 
     @Composable
     fun BuildScreen() {
-        val cardLoads by newCardLoads.collectAsState()
+        val cardLoads by (application as VitalWearApp).cardReceiver.cardsImported.collectAsState()
         var loaded by remember { mutableStateOf(false) }
         var loadingNewCharacter by remember { mutableStateOf(false) }
         var cards by remember { mutableStateOf(ArrayList<CardMetaEntity>() as List<CardMetaEntity>) }
