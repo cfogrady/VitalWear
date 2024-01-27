@@ -48,6 +48,9 @@ android {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debug {
+            applicationIdSuffix ".debug"
+        }
     }
     buildFeatures {
         viewBinding true
@@ -96,7 +99,7 @@ dependencies {
     debugImplementation 'androidx.wear.tiles:tiles-renderer:1.1.0'
 
     //Channel Client (data transfer)
-    implementation 'com.google.android.gms:play-services-wearable:17.1.0'
+    implementation 'com.google.android.gms:play-services-wearable:18.1.0'
 
     //SLF4J logging
     runtimeOnly 'org.slf4j:slf4j-android:1.7.26'

@@ -68,8 +68,6 @@
         </activity>
         <activity android:name=".activity.FileExploreActivity"
             android:taskAffinity="" />
-        <activity android:name=".card.activity.LoadCardActivity"
-            android:taskAffinity="" />
         <activity android:name=".adventure.AdventureMenuActivity"
             android:taskAffinity="" />
         <activity android:name=".character.activity.CharacterSelectActivity"
@@ -160,11 +158,10 @@
                 android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
                 android:value="300" />
         </service>
-        <!-- This stupid service doesn't work. TODO: Figure out why -->
-        <service android:name=".card.CardImageImportService" android:exported="true" android:enabled="true">
+        <service android:name=".communication.PhoneCommunicationService" android:exported="true" android:enabled="true">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.CHANNEL_EVENT" />
-                <data android:scheme="wear" android:host="*"/>
+                 <data android:scheme="wear" android:host="*"/>
             </intent-filter>
         </service>
 
