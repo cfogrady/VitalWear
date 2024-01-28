@@ -175,7 +175,7 @@ class CharacterManagerImpl(
         transformedCharacter.characterStats.currentPhaseBattles = 0
         transformedCharacter.characterStats.currentPhaseWins = 0
         transformedCharacter.characterStats.hasTransformations = transformedCharacter.transformationOptions.isNotEmpty()
-        transformedCharacter.characterStats.lastUpdate = LocalDateTime.now()
+        transformedCharacter.characterStats.updateTimeStamps(LocalDateTime.now())
         transformedCharacter.characterStats.timeUntilNextTransformation = transformedCharacter.transformationWaitTimeSeconds
         transformedCharacter.characterStats.trainedPP = 0
         if(transformedCharacter.speciesStats.phase > 2 || actualCharacter.speciesStats.phase > 2) {
@@ -303,6 +303,7 @@ class CharacterManagerImpl(
             else buildDIMCharacter(applicationContext, cardMetaEntity, selectedCharacterPreview.slotId, settings) {
                 characterDao.getCharacterById(selectedCharacterPreview.characterId)
             }
+            selectedCharacter.characterStats.lastUpdate = LocalDateTime.now() // don't count down timers for character that was in storage
             val currentCharacter = activeCharacterFlow.value
             if(currentCharacter != null) {
                 currentCharacter.characterStats.state =
