@@ -71,6 +71,10 @@ class DimToBemStatConversion(private val statConversionDao: StatConversionDao) {
     data class Stats(val bp: Float, val hp: Float, val ap: Float)
 
     suspend fun convertSpeciesEntity(speciesEntity: SpeciesEntity): SpeciesEntity {
+        val existingBemVersion = getBEMOfSameSpecies(speciesEntity.spriteDirName)
+        existingBemVersion?.let {
+            return speciesEntity.copy(phase = existingBemVersion.phase, bp = existingBemVersion.bp, hp = existingBemVersion.hp, ap = existingBemVersion.ap)
+        }
         val newPhase = withContext(Dispatchers.IO) {
             newSpeciesPhase(speciesEntity.cardName, speciesEntity.characterId, speciesEntity.phase)
         }
@@ -89,6 +93,16 @@ class DimToBemStatConversion(private val statConversionDao: StatConversionDao) {
         val ap = convertStat(speciesEntity.ap, apPhase, Stats::ap)
         Log.i(TAG, "Card ${speciesEntity.cardName} slot: ${speciesEntity.characterId} converted to new stats: {phase: $newPhase, bp: $bp, hp: $hp, ap: $ap}")
         return speciesEntity.copy(bp = bp, hp = hp, ap = ap, phase = newPhase)
+    }
+
+    private suspend fun getBEMOfSameSpecies(spriteDir: String): SpeciesEntity? {
+        val speciesEntities =  withContext(Dispatchers.IO) {
+            statConversionDao.getSameSpeciesFromBEM(spriteDir)
+        }
+        if(speciesEntities.isEmpty()) {
+            return null
+        }
+        return speciesEntities[0]
     }
 
     private fun convertStat(stat: Int, phase: Int, statSelector: (Stats)->Float): Int {
@@ -112,14 +126,19 @@ class DimToBemStatConversion(private val statConversionDao: StatConversionDao) {
         // Detect Omegamon, Omegamon Zwart, Ragna Lordmon, and Susanoomon
         return withContext(Dispatchers.IO) {
             val maxJogressFromPhase =
-                statConversionDao.getFusionPhasesToCharacter(cardName, slotId) ?: (currentPhase - 1)
+                statConversionDao.getFusionToCharacterPhase(cardName, slotId) ?: (currentPhase - 1)
             Log.i(TAG, "Max Jogress From Phase: $maxJogressFromPhase")
             val maxDirectTransformationFromPhase =
-                statConversionDao.getPhaseTransformationsToCharacter(cardName, slotId)
+                statConversionDao.getTransformationsToCharacterPhase(cardName, slotId)
                     ?: (currentPhase - 1)
             Log.i(TAG, "Max Transform From Phase: $maxDirectTransformationFromPhase")
             val maxTransformFrom = max(maxJogressFromPhase, maxDirectTransformationFromPhase)
-            if(maxTransformFrom >= currentPhase) {
+            val minPhaseOfNext =
+                statConversionDao.getNextTransformationPhaseFromCharacter(cardName, slotId)
+                    ?: (currentPhase + 1)
+            if(minPhaseOfNext <= currentPhase) { // Handle Aderek's custom periodic mode change DIM
+                currentPhase
+            } else if(maxTransformFrom >= currentPhase) {
                 maxTransformFrom + 1
             } else {
                 currentPhase
