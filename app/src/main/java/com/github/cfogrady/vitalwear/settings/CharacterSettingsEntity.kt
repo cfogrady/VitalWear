@@ -20,7 +20,7 @@ data class CharacterSettingsEntity (
     enum class AllowedBattles(val descr: String) {
         CARD_ONLY("Random Battles Against Card Only"),
         ALL_FRANCHISE("Random Battles Against Any Card In Franchise"),
-        // ALL_FRANCHISE_AND_DIM("Random Battles Against Any Card In Franchise And DIMs"),
+        ALL_FRANCHISE_AND_DIM("Random Battles Against Any Card In Franchise And DIMs"),
         ALL("Random Battles Against Any Card");
     }
 }

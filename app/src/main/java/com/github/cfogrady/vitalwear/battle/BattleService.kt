@@ -6,6 +6,7 @@ import android.util.Log
 import com.github.cfogrady.vb.dim.card.DimReader
 import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.battle.data.*
+import com.github.cfogrady.vitalwear.card.DimToBemStatConversion
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
@@ -38,6 +39,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
                     private val random: Random,
                     private val cardSettingsDao: CardSettingsDao,
                     private val cardMetaEntityDao: CardMetaEntityDao,
+                    private val dimToBemStatConversion: DimToBemStatConversion,
 ) {
     companion object {
         const val TAG = "BattleService"
@@ -87,9 +89,8 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         val partnerCharacter = characterManager.getCharacterFlow().value!!
         val firmware = firmwareManager.getFirmware().value!!
         val partnerBattleCharacter = battleCharacterFromBemCharacter(context, partnerCharacter)
-        val hasCardHits = partnerCharacter.isBEM()
         val hasThirdBattlePool = partnerCharacter.isBEM()
-        val randomOpponent = loadRandomTarget(context, partnerCharacter.cardName(), hasThirdBattlePool, hasCardHits, partnerCharacter.speciesStats.phase, partnerCharacter.settings.allowedBattles, partnerCharacter.cardMetaEntity.franchise)
+        val randomOpponent = loadRandomTarget(context, partnerCharacter.cardMetaEntity, hasThirdBattlePool, partnerCharacter.speciesStats.phase, partnerCharacter.settings.allowedBattles, partnerCharacter.cardMetaEntity.franchise)
         val battleSpriteLoader = if (partnerCharacter.isBEM()) BemBattleSpriteLoader(context, cardSpritesIO, partnerCharacter.cardName()) else DimBattleSpriteLoader(context, firmware, cardSpritesIO, partnerCharacter.cardName())
         return PreBattleModel(
             partnerBattleCharacter,
@@ -230,23 +231,40 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         return firmware.battleFirmwareSprites.hitIcons
     }
 
-    private fun loadRandomTarget(context: Context, cardName: String, hasThirdBattlePool: Boolean, hasCardHits: Boolean, phase: Int, allowedBattles: CharacterSettingsEntity.AllowedBattles, franchiseId: Int): BattleCharacter {
-        var targetCard = cardName
-        if (allowedBattles == CharacterSettingsEntity.AllowedBattles.ALL) {
-            val options = cardSettingsDao.getAllBattleCardNames()
-            targetCard = options[random.nextInt(options.size)]
-        } else if (allowedBattles == CharacterSettingsEntity.AllowedBattles.ALL_FRANCHISE) {
-            val options = cardSettingsDao.getAllFranchiseBattleCardNames(franchiseId)
-            targetCard = options[random.nextInt(options.size)]
+    private suspend fun loadRandomTarget(context: Context, partnerCard: CardMetaEntity, hasThirdBattlePool: Boolean, phase: Int, allowedBattles: CharacterSettingsEntity.AllowedBattles, franchiseId: Int): BattleCharacter {
+        val targetCard = when (allowedBattles) {
+            CharacterSettingsEntity.AllowedBattles.ALL -> {
+                val options = cardSettingsDao.getAllBattleCards()
+                options[random.nextInt(options.size)]
+            }
+            CharacterSettingsEntity.AllowedBattles.ALL_FRANCHISE_AND_DIM -> {
+                val franchiseOptions = cardSettingsDao.getAllFranchiseBattleCards(franchiseId)
+                val dimOptions = cardSettingsDao.getAllFranchiseBattleCards(0)
+                val options = ArrayList<CardMetaEntity>(franchiseOptions.size + dimOptions.size)
+                options.addAll(franchiseOptions)
+                options.addAll(dimOptions)
+                options[random.nextInt(options.size)]
+            }
+            CharacterSettingsEntity.AllowedBattles.ALL_FRANCHISE -> {
+                val options = cardSettingsDao.getAllFranchiseBattleCards(franchiseId)
+                options[random.nextInt(options.size)]
+            }
+            CharacterSettingsEntity.AllowedBattles.CARD_ONLY -> {
+                partnerCard
+            }
         }
-        val speciesEntity = assignRandomTargetFromCard(targetCard, hasThirdBattlePool, phase)
+        var speciesEntity = assignRandomTargetFromCard(targetCard.cardName, hasThirdBattlePool, phase)
+        if(targetCard.franchise == 0 && partnerCard.franchise != 0) {
+            speciesEntity = dimToBemStatConversion.convertSpeciesEntity(speciesEntity)
+        }
+        val hasCardHits = targetCard.cardType == CardType.BEM
         return loadBattleCharacter(context, speciesEntity, hasCardHits)
     }
 
     private fun assignRandomTargetFromCard(cardName: String, hasThirdBattlePool: Boolean, activeStage: Int): SpeciesEntity {
         var roll = random.nextInt(100)
         val cardSpecies = speciesEntityDao.getCharacterByCard(cardName)
-        while(roll >= 0) {
+        do {
             for(species in cardSpecies) {
                 if(activeStage < 4) {
                     if(species.battlePool1 != DimReader.NONE_VALUE) {
@@ -268,7 +286,6 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
             Log.w(
                 BattleActivity.TAG, "Rolled for an invalid species... This is a bad card image." +
                         "Running through the options until our roll is reduced to 0.")
-        }
-        throw java.lang.IllegalStateException("If we get here then we somehow failed to return the species that brought out role under 0.")
+        } while (true) // always true because if it were false we would have already returned
     }
 }

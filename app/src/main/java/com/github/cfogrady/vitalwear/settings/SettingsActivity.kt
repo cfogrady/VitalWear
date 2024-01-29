@@ -72,7 +72,7 @@ class SettingsActivity : ComponentActivity() {
             }
             item {
                 Column {
-                    CharacterSettingsEntity.AllowedBattles.values().forEach{allowBattlesOption ->
+                    CharacterSettingsEntity.AllowedBattles.entries.forEach{ allowBattlesOption ->
                         Row(horizontalArrangement = Arrangement.Start, modifier = Modifier.clickable {
                             allowedBattles = allowBattlesOption
                         }) {

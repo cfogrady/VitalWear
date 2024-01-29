@@ -6,6 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.github.cfogrady.vitalwear.adventure.data.CharacterAdventureEntity
 import com.github.cfogrady.vitalwear.adventure.data.CharacterAdventureDao
+import com.github.cfogrady.vitalwear.card.StatConversionDao
 import com.github.cfogrady.vitalwear.character.data.CharacterDao
 import com.github.cfogrady.vitalwear.character.data.CharacterEntity
 import com.github.cfogrady.vitalwear.character.transformation.history.TransformationHistoryDao
@@ -63,4 +64,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun transformationHistoryDao(): TransformationHistoryDao
 
     abstract fun cardSettingsDao(): CardSettingsDao
+
+    abstract fun statConversionDao(): StatConversionDao
 }
