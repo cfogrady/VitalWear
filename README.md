@@ -3,7 +3,7 @@ VitalWear is an engine reimplementation (https://en.wikipedia.org/wiki/Game_engi
 of Bandai's Vital Bracelet BE for Wear OS. It will eventually also run unique gameplay using
 DIM and BE Memory data.
 
-This project cannot be run without having access to a Vital Bracelet BE and the cards with which the
+This project cannot be run without having access to a Vital Bracelet and the cards with which the
 user intends to play. This project is meant to facilitate enhanced gameplay for legitimate customers
 of Bandai's Vital Bracelet and DIM/BE Memory cards. For this reason, all new card images imported
 into the app require validation against Bandai's Vital Bracelet and the physical card.
@@ -27,33 +27,33 @@ watch.
 
 ## Importing New Card Images
 From the phone app, click "Import Card Image". This will allow the user to navigate to a card image
-file.
-
-**NOTE:** At this time only BE Memories are supported. Loading a DIM may cause the app to malfunction.
-
-From the character selection screen click "Import Card". Once the card image is selected, the user
-will be able to set a card name, and specify whether the card has unique sprites. If this flag is
-off, Vital Wear will attempt to save space by re-using sprites across cards for a character when the
-splash screen sprite of the character is identical.
+file. Once the card image is selected, the user  will be able to set a card name, and specify
+whether the card has unique sprites. If this flag is  off, Vital Wear will attempt to save space by
+re-using sprites across cards for a character when the splash screen sprite of the character is
+identical.
 
 Clicking "continue", will take the user to a screen asking the user to connect to their bracelet.
-On a Vital Bracelet BE, go to "Connect"->"App Loglink". Once the bracelet is ready, tap the bracelet
+On a Vital Bracelet, go to "Connect"->"App Loglink". Once the bracelet is ready, tap the bracelet
 to the phone. The phone will send a code to the bracelet asking for card verification and after a
 few seconds the bracelet will show the insert card icon.
 
-**NOTE:** At this time there must be an active character (from any card) on the Vital Bracelet BE
+**NOTE:** At this time there must be an active character (from any card) on the Vital Bracelet
 during validation.
 
-Insert the physical card into the bracelet that matches the card image being imported. Once the BE
-has loaded the card, tap the bracelet back to the phone.
+Insert the physical card into the bracelet that matches the card image being imported. Once the VB
+has loaded the card, tap the bracelet back to the phone. The phone will show a loading screen. A few
+seconds after the phone is finished loading, a notification should appear on the watch letting the
+user know that the card is ready to use.
 
-From the watch character selection screen, click "New...", then click "Import Card". At this point,
-the phone and watch should connect and both should show loading screens. Once the card is imported,
-you can select it and start a character from that card.
-
-If using custom card images, you only have to verify the card id against the Vital Bracelet BE once.
+If using custom card images, you only have to verify the card id against the Vital Bracelet once.
 Subsequent card images with the same card id will skip straight to connecting with the watch after
 the card image is selected on the phone.
+
+## Character Settings
+There are several settings when starting a new character
+1) Background Training - This allows training to occur in the background of the watch. When this is disabled, the watch behaves similar to a vanilla VB and runs a single training mission.
+2) Scale DIM to BEM - This only shows up for DIM characters, and allows you scale the DIM stats to BEM stats and do trainings and battles other BEM characters. When this is enabled the user must select a franchise from the other loaded BEM cards. This will determine adventures and battle opponents.
+3) Battle Options - This allows the character to have random battles against only characters from the same card (same as physical VB), against any characters from the same franchise, against any characters from the same franchise or DIM characters, or against any character from any card loaded in the app.
 
 ## Permissions
 At the moment permissions must be manually enabled by going to permissions in App Info on the watch.
