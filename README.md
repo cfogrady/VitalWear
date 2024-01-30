@@ -55,6 +55,22 @@ There are several settings when starting a new character
 2) Scale DIM to BEM - This only shows up for DIM characters, and allows you scale the DIM stats to BEM stats and do trainings and battles other BEM characters. When this is enabled the user must select a franchise from the other loaded BEM cards. This will determine adventures and battle opponents.
 3) Battle Options - This allows the character to have random battles against only characters from the same card (same as physical VB), against any characters from the same franchise, against any characters from the same franchise or DIM characters, or against any character from any card loaded in the app.
 
+### DIM Scaling Algorithm
+There are minimums, maximums, and averages for all DIM stats across phases built into the program. If a
+character's DIM stat is above the average for the next level up it is excluded from the calculation
+for maximum.
+
+This data is also built into the program for Digimon BE Memories released as of 2024-01-30, but
+there are no exclusions because the averages for BE Memories are much closer together than DIMs
+
+If a character shares the same splash sprite as an imported BEM character (and the character doesn't
+have unique sprites enabled), those stats are used.
+
+When there is no BEM version of a character and it is upscaled, each of their stats is marked as a
+percentage of the range for their level (or the next level if that stat was an outlier), then that
+percentage is applied to the range of the BEM stats for the same level. This should keep each
+characters relative strength to other DIM characters in tact for BEM stats.
+
 ## Permissions
 At the moment permissions must be manually enabled by going to permissions in App Info on the watch.
 
