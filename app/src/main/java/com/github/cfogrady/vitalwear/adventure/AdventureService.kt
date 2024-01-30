@@ -8,6 +8,7 @@ import android.util.Log
 import com.github.cfogrady.vitalwear.adventure.data.CharacterAdventureDao
 import com.github.cfogrady.vitalwear.adventure.data.CharacterAdventureEntity
 import com.github.cfogrady.vitalwear.battle.data.BattleResult
+import com.github.cfogrady.vitalwear.card.CardMeta
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntity
@@ -100,7 +101,7 @@ class AdventureService(
             if(maxAdventureCompletedForCard < adventureEntity.adventureId) {
                 val updated = cardMeta.copy(maxAdventureCompletion = adventureEntity.adventureId)
                 cardMetaEntityDao.update(updated)
-                characterManager.maybeUpdateCardMeta(updated)
+                characterManager.maybeUpdateCardMeta(CardMeta.fromCardMetaEntity(updated))
             }
             // set character card completion
             val highestCompleted = characterAdventureDao.getByCharacterIdAndCardName(adventureEntity.characterId, adventureEntity.cardName)?.adventureId ?: -1

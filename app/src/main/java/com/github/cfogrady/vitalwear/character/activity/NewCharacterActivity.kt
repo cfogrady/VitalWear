@@ -18,22 +18,25 @@ import androidx.wear.compose.material.ScalingLazyColumn
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.items
 import com.github.cfogrady.vitalwear.VitalWearApp
+import com.github.cfogrady.vitalwear.card.CardMeta
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
-const val NEW_CHARACTER_SELECTED_FLAG = "newCharacterStarted"
 
 /**
  * NewCardActivity is used to start a new character.
  */
 class NewCharacterActivity : ComponentActivity() {
+
+    companion object {
+        const val NEW_CHARACTER_SELECTED_FLAG = "newCharacterStarted"
+        const val CARD_SELECTED = "CARD_SELECTED"
+        const val SLOT_SELECTED = "SLOT_SELECTED"
+    }
 
     lateinit var characterManager : CharacterManager
     lateinit var cardSpritesIO: CardSpritesIO
@@ -54,7 +57,6 @@ class NewCharacterActivity : ComponentActivity() {
     fun BuildScreen() {
         val cardLoads by (application as VitalWearApp).cardReceiver.cardsImported.collectAsState()
         var loaded by remember { mutableStateOf(false) }
-        var loadingNewCharacter by remember { mutableStateOf(false) }
         var cards by remember { mutableStateOf(ArrayList<CardMetaEntity>() as List<CardMetaEntity>) }
         LaunchedEffect(cardLoads) {
             loaded = false
@@ -63,11 +65,7 @@ class NewCharacterActivity : ComponentActivity() {
                 loaded = true
             }
         }
-        if(loadingNewCharacter) {
-            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "Loading New Character")
-            }
-        } else if(!loaded) {
+        if(!loaded) {
             Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = LOADING_TEXT)
             }
@@ -82,14 +80,11 @@ class NewCharacterActivity : ComponentActivity() {
             ) {
                 items(items = cards) { card ->
                     Button(onClick = {
-                        loadingNewCharacter = true
-                        CoroutineScope(Dispatchers.Default).launch {
-                            characterManager.createNewCharacter(applicationContext, card)
-                            val intent = Intent()
-                            intent.putExtra(NEW_CHARACTER_SELECTED_FLAG, true)
-                            setResult(0, intent)
-                            finish()
-                        }
+                        val intent = Intent()
+                        intent.putExtra(NEW_CHARACTER_SELECTED_FLAG, true)
+                        intent.putExtra(CARD_SELECTED, CardMeta.fromCardMetaEntity(card))
+                        setResult(0, intent)
+                        finish()
                     }) {
                         Text(text = card.cardName, modifier = Modifier.padding(10.dp))
                     }

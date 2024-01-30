@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import com.github.cfogrady.vitalwear.adventure.data.CharacterAdventureDao
+import com.github.cfogrady.vitalwear.card.CardMeta
+import com.github.cfogrady.vitalwear.card.DimToBemStatConversion
 import com.github.cfogrady.vitalwear.character.data.*
 import com.github.cfogrady.vitalwear.character.transformation.ExpectedTransformation
 import com.github.cfogrady.vitalwear.character.transformation.TransformationOption
@@ -18,6 +20,7 @@ import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.TransformationEntityDao
+import com.github.cfogrady.vitalwear.settings.CharacterSettings
 import com.github.cfogrady.vitalwear.settings.CharacterSettingsDao
 import com.github.cfogrady.vitalwear.settings.CharacterSettingsEntity
 import kotlinx.coroutines.*
@@ -44,6 +47,7 @@ class CharacterManagerImpl(
     private val transformationHistoryDao: TransformationHistoryDao,
     private val attributeFusionEntityDao: AttributeFusionEntityDao,
     private val specificFusionEntityDao: SpecificFusionEntityDao,
+    private val dimToBemStatConversion: DimToBemStatConversion,
 ) : CharacterManager {
     private val activeCharacterFlow = MutableStateFlow<VBCharacter?>(null)
     private lateinit var vbUpdater: VBUpdater
@@ -73,21 +77,25 @@ class CharacterManagerImpl(
         return activeCharacterFlow
     }
 
-    private fun loadActiveCharacter(applicationContext: Context) : VBCharacter? {
+    private suspend fun loadActiveCharacter(applicationContext: Context) : VBCharacter? {
         Log.i(TAG, "Loading active character")
         // replace this with a table for activePartner and fetch by character id
         val activeCharacterStats = characterDao.getCharactersByState(CharacterState.SYNCED)
         if(activeCharacterStats.isNotEmpty()) {
             val characterStats = activeCharacterStats[0]
-            val settings = characterSettingsDao.getByCharacterId(characterStats.id)
+            val settings = CharacterSettings.fromCharacterSettingsEntity(characterSettingsDao.getByCharacterId(characterStats.id))
             return try {
-                val cardMetaEntity = cardMetaEntityDao.getByName(characterStats.cardFile)
-                if(cardMetaEntity.cardType == CardType.BEM) {
-                    buildBEMCharacter(applicationContext, cardMetaEntity, characterStats.slotId, settings) {
+                val cardMeta = CardMeta.fromCardMetaEntity(cardMetaEntityDao.getByName(characterStats.cardFile))
+                if(cardMeta.cardType == CardType.BEM) {
+                    buildBEMCharacter(applicationContext, cardMeta, characterStats.slotId, settings) {
+                        characterStats
+                    }
+                } else if (settings.assumedFranchise != null) {
+                    buildDIMToBEMCharacter(applicationContext, cardMeta, characterStats.slotId, settings) {
                         characterStats
                     }
                 } else {
-                    buildDIMCharacter(applicationContext, cardMetaEntity, characterStats.slotId, settings) {
+                    buildDIMCharacter(applicationContext, cardMeta, characterStats.slotId, settings) {
                         characterStats
                     }
                 }
@@ -138,6 +146,7 @@ class CharacterManagerImpl(
                 }
                 val support = supports[0]
                 val card = cardMetaEntityDao.getByName(support.cardFile)
+                val characterSettings = characterSettingsDao.getByCharacterId(support.id)
                 val species = speciesEntityDao.getCharacterByCardAndCharacterId(support.cardFile, support.slotId)
                 val idle1 = characterSpritesIO.loadCharacterBitmapFile(context, species.spriteDirName, CharacterSpritesIO.IDLE1)!!
                 val idle2 = characterSpritesIO.loadCharacterBitmapFile(context, species.spriteDirName, CharacterSpritesIO.IDLE2)!!
@@ -145,7 +154,7 @@ class CharacterManagerImpl(
                 SupportCharacter(
                     support.cardFile,
                     card.cardId,
-                    card.franchise,
+                    characterSettings.assumedFranchise ?: card.franchise,
                     support.slotId,
                     species.attribute,
                     species.phase,
@@ -162,13 +171,18 @@ class CharacterManagerImpl(
         }
     }
 
-    override fun doActiveCharacterTransformation(applicationContext: Context, transformationOption: ExpectedTransformation) : VBCharacter {
+    override suspend fun doActiveCharacterTransformation(applicationContext: Context, transformationOption: ExpectedTransformation) : VBCharacter {
         val actualCharacter = activeCharacterFlow.value!!
         val transformedCharacter = if(actualCharacter is BEMCharacter)
-            buildBEMCharacter(applicationContext, actualCharacter.cardMetaEntity, transformationOption.slotId, actualCharacter.settings) {
+            buildBEMCharacter(applicationContext, actualCharacter.cardMeta, transformationOption.slotId, actualCharacter.settings) {
                 actualCharacter.characterStats
             }
-        else buildDIMCharacter(applicationContext, actualCharacter.cardMetaEntity, transformationOption.slotId, actualCharacter.settings) {
+        else if (actualCharacter is DIMToBEMCharacter) {
+            buildDIMToBEMCharacter(applicationContext, actualCharacter.cardMeta, transformationOption.slotId, actualCharacter.settings) {
+                actualCharacter.characterStats
+            }
+        }
+        else buildDIMCharacter(applicationContext, actualCharacter.cardMeta, transformationOption.slotId, actualCharacter.settings) {
                 actualCharacter.characterStats
             }
         transformedCharacter.characterStats.slotId = transformationOption.slotId
@@ -206,55 +220,71 @@ class CharacterManagerImpl(
         }
     }
 
-    override fun createNewCharacter(applicationContext: Context, cardMetaEntity: CardMetaEntity) {
+    override suspend fun createNewCharacter(applicationContext: Context, cardMeta: CardMeta, slotId: Int, characterSettings: CharacterSettings) {
         val currentCharacter = activeCharacterFlow.value
         if(currentCharacter != null) {
             currentCharacter.characterStats.state = CharacterState.STORED
             updateCharacter(currentCharacter.characterStats)
             vbUpdater.cancel()
         }
-        val character = newCharacter(applicationContext, cardMetaEntity, 0)
+        val character = newCharacter(applicationContext, cardMeta, characterSettings, slotId)
         insertCharacter(character.characterStats, character.settings, character.speciesStats.phase)
         activeCharacterFlow.value = character
         vbUpdater.setupTransformationChecker(character)
         complicationRefreshService.refreshVitalsComplication()
     }
 
-    private fun newCharacter(applicationContext: Context, cardMetaEntity: CardMetaEntity, slotId: Int) : VBCharacter {
-        if(cardMetaEntity.cardType == CardType.BEM) {
-            return buildBEMCharacter(applicationContext, cardMetaEntity, slotId, CharacterSettingsEntity.DEFAULT_SETTINGS) { transformationTime ->
-                newCharacterEntityFromCard(cardMetaEntity.cardName, slotId, transformationTime)
+    private suspend fun newCharacter(applicationContext: Context, cardMeta: CardMeta, characterSettings: CharacterSettings, slotId: Int) : VBCharacter {
+        return if(cardMeta.cardType == CardType.BEM) {
+            buildBEMCharacter(applicationContext, cardMeta, slotId, characterSettings) { transformationTime ->
+                newCharacterEntityFromCard(cardMeta.cardName, slotId, transformationTime)
+            }
+        } else if(characterSettings.assumedFranchise != null) {
+            buildDIMToBEMCharacter(applicationContext, cardMeta, slotId, characterSettings) { transformationTime ->
+                newCharacterEntityFromCard(cardMeta.cardName, slotId, transformationTime)
             }
         } else {
-            return buildDIMCharacter(applicationContext, cardMetaEntity, slotId, CharacterSettingsEntity.DEFAULT_SETTINGS) { transformationTime ->
-                newCharacterEntityFromCard(cardMetaEntity.cardName, slotId, transformationTime)
+            buildDIMCharacter(applicationContext, cardMeta, slotId, characterSettings) { transformationTime ->
+                newCharacterEntityFromCard(cardMeta.cardName, slotId, transformationTime)
             }
         }
 
     }
 
-    private fun buildBEMCharacter(applicationContext: Context, cardMetaEntity: CardMetaEntity, slotId: Int, settings: CharacterSettingsEntity, characterEntitySupplier: (Long) -> CharacterEntity): BEMCharacter {
-        val cardName = cardMetaEntity.cardName
-        val transformationTime = largestTransformationTimeSeconds(cardMetaEntity.cardName, slotId)
+    private fun buildBEMCharacter(applicationContext: Context, cardMeta: CardMeta, slotId: Int, settings: CharacterSettings, characterEntitySupplier: (Long) -> CharacterEntity): BEMCharacter {
+        val cardName = cardMeta.cardName
+        val transformationTime = largestTransformationTimeSeconds(cardName, slotId)
         val characterEntity = characterEntitySupplier.invoke(transformationTime)
         val speciesEntity = speciesEntityDao.getCharacterByCardAndCharacterId(cardName, slotId)
         val bitmaps = characterSpritesIO.loadCharacterSprites(applicationContext, speciesEntity.spriteDirName)
         val transformationOptions = transformationOptions(applicationContext, cardName, slotId)
         val attributeFusionEntity = attributeFusionEntityDao.findByCardAndSpeciesId(cardName, slotId)
         val specificFusionOptions = specificFusionEntityDao.findByCardAndSpeciesId(cardName, slotId)
-        return BEMCharacter(cardMetaEntity, bitmaps, characterEntity, speciesEntity, transformationTime, transformationOptions, attributeFusionEntity, specificFusionOptions, settings)
+        return BEMCharacter(cardMeta, bitmaps, characterEntity, speciesEntity, transformationTime, transformationOptions, attributeFusionEntity, specificFusionOptions, settings)
     }
 
-    private fun buildDIMCharacter(applicationContext: Context, cardMetaEntity: CardMetaEntity, slotId: Int, settings: CharacterSettingsEntity, characterEntitySupplier: (Long) -> CharacterEntity): DIMCharacter {
-        val cardName = cardMetaEntity.cardName
-        val transformationTime = largestTransformationTimeSeconds(cardMetaEntity.cardName, slotId)
+    private fun buildDIMCharacter(applicationContext: Context, cardMeta: CardMeta, slotId: Int, settings: CharacterSettings, characterEntitySupplier: (Long) -> CharacterEntity): DIMCharacter {
+        val cardName = cardMeta.cardName
+        val transformationTime = largestTransformationTimeSeconds(cardName, slotId)
         val characterEntity = characterEntitySupplier.invoke(transformationTime)
         val speciesEntity = speciesEntityDao.getCharacterByCardAndCharacterId(cardName, slotId)
         val bitmaps = characterSpritesIO.loadCharacterSprites(applicationContext, speciesEntity.spriteDirName)
         val transformationOptions = transformationOptions(applicationContext, cardName, slotId)
         val attributeFusionEntity = attributeFusionEntityDao.findByCardAndSpeciesId(cardName, slotId)
         val specificFusionOptions = specificFusionEntityDao.findByCardAndSpeciesId(cardName, slotId)
-        return DIMCharacter(cardMetaEntity, bitmaps, characterEntity, speciesEntity, transformationTime, transformationOptions, attributeFusionEntity, specificFusionOptions, settings)
+        return DIMCharacter(cardMeta, bitmaps, characterEntity, speciesEntity, transformationTime, transformationOptions, attributeFusionEntity, specificFusionOptions, settings)
+    }
+
+    private suspend fun buildDIMToBEMCharacter(applicationContext: Context, cardMeta: CardMeta, slotId: Int, settings: CharacterSettings, characterEntitySupplier: (Long) -> CharacterEntity): DIMToBEMCharacter {
+        val cardName = cardMeta.cardName
+        val transformationTime = largestTransformationTimeSeconds(cardName, slotId)
+        val characterEntity = characterEntitySupplier.invoke(transformationTime)
+        val speciesEntity = dimToBemStatConversion.convertSpeciesEntity(speciesEntityDao.getCharacterByCardAndCharacterId(cardName, slotId))
+        val bitmaps = characterSpritesIO.loadCharacterSprites(applicationContext, speciesEntity.spriteDirName)
+        val transformationOptions = transformationOptions(applicationContext, cardName, slotId)
+        val attributeFusionEntity = attributeFusionEntityDao.findByCardAndSpeciesId(cardName, slotId)
+        val specificFusionOptions = specificFusionEntityDao.findByCardAndSpeciesId(cardName, slotId)
+        return DIMToBEMCharacter(cardMeta, bitmaps, characterEntity, speciesEntity, transformationTime, transformationOptions, attributeFusionEntity, specificFusionOptions, settings)
     }
 
     private val totalTrainingTime = 100L*60L*60L //100 hours * 60min/hr * 60sec/min = total seconds
@@ -285,22 +315,27 @@ class CharacterManagerImpl(
         )
     }
 
-    private fun insertCharacter(character: CharacterEntity, settings: CharacterSettingsEntity, phase: Int) {
+    private fun insertCharacter(character: CharacterEntity, settings: CharacterSettings, phase: Int) {
         character.id = characterDao.insert(character).toInt()
-        settings.characterId = character.id
-        characterSettingsDao.insert(settings)
+        val settingsToSave = settings.copy(characterId = character.id).toCharacterSettingsEntity()
+        characterSettingsDao.insert(settingsToSave)
         transformationHistoryDao.upsert(TransformationHistoryEntity(character.id, phase, character.cardFile, character.slotId))
     }
 
     override suspend fun swapToCharacter(applicationContext: Context, selectedCharacterPreview : CharacterPreview) {
         withContext(Dispatchers.IO) {
-            val cardMetaEntity = cardMetaEntityDao.getByName(selectedCharacterPreview.cardName)
-            val settings = characterSettingsDao.getByCharacterId(selectedCharacterPreview.characterId)
-            val selectedCharacter = if(cardMetaEntity.cardType == CardType.BEM)
-                buildBEMCharacter(applicationContext, cardMetaEntity, selectedCharacterPreview.slotId, settings) {
+            val cardMeta = CardMeta.fromCardMetaEntity(cardMetaEntityDao.getByName(selectedCharacterPreview.cardName))
+            val settings = CharacterSettings.fromCharacterSettingsEntity(characterSettingsDao.getByCharacterId(selectedCharacterPreview.characterId))
+            val selectedCharacter = if(cardMeta.cardType == CardType.BEM)
+                buildBEMCharacter(applicationContext, cardMeta, selectedCharacterPreview.slotId, settings) {
                     characterDao.getCharacterById(selectedCharacterPreview.characterId)
                 }
-            else buildDIMCharacter(applicationContext, cardMetaEntity, selectedCharacterPreview.slotId, settings) {
+            else if(settings.assumedFranchise != null) {
+                buildDIMToBEMCharacter(applicationContext, cardMeta, selectedCharacterPreview.slotId, settings) {
+                    characterDao.getCharacterById(selectedCharacterPreview.characterId)
+                }
+            }
+            else buildDIMCharacter(applicationContext, cardMeta, selectedCharacterPreview.slotId, settings) {
                 characterDao.getCharacterById(selectedCharacterPreview.characterId)
             }
             selectedCharacter.characterStats.lastUpdate = LocalDateTime.now() // don't count down timers for character that was in storage
@@ -339,15 +374,6 @@ class CharacterManagerImpl(
         }
     }
 
-    override suspend fun updateSettings() {
-        withContext(Dispatchers.IO) {
-            val character = getCurrentCharacter()
-            if(character != null) {
-                characterSettingsDao.update(character.settings)
-            }
-        }
-    }
-
     override fun deleteCharacter(characterPreview: CharacterPreview) {
         val currentCharacter = activeCharacterFlow.value
         if(currentCharacter == null) {
@@ -365,13 +391,15 @@ class CharacterManagerImpl(
         }
     }
 
-    override fun maybeUpdateCardMeta(cardMetaEntity: CardMetaEntity) {
+    override fun maybeUpdateCardMeta(cardMeta: CardMeta) {
         val activeCharacter = activeCharacterFlow.value
-        if(activeCharacter?.cardMetaEntity?.cardName == cardMetaEntity.cardName) {
+        if(activeCharacter?.cardMeta?.cardName == cardMeta.cardName) {
             if(activeCharacter is BEMCharacter) {
-                activeCharacterFlow.value = activeCharacter.copy(cardMetaEntity = cardMetaEntity)
+                activeCharacterFlow.value = activeCharacter.copy(cardMeta = cardMeta)
             } else if(activeCharacter is DIMCharacter) {
-                activeCharacterFlow.value = activeCharacter.copy(cardMetaEntity = cardMetaEntity)
+                activeCharacterFlow.value = activeCharacter.copy(cardMeta = cardMeta)
+            } else if(activeCharacter is DIMToBEMCharacter) {
+                activeCharacterFlow.value = activeCharacter.copy(cardMeta = cardMeta)
             }
         }
     }

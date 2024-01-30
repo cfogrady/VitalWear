@@ -1,23 +1,19 @@
 package com.github.cfogrady.vitalwear.character.data
 
-import android.util.Log
+import com.github.cfogrady.vitalwear.card.CardMeta
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.transformation.ExpectedTransformation
-import com.github.cfogrady.vitalwear.character.transformation.FusionTransformation
 import com.github.cfogrady.vitalwear.character.transformation.TransformationOption
-import com.github.cfogrady.vitalwear.common.card.CardType
 import com.github.cfogrady.vitalwear.common.card.db.AttributeFusionEntity
-import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntity
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
-import com.github.cfogrady.vitalwear.settings.CharacterSettingsEntity
+import com.github.cfogrady.vitalwear.settings.CharacterSettings
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDateTime
 
 class BEMCharacter(
-    cardMetaEntity: CardMetaEntity,
+    cardMeta: CardMeta,
     characterSprites: CharacterSprites,
     characterStats: CharacterEntity,
     speciesStats : SpeciesEntity,
@@ -25,13 +21,13 @@ class BEMCharacter(
     transformationOptions: List<TransformationOption>,
     attributeFusionEntity: AttributeFusionEntity?,
     specificFusionOptions: List<SpecificFusionEntity>,
-    settings: CharacterSettingsEntity,
-    _readyToTransform: MutableStateFlow<ExpectedTransformation?> = MutableStateFlow<ExpectedTransformation?>(null),
+    settings: CharacterSettings,
+    readyToTransform: MutableStateFlow<ExpectedTransformation?> = MutableStateFlow<ExpectedTransformation?>(null),
     activityIdx : Int = 1,
     lastTransformationCheck: LocalDateTime = LocalDateTime.MIN,
     currentTimeProvider: ()->LocalDateTime = LocalDateTime::now
 ): VBCharacter(
-    cardMetaEntity,
+    cardMeta,
     characterSprites,
     characterStats,
     speciesStats,
@@ -40,7 +36,7 @@ class BEMCharacter(
     attributeFusionEntity,
     specificFusionOptions,
     settings,
-    _readyToTransform,
+    readyToTransform,
     activityIdx,
     lastTransformationCheck,
     currentTimeProvider
@@ -53,7 +49,7 @@ class BEMCharacter(
     }
 
     fun copy(
-        cardMetaEntity: CardMetaEntity = this.cardMetaEntity,
+        cardMeta: CardMeta = this.cardMeta,
         characterSprites: CharacterSprites = this.characterSprites,
         characterStats: CharacterEntity = this.characterStats,
         speciesStats : SpeciesEntity = this.speciesStats,
@@ -61,10 +57,10 @@ class BEMCharacter(
         transformationOptions: List<TransformationOption> = this.transformationOptions,
         attributeFusionEntity: AttributeFusionEntity? = this.attributeFusionEntity,
         specificFusionOptions: List<SpecificFusionEntity> = this.specificFusionOptions,
-        settings: CharacterSettingsEntity = this.settings,
+        settings: CharacterSettings = this.settings,
         ): BEMCharacter {
         return BEMCharacter(
-            cardMetaEntity,
+            cardMeta,
             characterSprites,
             characterStats,
             speciesStats,
@@ -73,14 +69,10 @@ class BEMCharacter(
             attributeFusionEntity,
             specificFusionOptions,
             settings,
-            _readyToTransform = _readyToTransform,
+            readyToTransform = _readyToTransform,
             activityIdx = activityIdx,
             lastTransformationCheck = lastTransformationCheck,
         )
-    }
-
-    override fun isBEM() : Boolean {
-        return cardMetaEntity.cardType == CardType.BEM
     }
 
     override fun totalBp(): Int {

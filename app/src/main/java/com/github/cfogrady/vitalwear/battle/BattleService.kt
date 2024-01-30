@@ -21,7 +21,7 @@ import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.settings.CardSettingsDao
-import com.github.cfogrady.vitalwear.settings.CharacterSettingsEntity
+import com.github.cfogrady.vitalwear.settings.CharacterSettings
 import com.github.cfogrady.vitalwear.vitals.VitalService
 import java.util.*
 
@@ -50,14 +50,14 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         val firmware = firmwareManager.getFirmware().value!!
         val partnerBattleCharacter = battleCharacterFromBemCharacter(context, partnerCharacter)
         val targetCard = cardMetaEntityDao.getByName(battleTargetInfo.cardName)
-        val battleTarget = buildTargetFromInfo(context, targetCard, battleTargetInfo)
+        val battleTarget = buildTargetFromInfo(context, partnerCharacter, targetCard, battleTargetInfo)
         val battleSpriteLoader = if(targetCard.cardType == CardType.BEM)
             BemBattleSpriteLoader(context, cardSpritesIO, targetCard.cardName, battleTargetInfo.battleBackground)
         else
             DimBattleSpriteLoader(context, firmware, cardSpritesIO, targetCard.cardName, battleTargetInfo.battleBackground)
         return PreBattleModel(
             partnerBattleCharacter,
-            fetchSupportCharacter(context, firmware, partnerCharacter.cardMetaEntity.franchise),
+            fetchSupportCharacter(context, firmware, partnerCharacter.getFranchise()),
             battleTarget,
             battleSpriteLoader.getBackground(),
             battleSpriteLoader.getReadyIcon(),
@@ -89,12 +89,11 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         val partnerCharacter = characterManager.getCharacterFlow().value!!
         val firmware = firmwareManager.getFirmware().value!!
         val partnerBattleCharacter = battleCharacterFromBemCharacter(context, partnerCharacter)
-        val hasThirdBattlePool = partnerCharacter.isBEM()
-        val randomOpponent = loadRandomTarget(context, partnerCharacter.cardMetaEntity, hasThirdBattlePool, partnerCharacter.speciesStats.phase, partnerCharacter.settings.allowedBattles, partnerCharacter.cardMetaEntity.franchise)
+        val randomOpponent = loadRandomTarget(context, partnerCharacter, partnerCharacter.speciesStats.phase, partnerCharacter.settings.allowedBattles, partnerCharacter.getFranchise())
         val battleSpriteLoader = if (partnerCharacter.isBEM()) BemBattleSpriteLoader(context, cardSpritesIO, partnerCharacter.cardName()) else DimBattleSpriteLoader(context, firmware, cardSpritesIO, partnerCharacter.cardName())
         return PreBattleModel(
             partnerBattleCharacter,
-            fetchSupportCharacter(context, firmware, partnerCharacter.cardMetaEntity.franchise),
+            fetchSupportCharacter(context, firmware, partnerCharacter.getFranchise()),
             randomOpponent,
             battleSpriteLoader.getBackground(),
             battleSpriteLoader.getReadyIcon(),
@@ -102,15 +101,18 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         )
     }
 
-    private fun buildTargetFromInfo(context: Context, cardMetaEntity: CardMetaEntity, battleTargetInfo: BattleCharacterInfo): BattleCharacter {
-        val speciesEntity = speciesEntityDao.getCharacterByCardAndCharacterId(battleTargetInfo.cardName, battleTargetInfo.characterId)
+    private suspend fun buildTargetFromInfo(context: Context, partner: VBCharacter, opponentCardMeta: CardMetaEntity, battleTargetInfo: BattleCharacterInfo): BattleCharacter {
+        var speciesEntity = speciesEntityDao.getCharacterByCardAndCharacterId(battleTargetInfo.cardName, battleTargetInfo.characterId)
         val battleStats =
         if(battleTargetInfo.hp == null || battleTargetInfo.ap == null || battleTargetInfo.bp == null || battleTargetInfo.attack == null || battleTargetInfo.critical == null) {
+            if(partner.otherCardNeedsStatConversion(opponentCardMeta)) {
+                speciesEntity = dimToBemStatConversion.convertSpeciesEntity(speciesEntity)
+            }
             loadBattleStats(speciesEntity)
         } else {
             BattleStats(battleTargetInfo.bp, battleTargetInfo.ap, battleTargetInfo.hp, 0, speciesEntity.attribute, speciesEntity.type, speciesEntity.phase, Mood.NORMAL)
         }
-        val battleSprites = loadBattleSprites(context, speciesEntity, cardMetaEntity.cardType == CardType.BEM, battleTargetInfo.attack, battleTargetInfo.critical)
+        val battleSprites = loadBattleSprites(context, speciesEntity, opponentCardMeta.cardType == CardType.BEM, battleTargetInfo.attack, battleTargetInfo.critical)
         return BattleCharacter(battleStats, battleSprites)
     }
 
@@ -231,13 +233,13 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         return firmware.battleFirmwareSprites.hitIcons
     }
 
-    private suspend fun loadRandomTarget(context: Context, partnerCard: CardMetaEntity, hasThirdBattlePool: Boolean, phase: Int, allowedBattles: CharacterSettingsEntity.AllowedBattles, franchiseId: Int): BattleCharacter {
+    private suspend fun loadRandomTarget(context: Context, partner: VBCharacter, phase: Int, allowedBattles: CharacterSettings.AllowedBattles, franchiseId: Int): BattleCharacter {
         val targetCard = when (allowedBattles) {
-            CharacterSettingsEntity.AllowedBattles.ALL -> {
+            CharacterSettings.AllowedBattles.ALL -> {
                 val options = cardSettingsDao.getAllBattleCards()
                 options[random.nextInt(options.size)]
             }
-            CharacterSettingsEntity.AllowedBattles.ALL_FRANCHISE_AND_DIM -> {
+            CharacterSettings.AllowedBattles.ALL_FRANCHISE_AND_DIM -> {
                 val franchiseOptions = cardSettingsDao.getAllFranchiseBattleCards(franchiseId)
                 val dimOptions = cardSettingsDao.getAllFranchiseBattleCards(0)
                 val options = ArrayList<CardMetaEntity>(franchiseOptions.size + dimOptions.size)
@@ -245,16 +247,16 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
                 options.addAll(dimOptions)
                 options[random.nextInt(options.size)]
             }
-            CharacterSettingsEntity.AllowedBattles.ALL_FRANCHISE -> {
+            CharacterSettings.AllowedBattles.ALL_FRANCHISE -> {
                 val options = cardSettingsDao.getAllFranchiseBattleCards(franchiseId)
                 options[random.nextInt(options.size)]
             }
-            CharacterSettingsEntity.AllowedBattles.CARD_ONLY -> {
-                partnerCard
+            CharacterSettings.AllowedBattles.CARD_ONLY -> {
+                partner.cardMeta.toCardMetaEntity()
             }
         }
-        var speciesEntity = assignRandomTargetFromCard(targetCard.cardName, hasThirdBattlePool, phase)
-        if(targetCard.franchise == 0 && partnerCard.franchise != 0) {
+        var speciesEntity = assignRandomTargetFromCard(targetCard.cardName, targetCard.cardType == CardType.BEM, phase)
+        if(partner.otherCardNeedsStatConversion(targetCard)) {
             speciesEntity = dimToBemStatConversion.convertSpeciesEntity(speciesEntity)
         }
         val hasCardHits = targetCard.cardType == CardType.BEM

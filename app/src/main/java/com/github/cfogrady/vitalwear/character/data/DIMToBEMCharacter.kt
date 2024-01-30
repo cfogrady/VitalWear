@@ -1,37 +1,32 @@
 package com.github.cfogrady.vitalwear.character.data
 
 import com.github.cfogrady.vitalwear.card.CardMeta
-import com.github.cfogrady.vitalwear.character.StatType
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.transformation.ExpectedTransformation
 import com.github.cfogrady.vitalwear.character.transformation.TransformationOption
 import com.github.cfogrady.vitalwear.common.card.db.AttributeFusionEntity
+import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntity
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.settings.CharacterSettings
-import com.github.cfogrady.vitalwear.training.BackgroundTrainingResults
-import com.github.cfogrady.vitalwear.training.TrainingStatChanges
-import com.github.cfogrady.vitalwear.training.TrainingType
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.LocalDateTime
 
-class DIMCharacter(
-    cardMeta: CardMeta,
-    characterSprites: CharacterSprites,
-    characterStats: CharacterEntity,
-    speciesStats : SpeciesEntity,
-    transformationWaitTimeSeconds: Long,
-    transformationOptions: List<TransformationOption>,
-    attributeFusionEntity: AttributeFusionEntity?,
-    specificFusionOptions: List<SpecificFusionEntity>,
-    settings: CharacterSettings,
-    readyToTransform: MutableStateFlow<ExpectedTransformation?> = MutableStateFlow(null),
-    activityIdx : Int = 1,
-    lastTransformationCheck: LocalDateTime = LocalDateTime.MIN,
-    currentTimeProvider: ()->LocalDateTime = LocalDateTime::now
-): VBCharacter(
-    cardMeta,
+class DIMToBEMCharacter(cardMeta: CardMeta,
+                        characterSprites: CharacterSprites,
+                        characterStats: CharacterEntity,
+                        speciesStats : SpeciesEntity,
+                        transformationWaitTimeSeconds: Long,
+                        transformationOptions: List<TransformationOption>,
+                        attributeFusionEntity: AttributeFusionEntity?,
+                        specificFusionOptions: List<SpecificFusionEntity>,
+                        settings: CharacterSettings,
+                        readyToTransform: MutableStateFlow<ExpectedTransformation?> = MutableStateFlow<ExpectedTransformation?>(null),
+                        activityIdx : Int = 1,
+                        lastTransformationCheck: LocalDateTime = LocalDateTime.MIN,
+                        currentTimeProvider: ()-> LocalDateTime = LocalDateTime::now) :
+    VBCharacter(cardMeta,
     characterSprites,
     characterStats,
     speciesStats,
@@ -43,8 +38,7 @@ class DIMCharacter(
     readyToTransform,
     activityIdx,
     lastTransformationCheck,
-    currentTimeProvider
-) {
+    currentTimeProvider) {
 
     fun copy(
         cardMeta: CardMeta = this.cardMeta,
@@ -56,8 +50,8 @@ class DIMCharacter(
         attributeFusionEntity: AttributeFusionEntity? = this.attributeFusionEntity,
         specificFusionOptions: List<SpecificFusionEntity> = this.specificFusionOptions,
         settings: CharacterSettings = this.settings,
-    ): DIMCharacter {
-        return DIMCharacter(
+    ): DIMToBEMCharacter {
+        return DIMToBEMCharacter(
             cardMeta,
             characterSprites,
             characterStats,
@@ -73,34 +67,18 @@ class DIMCharacter(
         )
     }
 
+
     override fun totalBp(): Int {
-        return speciesStats.bp
+        return speciesStats.bp + characterStats.trainedBp.coerceAtMost(999)
     }
     override fun totalAp(): Int {
-        return speciesStats.ap
+        return speciesStats.ap + characterStats.trainedAp.coerceAtMost(999)
     }
     override fun totalHp(): Int {
-        return speciesStats.hp
+        return speciesStats.hp + characterStats.trainedHp.coerceAtMost(999)
     }
 
-    override fun increaseStats(trainingType: TrainingType, great: Boolean): TrainingStatChanges {
-        if(!canIncreaseStats()) {
-            return TrainingStatChanges(StatType.PP, 0)
-        }
-        var statChange = 1
-        if(great) {
-            statChange *= 2
-        }
-        return applyIncreaseToStat(statChange, StatType.PP) //pp
-    }
-
-    override fun increaseStatsFromMultipleTrainings(backgroundTrainingResults: BackgroundTrainingResults): TrainingStatChanges {
-        if(!canIncreaseStats()) {
-            return TrainingStatChanges(StatType.PP, 0)
-        }
-        val standardStatIncrease = 1
-        var statChange = standardStatIncrease * 2 * backgroundTrainingResults.great
-        statChange += standardStatIncrease * backgroundTrainingResults.good
-        return applyIncreaseToStat(statChange, StatType.PP)
+    override fun otherCardNeedsStatConversion(otherCard: CardMetaEntity): Boolean {
+        return otherCard.franchise == 0
     }
 }

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
@@ -38,7 +37,6 @@ import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.adventure.firmware.AdventureFirmwareSprites
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.activity.LOADING_TEXT
-import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntity
@@ -132,7 +130,7 @@ class AdventureMenuScreenFactory(
         LaunchedEffect(true) {
             loaded = false
             withContext(Dispatchers.IO) {
-                cards = loadCards(partner.cardMetaEntity.franchise)
+                cards = loadCards(partner.getFranchise())
                 loaded = true
             }
         }

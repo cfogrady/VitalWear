@@ -13,6 +13,9 @@ interface CardMetaEntityDao {
     @Query("select * from ${CardMetaEntity.TABLE} where cardName = :cardName limit 1")
     fun getByName(cardName: String): CardMetaEntity
 
+    @Query("select distinct franchise from ${CardMetaEntity.TABLE} where franchise != 0")
+    fun getNonDIMFranchises(): List<Int>
+
     @Update
     fun update(cardMetaEntity: CardMetaEntity)
 

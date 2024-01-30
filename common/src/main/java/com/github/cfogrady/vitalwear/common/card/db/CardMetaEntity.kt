@@ -18,6 +18,5 @@ data class CardMetaEntity(
     companion object {
         const val TAG = "CardMetaEntity"
         const val TABLE = "card_meta"
-        val EMPTY_CARD_META = CardMetaEntity("NONE", 0, 0, CardType.BEM, 0, null)
     }
 }

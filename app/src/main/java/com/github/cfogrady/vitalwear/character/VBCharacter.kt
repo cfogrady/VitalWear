@@ -1,6 +1,7 @@
 package com.github.cfogrady.vitalwear.character
 
 import android.util.Log
+import com.github.cfogrady.vitalwear.card.CardMeta
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterEntity
 import com.github.cfogrady.vitalwear.character.data.Mood
@@ -8,12 +9,13 @@ import com.github.cfogrady.vitalwear.character.data.SupportCharacter
 import com.github.cfogrady.vitalwear.character.transformation.ExpectedTransformation
 import com.github.cfogrady.vitalwear.character.transformation.FusionTransformation
 import com.github.cfogrady.vitalwear.character.transformation.TransformationOption
+import com.github.cfogrady.vitalwear.common.card.CardType
 import com.github.cfogrady.vitalwear.common.card.db.AttributeFusionEntity
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntity
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
-import com.github.cfogrady.vitalwear.settings.CharacterSettingsEntity
+import com.github.cfogrady.vitalwear.settings.CharacterSettings
 import com.github.cfogrady.vitalwear.training.BackgroundTrainingResults
 import com.github.cfogrady.vitalwear.training.TrainingStatChanges
 import com.github.cfogrady.vitalwear.training.TrainingType
@@ -22,7 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDateTime
 
 abstract class VBCharacter(
-    val cardMetaEntity: CardMetaEntity,
+    val cardMeta: CardMeta,
     val characterSprites: CharacterSprites,
     val characterStats: CharacterEntity,
     val speciesStats : SpeciesEntity,
@@ -30,7 +32,7 @@ abstract class VBCharacter(
     val transformationOptions: List<TransformationOption>,
     internal val attributeFusionEntity: AttributeFusionEntity?,
     internal val specificFusionOptions: List<SpecificFusionEntity>,
-    val settings: CharacterSettingsEntity,
+    val settings: CharacterSettings,
     internal val _readyToTransform: MutableStateFlow<ExpectedTransformation?> = MutableStateFlow<ExpectedTransformation?>(null),
     var activityIdx : Int = 1,
     internal var lastTransformationCheck: LocalDateTime = LocalDateTime.MIN,
@@ -42,10 +44,16 @@ abstract class VBCharacter(
         const val TAG = "VBCharacter"
     }
 
-    abstract fun isBEM(): Boolean
+    fun isBEM() : Boolean {
+        return cardMeta.cardType == CardType.BEM
+    }
+
+    open fun otherCardNeedsStatConversion(otherCard: CardMetaEntity): Boolean {
+        return (isBEM() || settings.assumedFranchise != null) && otherCard.franchise == 0
+    }
 
     fun cardName(): String {
-        return cardMetaEntity.cardName
+        return cardMeta.cardName
     }
 
     fun canIncreaseStats(): Boolean {
@@ -91,7 +99,7 @@ abstract class VBCharacter(
 
     fun hasValidTransformation(): TransformationOption? {
         for(transformationOption in transformationOptions) {
-            if((transformationOption.requiredAdventureCompleted ?: -1) > (cardMetaEntity.maxAdventureCompletion
+            if((transformationOption.requiredAdventureCompleted ?: -1) > (cardMeta.maxAdventureCompletion
                     ?: -1)
             ) {
                 continue
@@ -144,10 +152,14 @@ abstract class VBCharacter(
         lastTransformationCheck = LocalDateTime.now()
         val characterStats = characterStats
         Log.i(TAG, "Checking transformations")
-        checkFusion(support)?.let {
-            Log.i(TAG, "Fusion Option Available")
-            _readyToTransform.tryEmit(it)
-            return
+        support?.let {
+            if(it.franchiseId == getFranchise()) {
+                checkFusion(support)?.let {
+                    Log.i(TAG, "Fusion Option Available")
+                    _readyToTransform.tryEmit(it)
+                    return
+                }
+            }
         }
         val transformationOption = hasValidTransformation()
         if(transformationOption != null) {
@@ -213,5 +225,9 @@ abstract class VBCharacter(
             }
         }
         return TrainingStatChanges(statType, actualIncrease)
+    }
+
+    fun getFranchise(): Int {
+        return settings.assumedFranchise ?: cardMeta.franchise
     }
 }

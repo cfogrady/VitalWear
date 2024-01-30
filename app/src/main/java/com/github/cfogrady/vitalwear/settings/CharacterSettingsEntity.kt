@@ -8,19 +8,12 @@ import com.github.cfogrady.vitalwear.settings.CharacterSettingsEntity.Companion.
 @Entity(tableName = TABLE_NAME)
 data class CharacterSettingsEntity (
     @PrimaryKey(autoGenerate = false)
-    @ColumnInfo(name = "character_id")    var characterId: Int,
-    @ColumnInfo(name = "train_in_background") var trainInBackground: Boolean,
-    @ColumnInfo(name = "allowed_battles") var allowedBattles: AllowedBattles,
+    @ColumnInfo(name = "character_id")    val characterId: Int,
+    @ColumnInfo(name = "train_in_background") val trainInBackground: Boolean,
+    @ColumnInfo(name = "allowed_battles") val allowedBattles: CharacterSettings.AllowedBattles,
+    @ColumnInfo(name = "assumedFranchise") val assumedFranchise: Int?,
 ) {
     companion object {
         const val TABLE_NAME = "character_settings"
-        val DEFAULT_SETTINGS = CharacterSettingsEntity(0, true, AllowedBattles.CARD_ONLY)
-    }
-
-    enum class AllowedBattles(val descr: String) {
-        CARD_ONLY("Random Battles Against Card Only"),
-        ALL_FRANCHISE("Random Battles Against Any Card In Franchise"),
-        ALL_FRANCHISE_AND_DIM("Random Battles Against Any Card In Franchise And DIMs"),
-        ALL("Random Battles Against Any Card");
     }
 }

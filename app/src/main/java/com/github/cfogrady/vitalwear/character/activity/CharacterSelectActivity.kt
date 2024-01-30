@@ -16,20 +16,25 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.wear.compose.material.*
 import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.VitalWearApp
+import com.github.cfogrady.vitalwear.card.CardMeta
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.data.CharacterPreview
 import com.github.cfogrady.vitalwear.character.data.CharacterState
 import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
 import com.github.cfogrady.vitalwear.common.util.ActivityHelper
 import com.github.cfogrady.vitalwear.firmware.Firmware
-import com.github.cfogrady.vitalwear.settings.SettingsActivity
+import com.github.cfogrady.vitalwear.settings.CharacterSettings
+import com.github.cfogrady.vitalwear.settings.CharacterSettingsActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 const val TAG = "CharacterSelectActivity"
@@ -39,35 +44,57 @@ class CharacterSelectActivity : ComponentActivity() {
 
     lateinit var characterManager : CharacterManager
     lateinit var previewCharacterManager: PreviewCharacterManager
+
+    class NewCharacter(val cardMeta: CardMeta, val slotId: Int)
+
+    lateinit var selectedNewCharacter : NewCharacter
+
+    var loadingNewCharacterFlow = MutableStateFlow(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val activityHelper = ActivityHelper(this)
         characterManager = (application as VitalWearApp).characterManager
         val firmware = (application as VitalWearApp).firmwareManager.getFirmware().value!!
         previewCharacterManager = (application as VitalWearApp).previewCharacterManager
-        val newCharacterSettingsLauncher = activityHelper.getActivityLauncherWithResultHandling(SettingsActivity::class.java) {
-            Log.i(TAG, "Finished from settings")
-            finish()
+        val newCharacterSettingsLauncher = activityHelper.getActivityLauncherWithResultHandling(CharacterSettingsActivity::class.java) {
+            loadingNewCharacterFlow.value = true
+            val settings = it.data?.getParcelableExtra(CharacterSettingsActivity.CHARACTER_SETTINGS) ?: CharacterSettings.defaultSettings()
+            CoroutineScope(Dispatchers.IO).launch {
+                characterManager.createNewCharacter(applicationContext, selectedNewCharacter.cardMeta, selectedNewCharacter.slotId, settings)
+                finish()
+            }
         }
         val newCharacterLauncher = activityHelper.getActivityLauncherWithResultHandling(NewCharacterActivity::class.java) {result ->
             Log.i(TAG, "Finished from new character")
             if(newCharacterWasSelected(result)) {
                 Log.i(TAG, "Received new character")
-                newCharacterSettingsLauncher.invoke {  }
+                loadingNewCharacterFlow.value = true
+                val cardFromActivity = result.data?.getParcelableExtra<CardMeta>(NewCharacterActivity.CARD_SELECTED)!!
+                val slotId = result.data?.getIntExtra(NewCharacterActivity.SLOT_SELECTED, 0)!!
+                selectedNewCharacter = NewCharacter(cardFromActivity, slotId)
+                newCharacterSettingsLauncher.invoke {
+                    it.putExtra(CharacterSettingsActivity.CARD_TYPE, cardFromActivity.cardType)
+                }
             }
         }
         setContent {
-            BuildScreen(firmware) {
+            BuildScreen(loadingNewCharacterFlow, firmware) {
                 newCharacterLauncher.invoke {  }
             }
         }
     }
 
     @Composable
-    fun BuildScreen(firmware: Firmware, newCharacterLauncher: () -> Unit) {
+    fun BuildScreen(loadingNewCharacterState: StateFlow<Boolean>, firmware: Firmware, newCharacterLauncher: () -> Unit) {
         var loaded by remember { mutableStateOf(false) }
         var characters by remember { mutableStateOf(ArrayList<CharacterPreview>() as List<CharacterPreview>) }
-        if(!loaded) {
+        val loadingNewCharacter by loadingNewCharacterState.collectAsState()
+        if(loadingNewCharacter) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Setting Up New Character")
+            }
+        } else if(!loaded) {
             Loading() {
                 /* TODO: Changes this to just be a database call.
                    Do card load into a cache for images on each individual item.
@@ -126,7 +153,9 @@ class CharacterSelectActivity : ComponentActivity() {
     private fun PreviewCharacter(support: Bitmap, character: CharacterPreview, onSetSupport: ()->Unit, onDelete: ()->Unit) {
         var showMenu by remember { mutableStateOf(false) }
         if(showMenu) {
-            Column(modifier = Modifier.fillMaxSize().clickable { showMenu = false }, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceAround) {
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .clickable { showMenu = false }, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceAround) {
                 Button(onClick = {
                     swapToCharacter(character)
                 }) {
@@ -174,7 +203,7 @@ class CharacterSelectActivity : ComponentActivity() {
             Log.i(TAG, "result has no data?")
             return false
         }
-        return result.data!!.getBooleanExtra(NEW_CHARACTER_SELECTED_FLAG, false)
+        return result.data!!.getBooleanExtra(NewCharacterActivity.NEW_CHARACTER_SELECTED_FLAG, false)
     }
 
     private fun swapToCharacter(character: CharacterPreview) {

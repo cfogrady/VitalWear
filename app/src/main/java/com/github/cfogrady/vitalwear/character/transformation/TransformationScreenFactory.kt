@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
+import androidx.lifecycle.LifecycleCoroutineScope
 import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.character.VBUpdater
 import com.github.cfogrady.vitalwear.character.CharacterManager
@@ -22,6 +23,9 @@ import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class TransformationScreenFactory(
     private val characterManager: CharacterManager,
@@ -74,8 +78,10 @@ class TransformationScreenFactory(
                 TransformationState.NEW_CHARACTER -> NewCharacter(
                     firmwareSprites = transformationFirmwareSprites
                 ) {
-                    character = characterManager.doActiveCharacterTransformation(context, transformation)
-                    transformationProgress = TransformationState.SPLASH
+                    CoroutineScope(Dispatchers.IO).launch {
+                        character = characterManager.doActiveCharacterTransformation(context, transformation)
+                        transformationProgress = TransformationState.SPLASH
+                    }
                 }
                 TransformationState.SPLASH -> Splash(partner = character) {
                     transformationProgress = TransformationState.LIGHT_OF_TRANSFORMATION

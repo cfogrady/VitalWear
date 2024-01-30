@@ -21,7 +21,6 @@ import com.github.cfogrady.vitalwear.BackgroundManager
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
-import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.character.transformation.TransformationOption
 import com.github.cfogrady.vitalwear.character.transformation.TransformationFirmwareSprites
@@ -90,7 +89,7 @@ class StatsMenuActivity : ComponentActivity() {
                     }
                     else -> {
                         val potentialOption = partner.transformationOptions[rootPage - 1]
-                        val highestCompletedAdventure = partner.cardMetaEntity.maxAdventureCompletion ?: -1
+                        val highestCompletedAdventure = partner.cardMeta.maxAdventureCompletion ?: -1
                         PotentialTransformation(
                             firmwareSprites = firmware.transformationFirmwareSprites,
                             bemCharacter = partner,
