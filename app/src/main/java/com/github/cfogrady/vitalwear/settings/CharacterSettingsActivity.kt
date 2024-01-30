@@ -85,11 +85,14 @@ class CharacterSettingsActivity : ComponentActivity() {
                                     assumedFranchise = 1
                                 } else {
                                     assumedFranchise = null
+                                    if(!allowedBattles.showOnDIM) {
+                                        allowedBattles = CharacterSettings.AllowedBattles.CARD_ONLY
+                                    }
                                 }
                             })
                         }
                         if(assumedFranchise != null) {
-                            Text(text = "Franchies: ", fontWeight = FontWeight.Bold, modifier = Modifier.padding(5.dp))
+                            Text(text = "Franchises: ", fontWeight = FontWeight.Bold, modifier = Modifier.padding(5.dp))
                             franchises.forEach{
                                 Row(horizontalArrangement = Arrangement.Start, modifier = Modifier.clickable {
                                     assumedFranchise = it
@@ -123,7 +126,7 @@ class CharacterSettingsActivity : ComponentActivity() {
             item {
                 Button(onClick = {
                     val intent = Intent()
-                    val characterSettings = CharacterSettings(0, trainInBackground, allowedBattles, null)
+                    val characterSettings = CharacterSettings(0, trainInBackground, allowedBattles, assumedFranchise)
                     intent.putExtra(CHARACTER_SETTINGS, characterSettings)
                     setResult(0, intent)
                     finish()
