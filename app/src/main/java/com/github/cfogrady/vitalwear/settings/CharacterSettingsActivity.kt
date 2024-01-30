@@ -29,6 +29,7 @@ import androidx.wear.compose.material.Checkbox
 import androidx.wear.compose.material.RadioButton
 import androidx.wear.compose.material.ScalingLazyColumn
 import androidx.wear.compose.material.Text
+import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.common.card.CardType
 import kotlinx.coroutines.Dispatchers
@@ -52,17 +53,29 @@ class CharacterSettingsActivity : ComponentActivity() {
 
     @Composable
     private fun BuildScreen(cardType: CardType) {
+        var franchises by remember { mutableStateOf(emptyList<Int>()) }
+        var loading by remember { mutableStateOf(true) }
+        if(loading) {
+            Loading(scope = Dispatchers.IO) {
+                if(cardType == CardType.DIM) {
+                    franchises = (application as VitalWearApp).cardMetaEntityDao.getNonDIMFranchises()
+                    loading = false
+                } else {
+                    loading = false
+                }
+            }
+        } else {
+            SettingsControls(cardType = cardType, franchises = franchises)
+        }
+
+
+    }
+
+    @Composable
+    private fun SettingsControls(cardType: CardType, franchises: List<Int>) {
         var trainInBackground by remember { mutableStateOf(true) }
         var allowedBattles by remember { mutableStateOf(CharacterSettings.AllowedBattles.CARD_ONLY) }
         var assumedFranchise by remember { mutableStateOf<Int?>(null) }
-        var franchises by remember { mutableStateOf(emptyList<Int>()) }
-        LaunchedEffect(true) {
-            if(cardType == CardType.DIM) {
-                withContext(Dispatchers.IO) {
-                    franchises = (application as VitalWearApp).cardMetaEntityDao.getNonDIMFranchises()
-                }
-            }
-        }
         ScalingLazyColumn(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
             item {
                 // Take some space at the top so the Background training isn't cut off
@@ -74,7 +87,7 @@ class CharacterSettingsActivity : ComponentActivity() {
                     Checkbox(checked = trainInBackground, onCheckedChange = {trainInBackground = it})
                 }
             }
-            if(cardType == CardType.DIM) {
+            if(cardType == CardType.DIM && franchises.isNotEmpty()) {
                 item {
                     Column {
                         Divider(thickness = 1.dp)
