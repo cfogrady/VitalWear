@@ -8,12 +8,13 @@ import android.hardware.SensorEventListener
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntity
 import com.github.cfogrady.vitalwear.util.BridgedSensorEventListener
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class ActiveAdventure(private val context: Context, private val service: AdventureService, private val adventures: List<AdventureEntity>, private val backgrounds: List<Bitmap>, private var currentZone: Int, val partnerId: Int) : SensorEventListener, BridgedSensorEventListener {
+class ActiveAdventure(private val context: Context, private val service: AdventureService, private val adventures: List<AdventureEntity>, private val backgrounds: List<Bitmap>, private var currentZone: Int, val partner: VBCharacter) : SensorEventListener, BridgedSensorEventListener {
     companion object {
         const val TAG = "ActiveAdventure"
     }

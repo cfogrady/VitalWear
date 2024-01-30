@@ -42,12 +42,13 @@ class AdventureService(
     var activeAdventure: ActiveAdventure? = null
     var accelerometerToStepSensor: AccelerometerToStepSensor? = null
 
-    fun startAdventure(context: Context, cardName: String, partnerId: Int, startingAdventure: Int): Job {
+    fun startAdventure(context: Context, cardName: String, startingAdventure: Int): Job {
         val adventureService = this
         return CoroutineScope(Dispatchers.IO).launch {
             val adventures = getAdventureOptions(cardName)
             val backgrounds = cardSpritesIO.loadCardBackgrounds(context, cardName)
-            val adventure = ActiveAdventure(context, adventureService, adventures, backgrounds, startingAdventure, partnerId)
+            val partner = characterManager.getCurrentCharacter()!!
+            val adventure = ActiveAdventure(context, adventureService, adventures, backgrounds, startingAdventure, partner)
             activeAdventure = adventure
             val stepCounter = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
             if(stepCounter == null) {
@@ -89,19 +90,22 @@ class AdventureService(
         notificationChannelManager.cancelNotification(NotificationChannelManager.ADVENTURE_BOSS)
         if(battleResult == BattleResult.WIN) {
             // function so we don't lose references in coroutine scope during finishZone
-            markCompletion(adventure.currentAdventureEntity(), adventure.partnerId)
+            markCompletion(adventure.currentAdventureEntity(), adventure.partner.characterStats.id, adventure.partner.getFranchise(), adventure.partner.settings.assumedFranchise != null)
         }
         adventure.finishZone(battleResult == BattleResult.WIN)
     }
 
-    fun markCompletion(adventureEntity: AdventureEntity, partnerId: Int) {
+    fun markCompletion(adventureEntity: AdventureEntity, partnerId: Int, partnerFranchise: Int, assumedFranchise: Boolean) {
         CoroutineScope(Dispatchers.IO).launch {
             val cardMeta = cardMetaEntityDao.getByName(adventureEntity.cardName)
-            val maxAdventureCompletedForCard = cardMeta.maxAdventureCompletion ?: -1
-            if(maxAdventureCompletedForCard < adventureEntity.adventureId) {
-                val updated = cardMeta.copy(maxAdventureCompletion = adventureEntity.adventureId)
-                cardMetaEntityDao.update(updated)
-                characterManager.maybeUpdateCardMeta(CardMeta.fromCardMetaEntity(updated))
+            // only do a card adventure unlock if this was a character originally belonging to that franchise
+            if(!assumedFranchise && partnerFranchise == cardMeta.franchise) {
+                val maxAdventureCompletedForCard = cardMeta.maxAdventureCompletion ?: -1
+                if(maxAdventureCompletedForCard < adventureEntity.adventureId) {
+                    val updated = cardMeta.copy(maxAdventureCompletion = adventureEntity.adventureId)
+                    cardMetaEntityDao.update(updated)
+                    characterManager.maybeUpdateCardMeta(CardMeta.fromCardMetaEntity(updated))
+                }
             }
             // set character card completion
             val highestCompleted = characterAdventureDao.getByCharacterIdAndCardName(adventureEntity.characterId, adventureEntity.cardName)?.adventureId ?: -1

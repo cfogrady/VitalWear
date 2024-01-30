@@ -14,6 +14,8 @@ class CardMeta(val cardName: String,
 ) : Parcelable {
 
     companion object CREATOR : Parcelable.Creator<CardMeta> {
+        const val DIM_FRANCHISE = 0
+
         override fun createFromParcel(parcel: Parcel): CardMeta {
             return CardMeta(parcel)
         }

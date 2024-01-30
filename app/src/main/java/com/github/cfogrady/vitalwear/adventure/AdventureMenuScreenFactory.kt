@@ -20,6 +20,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,6 +36,7 @@ import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.items
 import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.adventure.firmware.AdventureFirmwareSprites
+import com.github.cfogrady.vitalwear.card.CardMeta
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.activity.LOADING_TEXT
 import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
@@ -48,6 +50,7 @@ import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.firmware.Firmware
+import com.github.cfogrady.vitalwear.settings.CharacterSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -113,7 +116,6 @@ class AdventureMenuScreenFactory(
                 val foregroundIntent = Intent(context, AdventureForegroundService::class.java)
                 foregroundIntent.putExtra(AdventureForegroundService.CARD_NAME, selectedAdventure!!.cardName)
                 foregroundIntent.putExtra(AdventureForegroundService.STARTING_ADVENTURE, selectedAdventure!!.adventureId)
-                foregroundIntent.putExtra(AdventureForegroundService.PARTNER, character.characterStats.id)
                 context.startForegroundService(foregroundIntent)
                 adventureMenuState = AdventureMenuState.Go
             }
@@ -130,7 +132,7 @@ class AdventureMenuScreenFactory(
         LaunchedEffect(true) {
             loaded = false
             withContext(Dispatchers.IO) {
-                cards = loadCards(partner.getFranchise())
+                cards = loadCards(partner.getFranchise(), partner.settings)
                 loaded = true
             }
         }
@@ -276,7 +278,7 @@ class AdventureMenuScreenFactory(
 
     @Composable
     fun Go(firmware: Firmware, background: Bitmap, characterSprites: CharacterSprites, onFinish: () -> Unit) {
-        var state by remember { mutableStateOf(CharacterSprites.IDLE_1) }
+        var state by remember { mutableIntStateOf(CharacterSprites.IDLE_1) }
         LaunchedEffect(key1 = state) {
             Handler.createAsync(Looper.getMainLooper()).postDelayed({
                 if(state == CharacterSprites.IDLE_1) {
@@ -298,8 +300,15 @@ class AdventureMenuScreenFactory(
         }
     }
 
-    private fun loadCards(franchiseId: Int) : List<CardMetaEntity> {
-        val cardMetaEntityDao = cardMetaEntityDao
-        return cardMetaEntityDao.getByFranchise(franchiseId)
+    private fun loadCards(franchiseId: Int, settings: CharacterSettings) : List<CardMetaEntity> {
+        return when(settings.allowedBattles) {
+            CharacterSettings.AllowedBattles.ALL_FRANCHISE_AND_DIM -> {
+                cardMetaEntityDao.getByFranchiseIn(listOf(franchiseId, CardMeta.DIM_FRANCHISE))
+            }
+            CharacterSettings.AllowedBattles.ALL -> {
+                cardMetaEntityDao.getAll()
+            }
+            else -> cardMetaEntityDao.getByFranchise(franchiseId)
+        }
     }
 }
