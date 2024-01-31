@@ -145,7 +145,10 @@ class CharacterManagerImpl(
                 val support = supports[0]
                 val card = cardMetaEntityDao.getByName(support.cardFile)
                 val characterSettings = characterSettingsDao.getByCharacterId(support.id)
-                val species = speciesEntityDao.getCharacterByCardAndCharacterId(support.cardFile, support.slotId)
+                var species = speciesEntityDao.getCharacterByCardAndCharacterId(support.cardFile, support.slotId)
+                if(characterSettings.assumedFranchise != null && card.cardType == CardType.DIM) {
+                    species = dimToBemStatConversion.convertSpeciesEntity(species)
+                }
                 val idle1 = characterSpritesIO.loadCharacterBitmapFile(context, species.spriteDirName, CharacterSpritesIO.IDLE1)!!
                 val idle2 = characterSpritesIO.loadCharacterBitmapFile(context, species.spriteDirName, CharacterSpritesIO.IDLE2)!!
                 val attack = characterSpritesIO.loadCharacterBitmapFile(context, species.spriteDirName, CharacterSpritesIO.ATTACK) ?: idle2
