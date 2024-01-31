@@ -51,9 +51,17 @@ the card image is selected on the phone.
 
 ## Character Settings
 There are several settings when starting a new character
-1) Background Training - This allows training to occur in the background of the watch. When this is disabled, the watch behaves similar to a vanilla VB and runs a single training mission.
-2) Scale DIM to BEM - This only shows up for DIM characters, and allows you scale the DIM stats to BEM stats and do trainings and battles other BEM characters. When this is enabled the user must select a franchise from the other loaded BEM cards. This will determine adventures and battle opponents.
-3) Battle Options - This allows the character to have random battles against only characters from the same card (same as physical VB), against any characters from the same franchise, against any characters from the same franchise or DIM characters, or against any character from any card loaded in the app. The latter two settings will also allow the character to do DIM adventure missions or adventure missions from other franchises. Doing adventure missions with these characters will not unlock transformations or gift characters. Those can only be unlocked by completing an adventure with a character originally from the card's franchise.
+1) **Background Training** - This allows training to occur in the background of the watch. When this is
+   disabled, the watch behaves similar to a vanilla VB and runs a single training mission.
+2) **Scale DIM to BEM** - This only shows up for DIM characters, and allows you scale the DIM stats to
+   BEM stats and do trainings and battles other BEM characters. When this is enabled the user must
+   select a franchise from the other loaded BEM cards. This will determine adventures and battle
+   opponents.
+3) **Battle Options** - This allows the character to have random battles against only characters
+   from the same card (same as physical VB), against any characters from the same franchise, against
+   any characters from the same franchise or DIM characters, or against any character from any card
+   loaded in the app. 
+   1) The latter two settings will also allow the character to do DIM adventure missions or adventure missions from other franchises. Doing adventure missions with these characters will not unlock transformations or gift characters. Those can only be unlocked by completing an adventure with a character originally from the card's franchise.
 
 ### DIM Scaling Algorithm
 There are minimums, maximums, and averages for all DIM stats across phases built into the program. If a
