@@ -68,16 +68,19 @@ There are minimums, maximums, and averages for all DIM stats across phases built
 character's DIM stat is above the average for the next level up it is excluded from the calculation
 for maximum.
 
-This data is also built into the program for Digimon BE Memories released as of 2024-01-30, but
-there are no exclusions because the averages for BE Memories are much closer together than DIMs
+The averages and standard deviations for Digimon BE Memories released as of 2024-01-30 are also
+stored.
 
 If a character shares the same splash sprite as an imported BEM character (and the character doesn't
 have unique sprites enabled), those stats are used.
 
 When there is no BEM version of a character and it is upscaled, each of their stats is marked as a
 percentage of the range for their level (or the next level if that stat was an outlier), then that
-percentage is applied to the range of the BEM stats for the same level. This should keep each
-characters relative strength to other DIM characters in tact for BEM stats.
+percentage is used to for the BEM stat range, defined as the average plus or minus one standard
+deviation. This should keep each characters relative strength to other DIM characters in tact for
+BEM stats; however, this also means that most DIM characters won't have outliers far from the
+average. There are a few BEM characters with wildly different from the rest which would otherwise
+skew stats for the entire clump of weakest or strongest DIM characters for a phase.
 
 ## Permissions
 At the moment permissions must be manually enabled by going to permissions in App Info on the watch.

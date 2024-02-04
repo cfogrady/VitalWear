@@ -37,14 +37,14 @@ class DimToBemStatConversion(private val statConversionDao: StatConversionDao) {
             Stats(70f,22f,12f), // VI
         )
 
-        val MIN_BEM_STATS = listOf(
+        val STDDEV_BEM_STATS = listOf(
             Stats(0f, 0f,0f), // I
             Stats(0f, 0f,0f), // II
-            Stats(3900f, 2600f,900f), // III
-            Stats(3500f, 3000f,1100f), // IV
-            Stats(3800f, 3100f,1250f), // V
-            Stats(3200f, 4150f,1800f), // VI
-            Stats(5000f, 4900f, 2000f), // VI+
+            Stats(421.3150f, 249.2136f,72.4568f), // III
+            Stats(470.1532f, 213.6744f,66.5749f), // IV
+            Stats(616.0121f, 367.4271f,89.2335f), // V
+            Stats(679.0475f, 429.7718f,98.3021f), // VI
+            Stats(705.7586f, 498.9274f, 53.4522f), // VI+
         )
 
         val AVERAGE_BEM_STATS = listOf(
@@ -55,16 +55,6 @@ class DimToBemStatConversion(private val statConversionDao: StatConversionDao) {
             Stats(5664.4f, 4408f,1505.7333f), // V
             Stats(5972.2974f, 5540.5405f,1976.7568f), // VI
             Stats(6314.2856f, 5935.7144f, 2092.8572f), // VI+
-        )
-
-        val MAX_BEM_STATS = listOf(
-            Stats(0f, 0f,0f), // I
-            Stats(0f, 0f,0f), // II
-            Stats(5300f, 3800f,1200f), // III
-            Stats(6500f, 4000f,1350f), // IV
-            Stats(8000f, 5100f,1700f), // V
-            Stats(6900f, 6400f,2200f), // VI
-            Stats(7000f, 6500f, 2150f), // VI+
         )
     }
 
@@ -82,11 +72,17 @@ class DimToBemStatConversion(private val statConversionDao: StatConversionDao) {
         var bpPhase = newPhase
         var hpPhase = newPhase
         var apPhase = newPhase
-        if(newPhase == AVERAGE_DIM_STATS.size - 1) {
+        if(newPhase < AVERAGE_DIM_STATS.size-1) {
             // Lucemon and a few others with abnormally high stats for their phase
-            bpPhase = if(speciesEntity.bp > AVERAGE_DIM_STATS[newPhase+1].bp) newPhase + 1 else newPhase
-            hpPhase = if(speciesEntity.hp > AVERAGE_DIM_STATS[newPhase+1].hp) newPhase + 1 else newPhase
-            apPhase = if(speciesEntity.ap > AVERAGE_DIM_STATS[newPhase+1].ap) newPhase + 1 else newPhase
+            if(speciesEntity.bp > AVERAGE_DIM_STATS[newPhase+1].bp) {
+                bpPhase = newPhase + 1
+            }
+            if(speciesEntity.hp > AVERAGE_DIM_STATS[newPhase+1].hp) {
+                hpPhase = newPhase + 1
+            }
+            if(speciesEntity.ap > AVERAGE_DIM_STATS[newPhase+1].ap) {
+                apPhase = newPhase + 1
+            }
         }
         val bp = convertStat(speciesEntity.bp, bpPhase, Stats::bp)
         val hp = convertStat(speciesEntity.hp, hpPhase, Stats::hp)
@@ -113,13 +109,13 @@ class DimToBemStatConversion(private val statConversionDao: StatConversionDao) {
             return statSelector(AVERAGE_BEM_STATS[phase]).toInt()
         }
         val percent = (stat - dimMin)/dimRange
-        val bemMin = statSelector.invoke(MIN_BEM_STATS[phase])
-        val bemMax = statSelector.invoke(MAX_BEM_STATS[phase])
-        val bemRange = bemMax - bemMin
+        val bemStddev = statSelector.invoke(STDDEV_BEM_STATS[phase])
+        val bemRange = bemStddev * 2
+        val bemAverage = statSelector.invoke(AVERAGE_BEM_STATS[phase])
         if(bemRange == 0f) {
-            return statSelector(AVERAGE_BEM_STATS[phase]).toInt()
+            return bemAverage.toInt()
         }
-        return ((percent * bemRange) + bemMin).toInt()
+        return ((percent * bemRange) + (bemAverage - bemStddev)).toInt()
     }
 
     private suspend fun newSpeciesPhase(cardName: String, slotId: Int, currentPhase: Int): Int {
