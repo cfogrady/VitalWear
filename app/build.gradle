@@ -37,8 +37,8 @@ android {
         applicationId "com.github.cfogrady.vitalwear"
         minSdk 28
         targetSdk 34
-        versionCode 9
-        versionName "0.2.1"
+        versionCode 10
+        versionName "0.2.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -73,6 +73,8 @@ dependencies {
     implementation project(':common')
     implementation 'androidx.compose.material3:material3:1.1.2'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0-RC2'
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     implementation "androidx.wear.watchface:watchface-complications-data-source-ktx:1.2.0"
     implementation 'androidx.preference:preference-ktx:1.2.0'
