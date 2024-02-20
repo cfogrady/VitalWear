@@ -67,6 +67,7 @@ class MainActivity : ComponentActivity() {
 
     private fun toggleSleep() {
         val gameState = (application as VitalWearApp).gameState
+        (applicationContext as VitalWearApp).partnerComplicationState.spriteIndex = 0
         if(gameState.value == GameState.SLEEPING) {
             gameState.value = GameState.IDLE
         } else {
