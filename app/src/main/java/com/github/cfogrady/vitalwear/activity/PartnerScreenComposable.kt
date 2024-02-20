@@ -12,12 +12,15 @@ import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
+import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
+import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.steps.StepService
+import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDateTime
 
-class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp, private val stepService: StepService) {
+class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp, private val stepService: StepService, private val gameStateFlow: StateFlow<GameState>) {
     companion object {
         const val TAG = "PartnerScreenComposable"
     }
@@ -36,6 +39,7 @@ class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private va
                 manyStepListener.unregister()
             }
         }
+        val gameState by gameStateFlow.collectAsState()
         val dailyStepCount by manyStepListener.dailyStepObserver.collectAsState()
         Log.i(TAG, "StepCount in activity: $dailyStepCount")
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
@@ -53,7 +57,11 @@ class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private va
                 }
                 Row(Modifier.height(emojiHeight)) {
                 }
-                bitmapScaler.AnimatedScaledBitmap(bitmaps = character.characterSprites.sprites, startIdx = character.activityIdx, frames = 2, contentDescription = "Character", alignment = Alignment.BottomCenter)
+                if(gameState == GameState.SLEEPING) {
+                    bitmapScaler.ScaledBitmap(bitmap = character.characterSprites.sprites[CharacterSprites.DOWN], contentDescription = "character", alignment = Alignment.BottomCenter)
+                } else {
+                    bitmapScaler.AnimatedScaledBitmap(bitmaps = character.characterSprites.sprites, startIdx = character.activityIdx, frames = 2, contentDescription = "Character", alignment = Alignment.BottomCenter)
+                }
             }
         }
     }

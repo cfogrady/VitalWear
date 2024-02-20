@@ -12,6 +12,8 @@ class MenuFirmwareSprites(
     val stopText: Bitmap,
     val stopIcon: Bitmap,
     val connectIcon: Bitmap,
+    val sleepIcon: Bitmap,
+    val wakeIcon: Bitmap,
 )
 {
     companion object {
@@ -22,6 +24,8 @@ class MenuFirmwareSprites(
         const val CONNECT_ICON = 268
         const val STOP_ICON = 44
         const val STOP_TEXT = 169
+        const val SLEEP = 76
+        const val WAKEUP = 75
 
         fun menuFirmwareSprites(spriteBitmapConverter: SpriteBitmapConverter, firmwareSprites: List<SpriteData.Sprite>): MenuFirmwareSprites {
             val statsMenuIcon = spriteBitmapConverter.getBitmap(firmwareSprites[STATS_ICON_IDX])
@@ -31,7 +35,9 @@ class MenuFirmwareSprites(
             val connectMenuIcon = spriteBitmapConverter.getBitmap(firmwareSprites[CONNECT_ICON])
             val stopText = spriteBitmapConverter.getBitmap(firmwareSprites[STOP_TEXT])
             val stopIcon = spriteBitmapConverter.getBitmap(firmwareSprites[STOP_ICON])
-            return MenuFirmwareSprites(statsMenuIcon, characterSelectorIcon, trainingMenuIcon, adventureIcon, stopText, stopIcon, connectMenuIcon)
+            val sleepIcon = spriteBitmapConverter.getBitmap(firmwareSprites[SLEEP])
+            val wakeIcon = spriteBitmapConverter.getBitmap(firmwareSprites[WAKEUP])
+            return MenuFirmwareSprites(statsMenuIcon, characterSelectorIcon, trainingMenuIcon, adventureIcon, stopText, stopIcon, connectMenuIcon, sleepIcon, wakeIcon)
         }
     }
 }

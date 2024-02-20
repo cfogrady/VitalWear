@@ -26,15 +26,12 @@ import com.github.cfogrady.vitalwear.R
 import com.github.cfogrady.vitalwear.adventure.AdventureScreenFactory
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
-import com.github.cfogrady.vitalwear.character.data.BEMCharacter
-import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.training.BackgroundTrainingScreenFactory
-import com.github.cfogrady.vitalwear.training.TrainingScreenFactory
 import kotlinx.coroutines.flow.StateFlow
 
 class MainScreenComposable(
@@ -91,7 +88,7 @@ class MainScreenComposable(
         } else if (gameState == GameState.ADVENTURE) {
             adventureScreenFactory.AdventureScreen(activityLaunchers.context, activityLaunchers.adventureActivityLauncher, firmware!!, character!!)
         } else {
-            DailyScreen(firmware!!, character = character!!, background!!, activityLaunchers)
+            DailyScreen(firmware!!, character = character!!, background!!, gameState, activityLaunchers)
         }
     }
 
@@ -135,7 +132,7 @@ class MainScreenComposable(
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun DailyScreen(firmware: Firmware, character: VBCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
+    fun DailyScreen(firmware: Firmware, character: VBCharacter, background: Bitmap, gameState: GameState, activityLaunchers: ActivityLaunchers) {
         val readyToTransform by character.readyToTransform.collectAsState()
         if (readyToTransform != null) {
             activityLaunchers.transformLauncher.invoke()
@@ -146,7 +143,7 @@ class MainScreenComposable(
             .fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
             val pagerState = rememberPagerState(pageCount = {
-                8
+                9
             })
             VerticalPager(state = pagerState) {page ->
                 when(page) {
@@ -212,6 +209,16 @@ class MainScreenComposable(
                     }
                     6 -> {
                         vitalBoxFactory.VitalBox {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                val sleepButton = if(gameState == GameState.SLEEPING) firmware.menuFirmwareSprites.wakeIcon else firmware.menuFirmwareSprites.sleepIcon
+                                bitmapScaler.ScaledBitmap(bitmap = sleepButton, contentDescription = "Sleep", modifier = Modifier.clickable {
+                                    activityLaunchers.sleepToggle.invoke()
+                                })
+                            }
+                        }
+                    }
+                    7 -> {
+                        vitalBoxFactory.VitalBox {
                             Box(modifier = Modifier
                                 .fillMaxSize()
                                 .clickable { activityLaunchers.debugActivityLauncher.invoke() }, contentAlignment = Alignment.Center) {
@@ -219,7 +226,7 @@ class MainScreenComposable(
                             }
                         }
                     }
-                    7 -> {
+                    8 -> {
                         vitalBoxFactory.VitalBox {
                             Box(modifier = Modifier
                                 .fillMaxSize()
@@ -234,4 +241,5 @@ class MainScreenComposable(
             }
         }
     }
+
 }

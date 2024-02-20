@@ -143,7 +143,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         stepService = SensorStepService(sharedPreferences, sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService))
         heartRateService = HeartRateService(sensorManager, sensorThreadHandler)
         vbUpdater = VBUpdater(applicationContext)
-        moodService = MoodService(heartRateService, stepService, sensorManager, vbUpdater, characterManager)
+        moodService = MoodService(heartRateService, stepService, sensorManager, vbUpdater, characterManager, gameState)
         moodBroadcastReceiver = MoodBroadcastReceiver(moodService, characterManager)
         saveService = SaveService(characterManager as CharacterManagerImpl, stepService, sharedPreferences)
         trainingService = TrainingService(sensorManager, heartRateService, saveService)
@@ -171,7 +171,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         backgroundTrainingScreenFactory = BackgroundTrainingScreenFactory(trainingScreenFactory, trainingService)
 
         transformationScreenFactory = TransformationScreenFactory(characterManager, backgroundHeight, firmwareManager, bitmapScaler, vitalBoxFactory, vbUpdater)
-        partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService)
+        partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService, gameState)
         adventureService = AdventureService(gameState, database.cardMetaEntityDao(), characterManager, database.adventureEntityDao(), cardSpriteIO, notificationChannelManager, database.characterAdventureDao(), sensorManager)
         val adventureScreenFactory = AdventureScreenFactory(adventureService, vitalBoxFactory, bitmapScaler, backgroundHeight)
         mainScreenComposable = MainScreenComposable(gameState, characterManager, saveService, firmwareManager, backgroundManager, backgroundTrainingScreenFactory, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory, adventureScreenFactory)

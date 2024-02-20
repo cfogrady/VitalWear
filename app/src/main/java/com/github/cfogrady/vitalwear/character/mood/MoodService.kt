@@ -8,12 +8,14 @@ import android.util.Log
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.VBUpdater
+import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.debug.Debuggable
 import com.github.cfogrady.vitalwear.heartrate.HeartRateResult
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.steps.SensorStepService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -25,6 +27,7 @@ class MoodService(
     private val sensorManager: SensorManager,
     private val vbUpdater: VBUpdater,
     private val characterManager: CharacterManager,
+    private val gameState: StateFlow<GameState>,
     private val localDateTimeProvider: () -> LocalDateTime = LocalDateTime::now): Debuggable {
 
     companion object {
@@ -68,7 +71,7 @@ class MoodService(
     }
 
     private fun handleDevicePutOn() {
-        if(lastWorn != null) {
+        if(lastWorn != null && gameState.value != GameState.SLEEPING) {
             val current = localDateTimeProvider.invoke()
             val minutesSinceLastWorn = ChronoUnit.MINUTES.between(lastWorn, current).toInt()
             val updateEvents = minutesSinceLastWorn/5
@@ -94,8 +97,10 @@ class MoodService(
 
     fun updateMood(now: LocalDateTime) {
         characterManager.getCurrentCharacter()?.let {character ->
-            CoroutineScope(Dispatchers.Default).launch {
-                updateCharacterMood(character, now)
+            if(gameState.value != GameState.SLEEPING) {
+                CoroutineScope(Dispatchers.Default).launch {
+                    updateCharacterMood(character, now)
+                }
             }
         }
     }
