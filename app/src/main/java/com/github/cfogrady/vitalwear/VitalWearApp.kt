@@ -30,8 +30,8 @@ import com.github.cfogrady.vitalwear.character.VBUpdater
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.CharacterManagerImpl
 import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
-import com.github.cfogrady.vitalwear.character.mood.BEMMoodUpdater
 import com.github.cfogrady.vitalwear.character.mood.MoodBroadcastReceiver
+import com.github.cfogrady.vitalwear.character.mood.MoodService
 import com.github.cfogrady.vitalwear.character.transformation.TransformationScreenFactory
 import com.github.cfogrady.vitalwear.common.card.CardCharacterImageService
 import com.github.cfogrady.vitalwear.common.card.CardLoader
@@ -105,6 +105,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var adventureService: AdventureService
     lateinit var cardReceiver: CardReceiver
     lateinit var firmwareReceiver: FirmwareReceiver
+    lateinit var moodService: MoodService
     private lateinit var applicationBootManager: ApplicationBootManager
     private lateinit var vbUpdater: VBUpdater
     var backgroundHeight = 0.dp
@@ -141,8 +142,9 @@ class VitalWearApp : Application(), Configuration.Provider {
         vitalService = VitalService(characterManager, complicationRefreshService)
         stepService = SensorStepService(sharedPreferences, sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService))
         heartRateService = HeartRateService(sensorManager, sensorThreadHandler)
-        moodBroadcastReceiver = MoodBroadcastReceiver(BEMMoodUpdater(heartRateService, stepService), characterManager)
         vbUpdater = VBUpdater(applicationContext)
+        moodService = MoodService(heartRateService, stepService, sensorManager, vbUpdater, characterManager)
+        moodBroadcastReceiver = MoodBroadcastReceiver(moodService, characterManager)
         saveService = SaveService(characterManager as CharacterManagerImpl, stepService, sharedPreferences)
         trainingService = TrainingService(sensorManager, heartRateService, saveService)
         shutdownManager = ShutdownManager(saveService)
@@ -176,7 +178,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val cardCharacterImageService = CardCharacterImageService(database.speciesEntityDao(), characterSpritesIO)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardCharacterImageService)
         shutdownReceiver = ShutdownReceiver(shutdownManager)
-        applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, vbUpdater, saveService, notificationChannelManager, complicationRefreshService)
+        applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, vbUpdater, moodService, saveService, notificationChannelManager, complicationRefreshService)
         adventureMenuScreenFactory = AdventureMenuScreenFactory(cardSpriteIO, database.cardMetaEntityDao(), adventureService, vitalBoxFactory, characterSpritesIO, database.speciesEntityDao(), bitmapScaler, backgroundHeight)
         cardReceiver = CardReceiver(cardLoader)
         firmwareReceiver = FirmwareReceiver(firmwareManager, notificationChannelManager)

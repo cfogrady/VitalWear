@@ -42,6 +42,13 @@ class VBUpdater(val context: Context) {
         alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, now + period, period, moodUpdateIntent)
     }
 
+    fun unRegisterMoodUpdates() {
+        val alarmManager = context.getSystemService(Service.ALARM_SERVICE) as AlarmManager
+        val moodUpdateIntent = PendingIntent.getBroadcast(context, 0, Intent(MoodBroadcastReceiver.MOOD_UPDATE),
+            PendingIntent.FLAG_IMMUTABLE)
+        alarmManager.cancel(moodUpdateIntent)
+    }
+
     fun cancel(workManager: WorkManager = WorkManager.getInstance(context)) {
         workManager.cancelAllWorkByTag(WORK_TAG)
     }

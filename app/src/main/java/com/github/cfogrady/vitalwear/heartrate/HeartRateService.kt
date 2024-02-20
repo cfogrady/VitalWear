@@ -3,8 +3,6 @@ package com.github.cfogrady.vitalwear.heartrate
 import android.hardware.SensorManager
 import android.util.Log
 import com.github.cfogrady.vitalwear.util.SensorThreadHandler
-import java.time.LocalDateTime
-import java.util.*
 
 
 class HeartRateService(
@@ -14,24 +12,6 @@ class HeartRateService(
 
     companion object {
         const val TAG = "HeartRateService"
-
-        class HeartRateLog(
-            val startListening: LocalDateTime,
-            val heartRate: Int,
-            val sensorError: HeartRateResult.Companion.HeartRateError,
-            val exerciseLevel: Int,
-            val readTime: LocalDateTime
-        )
-    }
-
-    var readingsLog = LinkedList<HeartRateLog>()
-
-    fun debug(): List<Pair<String, String>> {
-        val debugList = ArrayList<Pair<String, String>>(20)
-        for(log in readingsLog) {
-            debugList.add(Pair("HeartRateLog", "${log.startListening}: ${log.readTime}, ${log.heartRate}, ${log.sensorError}, ${log.exerciseLevel}"))
-        }
-        return debugList
     }
 
     private suspend fun getHeartRate(): HeartRateResult {
@@ -55,14 +35,12 @@ class HeartRateService(
         }
     }
 
-    suspend fun getExerciseLevel(lastLevel: Int, now: LocalDateTime): Int {
+    class ExerciseLevel(val level: Int, val heartRate: HeartRateResult)
+
+    suspend fun getExerciseLevel(lastLevel: Int): ExerciseLevel {
         val heartRateResult = getHeartRate()
         val level = exerciseLevelFromResult(heartRateResult, lastLevel)
-        readingsLog.addFirst(HeartRateLog(now, heartRateResult.heartRate, heartRateResult.heartRateError, level, LocalDateTime.now()))
-        if(readingsLog.size > 9) {
-            readingsLog.removeLast()
-        }
-        return level
+        return ExerciseLevel(level, heartRateResult)
     }
 
     fun restingHeartRate(): Int {
