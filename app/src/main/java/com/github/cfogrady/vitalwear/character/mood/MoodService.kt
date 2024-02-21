@@ -41,12 +41,17 @@ class MoodService(
 
     @Synchronized fun initialize() {
         if (offBodySensor == null) {
-            offBodySensor = sensorManager.getDefaultSensor(Sensor.TYPE_LOW_LATENCY_OFFBODY_DETECT)!!
-            if(!sensorManager.registerListener(offBodySensorEvenListener, offBodySensor, SensorManager.SENSOR_DELAY_NORMAL)) {
-                Log.e(TAG, "Can't setup body sensor!")
+            val maybeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LOW_LATENCY_OFFBODY_DETECT)
+            if (maybeSensor == null) {
+                Log.e(TAG, "No off body sensor!")
+            } else {
+                offBodySensor = maybeSensor
+                if(!sensorManager.registerListener(offBodySensorEvenListener, offBodySensor, SensorManager.SENSOR_DELAY_NORMAL)) {
+                    Log.e(TAG, "Can't setup body sensor!")
+                }
             }
-            vbUpdater.scheduleExactMoodUpdates()
         }
+//        vbUpdater.scheduleExactMoodUpdates()
     }
 
     private val offBodySensorEvenListener = object: SensorEventListener {
@@ -66,11 +71,13 @@ class MoodService(
     }
 
     private fun handleDeviceTakenOff() {
+        Log.i(TAG, "Device removed")
         vbUpdater.unRegisterMoodUpdates()
         lastWorn = localDateTimeProvider.invoke()
     }
 
     private fun handleDevicePutOn() {
+        Log.i(TAG, "Device being worn again")
         if(lastWorn != null && gameState.value != GameState.SLEEPING) {
             val current = localDateTimeProvider.invoke()
             val minutesSinceLastWorn = ChronoUnit.MINUTES.between(lastWorn, current).toInt()

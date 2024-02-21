@@ -1,6 +1,5 @@
 package com.github.cfogrady.vitalwear
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.app.NotificationManager
 import android.content.Context
@@ -8,7 +7,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.hardware.SensorManager
+import android.util.Log
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import androidx.room.Room
 import androidx.work.Configuration
@@ -111,13 +112,15 @@ class VitalWearApp : Application(), Configuration.Provider {
     var backgroundHeight = 0.dp
     val gameState = MutableStateFlow(GameState.IDLE)
 
-    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
         super.onCreate()
         Log.i("VitalWear", "Create application")
         buildDependencies()
+
         applicationContext.registerReceiver(shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN))
-        applicationContext.registerReceiver(moodBroadcastReceiver, IntentFilter(MoodBroadcastReceiver.MOOD_UPDATE))
+        // NOT_EXPORTED prevents debug and release app from sending each other broadcasts
+        ContextCompat.registerReceiver(applicationContext, moodBroadcastReceiver, IntentFilter(MoodBroadcastReceiver.MOOD_UPDATE), ContextCompat.RECEIVER_NOT_EXPORTED)
+
         SensorStepService.setupDailyStepReset(this)
         val appShutdownHandler = AppShutdownHandler(shutdownManager, sharedPreferences)
         // This may be run on app shutdown by Android... but updating or killing via the IDE never triggers this.
