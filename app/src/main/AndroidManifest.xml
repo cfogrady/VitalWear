@@ -164,8 +164,6 @@
                  <data android:scheme="wear" android:host="*"/>
             </intent-filter>
         </service>
-
-        <receiver android:name=".complications.PartnerComplicationReceiver" />
         <receiver
             android:name=".BootReceiver"
             android:exported="true">
