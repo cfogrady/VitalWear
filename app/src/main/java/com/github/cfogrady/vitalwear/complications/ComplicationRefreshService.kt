@@ -56,8 +56,9 @@ class ComplicationRefreshService(private val applicationContext: Context, privat
 
         private fun updateComplicationState() {
             // TODO: Find better way to change sleep idx
-            if((applicationContext as VitalWearApp).gameState.value != GameState.SLEEPING) {
-                val state = (applicationContext as VitalWearApp).partnerComplicationState
+            val vitalWearApp = (applicationContext as VitalWearApp)
+            if(vitalWearApp.gameState.value != GameState.SLEEPING) {
+                val state = (vitalWearApp).partnerComplicationState
                 state.spriteIndex++
                 if(state.spriteIndex > 1) {
                     state.spriteIndex = 0
@@ -72,6 +73,7 @@ class ComplicationRefreshService(private val applicationContext: Context, privat
                     context = applicationContext,
                     complicationDataSourceComponent = component
                 )
+            // For some reason this seems to generate a lot of Job didn't exist in JobStore warnings. Seems safe to ignore at the moment.
             complicationDataSourceUpdateRequester.requestUpdateAll()
         }
     }

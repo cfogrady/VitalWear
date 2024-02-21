@@ -1,7 +1,6 @@
 package com.github.cfogrady.vitalwear.complications
 
 import android.app.PendingIntent
-import android.content.ComponentName
 import android.content.Intent
 import android.graphics.drawable.Icon
 import androidx.wear.watchface.complications.data.*
@@ -11,9 +10,9 @@ import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.activity.MainActivity
 
 class PartnerComplicationService : ComplicationDataSourceService() {
+
     // TODO: Mood and Sleeping Sprites: 23-28
     val TAG = "PartnerComplicationService"
-    lateinit var dataSource : ComponentName
 
     // Called when setting up complication (edit screens)
     override fun getPreviewData(type: ComplicationType): ComplicationData? {
@@ -31,14 +30,21 @@ class PartnerComplicationService : ComplicationDataSourceService() {
         request: ComplicationRequest,
         listener: ComplicationRequestListener
     ) {
-        dataSource = ComponentName(this, javaClass)
+        request.complicationInstanceId
         val complicationData = complicationResult()
         listener.onComplicationData(complicationData)
     }
 
+    override fun onComplicationDeactivated(complicationInstanceId: Int) {
+        super.onComplicationDeactivated(complicationInstanceId)
+    }
+
     private fun complicationResult() : ComplicationData {
         val goToAppIntent = Intent(applicationContext, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(applicationContext, 0, goToAppIntent, PendingIntent.FLAG_CANCEL_CURRENT.or(PendingIntent.FLAG_IMMUTABLE).or(PendingIntent.FLAG_ONE_SHOT))
+        val pendingIntent = PendingIntent.getActivity(applicationContext, 0, goToAppIntent,
+            PendingIntent.FLAG_CANCEL_CURRENT
+                .or(PendingIntent.FLAG_IMMUTABLE)
+                .or(PendingIntent.FLAG_ONE_SHOT))
         val iconImage = findComplicationIcon()
         val image = SmallImage.Builder(iconImage, SmallImageType.PHOTO).build()
         val text = PlainComplicationText.Builder("Partner").build()
