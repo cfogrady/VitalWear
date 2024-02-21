@@ -4,13 +4,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.github.cfogrady.vitalwear.character.CharacterManager
-import com.github.cfogrady.vitalwear.steps.SensorStepService
 import java.time.LocalDateTime
 
 class MoodBroadcastReceiver(
-    private val moodService: MoodService,
-    private val characterManager: CharacterManager) : BroadcastReceiver() {
+    private val moodService: MoodService) : BroadcastReceiver() {
     companion object {
         const val MOOD_UPDATE = "MOOD_UPDATE_INTENT"
         const val TAG = "MoodBroadcastReceiver"

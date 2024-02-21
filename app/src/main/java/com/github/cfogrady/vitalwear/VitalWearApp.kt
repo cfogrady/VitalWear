@@ -114,6 +114,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
         super.onCreate()
+        Log.i("VitalWear", "Create application")
         buildDependencies()
         applicationContext.registerReceiver(shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN))
         applicationContext.registerReceiver(moodBroadcastReceiver, IntentFilter(MoodBroadcastReceiver.MOOD_UPDATE))
@@ -144,7 +145,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         heartRateService = HeartRateService(sensorManager, sensorThreadHandler)
         vbUpdater = VBUpdater(applicationContext)
         moodService = MoodService(heartRateService, stepService, sensorManager, vbUpdater, characterManager, gameState)
-        moodBroadcastReceiver = MoodBroadcastReceiver(moodService, characterManager)
+        moodBroadcastReceiver = MoodBroadcastReceiver(moodService)
         saveService = SaveService(characterManager as CharacterManagerImpl, stepService, sharedPreferences)
         trainingService = TrainingService(sensorManager, heartRateService, saveService)
         shutdownManager = ShutdownManager(saveService)
