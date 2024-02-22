@@ -53,6 +53,7 @@ import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.firmware.FirmwareReceiver
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
+import com.github.cfogrady.vitalwear.settings.SettingsComposableFactory
 import com.github.cfogrady.vitalwear.steps.SensorStepService
 import com.github.cfogrady.vitalwear.training.BackgroundTrainingScreenFactory
 import com.github.cfogrady.vitalwear.util.SensorThreadHandler
@@ -107,6 +108,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var cardReceiver: CardReceiver
     lateinit var firmwareReceiver: FirmwareReceiver
     lateinit var moodService: MoodService
+    lateinit var settingsComposableFactory: SettingsComposableFactory
     private lateinit var applicationBootManager: ApplicationBootManager
     private lateinit var vbUpdater: VBUpdater
     var backgroundHeight = 0.dp
@@ -186,6 +188,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         adventureMenuScreenFactory = AdventureMenuScreenFactory(cardSpriteIO, database.cardMetaEntityDao(), adventureService, vitalBoxFactory, characterSpritesIO, database.speciesEntityDao(), bitmapScaler, backgroundHeight)
         cardReceiver = CardReceiver(cardLoader)
         firmwareReceiver = FirmwareReceiver(firmwareManager, notificationChannelManager)
+        settingsComposableFactory = SettingsComposableFactory(backgroundManager, vitalBoxFactory, bitmapScaler, saveService)
     }
 
     override fun getWorkManagerConfiguration(): Configuration {

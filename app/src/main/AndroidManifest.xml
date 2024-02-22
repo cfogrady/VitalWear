@@ -92,6 +92,8 @@
             android:taskAffinity="" />
         <activity android:name=".training.StopBackgroundTrainingActivity"
             android:taskAffinity="" />
+        <activity android:name=".settings.SettingsActivity"
+            android:taskAffinity="" />
         <service
             android:name=".tiles.PetTileService"
             android:label="VitalWear"

@@ -19,6 +19,7 @@ class SaveService(private val characterManager: CharacterManagerImpl, private va
         }
     }
 
+
     fun saveBlocking(preferencesEditor: Editor = sharedPreferences.edit()) {
         runBlocking(Dispatchers.IO) {
             internalSave(preferencesEditor)

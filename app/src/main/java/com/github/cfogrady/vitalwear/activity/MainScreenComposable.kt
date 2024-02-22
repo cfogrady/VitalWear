@@ -1,9 +1,7 @@
 package com.github.cfogrady.vitalwear.activity
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -16,10 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.LiveData
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.*
@@ -222,23 +217,12 @@ class MainScreenComposable(
                             }
                         }
                     }
-                    MenuOption.DEBUG -> {
+                    MenuOption.SETTINGS -> {
                         vitalBoxFactory.VitalBox {
-                            Box(modifier = Modifier
-                                .fillMaxSize()
-                                .clickable { activityLaunchers.debugActivityLauncher.invoke() }, contentAlignment = Alignment.Center) {
-                                Text(text = "DEBUG",  fontWeight = FontWeight.Bold, fontSize = 3.em)
-                            }
-                        }
-                    }
-                    MenuOption.SAVE -> {
-                        vitalBoxFactory.VitalBox {
-                            Box(modifier = Modifier
-                                .fillMaxSize()
-                                .clickable {
-                                    saveService.saveAsync()
-                                }, contentAlignment = Alignment.Center) {
-                                Text(text = "SAVE",  fontWeight = FontWeight.Bold, fontSize = 3.em)
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.settingsIcon, contentDescription = "Settings", modifier = Modifier.clickable {
+                                    activityLaunchers.settingsActivityLauncher.invoke()
+                                })
                             }
                         }
                     }
@@ -255,8 +239,7 @@ class MainScreenComposable(
         ADVENTURE,
         BATTLE,
         SLEEP,
-        DEBUG,
-        SAVE,
+        SETTINGS,
     }
 
     fun buildMenuPages(phase: Int, gameState: GameState): ArrayList<MenuOption> {
@@ -272,8 +255,7 @@ class MainScreenComposable(
             }
         }
         menuPages.add(MenuOption.SLEEP)
-        menuPages.add(MenuOption.DEBUG)
-        menuPages.add(MenuOption.SAVE)
+        menuPages.add(MenuOption.SETTINGS)
         return menuPages
     }
 }
