@@ -20,6 +20,7 @@ import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.*
 import com.github.cfogrady.vitalwear.R
 import com.github.cfogrady.vitalwear.adventure.AdventureScreenFactory
+import com.github.cfogrady.vitalwear.background.BackgroundManager
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
