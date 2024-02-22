@@ -122,6 +122,12 @@ class VitalWearApp : Application(), Configuration.Provider {
         applicationContext.registerReceiver(shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN))
         // NOT_EXPORTED prevents debug and release app from sending each other broadcasts
         ContextCompat.registerReceiver(applicationContext, moodBroadcastReceiver, IntentFilter(MoodBroadcastReceiver.MOOD_UPDATE), ContextCompat.RECEIVER_NOT_EXPORTED)
+        val powerBroadcastReceiver = PowerBroadcastReceiver()
+        val powerChangeIntentFilter = IntentFilter()
+        powerChangeIntentFilter.addAction(Intent.ACTION_POWER_CONNECTED)
+        powerChangeIntentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED)
+        ContextCompat.registerReceiver(applicationContext, powerBroadcastReceiver, powerChangeIntentFilter, ContextCompat.RECEIVER_EXPORTED)
+
 
         SensorStepService.setupDailyStepReset(this)
         val appShutdownHandler = AppShutdownHandler(shutdownManager, sharedPreferences)
