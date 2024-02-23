@@ -7,8 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -27,23 +28,33 @@ class SettingsComposableFactory(private val backgroundManager: BackgroundManager
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun SettingsMenu(activityLauncher: SettingsActivityLauncher, onFinish: () -> Unit) {
-        val background by backgroundManager.selectedBackground.observeAsState()
+    fun SettingsMenu(activityLauncher: SettingsActivityLauncher) {
+        val background by backgroundManager.selectedBackground.collectAsState()
+        val menuPages = remember { buildSettingMenuPages() }
         vitalBoxFactory.VitalBox {
             bitmapScaler.ScaledBitmap(bitmap = background!!, contentDescription = "Background", alignment = Alignment.BottomCenter)
-            val pagerState = rememberPagerState(pageCount = {2})
+            val pagerState = rememberPagerState(pageCount = {menuPages.size})
             VerticalPager(state = pagerState) {
-                when(it) {
-                    0 -> {
+                when(menuPages[it]) {
+                    SettingsMenuOption.Background -> {
                         Box(modifier = Modifier
                             .fillMaxSize()
                             .clickable {
-                                activityLauncher.launchDebug.invoke {}
+                                activityLauncher.backgroundSelection.invoke()
+                            }, contentAlignment = Alignment.Center) {
+                            Text(text = "BACKGROUND", fontWeight = FontWeight.Bold, fontSize = 2.5.em)
+                        }
+                    }
+                    SettingsMenuOption.Debug -> {
+                        Box(modifier = Modifier
+                            .fillMaxSize()
+                            .clickable {
+                                activityLauncher.launchDebug.invoke()
                             }, contentAlignment = Alignment.Center) {
                             Text(text = "DEBUG", fontWeight = FontWeight.Bold, fontSize = 3.em)
                         }
                     }
-                    1 -> {
+                    SettingsMenuOption.Save -> {
                         Box(modifier = Modifier
                             .fillMaxSize()
                             .clickable {
@@ -60,5 +71,17 @@ class SettingsComposableFactory(private val backgroundManager: BackgroundManager
                 }
             }
         }
+    }
+
+    enum class SettingsMenuOption {
+        Background,
+        Debug,
+        Save
+    }
+
+    fun buildSettingMenuPages(): List<SettingsMenuOption> {
+        return listOf(SettingsMenuOption.Background,
+            SettingsMenuOption.Debug,
+            SettingsMenuOption.Save)
     }
 }

@@ -71,17 +71,14 @@ class MainScreenComposable(
     }
 
     @Composable
-    fun EverythingLoadedScreen(firmwareData: StateFlow<Firmware?>, activeCharacterData: StateFlow<VBCharacter?>, backgroundData: LiveData<Bitmap>, activityLaunchers: ActivityLaunchers) {
+    fun EverythingLoadedScreen(firmwareData: StateFlow<Firmware?>, activeCharacterData: StateFlow<VBCharacter?>, backgroundData: StateFlow<Bitmap?>, activityLaunchers: ActivityLaunchers) {
         val firmware by firmwareData.collectAsState()
         val character by activeCharacterData.collectAsState()
-        val background by backgroundData.observeAsState()
+        val background by backgroundData.collectAsState()
         val gameState by gameStateFlow.collectAsState()
         if(background == null) {
             Log.i(TAG, "Loading in everythingLoadedScreen background is null")
-            Loading {
-                // TODO: Change to loadCurrent or similar
-                backgroundManager.loadDefault()
-            }
+            Loading {}
         } else if(character == null) {
             activityLaunchers.characterSelectionLauncher.invoke()
         } else if(gameState == GameState.TRAINING) {

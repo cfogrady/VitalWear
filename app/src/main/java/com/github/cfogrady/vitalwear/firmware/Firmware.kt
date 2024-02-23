@@ -19,7 +19,7 @@ class Firmware(
     val transformationFirmwareSprites: TransformationFirmwareSprites,
     val loadingIcon : Bitmap,
     val insertCardIcon: Bitmap,
-    val defaultBackground: Bitmap,
+    val backgrounds: List<Bitmap>,
     val readyIcon: Bitmap,
     val goIcon: Bitmap,
     val mission: Bitmap,

@@ -52,6 +52,7 @@ import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.debug.ExceptionService
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.firmware.FirmwareReceiver
+import com.github.cfogrady.vitalwear.firmware.PostFirmwareLoader
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 import com.github.cfogrady.vitalwear.settings.SettingsComposableFactory
@@ -69,12 +70,14 @@ import java.util.Random
 
 class VitalWearApp : Application(), Configuration.Provider {
     private val spriteBitmapConverter = SpriteBitmapConverter()
-    val firmwareManager = FirmwareManager(spriteBitmapConverter)
+    private val spriteFileIO = SpriteFileIO()
+    val cardSpriteIO = CardSpritesIO(spriteFileIO, spriteBitmapConverter)
+    lateinit var backgroundManager: BackgroundManager
+    lateinit var firmwareManager: FirmwareManager
     val partnerComplicationState = PartnerComplicationState()
     val exceptionService = ExceptionService()
-    private val spriteFileIO = SpriteFileIO()
     private val characterSpritesIO = CharacterSpritesIO(spriteFileIO, spriteBitmapConverter)
-    val cardSpriteIO = CardSpritesIO(spriteFileIO, spriteBitmapConverter)
+
     private val sensorThreadHandler = SensorThreadHandler()
     private lateinit var imageScaler : ImageScaler
     lateinit var notificationChannelManager: NotificationChannelManager
@@ -84,7 +87,6 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var database : AppDatabase
     lateinit var characterManager: CharacterManager
     lateinit var previewCharacterManager: PreviewCharacterManager
-    lateinit var backgroundManager: BackgroundManager
     lateinit var battleService: BattleService
     lateinit var vitalBoxFactory: VitalBoxFactory
     lateinit var partnerScreenComposable: PartnerScreenComposable
@@ -143,6 +145,9 @@ class VitalWearApp : Application(), Configuration.Provider {
             .addMigrations(CreateAndPopulateMaxAdventureCompletionCardMeta()).allowMainThreadQueries().build()
         //TODO: Should replace sharedPreferences with datastore (see https://developer.android.com/training/data-storage/shared-preferences)
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        backgroundManager = BackgroundManager(cardSpriteIO, sharedPreferences)
+        val postFirmwareLoader = PostFirmwareLoader(backgroundManager)
+        firmwareManager = FirmwareManager(spriteBitmapConverter, postFirmwareLoader)
         val dimToBemStatConversion = DimToBemStatConversion(database.statConversionDao())
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationChannelManager = NotificationChannelManager(notificationManager)
@@ -162,7 +167,6 @@ class VitalWearApp : Application(), Configuration.Provider {
         trainingService = TrainingService(sensorManager, heartRateService, saveService)
         shutdownManager = ShutdownManager(saveService)
         firmwareManager.loadFirmware(applicationContext)
-        backgroundManager = BackgroundManager(firmwareManager)
         val random = Random()
         val bemBattleLogic = BEMBattleLogic(random)
         battleService = BattleService(cardSpriteIO, database.speciesEntityDao(), characterSpritesIO, characterManager, firmwareManager, bemBattleLogic, saveService, vitalService, random, database.cardSettingsDao(), database.cardMetaEntityDao(), dimToBemStatConversion)

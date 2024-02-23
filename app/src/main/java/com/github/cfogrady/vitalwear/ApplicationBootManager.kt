@@ -36,6 +36,7 @@ class ApplicationBootManager(private val characterManager: CharacterManagerImpl,
             }
             notificationChannelManager.createNotificationChannel()
             complicationRefreshService.startupPartnerComplications()
+
         }
     }
 }

@@ -113,10 +113,10 @@ class CharacterSelectActivity : ComponentActivity() {
     @Composable
     private fun PagedCharacterSelectionMenu(characters: List<CharacterPreview>, firmware: Firmware, newCharacterLauncher: () -> Unit) {
         val options = characters.toMutableStateList()
+        val background by (application as VitalWearApp).backgroundManager.selectedBackground.collectAsState()
         (application as VitalWearApp).vitalBoxFactory.VitalBox {
-            val background = (application as VitalWearApp).backgroundManager.selectedBackground.value!!
             (application as VitalWearApp).bitmapScaler.ScaledBitmap(
-                bitmap = background,
+                bitmap = background!!,
                 contentDescription = "background"
             )
             val pagerState = rememberPagerState(pageCount = {options.size + 1})

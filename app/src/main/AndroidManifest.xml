@@ -94,6 +94,8 @@
             android:taskAffinity="" />
         <activity android:name=".settings.SettingsActivity"
             android:taskAffinity="" />
+        <activity android:name=".background.BackgroundSelectionActivity"
+            android:taskAffinity="" />
         <service
             android:name=".tiles.PetTileService"
             android:label="VitalWear"

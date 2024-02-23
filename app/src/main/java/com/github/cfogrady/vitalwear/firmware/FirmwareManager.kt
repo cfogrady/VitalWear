@@ -29,11 +29,13 @@ const val SPRITE_PACKAGE_LOCATION = 0x80000
 
 const val TIMER_ICON = 81
 const val INSERT_CARD_ICON = 38
-const val DEFAULT_BACKGROUND = 0
+const val GREEN_BACKGROUND = 0
 const val BLACK_BACKGROUND = 1
 const val NEW_BACKGROUND_START_IDX = 2
 const val NEW_BACKGROUND_END_IDX = 5
 const val RAY_OF_LIGHT_BACKGROUND = 5
+const val ORANGE_BACKGROUND = 6
+const val BLUE_BACKGROUND = 7
 const val STEPS_ICON = 55
 const val VITALS_ICON = 54
 const val BATTLE_ICON = 370
@@ -93,7 +95,8 @@ const val TRANSFORMATION_LOCKED = 418
 
 
 class FirmwareManager(
-    val spriteBitmapConverter: SpriteBitmapConverter
+    val spriteBitmapConverter: SpriteBitmapConverter,
+    val postFirmwareLoader: PostFirmwareLoader
 ) {
 
     enum class FirmwareState {
@@ -124,6 +127,9 @@ class FirmwareManager(
                 mutalbeFirmwareState.value = FirmwareState.Missing
                 Log.w(TAG, "Imported Firmware file had errors!")
             }
+            if(firmwareState.value == FirmwareState.Loaded) {
+                postFirmwareLoader.loadWithFirmware(applicationContext, firmware.value!!)
+            }
         }
     }
 
@@ -146,7 +152,10 @@ class FirmwareManager(
                 Log.i(TAG, "Time to initialize firmware: ${System.currentTimeMillis() - startFirmwareRead}")
                 val loadingIcon = spriteBitmapConverter.getBitmap(sprites[TIMER_ICON])
                 val insertCardIcon = spriteBitmapConverter.getBitmap(sprites[INSERT_CARD_ICON])
-                val defaultBackground = spriteBitmapConverter.getBitmap(sprites[DEFAULT_BACKGROUND])
+                val greenBackground = spriteBitmapConverter.getBitmap(sprites[GREEN_BACKGROUND])
+                val orangeBackground = spriteBitmapConverter.getBitmap(sprites[ORANGE_BACKGROUND])
+                val blueBackground = spriteBitmapConverter.getBitmap(sprites[BLUE_BACKGROUND])
+                val battleBackground = spriteBitmapConverter.getBitmap(sprites[BATTLE_BACKGROUND])
 
 
                 val readyIcon = spriteBitmapConverter.getBitmap(sprites[READY_IDX])
@@ -166,7 +175,7 @@ class FirmwareManager(
                     transformationFirmwareSprites(sprites),
                     loadingIcon,
                     insertCardIcon,
-                    defaultBackground,
+                    arrayListOf(greenBackground, orangeBackground, blueBackground, battleBackground),
                     readyIcon,
                     goIcon,
                     missionIcon,
