@@ -27,7 +27,9 @@ class SettingsActivity : ComponentActivity() {
             { text ->
                 Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
             },
-            activityHelper.getActivityLauncher(BackgroundSelectionActivity::class.java),
+            activityHelper.getActivityLauncherWithResultHandling(BackgroundSelectionActivity::class.java) {
+
+            },
         )
     }
 }

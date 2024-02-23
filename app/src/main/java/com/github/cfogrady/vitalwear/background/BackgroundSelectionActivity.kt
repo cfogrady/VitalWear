@@ -27,20 +27,25 @@ import com.github.cfogrady.vitalwear.firmware.Firmware
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class BackgroundSelectionActivity : ComponentActivity() {
+    companion object {
+        const val BACKGROUND_TYPE = "BACKGROUND_TYPE"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val backgroundType = BackgroundManager.BackgroundType.entries[intent.getIntExtra(BACKGROUND_TYPE, 0)]
         val vitalWearApp = application as VitalWearApp
         val cardMetaEntityDao = vitalWearApp.cardMetaEntityDao
         val firmware = vitalWearApp.firmwareManager.getFirmware().value!!
         val cardSpritesIO = vitalWearApp.cardSpriteIO
         val vitalBoxFactory = vitalWearApp.vitalBoxFactory
         setContent {
-            BackgroundSelectorContent(firmware, cardMetaEntityDao, cardSpritesIO, vitalBoxFactory)
+            BackgroundSelectorContent(backgroundType, firmware, cardMetaEntityDao, cardSpritesIO, vitalBoxFactory)
         }
     }
 
     @Composable
-    fun BackgroundSelectorContent(firmware: Firmware, cardMetaEntityDao: CardMetaEntityDao, cardSpritesIO: CardSpritesIO, vitalBoxFactory: VitalBoxFactory) {
+    fun BackgroundSelectorContent(backgroundType: BackgroundManager.BackgroundType, firmware: Firmware, cardMetaEntityDao: CardMetaEntityDao, cardSpritesIO: CardSpritesIO, vitalBoxFactory: VitalBoxFactory) {
         var loading by remember { mutableStateOf(true) }
         var uninitializedPages by remember { mutableStateOf<ArrayList<BackgroundEntry>>(ArrayList()) }
         if(loading) {
@@ -50,13 +55,13 @@ class BackgroundSelectionActivity : ComponentActivity() {
                 loading = false
             }
         } else {
-            BackgroundSelector(backgroundPages = uninitializedPages, cardSpritesIO = cardSpritesIO, vitalBoxFactory)
+            BackgroundSelector(backgroundType, backgroundPages = uninitializedPages, cardSpritesIO = cardSpritesIO, vitalBoxFactory)
         }
     }
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun BackgroundSelector(backgroundPages: ArrayList<BackgroundEntry>, cardSpritesIO: CardSpritesIO, vitalBoxFactory: VitalBoxFactory) {
+    fun BackgroundSelector(backgroundType: BackgroundManager.BackgroundType, backgroundPages: ArrayList<BackgroundEntry>, cardSpritesIO: CardSpritesIO, vitalBoxFactory: VitalBoxFactory) {
         val pagerState = rememberPagerState {
             backgroundPages.size
         }
@@ -82,9 +87,9 @@ class BackgroundSelectionActivity : ComponentActivity() {
                         contentDescription = "background",
                         modifier = Modifier.clickable {
                             if (backgroundEntry.firmware) {
-                                (application as VitalWearApp).backgroundManager.setFirmwareBackground(backgroundEntry.index)
+                                (application as VitalWearApp).backgroundManager.setFirmwareBackground(backgroundType, backgroundEntry.index)
                             } else {
-                                (application as VitalWearApp).backgroundManager.setCardBackground(backgroundEntry.cardName, backgroundEntry.index, background!!)
+                                (application as VitalWearApp).backgroundManager.setCardBackground(backgroundType, backgroundEntry.cardName, backgroundEntry.index, background!!)
                             }
                             finish()
                         }

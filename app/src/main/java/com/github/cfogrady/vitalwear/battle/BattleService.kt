@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.util.Log
 import com.github.cfogrady.vb.dim.card.DimReader
 import com.github.cfogrady.vitalwear.SaveService
+import com.github.cfogrady.vitalwear.background.BackgroundManager
 import com.github.cfogrady.vitalwear.battle.data.*
 import com.github.cfogrady.vitalwear.card.DimToBemStatConversion
 import com.github.cfogrady.vitalwear.character.CharacterManager
@@ -36,6 +37,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
                     private val battleLogic: BEMBattleLogic,
                     private val saveService: SaveService,
                     private val vitalService: VitalService,
+                    private val backgroundManager: BackgroundManager,
                     private val random: Random,
                     private val cardSettingsDao: CardSettingsDao,
                     private val cardMetaEntityDao: CardMetaEntityDao,
@@ -91,11 +93,22 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         val partnerBattleCharacter = battleCharacterFromBemCharacter(context, partnerCharacter)
         val randomOpponent = loadRandomTarget(context, partnerCharacter, partnerCharacter.speciesStats.phase, partnerCharacter.settings.allowedBattles, partnerCharacter.getFranchise())
         val battleSpriteLoader = if (partnerCharacter.isBEM()) BemBattleSpriteLoader(context, cardSpritesIO, partnerCharacter.cardName()) else DimBattleSpriteLoader(context, firmware, cardSpritesIO, partnerCharacter.cardName())
+        val background = when(backgroundManager.battleBackgroundOption.value) {
+            BackgroundManager.BattleBackgroundType.PartnerCard -> battleSpriteLoader.getBackground()
+            BackgroundManager.BattleBackgroundType.Static -> backgroundManager.staticBattleBackground.value!!
+            BackgroundManager.BattleBackgroundType.OpponentCard -> {
+                if (randomOpponent.cardType == CardType.DIM) {
+                    firmware.battleFirmwareSprites.battleBackground
+                } else {
+                    cardSpritesIO.loadCardBackgrounds(context, randomOpponent.cardName)[1]
+                }
+            }
+        }
         return PreBattleModel(
             partnerBattleCharacter,
             fetchSupportCharacter(context, firmware, partnerCharacter.getFranchise()),
             randomOpponent,
-            battleSpriteLoader.getBackground(),
+            background,
             battleSpriteLoader.getReadyIcon(),
             battleSpriteLoader.getGoIcon(),
         )
@@ -113,7 +126,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
             BattleStats(battleTargetInfo.bp, battleTargetInfo.ap, battleTargetInfo.hp, 0, speciesEntity.attribute, speciesEntity.type, speciesEntity.phase, Mood.NORMAL)
         }
         val battleSprites = loadBattleSprites(context, speciesEntity, opponentCardMeta.cardType == CardType.BEM, battleTargetInfo.attack, battleTargetInfo.critical)
-        return BattleCharacter(battleStats, battleSprites)
+        return BattleCharacter(battleTargetInfo.cardName, opponentCardMeta.cardType, battleStats, battleSprites)
     }
 
     fun performBattle(preBattleModel: PreBattleModel, preDeterminedHits: Array<Boolean> = emptyArray()): PostBattleModel {
@@ -149,10 +162,10 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         )
     }
 
-    private fun loadBattleCharacter(context: Context, speciesEntity: SpeciesEntity, hasCardHits: Boolean): BattleCharacter {
+    private fun loadBattleCharacter(context: Context, cardName: String, cardType: CardType, speciesEntity: SpeciesEntity, hasCardHits: Boolean): BattleCharacter {
         val battleStats = loadBattleStats(speciesEntity)
         val battleSprites = loadBattleSprites(context, speciesEntity, hasCardHits)
-        return BattleCharacter(battleStats, battleSprites)
+        return BattleCharacter(cardName, cardType, battleStats, battleSprites)
     }
 
     private fun loadBattleStats(speciesEntity: SpeciesEntity, mood: Mood = Mood.NORMAL): BattleStats {
@@ -207,7 +220,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
             largeProjectileSprite,
             getHitSprite(context, character.cardName(), character.isBEM(), firmware)
         )
-        return BattleCharacter(battleStats, battleSprites)
+        return BattleCharacter(character.cardName(), character.cardMeta.cardType, battleStats, battleSprites)
     }
 
     private fun getSmallAttackSprite(context: Context, cardName: String, firmware: Firmware, smallAttackId: Int) : Bitmap {
@@ -260,7 +273,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
             speciesEntity = dimToBemStatConversion.convertSpeciesEntity(speciesEntity)
         }
         val hasCardHits = targetCard.cardType == CardType.BEM
-        return loadBattleCharacter(context, speciesEntity, hasCardHits)
+        return loadBattleCharacter(context, targetCard.cardName, targetCard.cardType, speciesEntity, hasCardHits)
     }
 
     private fun assignRandomTargetFromCard(cardName: String, hasThirdBattlePool: Boolean, activeStage: Int): SpeciesEntity {

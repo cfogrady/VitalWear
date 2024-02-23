@@ -1,9 +1,13 @@
 package com.github.cfogrady.vitalwear.settings
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
@@ -12,11 +16,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import androidx.wear.compose.material.RadioButton
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.background.BackgroundManager
 import com.github.cfogrady.vitalwear.SaveService
+import com.github.cfogrady.vitalwear.background.BackgroundSelectionActivity
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import kotlinx.coroutines.CoroutineScope
@@ -40,9 +48,47 @@ class SettingsComposableFactory(private val backgroundManager: BackgroundManager
                         Box(modifier = Modifier
                             .fillMaxSize()
                             .clickable {
-                                activityLauncher.backgroundSelection.invoke()
+                                activityLauncher.backgroundSelection.invoke{}
                             }, contentAlignment = Alignment.Center) {
                             Text(text = "BACKGROUND", fontWeight = FontWeight.Bold, fontSize = 2.5.em)
+                        }
+                    }
+                    SettingsMenuOption.BattleBackground -> {
+                        val battleBackgroundType by backgroundManager.battleBackgroundOption.collectAsState()
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = "BATTLE", fontSize = 2.5.em, fontWeight = FontWeight.Bold)
+                            Text(text = "BACKGROUND", fontSize = 2.5.em, fontWeight = FontWeight.Bold)
+                            val radioScale = .5f
+                            val fontSize = 1.7.em
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+                                .padding(0.dp, 10.dp, 0.dp, 0.dp)
+                                .clickable {
+                                    backgroundManager.setBattleBackgroundPartner()
+                                }) {
+                                RadioButton(selected = battleBackgroundType == BackgroundManager.BattleBackgroundType.PartnerCard,
+                                    modifier = Modifier.scale(radioScale))
+                                Text(text = "Partner Card Battle Background", fontSize = fontSize)
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+                                .padding(0.dp, 5.dp, 0.dp, 0.dp)
+                                .clickable {
+                                    backgroundManager.setBattleBackgroundOpponent()
+                                }) {
+                                RadioButton(selected = battleBackgroundType == BackgroundManager.BattleBackgroundType.OpponentCard,
+                                    modifier = Modifier.scale(radioScale))
+                                Text(text = "Opponent Card Battle Background", fontSize = fontSize)
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+                                .padding(0.dp, 5.dp, 0.dp, 0.dp)
+                                .clickable {
+                                    activityLauncher.backgroundSelection{
+                                        it.putExtra(BackgroundSelectionActivity.BACKGROUND_TYPE, BackgroundManager.BackgroundType.Battle.ordinal)
+                                    }
+                                }) {
+                                RadioButton(selected = battleBackgroundType == BackgroundManager.BattleBackgroundType.Static,
+                                    modifier = Modifier.scale(radioScale))
+                                Text(text = "Static Battle Background", fontSize = fontSize)
+                            }
                         }
                     }
                     SettingsMenuOption.Debug -> {
@@ -75,12 +121,14 @@ class SettingsComposableFactory(private val backgroundManager: BackgroundManager
 
     enum class SettingsMenuOption {
         Background,
+        BattleBackground,
         Debug,
         Save
     }
 
     fun buildSettingMenuPages(): List<SettingsMenuOption> {
         return listOf(SettingsMenuOption.Background,
+            SettingsMenuOption.BattleBackground,
             SettingsMenuOption.Debug,
             SettingsMenuOption.Save)
     }
