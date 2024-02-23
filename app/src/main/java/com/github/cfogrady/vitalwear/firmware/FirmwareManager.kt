@@ -57,6 +57,8 @@ const val HAPPY_EMOTE_START_IDX = 23 //also win
 const val HAPPY_EMOTE_END_IDX = 25
 const val LOSE_EMOTE_START_IDX = 25
 const val LOSE_EMOTE_END_IDX = 27
+const val SLEEP_EMOTE_START_IDX = 27
+const val SLEEP_EMOTE_END_IDX = 29
 const val SWEAT_EMOTE_IDX = 29
 const val INJURED_EMOTE_START_IDX = 30
 const val INJURED_EMOTE_END_IDX = 32
@@ -170,7 +172,6 @@ class FirmwareManager(
                     MenuFirmwareSprites.menuFirmwareSprites(spriteBitmapConverter, sprites),
                     AdventureFirmwareSprites.fromSprites(sprites, spriteBitmapConverter),
                     battleFirmwareSprites(sprites),
-                    emoteFirmwareSprites(sprites),
                     trainingFirmwareSprites(sprites),
                     transformationFirmwareSprites(sprites),
                     loadingIcon,
@@ -200,7 +201,7 @@ class FirmwareManager(
         val stepsIcon = spriteBitmapConverter.getBitmap(sprites[STEPS_ICON])
         val vitalsIcon = spriteBitmapConverter.getBitmap(sprites[VITALS_ICON])
         val supportIcon = spriteBitmapConverter.getBitmap(sprites[SUPPORT_IDX])
-        return CharacterFirmwareSprites(stepsIcon, vitalsIcon, supportIcon)
+        return CharacterFirmwareSprites(stepsIcon, vitalsIcon, supportIcon, emoteFirmwareSprites(sprites))
     }
 
     private fun emoteFirmwareSprites(sprites: List<Sprite>) : EmoteFirmwareSprites {
@@ -214,7 +215,8 @@ class FirmwareManager(
         val injuredEmote = spriteBitmapConverter.getBitmaps(sprites.subList(
             INJURED_EMOTE_START_IDX, INJURED_EMOTE_END_IDX
         ))
-        return EmoteFirmwareSprites(happyEmote, loseEmote, sweatEmote, injuredEmote)
+        val sleepEmote = spriteBitmapConverter.getBitmaps(sprites.subList(SLEEP_EMOTE_START_IDX, SLEEP_EMOTE_END_IDX))
+        return EmoteFirmwareSprites(happyEmote, loseEmote, sweatEmote, injuredEmote, sleepEmote)
     }
 
     private fun battleFirmwareSprites(sprites: List<Sprite>): BattleFirmwareSprites {

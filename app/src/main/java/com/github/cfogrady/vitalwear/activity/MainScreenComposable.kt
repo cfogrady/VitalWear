@@ -42,7 +42,6 @@ class MainScreenComposable(
     private val firmwareManager: FirmwareManager,
     private val backgroundManager: BackgroundManager,
     private val backgroundTrainingScreenFactory: BackgroundTrainingScreenFactory,
-    private val imageScaler: ImageScaler,
     private val bitmapScaler: BitmapScaler,
     private val partnerScreenComposable: PartnerScreenComposable,
     private val vitalBoxFactory: VitalBoxFactory,
@@ -135,14 +134,11 @@ class MainScreenComposable(
         if (readyToTransform != null) {
             activityLaunchers.transformLauncher.invoke()
         }
-        val padding = imageScaler.getPadding()
         val menuPages = remember(key1 = character.speciesStats.phase, key2 = gameState) {
             buildMenuPages(character.speciesStats.phase, gameState)
         }
 
-        Box(modifier = Modifier
-            .padding(padding)
-            .fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+        vitalBoxFactory.VitalBox {
             bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
             val pagerState = rememberPagerState(pageCount = {
                 menuPages.size

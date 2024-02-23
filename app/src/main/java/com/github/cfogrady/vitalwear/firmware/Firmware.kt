@@ -14,7 +14,6 @@ class Firmware(
     val menuFirmwareSprites: MenuFirmwareSprites,
     val adventureFirmwareSprites: AdventureFirmwareSprites,
     val battleFirmwareSprites: BattleFirmwareSprites,
-    val emoteFirmwareSprites: EmoteFirmwareSprites,
     val trainingFirmwareSprites: TrainingFirmwareSprites,
     val transformationFirmwareSprites: TransformationFirmwareSprites,
     val loadingIcon : Bitmap,

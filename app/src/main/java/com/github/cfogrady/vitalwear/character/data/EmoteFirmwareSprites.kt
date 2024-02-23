@@ -7,4 +7,5 @@ class EmoteFirmwareSprites(
     val loseEmote: List<Bitmap>,
     val sweatEmote: Bitmap,
     val injuredEmote: List<Bitmap>,
+    val sleepEmote: List<Bitmap>,
 )
