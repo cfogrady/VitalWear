@@ -188,7 +188,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         backgroundTrainingScreenFactory = BackgroundTrainingScreenFactory(trainingScreenFactory, trainingService)
 
         transformationScreenFactory = TransformationScreenFactory(characterManager, backgroundHeight, firmwareManager, bitmapScaler, vitalBoxFactory, vbUpdater)
-        partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService, gameState)
+        partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService)
         adventureService = AdventureService(gameState, database.cardMetaEntityDao(), characterManager, database.adventureEntityDao(), cardSpriteIO, notificationChannelManager, database.characterAdventureDao(), sensorManager)
         val adventureScreenFactory = AdventureScreenFactory(adventureService, vitalBoxFactory, bitmapScaler, backgroundHeight)
         mainScreenComposable = MainScreenComposable(gameState, characterManager, saveService, firmwareManager, backgroundManager, backgroundTrainingScreenFactory, bitmapScaler, partnerScreenComposable, vitalBoxFactory, adventureScreenFactory)

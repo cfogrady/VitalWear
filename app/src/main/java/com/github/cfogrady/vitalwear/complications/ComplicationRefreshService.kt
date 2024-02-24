@@ -55,14 +55,11 @@ class ComplicationRefreshService(private val applicationContext: Context, privat
         }
 
         private fun updateComplicationState() {
-            // TODO: Find better way to change sleep idx
             val vitalWearApp = (applicationContext as VitalWearApp)
-            if(vitalWearApp.gameState.value != GameState.SLEEPING) {
-                val state = (vitalWearApp).partnerComplicationState
-                state.spriteIndex++
-                if(state.spriteIndex > 1) {
-                    state.spriteIndex = 0
-                }
+            val state = (vitalWearApp).partnerComplicationState
+            state.spriteIndex++
+            if(state.spriteIndex > 1) {
+                state.spriteIndex = 0
             }
         }
 

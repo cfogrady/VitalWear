@@ -21,7 +21,7 @@ import com.github.cfogrady.vitalwear.steps.StepService
 import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDateTime
 
-class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp, private val stepService: StepService, private val gameStateFlow: StateFlow<GameState>) {
+class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp, private val stepService: StepService) {
     companion object {
         const val TAG = "PartnerScreenComposable"
     }
@@ -40,7 +40,6 @@ class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private va
                 manyStepListener.unregister()
             }
         }
-        val gameState by gameStateFlow.collectAsState()
         val dailyStepCount by manyStepListener.dailyStepObserver.collectAsState()
         Log.i(TAG, "StepCount in activity: $dailyStepCount")
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
@@ -56,7 +55,7 @@ class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private va
                     bitmapScaler.ScaledBitmap(bitmap = firmware.stepsIcon, contentDescription = "Steps Icon")
                     Text(text = formatNumber(dailyStepCount, 5), color = Color.White)
                 }
-                if(gameState == GameState.SLEEPING) {
+                if(character.characterStats.sleeping) {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomEnd) {
                         bitmapScaler.AnimatedScaledBitmap(
                             bitmaps = firmware.emoteFirmwareSprites.sleepEmote,

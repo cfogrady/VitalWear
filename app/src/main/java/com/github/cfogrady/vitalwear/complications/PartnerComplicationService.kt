@@ -8,6 +8,7 @@ import androidx.wear.watchface.complications.datasource.ComplicationDataSourceSe
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.activity.MainActivity
+import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 
 class PartnerComplicationService : ComplicationDataSourceService() {
 
@@ -60,6 +61,9 @@ class PartnerComplicationService : ComplicationDataSourceService() {
             Icon.createWithResource(applicationContext, com.github.cfogrady.vitalwear.common.R.drawable.loading_icon)
         } else if(character == null) {
             Icon.createWithBitmap(maybeFirmware.value!!.insertCardIcon)
+        } else if (character.characterStats.sleeping) {
+            val sleepingBitmap = character.characterSprites.sprites[CharacterSprites.DOWN]
+            Icon.createWithBitmap(sleepingBitmap)
         } else {
             val characterBitmaps = (application as VitalWearApp).gameState.value.bitmaps(character)
             Icon.createWithBitmap(characterBitmaps[state.spriteIndex])

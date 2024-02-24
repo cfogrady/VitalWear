@@ -78,20 +78,22 @@ class MoodService(
 
     private fun handleDevicePutOn() {
         Log.i(TAG, "Device being worn again")
-        if(lastWorn != null && gameState.value != GameState.SLEEPING) {
+        if(lastWorn != null) {
             val current = localDateTimeProvider.invoke()
             val minutesSinceLastWorn = ChronoUnit.MINUTES.between(lastWorn, current).toInt()
             val updateEvents = minutesSinceLastWorn/5
             characterManager.getCurrentCharacter()?.let {
-                val vitalDecrease = 20*updateEvents
-                it.characterStats.vitals = (it.characterStats.vitals - vitalDecrease).coerceAtLeast(0)
-                val moodDecrease = updateEvents
-                it.characterStats.mood = (it.characterStats.mood - moodDecrease).coerceAtLeast(0)
-                lastLevel = 0
-                it.characterStats.updateTimeStamps(current)
-                events.addFirst(Pair("$current", "Device back on after $minutesSinceLastWorn minutes. Lost $vitalDecrease vitals and $moodDecrease mood"))
-                while(events.size > DEBUG_HISTORY) {
-                    events.removeLast()
+                if(!it.characterStats.sleeping) {
+                    val vitalDecrease = 20*updateEvents
+                    it.characterStats.vitals = (it.characterStats.vitals - vitalDecrease).coerceAtLeast(0)
+                    val moodDecrease = updateEvents
+                    it.characterStats.mood = (it.characterStats.mood - moodDecrease).coerceAtLeast(0)
+                    lastLevel = 0
+                    it.characterStats.updateTimeStamps(current)
+                    events.addFirst(Pair("$current", "Device back on after $minutesSinceLastWorn minutes. Lost $vitalDecrease vitals and $moodDecrease mood"))
+                    while(events.size > DEBUG_HISTORY) {
+                        events.removeLast()
+                    }
                 }
             }
             if(minutesSinceLastWorn >= 24*60) {
@@ -104,7 +106,7 @@ class MoodService(
 
     fun updateMood(now: LocalDateTime) {
         characterManager.getCurrentCharacter()?.let {character ->
-            if(gameState.value != GameState.SLEEPING) {
+            if(!character.characterStats.sleeping) {
                 CoroutineScope(Dispatchers.Default).launch {
                     updateCharacterMood(character, now)
                 }

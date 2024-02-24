@@ -55,21 +55,10 @@ class MainActivity : ComponentActivity() {
             activityHelper.getActivityLauncher(CharacterSelectActivity::class.java),
             activityHelper.getActivityLauncher(BattleActivity::class.java),
             activityHelper.getActivityLauncher(TransformationActivity::class.java),
-            this::toggleSleep,
             activityHelper.getActivityLauncher(SettingsActivity::class.java),
             activityHelper.getActivityLauncher(StopBackgroundTrainingActivity::class.java),
             {text -> Toast.makeText(this, text, Toast.LENGTH_SHORT).show() },
             AdventureActivityLauncher.buildFromContextAndActivityHelper(application, activityHelper),
         )
-    }
-
-    private fun toggleSleep() {
-        val gameState = (application as VitalWearApp).gameState
-        (applicationContext as VitalWearApp).partnerComplicationState.spriteIndex = 0
-        if(gameState.value == GameState.SLEEPING) {
-            gameState.value = GameState.IDLE
-        } else {
-            gameState.value = GameState.SLEEPING
-        }
     }
 }

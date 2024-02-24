@@ -134,9 +134,11 @@ class MainScreenComposable(
         if (readyToTransform != null) {
             activityLaunchers.transformLauncher.invoke()
         }
+        var sleeping by remember { mutableStateOf(character.characterStats.sleeping) }
         val menuPages = remember(key1 = character.speciesStats.phase, key2 = gameState) {
-            buildMenuPages(character.speciesStats.phase, gameState)
+            buildMenuPages(character.speciesStats.phase, sleeping)
         }
+
 
         vitalBoxFactory.VitalBox {
             bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
@@ -201,9 +203,11 @@ class MainScreenComposable(
                     MenuOption.SLEEP -> {
                         vitalBoxFactory.VitalBox {
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                val sleepButton = if(gameState == GameState.SLEEPING) firmware.menuFirmwareSprites.wakeIcon else firmware.menuFirmwareSprites.sleepIcon
+                                val sleepButton = if(sleeping) firmware.menuFirmwareSprites.wakeIcon else firmware.menuFirmwareSprites.sleepIcon
                                 bitmapScaler.ScaledBitmap(bitmap = sleepButton, contentDescription = "Sleep", modifier = Modifier.clickable {
-                                    activityLaunchers.sleepToggle.invoke()
+                                    sleeping = !sleeping
+                                    character.characterStats.sleeping = sleeping
+                                    saveService.saveAsync()
                                     CoroutineScope(Dispatchers.Main).launch {
                                         pagerState.scrollToPage(0)
                                     }
@@ -236,12 +240,12 @@ class MainScreenComposable(
         SETTINGS,
     }
 
-    fun buildMenuPages(phase: Int, gameState: GameState): ArrayList<MenuOption> {
+    fun buildMenuPages(phase: Int, sleeping: Boolean): ArrayList<MenuOption> {
         val menuPages = ArrayList<MenuOption>()
         menuPages.add(MenuOption.PARTNER)
         menuPages.add(MenuOption.STATS)
         menuPages.add(MenuOption.CHARACTER)
-        if(gameState != GameState.SLEEPING) {
+        if(!sleeping) {
             menuPages.add(MenuOption.TRAINING)
             if(phase > 1) {
                 menuPages.add(MenuOption.ADVENTURE)
