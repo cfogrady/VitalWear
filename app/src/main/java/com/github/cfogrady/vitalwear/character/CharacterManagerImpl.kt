@@ -312,6 +312,7 @@ class CharacterManagerImpl(
             0,
             0,
             50,
+            false,
             false
         )
     }

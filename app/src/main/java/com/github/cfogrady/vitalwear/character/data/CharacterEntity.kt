@@ -15,8 +15,6 @@ data class CharacterEntity (
     @ColumnInfo(name = "state") var state: CharacterState,
     @ColumnInfo(name = "card_file") var cardFile: String,
     @ColumnInfo(name = "slot_id") var slotId: Int,
-    //franchise
-    //bem/dim
     @ColumnInfo(name = "last_update") var lastUpdate: LocalDateTime,
     @ColumnInfo(name = "vitals") var vitals: Int,
     @ColumnInfo(name = "training_time_remaining") var trainingTimeRemainingInSeconds: Long,
@@ -34,6 +32,7 @@ data class CharacterEntity (
     @ColumnInfo(name = "total_wins") var totalWins: Int,
     @ColumnInfo(name = "current_phase_wins") var currentPhaseWins: Int,
     @ColumnInfo(name = "mood") var mood: Int,
+    @ColumnInfo(name = "sleeping", defaultValue = "false") var sleeping: Boolean,
     @ColumnInfo(name = "dead") var dead: Boolean,
 ) {
 
