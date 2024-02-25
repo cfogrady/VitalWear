@@ -45,7 +45,7 @@ class BackgroundTrainingScreenFactory(
     @Composable
     fun BackgroundTraining(partner: VBCharacter, firmware: Firmware) {
         val trainingSprites = GameState.TRAINING.bitmaps(partner)
-        val swearIcon = firmware.emoteFirmwareSprites.sweatEmote
+        val swearIcon = firmware.characterFirmwareSprites.emoteFirmwareSprites.sweatEmote
         if(trainingService.backgroundTrainingProgressTracker == null) {
             return
         }

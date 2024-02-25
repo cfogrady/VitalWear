@@ -1,9 +1,7 @@
 package com.github.cfogrady.vitalwear.activity
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -16,26 +14,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.lifecycle.LiveData
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.*
 import com.github.cfogrady.vitalwear.R
 import com.github.cfogrady.vitalwear.adventure.AdventureScreenFactory
+import com.github.cfogrady.vitalwear.background.BackgroundManager
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
-import com.github.cfogrady.vitalwear.character.data.BEMCharacter
-import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.training.BackgroundTrainingScreenFactory
-import com.github.cfogrady.vitalwear.training.TrainingScreenFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import java.util.ArrayList
 
 class MainScreenComposable(
     private val gameStateFlow: StateFlow<GameState>,
@@ -44,7 +42,6 @@ class MainScreenComposable(
     private val firmwareManager: FirmwareManager,
     private val backgroundManager: BackgroundManager,
     private val backgroundTrainingScreenFactory: BackgroundTrainingScreenFactory,
-    private val imageScaler: ImageScaler,
     private val bitmapScaler: BitmapScaler,
     private val partnerScreenComposable: PartnerScreenComposable,
     private val vitalBoxFactory: VitalBoxFactory,
@@ -73,17 +70,14 @@ class MainScreenComposable(
     }
 
     @Composable
-    fun EverythingLoadedScreen(firmwareData: StateFlow<Firmware?>, activeCharacterData: StateFlow<VBCharacter?>, backgroundData: LiveData<Bitmap>, activityLaunchers: ActivityLaunchers) {
+    fun EverythingLoadedScreen(firmwareData: StateFlow<Firmware?>, activeCharacterData: StateFlow<VBCharacter?>, backgroundData: StateFlow<Bitmap?>, activityLaunchers: ActivityLaunchers) {
         val firmware by firmwareData.collectAsState()
         val character by activeCharacterData.collectAsState()
-        val background by backgroundData.observeAsState()
+        val background by backgroundData.collectAsState()
         val gameState by gameStateFlow.collectAsState()
         if(background == null) {
             Log.i(TAG, "Loading in everythingLoadedScreen background is null")
-            Loading {
-                // TODO: Change to loadCurrent or similar
-                backgroundManager.loadDefault()
-            }
+            Loading {}
         } else if(character == null) {
             activityLaunchers.characterSelectionLauncher.invoke()
         } else if(gameState == GameState.TRAINING) {
@@ -91,7 +85,7 @@ class MainScreenComposable(
         } else if (gameState == GameState.ADVENTURE) {
             adventureScreenFactory.AdventureScreen(activityLaunchers.context, activityLaunchers.adventureActivityLauncher, firmware!!, character!!)
         } else {
-            DailyScreen(firmware!!, character = character!!, background!!, activityLaunchers)
+            DailyScreen(firmware!!, character = character!!, background!!, gameState, activityLaunchers)
         }
     }
 
@@ -135,42 +129,46 @@ class MainScreenComposable(
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun DailyScreen(firmware: Firmware, character: VBCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
+    fun DailyScreen(firmware: Firmware, character: VBCharacter, background: Bitmap, gameState: GameState, activityLaunchers: ActivityLaunchers) {
         val readyToTransform by character.readyToTransform.collectAsState()
         if (readyToTransform != null) {
             activityLaunchers.transformLauncher.invoke()
         }
-        val padding = imageScaler.getPadding()
-        Box(modifier = Modifier
-            .padding(padding)
-            .fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+        var sleeping by remember { mutableStateOf(character.characterStats.sleeping) }
+        val menuPages = remember(key1 = character.speciesStats.phase, key2 = gameState) {
+            buildMenuPages(character.speciesStats.phase, sleeping)
+        }
+
+
+        vitalBoxFactory.VitalBox {
             bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
             val pagerState = rememberPagerState(pageCount = {
-                8
+                menuPages.size
             })
             VerticalPager(state = pagerState) {page ->
-                when(page) {
-                    0 -> {
+                val menuItem = menuPages[page]
+                when(menuItem) {
+                    MenuOption.PARTNER -> {
                         partnerScreenComposable.PartnerScreen(
                             character = character,
                             firmware = firmware.characterFirmwareSprites,
                         )
                     }
-                    1 -> {
+                    MenuOption.STATS -> {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.statsIcon, contentDescription = "stats", modifier = Modifier.clickable {
                                 activityLaunchers.statsMenuLauncher.invoke()
                             })
                         }
                     }
-                    2 -> {
+                    MenuOption.CHARACTER -> {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.characterSelectorIcon, contentDescription = "Character", modifier = Modifier.clickable {
                                 activityLaunchers.characterSelectionLauncher.invoke()
                             })
                         }
                     }
-                    3 -> {
+                    MenuOption.TRAINING -> {
                         vitalBoxFactory.VitalBox {
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.trainingIcon, contentDescription = "Training", modifier = Modifier.clickable {
@@ -179,29 +177,21 @@ class MainScreenComposable(
                             }
                         }
                     }
-                    4 -> {
+                    MenuOption.ADVENTURE -> {
                         vitalBoxFactory.VitalBox {
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.adventureIcon, contentDescription = "Adventure", modifier = Modifier.clickable {
-                                    if(character.speciesStats.phase >= 2) {
-                                        activityLaunchers.adventureActivityLauncher.launchMenu.invoke()
-                                    } else {
-                                        activityLaunchers.toastLauncher.invoke("Must be at a higher level to adventure")
-                                    }
+                                    activityLaunchers.adventureActivityLauncher.launchMenu.invoke()
                                 })
                             }
                         }
                     }
-                    5 -> {
+                    MenuOption.BATTLE -> {
                         vitalBoxFactory.VitalBox {
                             Box(modifier = Modifier
                                 .fillMaxSize()
                                 .clickable {
-                                    if (character.speciesStats.phase >= 2) {
-                                        activityLaunchers.battleLauncher.invoke()
-                                    } else {
-                                        activityLaunchers.toastLauncher.invoke("Must be at a higher level to battle")
-                                    }
+                                    activityLaunchers.battleLauncher.invoke()
                                 }, contentAlignment = Alignment.Center) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Image(painter = painterResource(id = R.drawable.fight_icon), contentDescription = "Battle")
@@ -210,28 +200,60 @@ class MainScreenComposable(
                             }
                         }
                     }
-                    6 -> {
+                    MenuOption.SLEEP -> {
                         vitalBoxFactory.VitalBox {
-                            Box(modifier = Modifier
-                                .fillMaxSize()
-                                .clickable { activityLaunchers.debugActivityLauncher.invoke() }, contentAlignment = Alignment.Center) {
-                                Text(text = "DEBUG",  fontWeight = FontWeight.Bold, fontSize = 3.em)
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                val sleepButton = if(sleeping) firmware.menuFirmwareSprites.wakeIcon else firmware.menuFirmwareSprites.sleepIcon
+                                bitmapScaler.ScaledBitmap(bitmap = sleepButton, contentDescription = "Sleep", modifier = Modifier.clickable {
+                                    sleeping = !sleeping
+                                    character.characterStats.sleeping = sleeping
+                                    saveService.saveAsync()
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        pagerState.scrollToPage(0)
+                                    }
+                                })
                             }
                         }
                     }
-                    7 -> {
+                    MenuOption.SETTINGS -> {
                         vitalBoxFactory.VitalBox {
-                            Box(modifier = Modifier
-                                .fillMaxSize()
-                                .clickable {
-                                    saveService.saveAsync()
-                                }, contentAlignment = Alignment.Center) {
-                                Text(text = "SAVE",  fontWeight = FontWeight.Bold, fontSize = 3.em)
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                bitmapScaler.ScaledBitmap(bitmap = firmware.menuFirmwareSprites.settingsIcon, contentDescription = "Settings", modifier = Modifier.clickable {
+                                    activityLaunchers.settingsActivityLauncher.invoke()
+                                })
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    enum class MenuOption {
+        PARTNER,
+        STATS,
+        CHARACTER,
+        TRAINING,
+        ADVENTURE,
+        BATTLE,
+        SLEEP,
+        SETTINGS,
+    }
+
+    fun buildMenuPages(phase: Int, sleeping: Boolean): ArrayList<MenuOption> {
+        val menuPages = ArrayList<MenuOption>()
+        menuPages.add(MenuOption.PARTNER)
+        menuPages.add(MenuOption.STATS)
+        menuPages.add(MenuOption.CHARACTER)
+        if(!sleeping) {
+            menuPages.add(MenuOption.TRAINING)
+            if(phase > 1) {
+                menuPages.add(MenuOption.ADVENTURE)
+                menuPages.add(MenuOption.BATTLE)
+            }
+        }
+        menuPages.add(MenuOption.SLEEP)
+        menuPages.add(MenuOption.SETTINGS)
+        return menuPages
     }
 }

@@ -3,6 +3,7 @@ package com.github.cfogrady.vitalwear.battle.data
 import android.graphics.Bitmap
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
+import com.github.cfogrady.vitalwear.common.card.CardType
 
 class BattleStats(
     val bp: Int,
@@ -29,6 +30,8 @@ class BattleSprites(
 )
 
 class BattleCharacter(
+    val cardName: String,
+    val cardType: CardType,
     val battleStats: BattleStats,
     val battleSprites: BattleSprites
 ) {

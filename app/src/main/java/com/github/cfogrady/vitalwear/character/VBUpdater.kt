@@ -18,6 +18,9 @@ class VBUpdater(val context: Context) {
         const val WORK_TAG = "VBUpdater"
     }
 
+    private val moodUpdateIntent = PendingIntent.getBroadcast(context, 0, Intent(MoodBroadcastReceiver.MOOD_UPDATE),
+        PendingIntent.FLAG_IMMUTABLE)
+
     fun setupTransformationChecker(character: VBCharacter, workManager: WorkManager = WorkManager.getInstance(context)) {
         cancel(workManager)
         Log.i(WORK_TAG, "Setup Transformation Check")
@@ -32,14 +35,20 @@ class VBUpdater(val context: Context) {
         }
     }
 
-    fun scheduleExactMoodUpdates() {
+    @Synchronized fun scheduleExactMoodUpdates() {
+        Log.i(WORK_TAG, "Setting up mood updates")
         val alarmManager = context.getSystemService(Service.ALARM_SERVICE) as AlarmManager
         val now = SystemClock.elapsedRealtime()
         val period = Duration.ofMinutes(5).toMillis()
-        val moodUpdateIntent = PendingIntent.getBroadcast(context, 0, Intent(MoodBroadcastReceiver.MOOD_UPDATE),
-            PendingIntent.FLAG_IMMUTABLE)
         alarmManager.cancel(moodUpdateIntent)
+        //TODO: This may only work when we have the complication service running
+        // Might need to start persistent service to do this.
         alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, now + period, period, moodUpdateIntent)
+    }
+
+    fun unRegisterMoodUpdates() {
+        val alarmManager = context.getSystemService(Service.ALARM_SERVICE) as AlarmManager
+        alarmManager.cancel(moodUpdateIntent)
     }
 
     fun cancel(workManager: WorkManager = WorkManager.getInstance(context)) {

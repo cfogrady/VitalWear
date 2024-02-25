@@ -6,4 +6,5 @@ class CharacterFirmwareSprites(
     val stepsIcon: Bitmap,
     val vitalsIcon: Bitmap,
     val supportIcon: Bitmap,
+    val emoteFirmwareSprites: EmoteFirmwareSprites,
 )

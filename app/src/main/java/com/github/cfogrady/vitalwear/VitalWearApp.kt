@@ -1,6 +1,5 @@
 package com.github.cfogrady.vitalwear
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.app.NotificationManager
 import android.content.Context
@@ -8,7 +7,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.hardware.SensorManager
+import android.util.Log
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import androidx.room.Room
 import androidx.work.Configuration
@@ -19,6 +20,7 @@ import com.github.cfogrady.vitalwear.activity.PartnerScreenComposable
 import com.github.cfogrady.vitalwear.adventure.AdventureMenuScreenFactory
 import com.github.cfogrady.vitalwear.adventure.AdventureScreenFactory
 import com.github.cfogrady.vitalwear.adventure.AdventureService
+import com.github.cfogrady.vitalwear.background.BackgroundManager
 import com.github.cfogrady.vitalwear.battle.composable.*
 import com.github.cfogrady.vitalwear.battle.data.BEMBattleLogic
 import com.github.cfogrady.vitalwear.battle.BattleService
@@ -30,8 +32,8 @@ import com.github.cfogrady.vitalwear.character.VBUpdater
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.CharacterManagerImpl
 import com.github.cfogrady.vitalwear.character.data.PreviewCharacterManager
-import com.github.cfogrady.vitalwear.character.mood.BEMMoodUpdater
 import com.github.cfogrady.vitalwear.character.mood.MoodBroadcastReceiver
+import com.github.cfogrady.vitalwear.character.mood.MoodService
 import com.github.cfogrady.vitalwear.character.transformation.TransformationScreenFactory
 import com.github.cfogrady.vitalwear.common.card.CardCharacterImageService
 import com.github.cfogrady.vitalwear.common.card.CardLoader
@@ -50,8 +52,10 @@ import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.debug.ExceptionService
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.firmware.FirmwareReceiver
+import com.github.cfogrady.vitalwear.firmware.PostFirmwareLoader
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
+import com.github.cfogrady.vitalwear.settings.SettingsComposableFactory
 import com.github.cfogrady.vitalwear.steps.SensorStepService
 import com.github.cfogrady.vitalwear.training.BackgroundTrainingScreenFactory
 import com.github.cfogrady.vitalwear.util.SensorThreadHandler
@@ -66,12 +70,14 @@ import java.util.Random
 
 class VitalWearApp : Application(), Configuration.Provider {
     private val spriteBitmapConverter = SpriteBitmapConverter()
-    val firmwareManager = FirmwareManager(spriteBitmapConverter)
+    private val spriteFileIO = SpriteFileIO()
+    val cardSpriteIO = CardSpritesIO(spriteFileIO, spriteBitmapConverter)
+    lateinit var backgroundManager: BackgroundManager
+    lateinit var firmwareManager: FirmwareManager
     val partnerComplicationState = PartnerComplicationState()
     val exceptionService = ExceptionService()
-    private val spriteFileIO = SpriteFileIO()
     private val characterSpritesIO = CharacterSpritesIO(spriteFileIO, spriteBitmapConverter)
-    val cardSpriteIO = CardSpritesIO(spriteFileIO, spriteBitmapConverter)
+
     private val sensorThreadHandler = SensorThreadHandler()
     private lateinit var imageScaler : ImageScaler
     lateinit var notificationChannelManager: NotificationChannelManager
@@ -81,7 +87,6 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var database : AppDatabase
     lateinit var characterManager: CharacterManager
     lateinit var previewCharacterManager: PreviewCharacterManager
-    lateinit var backgroundManager: BackgroundManager
     lateinit var battleService: BattleService
     lateinit var vitalBoxFactory: VitalBoxFactory
     lateinit var partnerScreenComposable: PartnerScreenComposable
@@ -105,17 +110,28 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var adventureService: AdventureService
     lateinit var cardReceiver: CardReceiver
     lateinit var firmwareReceiver: FirmwareReceiver
+    lateinit var moodService: MoodService
+    lateinit var settingsComposableFactory: SettingsComposableFactory
     private lateinit var applicationBootManager: ApplicationBootManager
     private lateinit var vbUpdater: VBUpdater
     var backgroundHeight = 0.dp
     val gameState = MutableStateFlow(GameState.IDLE)
 
-    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
         super.onCreate()
+        Log.i("VitalWear", "Create application")
         buildDependencies()
+
         applicationContext.registerReceiver(shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN))
-        applicationContext.registerReceiver(moodBroadcastReceiver, IntentFilter(MoodBroadcastReceiver.MOOD_UPDATE))
+        // NOT_EXPORTED prevents debug and release app from sending each other broadcasts
+        ContextCompat.registerReceiver(applicationContext, moodBroadcastReceiver, IntentFilter(MoodBroadcastReceiver.MOOD_UPDATE), ContextCompat.RECEIVER_NOT_EXPORTED)
+        val powerBroadcastReceiver = PowerBroadcastReceiver()
+        val powerChangeIntentFilter = IntentFilter()
+        powerChangeIntentFilter.addAction(Intent.ACTION_POWER_CONNECTED)
+        powerChangeIntentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED)
+        ContextCompat.registerReceiver(applicationContext, powerBroadcastReceiver, powerChangeIntentFilter, ContextCompat.RECEIVER_EXPORTED)
+
+
         SensorStepService.setupDailyStepReset(this)
         val appShutdownHandler = AppShutdownHandler(shutdownManager, sharedPreferences)
         // This may be run on app shutdown by Android... but updating or killing via the IDE never triggers this.
@@ -129,6 +145,9 @@ class VitalWearApp : Application(), Configuration.Provider {
             .addMigrations(CreateAndPopulateMaxAdventureCompletionCardMeta()).allowMainThreadQueries().build()
         //TODO: Should replace sharedPreferences with datastore (see https://developer.android.com/training/data-storage/shared-preferences)
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        backgroundManager = BackgroundManager(cardSpriteIO, sharedPreferences)
+        val postFirmwareLoader = PostFirmwareLoader(backgroundManager)
+        firmwareManager = FirmwareManager(spriteBitmapConverter, postFirmwareLoader)
         val dimToBemStatConversion = DimToBemStatConversion(database.statConversionDao())
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationChannelManager = NotificationChannelManager(notificationManager)
@@ -141,16 +160,16 @@ class VitalWearApp : Application(), Configuration.Provider {
         vitalService = VitalService(characterManager, complicationRefreshService)
         stepService = SensorStepService(sharedPreferences, sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService))
         heartRateService = HeartRateService(sensorManager, sensorThreadHandler)
-        moodBroadcastReceiver = MoodBroadcastReceiver(BEMMoodUpdater(heartRateService, stepService), characterManager)
         vbUpdater = VBUpdater(applicationContext)
+        moodService = MoodService(heartRateService, stepService, sensorManager, vbUpdater, characterManager, gameState)
+        moodBroadcastReceiver = MoodBroadcastReceiver(moodService)
         saveService = SaveService(characterManager as CharacterManagerImpl, stepService, sharedPreferences)
         trainingService = TrainingService(sensorManager, heartRateService, saveService)
         shutdownManager = ShutdownManager(saveService)
         firmwareManager.loadFirmware(applicationContext)
-        backgroundManager = BackgroundManager(firmwareManager)
         val random = Random()
         val bemBattleLogic = BEMBattleLogic(random)
-        battleService = BattleService(cardSpriteIO, database.speciesEntityDao(), characterSpritesIO, characterManager, firmwareManager, bemBattleLogic, saveService, vitalService, random, database.cardSettingsDao(), database.cardMetaEntityDao(), dimToBemStatConversion)
+        battleService = BattleService(cardSpriteIO, database.speciesEntityDao(), characterSpritesIO, characterManager, firmwareManager, bemBattleLogic, saveService, vitalService, backgroundManager, random, database.cardSettingsDao(), database.cardMetaEntityDao(), dimToBemStatConversion)
         imageScaler = ImageScaler(applicationContext.resources.displayMetrics, applicationContext.resources.configuration.isScreenRound)
         backgroundHeight = imageScaler.scaledDpValueFromPixels(ImageScaler.VB_HEIGHT.toInt())
         bitmapScaler = BitmapScaler(imageScaler)
@@ -172,14 +191,15 @@ class VitalWearApp : Application(), Configuration.Provider {
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService)
         adventureService = AdventureService(gameState, database.cardMetaEntityDao(), characterManager, database.adventureEntityDao(), cardSpriteIO, notificationChannelManager, database.characterAdventureDao(), sensorManager)
         val adventureScreenFactory = AdventureScreenFactory(adventureService, vitalBoxFactory, bitmapScaler, backgroundHeight)
-        mainScreenComposable = MainScreenComposable(gameState, characterManager, saveService, firmwareManager, backgroundManager, backgroundTrainingScreenFactory, imageScaler, bitmapScaler, partnerScreenComposable, vitalBoxFactory, adventureScreenFactory)
+        mainScreenComposable = MainScreenComposable(gameState, characterManager, saveService, firmwareManager, backgroundManager, backgroundTrainingScreenFactory, bitmapScaler, partnerScreenComposable, vitalBoxFactory, adventureScreenFactory)
         val cardCharacterImageService = CardCharacterImageService(database.speciesEntityDao(), characterSpritesIO)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardCharacterImageService)
         shutdownReceiver = ShutdownReceiver(shutdownManager)
-        applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, vbUpdater, saveService, notificationChannelManager, complicationRefreshService)
+        applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, vbUpdater, moodService, saveService, notificationChannelManager, complicationRefreshService)
         adventureMenuScreenFactory = AdventureMenuScreenFactory(cardSpriteIO, database.cardMetaEntityDao(), adventureService, vitalBoxFactory, characterSpritesIO, database.speciesEntityDao(), bitmapScaler, backgroundHeight)
         cardReceiver = CardReceiver(cardLoader)
         firmwareReceiver = FirmwareReceiver(firmwareManager, notificationChannelManager)
+        settingsComposableFactory = SettingsComposableFactory(backgroundManager, vitalBoxFactory, bitmapScaler, saveService)
     }
 
     override fun getWorkManagerConfiguration(): Configuration {

@@ -92,6 +92,10 @@
             android:taskAffinity="" />
         <activity android:name=".training.StopBackgroundTrainingActivity"
             android:taskAffinity="" />
+        <activity android:name=".settings.SettingsActivity"
+            android:taskAffinity="" />
+        <activity android:name=".background.BackgroundSelectionActivity"
+            android:taskAffinity="" />
         <service
             android:name=".tiles.PetTileService"
             android:label="VitalWear"
@@ -164,8 +168,6 @@
                  <data android:scheme="wear" android:host="*"/>
             </intent-filter>
         </service>
-
-        <receiver android:name=".complications.PartnerComplicationReceiver" />
         <receiver
             android:name=".BootReceiver"
             android:exported="true">

@@ -6,8 +6,6 @@ import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 
 enum class GameState {
     IDLE,
-    WALKING,
-    RUNNING,
     TRAINING,
     ADVENTURE;
 
@@ -15,12 +13,6 @@ enum class GameState {
         return when(this) {
             IDLE -> {
                 character.characterSprites.sprites.subList(1, 3)
-            }
-            WALKING -> {
-                character.characterSprites.sprites.subList(3, 5)
-            }
-            RUNNING -> {
-                character.characterSprites.sprites.subList(5, 7)
             }
             TRAINING -> {
                 character.characterSprites.sprites.subList(7, 9)

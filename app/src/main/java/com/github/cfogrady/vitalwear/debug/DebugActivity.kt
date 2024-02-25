@@ -29,7 +29,7 @@ class DebugActivity : ComponentActivity() {
         STEP_DEBUG_INFO,
         CHARACTER_DEBUG_INFO,
         TRAINING_DEBUG_INFO,
-        HEART_RATE_DEBUG_INFO,
+        MOOD_INFO,
         VITALS_DEBUG_INFO,
     }
 
@@ -59,7 +59,7 @@ class DebugActivity : ComponentActivity() {
             DebugScreens.TRAINING_DEBUG_INFO -> DebugItems(loader = (application as VitalWearApp).trainingService::debug) {
                 debugMenuSelection = DebugScreens.DEBUG_MENU
             }
-            DebugScreens.HEART_RATE_DEBUG_INFO -> DebugItems(loader = (application as VitalWearApp).heartRateService::debug) {
+            DebugScreens.MOOD_INFO -> DebugItems(loader = (application as VitalWearApp).moodService::debug) {
                 debugMenuSelection = DebugScreens.DEBUG_MENU
             }
             DebugScreens.VITALS_DEBUG_INFO -> DebugItems(loader = (application as VitalWearApp).vitalService::debug) {

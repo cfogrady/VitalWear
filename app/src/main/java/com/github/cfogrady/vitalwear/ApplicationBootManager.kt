@@ -3,6 +3,7 @@ package com.github.cfogrady.vitalwear
 import android.content.Context
 import com.github.cfogrady.vitalwear.character.VBUpdater
 import com.github.cfogrady.vitalwear.character.CharacterManagerImpl
+import com.github.cfogrady.vitalwear.character.mood.MoodService
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.debug.ExceptionService
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
@@ -14,6 +15,7 @@ import java.time.LocalDate
 class ApplicationBootManager(private val characterManager: CharacterManagerImpl,
                              private val stepService: SensorStepService,
                              private val vbUpdater: VBUpdater,
+                             private val moodService: MoodService,
                              private val saveService: SaveService,
                              private val notificationChannelManager: NotificationChannelManager,
                              private val complicationRefreshService: ComplicationRefreshService,
@@ -25,7 +27,7 @@ class ApplicationBootManager(private val characterManager: CharacterManagerImpl,
             try {
                 // characterManager init will load WorkManager configuration
                 characterManager.init(context, vbUpdater)
-                vbUpdater.scheduleExactMoodUpdates()
+                moodService.initialize()
                 if(stepService.handleBoot(LocalDate.now())) {
                     saveService.save()
                 }
@@ -34,6 +36,7 @@ class ApplicationBootManager(private val characterManager: CharacterManagerImpl,
             }
             notificationChannelManager.createNotificationChannel()
             complicationRefreshService.startupPartnerComplications()
+
         }
     }
 }
