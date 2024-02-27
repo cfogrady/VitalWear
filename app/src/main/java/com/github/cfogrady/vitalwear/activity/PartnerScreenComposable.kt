@@ -30,17 +30,7 @@ class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private va
     fun PartnerScreen(character: VBCharacter, firmware: CharacterFirmwareSprites) {
         val emojiHeight = bitmapScaler.scaledDimension(firmware.emoteFirmwareSprites.sweatEmote.height)
         val now = LocalDateTime.now()
-        val manyStepListener = remember {
-            Log.i(TAG, "Listen to daily steps")
-            stepService.listenDailySteps()
-        }
-        DisposableEffect(Unit) {
-            onDispose {
-                Log.i(TAG, "Stop listening to daily steps")
-                manyStepListener.unregister()
-            }
-        }
-        val dailyStepCount by manyStepListener.dailyStepObserver.collectAsState()
+        val dailyStepCount by stepService.dailySteps.collectAsState()
         Log.i(TAG, "StepCount in activity: $dailyStepCount")
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             Column(verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier

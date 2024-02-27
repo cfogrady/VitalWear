@@ -1,6 +1,7 @@
 package com.github.cfogrady.vitalwear.steps
 
+import kotlinx.coroutines.flow.StateFlow
+
 interface StepService {
-    suspend fun addStepsToVitals()
-    fun listenDailySteps(): ManyStepListener
+    val dailySteps: StateFlow<Int>
 }

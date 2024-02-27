@@ -28,9 +28,7 @@ class ApplicationBootManager(private val characterManager: CharacterManagerImpl,
                 // characterManager init will load WorkManager configuration
                 characterManager.init(context, vbUpdater)
                 moodService.initialize()
-                if(stepService.handleBoot(LocalDate.now())) {
-                    saveService.save()
-                }
+                stepService.startup()
             } catch (e: java.lang.Exception) {
                 ExceptionService.instance!!.logException(e)
             }

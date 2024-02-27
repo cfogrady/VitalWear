@@ -32,10 +32,9 @@ class SaveService(private val characterManager: CharacterManagerImpl, private va
         }
     }
 
-    private suspend fun internalSave(preferencesEditor: Editor) {
+    private fun internalSave(preferencesEditor: Editor) {
         val now = LocalDateTime.now()
         try {
-            stepService.addStepsToVitals()
             stepService.stepPreferenceUpdates(now.toLocalDate(), preferencesEditor).commit()
             characterManager.updateActiveCharacter(now)
         } catch (ise: IllegalStateException) {

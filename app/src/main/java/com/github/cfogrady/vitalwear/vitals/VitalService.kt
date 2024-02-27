@@ -30,6 +30,8 @@ class VitalService(private val characterManager: CharacterManager, private val c
         return debugInfo
     }
 
+    // This could be called everytime steps % 50 == 0, but that risks missing steps.
+    // So instead we call with old and new each time so if we go > 100 we don't miss vitals
     override fun processStepChanges(oldSteps: Int, newSteps: Int) {
         transformStepsIntoVitals(oldSteps, newSteps)
     }

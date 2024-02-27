@@ -116,7 +116,6 @@ class MoodService(
 
     private suspend fun updateCharacterMood(character: VBCharacter, now: LocalDateTime) {
         try {
-            stepService.addStepsToVitals()
             val exerciseLevel = heartRateService.getExerciseLevel(lastLevel)
             val heartRateResultStr = if(exerciseLevel.heartRate.heartRateError == HeartRateResult.Companion.HeartRateError.NONE) "${exerciseLevel.heartRate.heartRate}" else exerciseLevel.heartRate.heartRateError.name
             updateFromExerciseLevel(character, exerciseLevel.level, now)

@@ -17,10 +17,12 @@ import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 import com.github.cfogrady.vitalwear.steps.AccelerometerToStepSensor
+import com.github.cfogrady.vitalwear.steps.SensorStepService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.IllegalStateException
@@ -33,6 +35,7 @@ class AdventureService(
     private val cardSpritesIO: CardSpritesIO,
     private val notificationChannelManager: NotificationChannelManager,
     private val characterAdventureDao: CharacterAdventureDao,
+    private val stepService: SensorStepService,
     private val sensorManager: SensorManager) {
 
     companion object {
@@ -48,16 +51,18 @@ class AdventureService(
             val adventures = getAdventureOptions(cardName)
             val backgrounds = cardSpritesIO.loadCardBackgrounds(context, cardName)
             val partner = characterManager.getCurrentCharacter()!!
-            val adventure = ActiveAdventure(context, adventureService, adventures, backgrounds, startingAdventure, partner)
-            activeAdventure = adventure
-            val stepCounter = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-            if(stepCounter == null) {
+            val dailySteps: StateFlow<Int> =
+            if(!stepService.stepSensorEnabled()) {
                 val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-                accelerometerToStepSensor = AccelerometerToStepSensor(adventure)
-                sensorManager.registerListener(accelerometerToStepSensor, accelerometer, SensorManager.SENSOR_DELAY_GAME)
+                val accelerometerToSteps = AccelerometerToStepSensor()
+                sensorManager.registerListener(accelerometerToSteps, accelerometer, SensorManager.SENSOR_DELAY_GAME)
+                accelerometerToStepSensor = accelerometerToSteps
+                accelerometerToSteps.currentStep
             } else {
-                sensorManager.registerListener(activeAdventure, stepCounter, SensorManager.SENSOR_DELAY_GAME)
+                stepService.dailySteps
             }
+            val adventure = ActiveAdventure(context, adventureService, adventures, backgrounds, startingAdventure, partner, dailySteps)
+            activeAdventure = adventure
             gameStateFlow.value = GameState.ADVENTURE
         }
     }
@@ -70,10 +75,9 @@ class AdventureService(
         if(accelerometerToStepSensor != null) {
             sensorManager.unregisterListener(accelerometerToStepSensor)
             accelerometerToStepSensor = null
-        } else {
-            sensorManager.unregisterListener(activeAdventure)
         }
         gameStateFlow.value = GameState.IDLE
+        activeAdventure?.end()
         activeAdventure = null
     }
 

@@ -131,8 +131,6 @@ class VitalWearApp : Application(), Configuration.Provider {
         powerChangeIntentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED)
         ContextCompat.registerReceiver(applicationContext, powerBroadcastReceiver, powerChangeIntentFilter, ContextCompat.RECEIVER_EXPORTED)
 
-
-        SensorStepService.setupDailyStepReset(this)
         val appShutdownHandler = AppShutdownHandler(shutdownManager, sharedPreferences)
         // This may be run on app shutdown by Android... but updating or killing via the IDE never triggers this.
         Runtime.getRuntime().addShutdownHook(appShutdownHandler)
@@ -189,7 +187,7 @@ class VitalWearApp : Application(), Configuration.Provider {
 
         transformationScreenFactory = TransformationScreenFactory(characterManager, backgroundHeight, firmwareManager, bitmapScaler, vitalBoxFactory, vbUpdater)
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService)
-        adventureService = AdventureService(gameState, database.cardMetaEntityDao(), characterManager, database.adventureEntityDao(), cardSpriteIO, notificationChannelManager, database.characterAdventureDao(), sensorManager)
+        adventureService = AdventureService(gameState, database.cardMetaEntityDao(), characterManager, database.adventureEntityDao(), cardSpriteIO, notificationChannelManager, database.characterAdventureDao(), stepService, sensorManager)
         val adventureScreenFactory = AdventureScreenFactory(adventureService, vitalBoxFactory, bitmapScaler, backgroundHeight)
         mainScreenComposable = MainScreenComposable(gameState, characterManager, saveService, firmwareManager, backgroundManager, backgroundTrainingScreenFactory, bitmapScaler, partnerScreenComposable, vitalBoxFactory, adventureScreenFactory)
         val cardCharacterImageService = CardCharacterImageService(database.speciesEntityDao(), characterSpritesIO)
@@ -208,7 +206,6 @@ class VitalWearApp : Application(), Configuration.Provider {
             characterManager,
             notificationChannelManager,
             vbUpdater,
-            stepService,
             saveService,
             sharedPreferences,
         )
