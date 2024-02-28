@@ -9,6 +9,9 @@ import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.activity.MainActivity
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
+import com.github.cfogrady.vitalwear.data.GameState
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 class PartnerComplicationService : ComplicationDataSourceService() {
 
@@ -57,6 +60,7 @@ class PartnerComplicationService : ComplicationDataSourceService() {
         val maybeFirmware = (application as VitalWearApp).firmwareManager.getFirmware()
         val state = (application as VitalWearApp).partnerComplicationState
         val character = characterManager.getCurrentCharacter()
+        val gameState = (application as VitalWearApp).gameState.value
         return if(maybeFirmware.value == null || !characterManager.initialized.value) {
             Icon.createWithResource(applicationContext, com.github.cfogrady.vitalwear.common.R.drawable.loading_icon)
         } else if(character == null) {
@@ -64,9 +68,20 @@ class PartnerComplicationService : ComplicationDataSourceService() {
         } else if (character.characterStats.sleeping) {
             val sleepingBitmap = character.characterSprites.sprites[CharacterSprites.DOWN]
             Icon.createWithBitmap(sleepingBitmap)
-        } else {
-            val characterBitmaps = (application as VitalWearApp).gameState.value.bitmaps(character)
+        } else if (gameState != GameState.IDLE) {
+            val characterBitmaps = gameState.bitmaps(character)
             Icon.createWithBitmap(characterBitmaps[state.spriteIndex])
+        } else {
+            val timeFrom10StepsAgo = (application as VitalWearApp).stepService.timeFrom10StepsAgo.value
+            val now = LocalDateTime.now()
+
+            if(ChronoUnit.MILLIS.between(timeFrom10StepsAgo, now) < 60_000) {
+                Icon.createWithBitmap(character.characterSprites.sprites[state.spriteIndex + CharacterSprites.WALK_1])
+            } else {
+                Icon.createWithBitmap(character.characterSprites.sprites[state.spriteIndex + CharacterSprites.IDLE_1])
+            }
+
+
         }
     }
 }
