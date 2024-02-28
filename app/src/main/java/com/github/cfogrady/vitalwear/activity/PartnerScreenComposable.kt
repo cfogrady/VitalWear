@@ -1,5 +1,7 @@
 package com.github.cfogrady.vitalwear.activity
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
@@ -20,6 +22,7 @@ import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.steps.StepService
 import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp, private val stepService: StepService) {
     companion object {
@@ -29,9 +32,22 @@ class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private va
     @Composable
     fun PartnerScreen(character: VBCharacter, firmware: CharacterFirmwareSprites) {
         val emojiHeight = bitmapScaler.scaledDimension(firmware.emoteFirmwareSprites.sweatEmote.height)
-        val now = LocalDateTime.now()
         val dailyStepCount by stepService.dailySteps.collectAsState()
-        Log.i(TAG, "StepCount in activity: $dailyStepCount")
+        val timeFrom10StepsAgo by stepService.timeFrom10StepsAgo.collectAsState()
+        var now by remember {   mutableStateOf(LocalDateTime.now()) }
+        val walking = ChronoUnit.SECONDS.between(timeFrom10StepsAgo, now) < 60
+        val spriteIdx = if(walking) CharacterSprites.WALK_1 else CharacterSprites.IDLE_1
+        LaunchedEffect(timeFrom10StepsAgo, now) {
+            val currentNow = LocalDateTime.now()
+            val millisUntilIdle = 60_000 - ChronoUnit.MILLIS.between(timeFrom10StepsAgo, currentNow)
+            Log.i(TAG, "Time To Idle: $millisUntilIdle")
+            val millisUntilNextMinute = (60 - currentNow.second)*1_000.toLong()
+            val nextUpdate = if(millisUntilIdle > 0) millisUntilIdle.coerceAtMost(millisUntilNextMinute) else millisUntilNextMinute
+            Log.i(TAG, "Next Update: $nextUpdate")
+            Handler.createAsync(Looper.getMainLooper()).postDelayed({
+                now = LocalDateTime.now()
+            }, nextUpdate)
+        }
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             Column(verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
                 .fillMaxWidth()
@@ -77,7 +93,7 @@ class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private va
                             }
                         }
                     }
-                    bitmapScaler.AnimatedScaledBitmap(bitmaps = character.characterSprites.sprites, startIdx = character.activityIdx, frames = 2, contentDescription = "Character", alignment = Alignment.BottomCenter)
+                    bitmapScaler.AnimatedScaledBitmap(bitmaps = character.characterSprites.sprites, startIdx = spriteIdx, frames = 2, contentDescription = "Character", alignment = Alignment.BottomCenter)
                 }
             }
         }

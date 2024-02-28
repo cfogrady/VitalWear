@@ -7,6 +7,7 @@ import android.hardware.SensorManager
 import android.util.Log
 import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.util.SensorThreadHandler
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.time.*
 import java.util.LinkedList
@@ -29,6 +30,9 @@ class StepSensorService (
     }
 
     override val dailySteps: StateFlow<Int> = stepState.dailySteps
+    private val _timeFrom10StepsAgo = MutableStateFlow(LocalDateTime.now().minusMinutes(10))
+    override val timeFrom10StepsAgo: StateFlow<LocalDateTime> = _timeFrom10StepsAgo
+
 
     private var last10Steps = LinkedList<LocalDateTime>()
 
@@ -111,14 +115,10 @@ class StepSensorService (
                 saveService.saveAsync()
             }
             last10Steps.addFirst(now)
-            while(last10Steps.size > 10) {
-                last10Steps.removeLast()
+            while(last10Steps.size > 9) {
+                _timeFrom10StepsAgo.value = last10Steps.removeLast()
             }
         }
-    }
-
-    fun timeAt10StepsAgo(): LocalDateTime {
-        return last10Steps.last
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {

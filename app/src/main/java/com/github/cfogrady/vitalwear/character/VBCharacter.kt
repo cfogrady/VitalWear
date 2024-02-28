@@ -34,7 +34,6 @@ abstract class VBCharacter(
     internal val specificFusionOptions: List<SpecificFusionEntity>,
     val settings: CharacterSettings,
     internal val _readyToTransform: MutableStateFlow<ExpectedTransformation?> = MutableStateFlow<ExpectedTransformation?>(null),
-    var activityIdx : Int = 1,
     internal var lastTransformationCheck: LocalDateTime = LocalDateTime.MIN,
     internal val currentTimeProvider: ()->LocalDateTime = LocalDateTime::now
     ) {

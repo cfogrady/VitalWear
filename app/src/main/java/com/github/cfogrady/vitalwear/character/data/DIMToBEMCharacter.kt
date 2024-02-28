@@ -23,7 +23,6 @@ class DIMToBEMCharacter(cardMeta: CardMeta,
                         specificFusionOptions: List<SpecificFusionEntity>,
                         settings: CharacterSettings,
                         readyToTransform: MutableStateFlow<ExpectedTransformation?> = MutableStateFlow<ExpectedTransformation?>(null),
-                        activityIdx : Int = 1,
                         lastTransformationCheck: LocalDateTime = LocalDateTime.MIN,
                         currentTimeProvider: ()-> LocalDateTime = LocalDateTime::now) :
     VBCharacter(cardMeta,
@@ -36,7 +35,6 @@ class DIMToBEMCharacter(cardMeta: CardMeta,
     specificFusionOptions,
     settings,
     readyToTransform,
-    activityIdx,
     lastTransformationCheck,
     currentTimeProvider) {
 
@@ -62,7 +60,6 @@ class DIMToBEMCharacter(cardMeta: CardMeta,
             specificFusionOptions,
             settings,
             readyToTransform = _readyToTransform,
-            activityIdx = activityIdx,
             lastTransformationCheck = lastTransformationCheck,
         )
     }
