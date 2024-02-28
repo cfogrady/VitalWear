@@ -4,11 +4,11 @@ import android.content.SharedPreferences
 import android.content.SharedPreferences.Editor
 import android.util.Log
 import com.github.cfogrady.vitalwear.character.CharacterManagerImpl
-import com.github.cfogrady.vitalwear.steps.SensorStepService
+import com.github.cfogrady.vitalwear.steps.StepIOService
 import kotlinx.coroutines.*
 import java.time.LocalDateTime
 
-class SaveService(private val characterManager: CharacterManagerImpl, private val stepService: SensorStepService, private val sharedPreferences: SharedPreferences) {
+class SaveService(private val characterManager: CharacterManagerImpl, private val stepIOService: StepIOService, private val sharedPreferences: SharedPreferences) {
     companion object {
         const val TAG = "SaveService"
     }
@@ -35,7 +35,7 @@ class SaveService(private val characterManager: CharacterManagerImpl, private va
     private fun internalSave(preferencesEditor: Editor) {
         val now = LocalDateTime.now()
         try {
-            stepService.stepPreferenceUpdates(now.toLocalDate(), preferencesEditor).commit()
+            stepIOService.editStepPreferenceUpdates(now.toLocalDate(), preferencesEditor).commit()
             characterManager.updateActiveCharacter(now)
         } catch (ise: IllegalStateException) {
             // primarily caused in emulator by lack of step sensor

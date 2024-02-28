@@ -56,7 +56,9 @@ import com.github.cfogrady.vitalwear.firmware.PostFirmwareLoader
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 import com.github.cfogrady.vitalwear.settings.SettingsComposableFactory
-import com.github.cfogrady.vitalwear.steps.SensorStepService
+import com.github.cfogrady.vitalwear.steps.StepIOService
+import com.github.cfogrady.vitalwear.steps.StepSensorService
+import com.github.cfogrady.vitalwear.steps.StepState
 import com.github.cfogrady.vitalwear.training.BackgroundTrainingScreenFactory
 import com.github.cfogrady.vitalwear.util.SensorThreadHandler
 import com.github.cfogrady.vitalwear.training.TrainingScreenFactory
@@ -96,7 +98,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var trainingService: TrainingService
     lateinit var backgroundTrainingScreenFactory: BackgroundTrainingScreenFactory
     lateinit var sharedPreferences: SharedPreferences
-    lateinit var stepService: SensorStepService
+    lateinit var stepService: StepSensorService
     lateinit var shutdownReceiver: ShutdownReceiver
     lateinit var shutdownManager: ShutdownManager
     lateinit var heartRateService : HeartRateService
@@ -156,12 +158,15 @@ class VitalWearApp : Application(), Configuration.Provider {
         cardLoader = AppCardLoader(commonCardLoader, database.cardSettingsDao())
         val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         vitalService = VitalService(characterManager, complicationRefreshService)
-        stepService = SensorStepService(sharedPreferences, sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService))
         heartRateService = HeartRateService(sensorManager, sensorThreadHandler)
         vbUpdater = VBUpdater(applicationContext)
+        val stepState = StepState()
+        val stepIOService = StepIOService(sharedPreferences, stepState)
+        saveService = SaveService(characterManager as CharacterManagerImpl, stepIOService, sharedPreferences)
+        stepService = StepSensorService(sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService), stepState, stepIOService, saveService)
         moodService = MoodService(heartRateService, stepService, sensorManager, vbUpdater, characterManager, gameState)
         moodBroadcastReceiver = MoodBroadcastReceiver(moodService)
-        saveService = SaveService(characterManager as CharacterManagerImpl, stepService, sharedPreferences)
+
         trainingService = TrainingService(sensorManager, heartRateService, saveService)
         shutdownManager = ShutdownManager(saveService)
         firmwareManager.loadFirmware(applicationContext)

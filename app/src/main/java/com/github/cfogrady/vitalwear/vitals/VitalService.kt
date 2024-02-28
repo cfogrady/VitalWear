@@ -6,7 +6,7 @@ import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
-import com.github.cfogrady.vitalwear.steps.SensorStepService
+import com.github.cfogrady.vitalwear.steps.StepSensorService
 import com.github.cfogrady.vitalwear.steps.StepChangeListener
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -32,15 +32,17 @@ class VitalService(private val characterManager: CharacterManager, private val c
 
     // This could be called everytime steps % 50 == 0, but that risks missing steps.
     // So instead we call with old and new each time so if we go > 100 we don't miss vitals
-    override fun processStepChanges(oldSteps: Int, newSteps: Int) {
-        transformStepsIntoVitals(oldSteps, newSteps)
+    override fun processStepChanges(oldSteps: Int, newSteps: Int): Boolean {
+        return transformStepsIntoVitals(oldSteps, newSteps)
     }
 
-    private fun transformStepsIntoVitals(oldSteps: Int, newSteps: Int) {
+    private fun transformStepsIntoVitals(oldSteps: Int, newSteps: Int): Boolean {
         val character = getCharacter()
+        var stateChange = false
         if(character != null) {
             var stepsAlreadyTransformed = oldSteps
             if(newSteps - oldSteps >= remainingSteps) {
+                stateChange = true
                 stepsAlreadyTransformed += remainingSteps
                 var newVitals = vitalGainModifier(character, 4)
                 newVitals += vitalGainModifier(character, 4 * ((newSteps - stepsAlreadyTransformed)/STEPS_PER_VITAL))
@@ -56,6 +58,7 @@ class VitalService(private val characterManager: CharacterManager, private val c
         } else {
             debugList.addLast(Pair(LocalDateTime.now(), "No character selected when updating vitals from steps."))
         }
+        return stateChange
     }
 
     private fun addStepChangeToDebug(oldSteps: Int, newSteps: Int, newVitals: Int) {
@@ -80,7 +83,7 @@ class VitalService(private val characterManager: CharacterManager, private val c
 
     private fun vitalGainModifier(character: VBCharacter, vitals: Int) : Int {
         if(character == BEMCharacter.DEFAULT_CHARACTER) {
-            Log.w(SensorStepService.TAG, "Cannot apply vitals gain modifier for null active character.")
+            Log.w(StepSensorService.TAG, "Cannot apply vitals gain modifier for null active character.")
             return vitals
         }
         if(character.characterStats.injured) {

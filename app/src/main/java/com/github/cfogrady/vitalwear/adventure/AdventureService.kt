@@ -17,7 +17,7 @@ import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 import com.github.cfogrady.vitalwear.steps.AccelerometerToStepSensor
-import com.github.cfogrady.vitalwear.steps.SensorStepService
+import com.github.cfogrady.vitalwear.steps.StepSensorService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -35,7 +35,7 @@ class AdventureService(
     private val cardSpritesIO: CardSpritesIO,
     private val notificationChannelManager: NotificationChannelManager,
     private val characterAdventureDao: CharacterAdventureDao,
-    private val stepService: SensorStepService,
+    private val stepService: StepSensorService,
     private val sensorManager: SensorManager) {
 
     companion object {

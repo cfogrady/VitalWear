@@ -7,13 +7,12 @@ import com.github.cfogrady.vitalwear.character.mood.MoodService
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.debug.ExceptionService
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
-import com.github.cfogrady.vitalwear.steps.SensorStepService
+import com.github.cfogrady.vitalwear.steps.StepSensorService
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 class ApplicationBootManager(private val characterManager: CharacterManagerImpl,
-                             private val stepService: SensorStepService,
+                             private val stepService: StepSensorService,
                              private val vbUpdater: VBUpdater,
                              private val moodService: MoodService,
                              private val saveService: SaveService,

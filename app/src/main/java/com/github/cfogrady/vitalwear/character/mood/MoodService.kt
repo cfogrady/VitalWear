@@ -12,7 +12,7 @@ import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.debug.Debuggable
 import com.github.cfogrady.vitalwear.heartrate.HeartRateResult
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
-import com.github.cfogrady.vitalwear.steps.SensorStepService
+import com.github.cfogrady.vitalwear.steps.StepSensorService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +23,7 @@ import java.util.LinkedList
 
 class MoodService(
     private val heartRateService: HeartRateService,
-    private val stepService: SensorStepService,
+    private val stepService: StepSensorService,
     private val sensorManager: SensorManager,
     private val vbUpdater: VBUpdater,
     private val characterManager: CharacterManager,
