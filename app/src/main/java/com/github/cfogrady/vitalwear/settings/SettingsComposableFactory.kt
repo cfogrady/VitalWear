@@ -50,14 +50,14 @@ class SettingsComposableFactory(private val backgroundManager: BackgroundManager
                             .clickable {
                                 activityLauncher.backgroundSelection.invoke{}
                             }, contentAlignment = Alignment.Center) {
-                            Text(text = "BACKGROUND", fontWeight = FontWeight.Bold, fontSize = 2.5.em)
+                            Text(text = "BACKGROUND", fontWeight = FontWeight.Bold, fontSize = 2.1.em)
                         }
                     }
                     SettingsMenuOption.BattleBackground -> {
                         val battleBackgroundType by backgroundManager.battleBackgroundOption.collectAsState()
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = "BATTLE", fontSize = 2.5.em, fontWeight = FontWeight.Bold)
-                            Text(text = "BACKGROUND", fontSize = 2.5.em, fontWeight = FontWeight.Bold)
+                            Text(text = "BATTLE", fontSize = 2.1.em, fontWeight = FontWeight.Bold)
+                            Text(text = "BACKGROUND", fontSize = 2.1.em, fontWeight = FontWeight.Bold)
                             val radioScale = .5f
                             val fontSize = 1.7.em
                             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
