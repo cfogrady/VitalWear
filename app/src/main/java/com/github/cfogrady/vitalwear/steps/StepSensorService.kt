@@ -10,6 +10,7 @@ import com.github.cfogrady.vitalwear.util.SensorThreadHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.time.*
+import java.time.temporal.ChronoUnit
 import java.util.LinkedList
 
 /**
@@ -123,6 +124,10 @@ class StepSensorService (
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         Log.i(TAG, "Received accuracy change for step sensor")
+    }
+
+    override fun hasRecentSteps(now: LocalDateTime): Boolean {
+        return ChronoUnit.SECONDS.between(timeFrom10StepsAgo.value, now) < 60
     }
 
     fun debug(): List<Pair<String, String>> {

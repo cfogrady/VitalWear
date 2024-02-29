@@ -10,7 +10,7 @@ data class CharacterSprites(
         val IDLE_1 = 1
         val IDLE_2 = 2
         val WALK_1 = 3
-        val WALKT_2 = 4
+        val WALK_2 = 4
         val RUN_1 = 5
         val RUN_2 = 6
         val TRAIN_1 = 7

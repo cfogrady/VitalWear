@@ -65,23 +65,15 @@ class PartnerComplicationService : ComplicationDataSourceService() {
             Icon.createWithResource(applicationContext, com.github.cfogrady.vitalwear.common.R.drawable.loading_icon)
         } else if(character == null) {
             Icon.createWithBitmap(maybeFirmware.value!!.insertCardIcon)
-        } else if (character.characterStats.sleeping) {
-            val sleepingBitmap = character.characterSprites.sprites[CharacterSprites.DOWN]
-            Icon.createWithBitmap(sleepingBitmap)
         } else if (gameState != GameState.IDLE) {
             val characterBitmaps = gameState.bitmaps(character)
             Icon.createWithBitmap(characterBitmaps[state.spriteIndex])
         } else {
-            val timeFrom10StepsAgo = (application as VitalWearApp).stepService.timeFrom10StepsAgo.value
-            val now = LocalDateTime.now()
-
-            if(ChronoUnit.MILLIS.between(timeFrom10StepsAgo, now) < 60_000) {
-                Icon.createWithBitmap(character.characterSprites.sprites[state.spriteIndex + CharacterSprites.WALK_1])
-            } else {
-                Icon.createWithBitmap(character.characterSprites.sprites[state.spriteIndex + CharacterSprites.IDLE_1])
-            }
-
-
+            val vitalWearApp = (application as VitalWearApp)
+            val exerciseLevel = vitalWearApp.heartRateService.currentExerciseLevel.value
+            val recentSteps = vitalWearApp.stepService.hasRecentSteps()
+            val characterBitmaps = character.getNormalBitmaps(recentSteps, exerciseLevel)
+            Icon.createWithBitmap(characterBitmaps[state.spriteIndex % characterBitmaps.size])
         }
     }
 }

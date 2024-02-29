@@ -6,4 +6,5 @@ import java.time.LocalDateTime
 interface StepService {
     val dailySteps: StateFlow<Int>
     val timeFrom10StepsAgo: StateFlow<LocalDateTime>
+    fun hasRecentSteps(now: LocalDateTime = LocalDateTime.now()): Boolean
 }

@@ -19,12 +19,17 @@ import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.data.GameState
+import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.steps.StepService
 import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
-class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp, private val stepService: StepService) {
+class PartnerScreenComposable(
+    private val bitmapScaler: BitmapScaler,
+    private val backgroundHeight: Dp,
+    private val stepService: StepService,
+    private val heartRateService: HeartRateService) {
     companion object {
         const val TAG = "PartnerScreenComposable"
     }
@@ -35,8 +40,13 @@ class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private va
         val dailyStepCount by stepService.dailySteps.collectAsState()
         val timeFrom10StepsAgo by stepService.timeFrom10StepsAgo.collectAsState()
         var now by remember {   mutableStateOf(LocalDateTime.now()) }
-        val walking = ChronoUnit.SECONDS.between(timeFrom10StepsAgo, now) < 60
-        val spriteIdx = if(walking) CharacterSprites.WALK_1 else CharacterSprites.IDLE_1
+        val exerciseLevel by heartRateService.currentExerciseLevel.collectAsState()
+        val characterBitmaps = remember(exerciseLevel, now, timeFrom10StepsAgo) {
+            character.getNormalBitmaps(stepService.hasRecentSteps(now), exerciseLevel)
+        }
+        val emoteBitmaps = remember(exerciseLevel, now) {
+            character.getEmoteBitmaps(firmware.emoteFirmwareSprites, exerciseLevel)
+        }
         LaunchedEffect(timeFrom10StepsAgo, now) {
             val currentNow = LocalDateTime.now()
             val millisUntilIdle = 60_000 - ChronoUnit.MILLIS.between(timeFrom10StepsAgo, currentNow)
@@ -61,40 +71,15 @@ class PartnerScreenComposable(private val bitmapScaler: BitmapScaler, private va
                     bitmapScaler.ScaledBitmap(bitmap = firmware.stepsIcon, contentDescription = "Steps Icon")
                     Text(text = formatNumber(dailyStepCount, 5), color = Color.White)
                 }
-                if(character.characterStats.sleeping) {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomEnd) {
+                Box(modifier = Modifier.fillMaxWidth().height(emojiHeight), contentAlignment = Alignment.BottomEnd) {
+                    if(emoteBitmaps.isNotEmpty()) {
                         bitmapScaler.AnimatedScaledBitmap(
-                            bitmaps = firmware.emoteFirmwareSprites.sleepEmote,
-                            startIdx = 0,
-                            frames = 2,
-                            contentDescription = "sleep"
+                            bitmaps = emoteBitmaps,
+                            contentDescription = "emote",
                         )
                     }
-                    bitmapScaler.ScaledBitmap(bitmap = character.characterSprites.sprites[CharacterSprites.DOWN], contentDescription = "character", alignment = Alignment.BottomCenter)
-                } else {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomEnd) {
-                        if (character.mood() == Mood.GOOD) {
-                            bitmapScaler.AnimatedScaledBitmap(
-                                bitmaps = firmware.emoteFirmwareSprites.happyEmote,
-                                startIdx = 0,
-                                frames = 2,
-                                contentDescription = "happy"
-                            )
-                        } else if (character.mood() == Mood.BAD) {
-                            bitmapScaler.AnimatedScaledBitmap(
-                                bitmaps = firmware.emoteFirmwareSprites.loseEmote,
-                                startIdx = 0,
-                                frames = 2,
-                                contentDescription = "sad",
-                            )
-                        } else {
-                            Row(Modifier.height(emojiHeight)) {
-                                bitmapScaler
-                            }
-                        }
-                    }
-                    bitmapScaler.AnimatedScaledBitmap(bitmaps = character.characterSprites.sprites, startIdx = spriteIdx, frames = 2, contentDescription = "Character", alignment = Alignment.BottomCenter)
                 }
+                bitmapScaler.AnimatedScaledBitmap(bitmaps = characterBitmaps, contentDescription = "Character", alignment = Alignment.BottomCenter)
             }
         }
     }
