@@ -110,6 +110,7 @@ class MoodService(
             if(!character.characterStats.sleeping) {
                 CoroutineScope(Dispatchers.Default).launch {
                     updateCharacterMood(character, now)
+                    saveService.save()
                 }
             }
         }
