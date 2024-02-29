@@ -131,12 +131,12 @@ class MainScreenComposable(
     @Composable
     fun DailyScreen(firmware: Firmware, character: VBCharacter, background: Bitmap, gameState: GameState, activityLaunchers: ActivityLaunchers) {
         val readyToTransform by character.readyToTransform.collectAsState()
-        if (readyToTransform != null) {
-            activityLaunchers.transformLauncher.invoke()
-        }
         var sleeping by remember { mutableStateOf(character.characterStats.sleeping) }
         val menuPages = remember(key1 = character.speciesStats.phase, key2 = sleeping) {
             buildMenuPages(character.speciesStats.phase, sleeping)
+        }
+        if (readyToTransform != null && !character.characterStats.sleeping) {
+            activityLaunchers.transformLauncher.invoke()
         }
 
 
