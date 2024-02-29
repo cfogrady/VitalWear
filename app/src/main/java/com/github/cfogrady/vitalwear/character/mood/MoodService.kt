@@ -5,6 +5,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
+import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.VBUpdater
@@ -23,11 +24,10 @@ import java.util.LinkedList
 
 class MoodService(
     private val heartRateService: HeartRateService,
-    private val stepService: StepSensorService,
     private val sensorManager: SensorManager,
     private val vbUpdater: VBUpdater,
     private val characterManager: CharacterManager,
-    private val gameState: StateFlow<GameState>,
+    private val saveService: SaveService,
     private val localDateTimeProvider: () -> LocalDateTime = LocalDateTime::now): Debuggable {
 
     companion object {
@@ -102,6 +102,7 @@ class MoodService(
             }
         }
         vbUpdater.scheduleExactMoodUpdates()
+        saveService.saveAsync()
     }
 
     fun updateMood(now: LocalDateTime) {
