@@ -1,9 +1,13 @@
 package com.github.cfogrady.vitalwear.character
 
+import android.graphics.Bitmap
 import android.util.Log
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import com.github.cfogrady.vitalwear.card.CardMeta
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterEntity
+import com.github.cfogrady.vitalwear.character.data.EmoteFirmwareSprites
 import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.character.data.SupportCharacter
 import com.github.cfogrady.vitalwear.character.transformation.ExpectedTransformation
@@ -15,6 +19,7 @@ import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntity
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
+import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.settings.CharacterSettings
 import com.github.cfogrady.vitalwear.training.BackgroundTrainingResults
 import com.github.cfogrady.vitalwear.training.TrainingStatChanges
@@ -34,7 +39,6 @@ abstract class VBCharacter(
     internal val specificFusionOptions: List<SpecificFusionEntity>,
     val settings: CharacterSettings,
     internal val _readyToTransform: MutableStateFlow<ExpectedTransformation?> = MutableStateFlow<ExpectedTransformation?>(null),
-    var activityIdx : Int = 1,
     internal var lastTransformationCheck: LocalDateTime = LocalDateTime.MIN,
     internal val currentTimeProvider: ()->LocalDateTime = LocalDateTime::now
     ) {
@@ -229,5 +233,33 @@ abstract class VBCharacter(
 
     fun getFranchise(): Int {
         return settings.assumedFranchise ?: cardMeta.franchise
+    }
+
+    fun getNormalBitmaps(recentSteps: Boolean, exerciseLevel: Int): List<Bitmap> {
+        return if(characterStats.sleeping) {
+            characterSprites.sprites.subList(CharacterSprites.DOWN, CharacterSprites.DOWN+1)
+        } else if(exerciseLevel == 3 && recentSteps) {
+            characterSprites.sprites.subList(CharacterSprites.RUN_1, CharacterSprites.RUN_2+1)
+        } else if(exerciseLevel == 3) {
+            characterSprites.sprites.subList(CharacterSprites.TRAIN_1, CharacterSprites.TRAIN_2+1)
+        } else if(recentSteps) {
+            characterSprites.sprites.subList(CharacterSprites.WALK_1, CharacterSprites.WALK_2+1)
+        } else {
+            characterSprites.sprites.subList(CharacterSprites.IDLE_1, CharacterSprites.IDLE_2+1)
+        }
+    }
+
+    fun getEmoteBitmaps(firmware: EmoteFirmwareSprites, exerciseLevel: Int): List<Bitmap?> {
+        return if(characterStats.sleeping) {
+            firmware.sleepEmote
+        } else if(exerciseLevel == 3) {
+            listOf(firmware.sweatEmote, null)
+        } else if (mood() == Mood.GOOD) {
+            firmware.happyEmote
+        } else if (mood() == Mood.BAD) {
+            firmware.loseEmote
+        } else {
+            emptyList()
+        }
     }
 }

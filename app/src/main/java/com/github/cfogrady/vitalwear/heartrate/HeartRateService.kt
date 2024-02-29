@@ -3,6 +3,8 @@ package com.github.cfogrady.vitalwear.heartrate
 import android.hardware.SensorManager
 import android.util.Log
 import com.github.cfogrady.vitalwear.util.SensorThreadHandler
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 
 class HeartRateService(
@@ -13,6 +15,9 @@ class HeartRateService(
     companion object {
         const val TAG = "HeartRateService"
     }
+
+    private val _currentExerciseLevel = MutableStateFlow(0)
+    val currentExerciseLevel: StateFlow<Int> = _currentExerciseLevel
 
     private suspend fun getHeartRate(): HeartRateResult {
         val listener = SingleHeartRateSensorListener(sensorManager, sensorThreadHandler)
@@ -40,6 +45,7 @@ class HeartRateService(
     suspend fun getExerciseLevel(lastLevel: Int): ExerciseLevel {
         val heartRateResult = getHeartRate()
         val level = exerciseLevelFromResult(heartRateResult, lastLevel)
+        _currentExerciseLevel.value = level
         return ExerciseLevel(level, heartRateResult)
     }
 

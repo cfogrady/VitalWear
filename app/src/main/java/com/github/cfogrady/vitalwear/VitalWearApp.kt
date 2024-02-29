@@ -56,7 +56,9 @@ import com.github.cfogrady.vitalwear.firmware.PostFirmwareLoader
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 import com.github.cfogrady.vitalwear.settings.SettingsComposableFactory
-import com.github.cfogrady.vitalwear.steps.SensorStepService
+import com.github.cfogrady.vitalwear.steps.StepIOService
+import com.github.cfogrady.vitalwear.steps.StepSensorService
+import com.github.cfogrady.vitalwear.steps.StepState
 import com.github.cfogrady.vitalwear.training.BackgroundTrainingScreenFactory
 import com.github.cfogrady.vitalwear.util.SensorThreadHandler
 import com.github.cfogrady.vitalwear.training.TrainingScreenFactory
@@ -96,7 +98,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var trainingService: TrainingService
     lateinit var backgroundTrainingScreenFactory: BackgroundTrainingScreenFactory
     lateinit var sharedPreferences: SharedPreferences
-    lateinit var stepService: SensorStepService
+    lateinit var stepService: StepSensorService
     lateinit var shutdownReceiver: ShutdownReceiver
     lateinit var shutdownManager: ShutdownManager
     lateinit var heartRateService : HeartRateService
@@ -131,8 +133,6 @@ class VitalWearApp : Application(), Configuration.Provider {
         powerChangeIntentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED)
         ContextCompat.registerReceiver(applicationContext, powerBroadcastReceiver, powerChangeIntentFilter, ContextCompat.RECEIVER_EXPORTED)
 
-
-        SensorStepService.setupDailyStepReset(this)
         val appShutdownHandler = AppShutdownHandler(shutdownManager, sharedPreferences)
         // This may be run on app shutdown by Android... but updating or killing via the IDE never triggers this.
         Runtime.getRuntime().addShutdownHook(appShutdownHandler)
@@ -158,12 +158,15 @@ class VitalWearApp : Application(), Configuration.Provider {
         cardLoader = AppCardLoader(commonCardLoader, database.cardSettingsDao())
         val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         vitalService = VitalService(characterManager, complicationRefreshService)
-        stepService = SensorStepService(sharedPreferences, sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService))
         heartRateService = HeartRateService(sensorManager, sensorThreadHandler)
         vbUpdater = VBUpdater(applicationContext)
-        moodService = MoodService(heartRateService, stepService, sensorManager, vbUpdater, characterManager, gameState)
+        val stepState = StepState()
+        val stepIOService = StepIOService(sharedPreferences, stepState)
+        saveService = SaveService(characterManager as CharacterManagerImpl, stepIOService, sharedPreferences)
+        stepService = StepSensorService(sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService), stepState, stepIOService, saveService)
+        moodService = MoodService(heartRateService, sensorManager, vbUpdater, characterManager, saveService)
         moodBroadcastReceiver = MoodBroadcastReceiver(moodService)
-        saveService = SaveService(characterManager as CharacterManagerImpl, stepService, sharedPreferences)
+
         trainingService = TrainingService(sensorManager, heartRateService, saveService)
         shutdownManager = ShutdownManager(saveService)
         firmwareManager.loadFirmware(applicationContext)
@@ -188,8 +191,8 @@ class VitalWearApp : Application(), Configuration.Provider {
         backgroundTrainingScreenFactory = BackgroundTrainingScreenFactory(trainingScreenFactory, trainingService)
 
         transformationScreenFactory = TransformationScreenFactory(characterManager, backgroundHeight, firmwareManager, bitmapScaler, vitalBoxFactory, vbUpdater)
-        partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService)
-        adventureService = AdventureService(gameState, database.cardMetaEntityDao(), characterManager, database.adventureEntityDao(), cardSpriteIO, notificationChannelManager, database.characterAdventureDao(), sensorManager)
+        partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService, heartRateService)
+        adventureService = AdventureService(gameState, database.cardMetaEntityDao(), characterManager, database.adventureEntityDao(), cardSpriteIO, notificationChannelManager, database.characterAdventureDao(), stepService, sensorManager)
         val adventureScreenFactory = AdventureScreenFactory(adventureService, vitalBoxFactory, bitmapScaler, backgroundHeight)
         mainScreenComposable = MainScreenComposable(gameState, characterManager, saveService, firmwareManager, backgroundManager, backgroundTrainingScreenFactory, bitmapScaler, partnerScreenComposable, vitalBoxFactory, adventureScreenFactory)
         val cardCharacterImageService = CardCharacterImageService(database.speciesEntityDao(), characterSpritesIO)
@@ -208,7 +211,6 @@ class VitalWearApp : Application(), Configuration.Provider {
             characterManager,
             notificationChannelManager,
             vbUpdater,
-            stepService,
             saveService,
             sharedPreferences,
         )

@@ -23,7 +23,6 @@ class BEMCharacter(
     specificFusionOptions: List<SpecificFusionEntity>,
     settings: CharacterSettings,
     readyToTransform: MutableStateFlow<ExpectedTransformation?> = MutableStateFlow<ExpectedTransformation?>(null),
-    activityIdx : Int = 1,
     lastTransformationCheck: LocalDateTime = LocalDateTime.MIN,
     currentTimeProvider: ()->LocalDateTime = LocalDateTime::now
 ): VBCharacter(
@@ -37,7 +36,6 @@ class BEMCharacter(
     specificFusionOptions,
     settings,
     readyToTransform,
-    activityIdx,
     lastTransformationCheck,
     currentTimeProvider
 ) {
@@ -70,7 +68,6 @@ class BEMCharacter(
             specificFusionOptions,
             settings,
             readyToTransform = _readyToTransform,
-            activityIdx = activityIdx,
             lastTransformationCheck = lastTransformationCheck,
         )
     }

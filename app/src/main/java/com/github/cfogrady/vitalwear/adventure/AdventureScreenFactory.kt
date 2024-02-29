@@ -52,7 +52,7 @@ class AdventureScreenFactory(
     @Composable
     fun AdventureScreen(context: Context, adventureActivityLauncher: AdventureActivityLauncher, firmware: Firmware, partner: VBCharacter) {
         val adventure = adventureService.activeAdventure!!
-        val currentStep by adventure.currentStep.collectAsState()
+        val currentStep by adventure.dailySteps .collectAsState()
         val goalComplete by adventure.zoneCompleted.collectAsState()
         val stepsToGoal = remember(currentStep, goalComplete) {
             adventure.stepsTowardsGoal()

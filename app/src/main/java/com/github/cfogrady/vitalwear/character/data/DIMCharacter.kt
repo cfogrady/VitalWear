@@ -27,7 +27,6 @@ class DIMCharacter(
     specificFusionOptions: List<SpecificFusionEntity>,
     settings: CharacterSettings,
     readyToTransform: MutableStateFlow<ExpectedTransformation?> = MutableStateFlow(null),
-    activityIdx : Int = 1,
     lastTransformationCheck: LocalDateTime = LocalDateTime.MIN,
     currentTimeProvider: ()->LocalDateTime = LocalDateTime::now
 ): VBCharacter(
@@ -41,7 +40,6 @@ class DIMCharacter(
     specificFusionOptions,
     settings,
     readyToTransform,
-    activityIdx,
     lastTransformationCheck,
     currentTimeProvider
 ) {
@@ -68,7 +66,6 @@ class DIMCharacter(
             specificFusionOptions,
             settings,
             readyToTransform = _readyToTransform,
-            activityIdx = activityIdx,
             lastTransformationCheck = lastTransformationCheck,
         )
     }

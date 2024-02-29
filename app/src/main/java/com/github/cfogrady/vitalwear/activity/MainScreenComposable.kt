@@ -135,7 +135,7 @@ class MainScreenComposable(
             activityLaunchers.transformLauncher.invoke()
         }
         var sleeping by remember { mutableStateOf(character.characterStats.sleeping) }
-        val menuPages = remember(key1 = character.speciesStats.phase, key2 = gameState) {
+        val menuPages = remember(key1 = character.speciesStats.phase, key2 = sleeping) {
             buildMenuPages(character.speciesStats.phase, sleeping)
         }
 

@@ -57,7 +57,7 @@ class AdventureForegroundService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.i(TAG, "Remove Wakelock")
+//        Log.i(TAG, "Remove Wakelock")
 //        wakeLock?.let {
 //            if (it.isHeld) {
 //                it.release()

@@ -6,10 +6,14 @@ import android.hardware.SensorEventListener
 import android.util.Log
 import com.github.cfogrady.vitalwear.training.PunchSensorListener
 import com.github.cfogrady.vitalwear.util.BridgedSensorEventListener
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import java.time.LocalDateTime
 import java.util.LinkedList
 
-class AccelerometerToStepSensor(private val stepSensor: BridgedSensorEventListener, private val timeProvider: ()->Long = System::currentTimeMillis): SensorEventListener {
-    private var currentStep = 0;
+class AccelerometerToStepSensor(private val timeProvider: ()->Long = System::currentTimeMillis): SensorEventListener {
+    private val _currentStep = MutableStateFlow(0);
+    val currentStep: StateFlow<Int> = _currentStep
     private val squaredMagnitudeQueue = LinkedList<Float>()
     private var previousDiff = 0f
     private var lastTime = timeProvider.invoke()
@@ -37,8 +41,7 @@ class AccelerometerToStepSensor(private val stepSensor: BridgedSensorEventListen
             val diff = squaredMagnitude - secondPrevious
             if(roundsUntilNextReading == 0) {
                 if(previousDiff > PunchSensorListener.THRESHOLD_VALUE && diff < PunchSensorListener.THRESHOLD_VALUE) {
-                    currentStep++
-                    stepSensor.sensorChanged(Sensor.TYPE_STEP_COUNTER, currentTime, floatArrayOf(currentStep.toFloat()))
+                    _currentStep.value++
                     roundsUntilNextReading = 6
                 }
             } else {

@@ -9,6 +9,9 @@ import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.activity.MainActivity
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
+import com.github.cfogrady.vitalwear.data.GameState
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 class PartnerComplicationService : ComplicationDataSourceService() {
 
@@ -57,16 +60,20 @@ class PartnerComplicationService : ComplicationDataSourceService() {
         val maybeFirmware = (application as VitalWearApp).firmwareManager.getFirmware()
         val state = (application as VitalWearApp).partnerComplicationState
         val character = characterManager.getCurrentCharacter()
+        val gameState = (application as VitalWearApp).gameState.value
         return if(maybeFirmware.value == null || !characterManager.initialized.value) {
             Icon.createWithResource(applicationContext, com.github.cfogrady.vitalwear.common.R.drawable.loading_icon)
         } else if(character == null) {
             Icon.createWithBitmap(maybeFirmware.value!!.insertCardIcon)
-        } else if (character.characterStats.sleeping) {
-            val sleepingBitmap = character.characterSprites.sprites[CharacterSprites.DOWN]
-            Icon.createWithBitmap(sleepingBitmap)
-        } else {
-            val characterBitmaps = (application as VitalWearApp).gameState.value.bitmaps(character)
+        } else if (gameState != GameState.IDLE) {
+            val characterBitmaps = gameState.bitmaps(character)
             Icon.createWithBitmap(characterBitmaps[state.spriteIndex])
+        } else {
+            val vitalWearApp = (application as VitalWearApp)
+            val exerciseLevel = vitalWearApp.heartRateService.currentExerciseLevel.value
+            val recentSteps = vitalWearApp.stepService.hasRecentSteps()
+            val characterBitmaps = character.getNormalBitmaps(recentSteps, exerciseLevel)
+            Icon.createWithBitmap(characterBitmaps[state.spriteIndex % characterBitmaps.size])
         }
     }
 }

@@ -4,10 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.github.cfogrady.vitalwear.steps.SensorStepService
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 class BootReceiver : BroadcastReceiver() {
     companion object {

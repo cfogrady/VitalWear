@@ -1,6 +1,10 @@
 package com.github.cfogrady.vitalwear.steps
 
+import kotlinx.coroutines.flow.StateFlow
+import java.time.LocalDateTime
+
 interface StepService {
-    suspend fun addStepsToVitals()
-    fun listenDailySteps(): ManyStepListener
+    val dailySteps: StateFlow<Int>
+    val timeFrom10StepsAgo: StateFlow<LocalDateTime>
+    fun hasRecentSteps(now: LocalDateTime = LocalDateTime.now()): Boolean
 }

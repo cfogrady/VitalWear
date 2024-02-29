@@ -5,6 +5,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
+import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.VBUpdater
@@ -12,7 +13,7 @@ import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.debug.Debuggable
 import com.github.cfogrady.vitalwear.heartrate.HeartRateResult
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
-import com.github.cfogrady.vitalwear.steps.SensorStepService
+import com.github.cfogrady.vitalwear.steps.StepSensorService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
@@ -23,11 +24,10 @@ import java.util.LinkedList
 
 class MoodService(
     private val heartRateService: HeartRateService,
-    private val stepService: SensorStepService,
     private val sensorManager: SensorManager,
     private val vbUpdater: VBUpdater,
     private val characterManager: CharacterManager,
-    private val gameState: StateFlow<GameState>,
+    private val saveService: SaveService,
     private val localDateTimeProvider: () -> LocalDateTime = LocalDateTime::now): Debuggable {
 
     companion object {
@@ -102,6 +102,7 @@ class MoodService(
             }
         }
         vbUpdater.scheduleExactMoodUpdates()
+        saveService.saveAsync()
     }
 
     fun updateMood(now: LocalDateTime) {
@@ -109,6 +110,7 @@ class MoodService(
             if(!character.characterStats.sleeping) {
                 CoroutineScope(Dispatchers.Default).launch {
                     updateCharacterMood(character, now)
+                    saveService.save()
                 }
             }
         }
@@ -116,7 +118,6 @@ class MoodService(
 
     private suspend fun updateCharacterMood(character: VBCharacter, now: LocalDateTime) {
         try {
-            stepService.addStepsToVitals()
             val exerciseLevel = heartRateService.getExerciseLevel(lastLevel)
             val heartRateResultStr = if(exerciseLevel.heartRate.heartRateError == HeartRateResult.Companion.HeartRateError.NONE) "${exerciseLevel.heartRate.heartRate}" else exerciseLevel.heartRate.heartRateError.name
             updateFromExerciseLevel(character, exerciseLevel.level, now)

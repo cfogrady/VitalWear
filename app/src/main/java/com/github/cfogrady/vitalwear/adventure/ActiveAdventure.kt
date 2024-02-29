@@ -8,29 +8,47 @@ import android.hardware.SensorEventListener
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntity
 import com.github.cfogrady.vitalwear.util.BridgedSensorEventListener
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.observeOn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
-class ActiveAdventure(private val context: Context, private val service: AdventureService, private val adventures: List<AdventureEntity>, private val backgrounds: List<Bitmap>, private var currentZone: Int, val partner: VBCharacter) : SensorEventListener, BridgedSensorEventListener {
+class ActiveAdventure(private val context: Context, private val service: AdventureService, private val adventures: List<AdventureEntity>, private val backgrounds: List<Bitmap>, private var currentZone: Int, val partner: VBCharacter, val dailySteps: StateFlow<Int>) {
     companion object {
         const val TAG = "ActiveAdventure"
     }
 
-    private var startingStep: Int? = null
-    private val internalCurrentStep = MutableStateFlow(0)
-    val currentStep: StateFlow<Int> = internalCurrentStep
+    private var startingStep: Int = dailySteps.value
     private val internalZoneCompleted = MutableStateFlow(false)
     val zoneCompleted: StateFlow<Boolean> = internalZoneCompleted
+    val job: Job
+
+    init {
+        Log.i(TAG, "Creating ActionAdventure")
+        job = CoroutineScope(Dispatchers.Default).launch {
+            dailySteps.collect{
+                Log.i(TAG, "Step emitted: $it")
+                checkSteps()
+            }
+        }
+    }
+
+    fun end() {
+        job.cancel()
+    }
 
     fun stepsTowardsGoal(): Int {
-        if(startingStep == null) {
-            return 0
-        }
-        Log.i(TAG, "Steps towards goal: ${internalCurrentStep.value - startingStep!!}")
-        return internalCurrentStep.value - startingStep!!
+        Log.i(TAG, "Steps towards goal: ${dailySteps.value - startingStep}")
+        return dailySteps.value - startingStep
     }
 
     fun goal(): Int {
@@ -45,29 +63,11 @@ class ActiveAdventure(private val context: Context, private val service: Adventu
         return adventures[currentZone]
     }
 
-    override fun onSensorChanged(event: SensorEvent?) {
-        event?.let {
-            sensorChanged(event.sensor.type, event.timestamp, event.values)
-        }
-    }
-
-    override fun sensorChanged(sensorType: Int, timestamp: Long, values: FloatArray) {
-        internalCurrentStep.value = values[0].toInt()
-        if (startingStep == null) {
-            startingStep = internalCurrentStep.value - 1
-        }
-        checkSteps()
-    }
-
-    fun checkSteps() {
-        if(internalCurrentStep.value - startingStep!! >= adventures[currentZone].steps && !internalZoneCompleted.value) {
+    private fun checkSteps() {
+        if(dailySteps.value - startingStep >= adventures[currentZone].steps && !internalZoneCompleted.value) {
             internalZoneCompleted.value = true
             service.notifyZoneCompletion(context)
         }
-    }
-
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        Log.i(TAG, "step sensor accuracy changed to: $accuracy")
     }
 
     fun finishZone(moveToNext: Boolean) {
