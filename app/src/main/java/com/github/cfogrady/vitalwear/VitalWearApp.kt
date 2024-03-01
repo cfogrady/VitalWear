@@ -164,7 +164,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val stepIOService = StepIOService(sharedPreferences, stepState)
         saveService = SaveService(characterManager as CharacterManagerImpl, stepIOService, sharedPreferences)
         stepService = StepSensorService(sensorManager, sensorThreadHandler, Lists.newArrayList(vitalService), stepState, stepIOService, saveService)
-        moodService = MoodService(heartRateService, sensorManager, vbUpdater, characterManager, saveService)
+        moodService = MoodService(heartRateService, sensorManager, vbUpdater, characterManager, vitalService, saveService)
         moodBroadcastReceiver = MoodBroadcastReceiver(moodService)
 
         trainingService = TrainingService(sensorManager, heartRateService, saveService)

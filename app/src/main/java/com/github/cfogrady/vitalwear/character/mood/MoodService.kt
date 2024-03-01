@@ -14,6 +14,7 @@ import com.github.cfogrady.vitalwear.debug.Debuggable
 import com.github.cfogrady.vitalwear.heartrate.HeartRateResult
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.steps.StepSensorService
+import com.github.cfogrady.vitalwear.vitals.VitalService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +28,7 @@ class MoodService(
     private val sensorManager: SensorManager,
     private val vbUpdater: VBUpdater,
     private val characterManager: CharacterManager,
+    private val vitalService: VitalService,
     private val saveService: SaveService,
     private val localDateTimeProvider: () -> LocalDateTime = LocalDateTime::now): Debuggable {
 
@@ -84,8 +86,8 @@ class MoodService(
             val updateEvents = minutesSinceLastWorn/5
             characterManager.getCurrentCharacter()?.let {
                 if(!it.characterStats.sleeping) {
-                    val vitalDecrease = 20*updateEvents
-                    it.characterStats.vitals = (it.characterStats.vitals - vitalDecrease).coerceAtLeast(0)
+                    val vitalDecrease = -20*updateEvents
+                    vitalService.addVitals("untethered for $minutesSinceLastWorn", it, vitalDecrease)
                     val moodDecrease = updateEvents
                     it.characterStats.mood = (it.characterStats.mood - moodDecrease).coerceAtLeast(0)
                     lastLevel = 0

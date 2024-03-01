@@ -50,8 +50,7 @@ class VitalService(private val characterManager: CharacterManager, private val c
                 if(remainingSteps == 0) { // was an even division, so we're at a full STEPS_PER_VITAL
                     remainingSteps = STEPS_PER_VITAL
                 }
-                addStepChangeToDebug(oldSteps, newSteps, newVitals)
-                addVitals(character, newVitals)
+                addVitals("step change from $oldSteps to $newSteps", character, newVitals)
             } else {
                 remainingSteps -= (newSteps - oldSteps)
             }
@@ -61,18 +60,15 @@ class VitalService(private val characterManager: CharacterManager, private val c
         return stateChange
     }
 
-    private fun addStepChangeToDebug(oldSteps: Int, newSteps: Int, newVitals: Int) {
-        clearOldDebugEntries()
-        debugList.addLast(Pair<LocalDateTime, String>(LocalDateTime.now(), "Add $newVitals for step change from $oldSteps to $newSteps"))
-    }
-
     private fun clearOldDebugEntries() {
         while(debugList.isNotEmpty() && (debugList.first().first < LocalDate.now().atStartOfDay() || debugList.size > 50)) {
             debugList.removeFirst()
         }
     }
 
-    private fun addVitals(character: VBCharacter, newVitals: Int) {
+    fun addVitals(context: String, character: VBCharacter, newVitals: Int) {
+        clearOldDebugEntries()
+        debugList.addLast(Pair<LocalDateTime, String>(LocalDateTime.now(), "Add $newVitals for $context"))
         character.addVitals(newVitals)
         complicationRefreshService.refreshVitalsComplication()
     }
@@ -122,13 +118,7 @@ class VitalService(private val characterManager: CharacterManager, private val c
         } else {
             vitalLossTable[partnerLevel-2][opponentLevel-2]
         }
-        addBattleChangeToDebug(opponentLevel, win, vitalsChange)
-        addVitals(characterManager.getCurrentCharacter()!!, vitalsChange)
+        addVitals("battle against level ${opponentLevel +1} opponent. Won: $win", characterManager.getCurrentCharacter()!!, vitalsChange)
         return vitalsChange
-    }
-
-    private fun addBattleChangeToDebug(opponentLevel: Int, win: Boolean, newVitals: Int) {
-        clearOldDebugEntries()
-        debugList.addLast(Pair<LocalDateTime, String>(LocalDateTime.now(), "Add $newVitals from battle against level ${opponentLevel+1} opponent. Won: $win"))
     }
 }
