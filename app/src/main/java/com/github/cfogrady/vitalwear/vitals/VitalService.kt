@@ -60,6 +60,24 @@ class VitalService(private val characterManager: CharacterManager, private val c
         return stateChange
     }
 
+    val elevatedHeartRateVitalGain = arrayListOf(4, 10, 15, 20, 30, 40, 50, 60)
+
+    fun processVitalsFromHeartRate(character: VBCharacter, heartRate: Int, restingRate: Int) {
+        var index = (heartRate - restingRate)/10
+        if (index < 0) {
+            index = 0;
+        } else if (index >= elevatedHeartRateVitalGain.size) {
+            index = elevatedHeartRateVitalGain.size-1
+        }
+        var vitalGain = elevatedHeartRateVitalGain[index]
+        if(character.mood() == Mood.BAD) {
+            vitalGain /= 2
+        } else if (character.mood() == Mood.GOOD) {
+            vitalGain *= 2
+        }
+        addVitals("heart rate measured delta from resting of ${heartRate-restingRate}", character, vitalGain)
+    }
+
     private fun clearOldDebugEntries() {
         while(debugList.isNotEmpty() && (debugList.first().first < LocalDate.now().atStartOfDay() || debugList.size > 50)) {
             debugList.removeFirst()
