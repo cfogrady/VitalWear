@@ -48,7 +48,6 @@ import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.ScrollingNameFactory
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.GameState
-import com.github.cfogrady.vitalwear.debug.ExceptionService
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.firmware.FirmwareReceiver
 import com.github.cfogrady.vitalwear.firmware.PostFirmwareLoader
@@ -77,7 +76,6 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var backgroundManager: BackgroundManager
     lateinit var firmwareManager: FirmwareManager
     val partnerComplicationState = PartnerComplicationState()
-    val exceptionService = ExceptionService()
     private val characterSpritesIO = CharacterSpritesIO(spriteFileIO, spriteBitmapConverter)
 
     private val sensorThreadHandler = SensorThreadHandler()
@@ -201,7 +199,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val cardCharacterImageService = CardCharacterImageService(database.speciesEntityDao(), characterSpritesIO)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardCharacterImageService)
         shutdownReceiver = ShutdownReceiver(shutdownManager)
-        applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, vbUpdater, moodService, saveService, notificationChannelManager, complicationRefreshService)
+        applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, vbUpdater, moodService, notificationChannelManager, complicationRefreshService)
         adventureMenuScreenFactory = AdventureMenuScreenFactory(cardSpriteIO, database.cardMetaEntityDao(), adventureService, vitalBoxFactory, characterSpritesIO, database.speciesEntityDao(), bitmapScaler, backgroundHeight)
         cardReceiver = CardReceiver(cardLoader)
         firmwareReceiver = FirmwareReceiver(firmwareManager, notificationChannelManager)

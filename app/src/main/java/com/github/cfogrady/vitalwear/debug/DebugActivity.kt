@@ -35,9 +35,6 @@ class DebugActivity : ComponentActivity() {
 
     @Composable
     fun Debug() {
-        LaunchedEffect(key1 = true) {
-            (application as VitalWearApp).exceptionService.logOutExceptions()
-        }
         var debugMenuSelection by remember { mutableStateOf(DebugScreens.DEBUG_MENU) }
         val debugOptions = remember { DebugScreens.entries.filter { it != DebugScreens.DEBUG_MENU } }
         when(debugMenuSelection) {
