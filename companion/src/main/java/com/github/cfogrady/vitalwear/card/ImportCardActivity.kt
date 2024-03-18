@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -60,6 +59,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.nio.charset.Charset
 
 /**
@@ -68,10 +68,6 @@ import java.nio.charset.Charset
 class ImportCardActivity() : ComponentActivity() {
 
     private val activityHelper: ActivityHelper = ActivityHelper(this)
-
-    companion object {
-        const val TAG = "ImportCardActivity"
-    }
 
     enum class ImportState {
         PickFile,
@@ -121,7 +117,7 @@ class ImportCardActivity() : ComponentActivity() {
                 }
                 ImportState.UnlockCard -> {
                     cardVerificationLauncher.invoke {
-                        Log.i(TAG, "Adding cardId to be validated: ${card.header.dimId}")
+                        Timber.i("Adding cardId to be validated: ${card.header.dimId}")
                         it.putExtra(ValidateCardActivity.CARD_VALIDATED_KEY, card.header.dimId)
                     }
                 }
@@ -192,14 +188,14 @@ class ImportCardActivity() : ComponentActivity() {
                 finish()
             } else {
                 uri = it
-                Log.i(TAG, "Path: ${uri.path}")
+                Timber.i("Path: ${uri.path}")
                 val path = uri.path!!
                 var name = path.substring(path.lastIndexOf("/")+1)
                 if(name.contains(".")) {
                     name = name.substring(0, name.lastIndexOf("."))
                 }
                 cardName.value = name
-                Log.i(TAG, "Card: $name")
+                Timber.i("Card: $name")
                 importState.value = ImportState.NameOrUnique
             }
         }
@@ -209,10 +205,10 @@ class ImportCardActivity() : ComponentActivity() {
         return activityHelper.getActivityLauncherWithResultHandling(ValidateCardActivity::class.java) {
             val validatedCardId = it.data?.extras?.getInt(ValidateCardActivity.CARD_VALIDATED_KEY, -1)
             if(validatedCardId == null) {
-                Log.i(TAG, "Didn't receive cardId")
+                Timber.i("Didn't receive cardId")
                 finish()
             } else {
-                Log.i(TAG, "Validated Card $validatedCardId")
+                Timber.i("Validated Card $validatedCardId")
                 CoroutineScope(Dispatchers.IO).launch {
                     validatedCardManager.addValidatedCard(validatedCardId)
                 }
@@ -239,9 +235,9 @@ class ImportCardActivity() : ComponentActivity() {
         val nodes = Wearable.getNodeClient(this).connectedNodes.await()
         for (node in nodes) {
             val channel = channelClient.openChannel(node.id, ChannelTypes.CARD_DATA).await()
-            Log.i(TAG, "Digiport open!")
+            Timber.i("Digiport open!")
             channelClient.getOutputStream(channel).await().use {os ->
-                Log.i(TAG, "Writing the card data!")
+                Timber.i("Writing the card data!")
                 val cardWriter = DimWriter()
                 os.write(cardName.value.toByteArray(Charset.defaultCharset()))
                 os.write(0)

@@ -1,24 +1,16 @@
 package com.github.cfogrady.vitalwear.training
 
-import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
-import android.util.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileWriter
-import java.util.ArrayList
+import timber.log.Timber
 import java.util.LinkedList
 import kotlin.math.abs
 
 class SquatSensorListener(private val restingHeartRate: Float, private val unregisterFunctor: (SensorEventListener)->Unit, private val timeProvider: () -> Long = System::currentTimeMillis) : TrainingProgressTracker() {
     companion object {
-        const val TAG = "SquatSensorListener"
         const val PEAK_VALUE = 2.0
         const val GOAL = 5
         const val BONUS = 9
@@ -43,7 +35,7 @@ class SquatSensorListener(private val restingHeartRate: Float, private val unreg
                 handleHeartRate(maybeEvent)
             }
             else -> {
-                Log.w(TAG, "Event for unexpected sensor type: ${maybeEvent?.sensor?.name}")
+                Timber.w("Event for unexpected sensor type: ${maybeEvent?.sensor?.name}")
             }
         }
     }
@@ -111,7 +103,7 @@ class SquatSensorListener(private val restingHeartRate: Float, private val unreg
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        Log.i(TAG, "accuracy change: $accuracy")
+        Timber.i("accuracy change: $accuracy")
     }
 
     override fun progressFlow(): StateFlow<Float> {

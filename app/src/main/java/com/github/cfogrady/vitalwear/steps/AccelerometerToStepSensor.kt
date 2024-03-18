@@ -3,12 +3,10 @@ package com.github.cfogrady.vitalwear.steps
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
-import android.util.Log
 import com.github.cfogrady.vitalwear.training.PunchSensorListener
-import com.github.cfogrady.vitalwear.util.BridgedSensorEventListener
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import java.time.LocalDateTime
+import timber.log.Timber
 import java.util.LinkedList
 
 class AccelerometerToStepSensor(private val timeProvider: ()->Long = System::currentTimeMillis): SensorEventListener {
@@ -52,6 +50,6 @@ class AccelerometerToStepSensor(private val timeProvider: ()->Long = System::cur
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        Log.i("AccelerometerToStepSensor", "Accelerometer accuracy changed: $accuracy")
+        Timber.i("Accelerometer accuracy changed: $accuracy")
     }
 }

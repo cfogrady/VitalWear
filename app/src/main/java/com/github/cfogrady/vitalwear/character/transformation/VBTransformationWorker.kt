@@ -1,7 +1,6 @@
 package com.github.cfogrady.vitalwear.character.transformation
 
 import android.content.Context
-import android.util.Log
 import androidx.work.WorkerParameters
 import androidx.work.Worker
 import com.github.cfogrady.vitalwear.character.VBUpdater
@@ -10,6 +9,7 @@ import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class VBTransformationWorker (
     private val characterManager: CharacterManager,
@@ -18,9 +18,8 @@ class VBTransformationWorker (
     val context: Context,
     workerParams: WorkerParameters) : Worker(context, workerParams) {
 
-    val TAG = "VBTransformationWorker"
     override fun doWork(): Result {
-        Log.i(TAG, "Transforming!")
+        Timber.i("Transforming!")
         val character = characterManager.getCurrentCharacter()
         if(character != null) {
             CoroutineScope(Dispatchers.IO).launch {

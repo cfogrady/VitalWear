@@ -1,7 +1,6 @@
 package com.github.cfogrady.vitalwear.activity
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -9,13 +8,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.em
-import androidx.lifecycle.LiveData
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.*
 import com.github.cfogrady.vitalwear.R
@@ -33,6 +30,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.util.ArrayList
 
 class MainScreenComposable(
@@ -48,16 +46,15 @@ class MainScreenComposable(
     private val adventureScreenFactory: AdventureScreenFactory,
 ) {
     companion object {
-        val TAG = "MainScreenComposable"
     }
     @Composable
     fun MainScreen(activityLaunchers: ActivityLaunchers) {
         val characterManagerInitialized by characterManager.initialized.collectAsState()
         val firmwareState by firmwareManager.firmwareState.collectAsState()
         if(!characterManagerInitialized || firmwareState == FirmwareManager.FirmwareState.Loading) {
-            Log.i(TAG, "Loading in mainScreen")
-            Log.i(TAG, "Character Manager Initialized: $characterManagerInitialized")
-            Log.i(TAG, "Firmware Manager Initialized: $firmwareState")
+            Timber.i("Loading in mainScreen")
+            Timber.i("Character Manager Initialized: $characterManagerInitialized")
+            Timber.i("Firmware Manager Initialized: $firmwareState")
             Loading(loadingText = "Initializing") {}
         } else if(firmwareState == FirmwareManager.FirmwareState.Missing) {
             activityLaunchers.firmwareLoadingLauncher.invoke()
@@ -76,7 +73,7 @@ class MainScreenComposable(
         val background by backgroundData.collectAsState()
         val gameState by gameStateFlow.collectAsState()
         if(background == null) {
-            Log.i(TAG, "Loading in everythingLoadedScreen background is null")
+            Timber.i("Loading in everythingLoadedScreen background is null")
             Loading {}
         } else if(character == null) {
             activityLaunchers.characterSelectionLauncher.invoke()
@@ -85,7 +82,7 @@ class MainScreenComposable(
         } else if (gameState == GameState.ADVENTURE) {
             adventureScreenFactory.AdventureScreen(activityLaunchers.context, activityLaunchers.adventureActivityLauncher, firmware!!, character!!)
         } else {
-            DailyScreen(firmware!!, character = character!!, background!!, gameState, activityLaunchers)
+            DailyScreen(firmware!!, character = character!!, background!!, activityLaunchers)
         }
     }
 
@@ -129,7 +126,7 @@ class MainScreenComposable(
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun DailyScreen(firmware: Firmware, character: VBCharacter, background: Bitmap, gameState: GameState, activityLaunchers: ActivityLaunchers) {
+    fun DailyScreen(firmware: Firmware, character: VBCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
         val readyToTransform by character.readyToTransform.collectAsState()
         var sleeping by remember { mutableStateOf(character.characterStats.sleeping) }
         val menuPages = remember(key1 = character.speciesStats.phase, key2 = sleeping) {
@@ -240,7 +237,7 @@ class MainScreenComposable(
         SETTINGS,
     }
 
-    fun buildMenuPages(phase: Int, sleeping: Boolean): ArrayList<MenuOption> {
+    private fun buildMenuPages(phase: Int, sleeping: Boolean): ArrayList<MenuOption> {
         val menuPages = ArrayList<MenuOption>()
         menuPages.add(MenuOption.PARTNER)
         menuPages.add(MenuOption.STATS)

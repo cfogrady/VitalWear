@@ -1,6 +1,5 @@
 package com.github.cfogrady.vitalwear.vitals
 
-import android.util.Log
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
@@ -8,6 +7,7 @@ import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
 import com.github.cfogrady.vitalwear.steps.StepSensorService
 import com.github.cfogrady.vitalwear.steps.StepChangeListener
+import timber.log.Timber
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.LinkedList
@@ -97,7 +97,7 @@ class VitalService(private val characterManager: CharacterManager, private val c
 
     private fun vitalGainModifier(character: VBCharacter, vitals: Int) : Int {
         if(character == BEMCharacter.DEFAULT_CHARACTER) {
-            Log.w(StepSensorService.TAG, "Cannot apply vitals gain modifier for null active character.")
+            Timber.w("Cannot apply vitals gain modifier for null active character.")
             return vitals
         }
         if(character.characterStats.injured) {

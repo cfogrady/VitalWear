@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.hardware.SensorManager
-import android.util.Log
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
@@ -68,6 +67,7 @@ import com.github.cfogrady.vitalwear.workmanager.VitalWearWorkerFactory
 import com.github.cfogrady.vitalwear.workmanager.WorkProviderDependencies
 import com.google.common.collect.Lists
 import kotlinx.coroutines.flow.MutableStateFlow
+import timber.log.Timber
 import java.util.Random
 
 class VitalWearApp : Application(), Configuration.Provider {
@@ -121,7 +121,8 @@ class VitalWearApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        Log.i("VitalWear", "Create application")
+        Timber.plant(Timber.DebugTree())
+        Timber.i("Create application")
         val crashHandler = CrashHandler(this)
         Thread.setDefaultUncaughtExceptionHandler(crashHandler)
         buildDependencies()

@@ -4,21 +4,18 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.util.Log
 import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.VBUpdater
-import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.debug.Debuggable
 import com.github.cfogrady.vitalwear.heartrate.HeartRateResult
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
-import com.github.cfogrady.vitalwear.steps.StepSensorService
 import com.github.cfogrady.vitalwear.vitals.VitalService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.LinkedList
@@ -33,7 +30,6 @@ class MoodService(
     private val localDateTimeProvider: () -> LocalDateTime = LocalDateTime::now): Debuggable {
 
     companion object {
-        const val TAG = "MoodService"
         const val DEBUG_HISTORY = 100
     }
 
@@ -45,11 +41,11 @@ class MoodService(
         if (offBodySensor == null) {
             val maybeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LOW_LATENCY_OFFBODY_DETECT)
             if (maybeSensor == null) {
-                Log.e(TAG, "No off body sensor!")
+                Timber.e("No off body sensor!")
             } else {
                 offBodySensor = maybeSensor
                 if(!sensorManager.registerListener(offBodySensorEvenListener, offBodySensor, SensorManager.SENSOR_DELAY_NORMAL)) {
-                    Log.e(TAG, "Can't setup body sensor!")
+                    Timber.e("Can't setup body sensor!")
                 }
             }
         }
@@ -67,19 +63,19 @@ class MoodService(
         }
 
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-            Log.i(TAG, "OffBodySensor Accuracy changed: $accuracy")
+            Timber.i("OffBodySensor Accuracy changed: $accuracy")
         }
 
     }
 
     private fun handleDeviceTakenOff() {
-        Log.i(TAG, "Device removed")
+        Timber.i("Device removed")
         vbUpdater.unRegisterMoodUpdates()
         lastWorn = localDateTimeProvider.invoke()
     }
 
     private fun handleDevicePutOn() {
-        Log.i(TAG, "Device being worn again")
+        Timber.i("Device being worn again")
         if(lastWorn != null) {
             val current = localDateTimeProvider.invoke()
             val minutesSinceLastWorn = ChronoUnit.MINUTES.between(lastWorn, current).toInt()
@@ -99,7 +95,7 @@ class MoodService(
                 }
             }
             if(minutesSinceLastWorn >= 24*60) {
-                Log.i(TAG, "Device not worn for 24 hours. Character Death")
+                Timber.i("Device not worn for 24 hours. Character Death")
                 // TODO: Death
             }
         }
@@ -129,10 +125,10 @@ class MoodService(
             while(events.size > DEBUG_HISTORY) {
                 events.removeLast()
             }
-            Log.i(TAG, "Mood updated successfully")
+            Timber.i("Mood updated successfully")
         } catch (ise: IllegalStateException) {
             // primarily caused in emulator by lack of step sensor
-            Log.e(TAG, "Failed to update mood", ise)
+            Timber.e("Failed to update mood", ise)
         }
     }
 

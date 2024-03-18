@@ -70,6 +70,9 @@ dependencies {
     // VB-Dim-Reader library
     implementation "com.github.cfogrady:vb-dim-reader:$vb_dim_reader_version"
 
+    // Logging
+    implementation 'com.jakewharton.timber:timber:5.0.1'
+
     // Needed
     implementation 'com.google.guava:guava:31.1-android'
 

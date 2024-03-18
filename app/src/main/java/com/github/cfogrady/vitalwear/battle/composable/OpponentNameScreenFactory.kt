@@ -2,7 +2,6 @@ package com.github.cfogrady.vitalwear.battle.composable
 
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,11 +18,9 @@ import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.PositionOffsetRatios
 import com.github.cfogrady.vitalwear.composable.util.ScrollingNameFactory
 import com.google.common.collect.Lists
+import timber.log.Timber
 
 class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private val backgroundHeight: Dp, private val scrollingNameFactory: ScrollingNameFactory) {
-    companion object {
-        const val TAG = "OpponentNameScreenFactory"
-    }
 
     @Composable
     fun OpponentNameScreen(battleModel: PreBattleModel, stateUpdater: (FightTargetState) -> Unit) {
@@ -43,7 +40,7 @@ class OpponentNameScreenFactory(private val bitmapScaler: BitmapScaler, private 
             contentDescription = "Background",
             alignment = Alignment.BottomCenter,
             modifier = Modifier.clickable {
-                Log.i(TAG, "Continuing")
+                Timber.i("Continuing")
                 leftScreenEarly = true
                 stateUpdater.invoke(FightTargetState.READY)
             }

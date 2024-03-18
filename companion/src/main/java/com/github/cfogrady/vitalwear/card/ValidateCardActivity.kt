@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,6 +18,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.github.cfogrady.vitalwear.Loading
 import kotlinx.coroutines.flow.MutableStateFlow
+import timber.log.Timber
 
 /**
  * This activity is used to connect with a VBBE to validate cardIds.
@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class ValidateCardActivity : ComponentActivity(), NfcAdapter.ReaderCallback {
 
     companion object {
-        const val TAG = "ValidateCardActivity"
         const val CARD_VALIDATED_KEY = "CARD_VALIDATED"
     }
 
@@ -45,7 +44,7 @@ class ValidateCardActivity : ComponentActivity(), NfcAdapter.ReaderCallback {
         val maybeNfcAdapter = NfcAdapter.getDefaultAdapter(this)
         val inputCardId = intent.getIntExtra(CARD_VALIDATED_KEY, -1)
         if(inputCardId == -1) {
-            Log.e(TAG, "ValidateCardActivity called without card number!")
+            Timber.e("ValidateCardActivity called without card number!")
             finish()
             return
         }
@@ -131,7 +130,7 @@ class ValidateCardActivity : ComponentActivity(), NfcAdapter.ReaderCallback {
                 }
             }
             else -> {
-                Log.w(TAG, "Incorrect state")
+                Timber.w("Incorrect state")
             }
         }
     }

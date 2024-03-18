@@ -3,13 +3,12 @@ package com.github.cfogrady.vitalwear.training
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
-import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import timber.log.Timber
 
 class DashSensorListener(private val restingHeartRate: Float, private val unregisterFunctor: (SensorEventListener)->Unit) : TrainingProgressTracker() {
     companion object {
-        const val TAG = "DashSensorListener"
         const val GOAL = 12
         const val BONUS = 16
     }
@@ -32,7 +31,7 @@ class DashSensorListener(private val restingHeartRate: Float, private val unregi
             }
 
             else -> {
-                Log.w(TAG, "Event for unexpected sensor type: ${maybeEvent?.sensor?.name}")
+                Timber.w("Event for unexpected sensor type: ${maybeEvent?.sensor?.name}")
             }
         }
     }
@@ -56,7 +55,7 @@ class DashSensorListener(private val restingHeartRate: Float, private val unregi
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        Log.i(TAG, "accuracy change: $accuracy")
+        Timber.i("accuracy change: $accuracy")
     }
 
     override fun progressFlow(): StateFlow<Float> {

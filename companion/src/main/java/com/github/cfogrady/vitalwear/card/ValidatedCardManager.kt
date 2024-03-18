@@ -1,17 +1,13 @@
 package com.github.cfogrady.vitalwear.card
 
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.lang.IllegalStateException
 
 class ValidatedCardManager(private val validatedCardEntityDao: ValidatedCardEntityDao) {
-
-    companion object {
-        const val TAG = "ValidatedCardManager"
-    }
 
     private lateinit var validatedIds: Set<Int>
 
@@ -32,7 +28,7 @@ class ValidatedCardManager(private val validatedCardEntityDao: ValidatedCardEnti
     }
 
     fun isValidatedCard(cardId: Int): Boolean {
-        Log.i(TAG, "Checking if $cardId is contained in $validatedIds")
+        Timber.i("Checking if $cardId is contained in $validatedIds")
         if (!isInitialized()) {
             throw IllegalStateException("Not yet initialized")
         }

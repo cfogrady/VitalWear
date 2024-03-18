@@ -4,11 +4,11 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.util.Log
 import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.util.SensorThreadHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import timber.log.Timber
 import java.time.*
 import java.time.temporal.ChronoUnit
 import java.util.LinkedList
@@ -26,9 +26,6 @@ class StepSensorService (
     private val stepIOService: StepIOService,
     private val saveService: SaveService,
     private val dateTimeFetcher: ()->LocalDateTime = LocalDateTime::now): StepService, SensorEventListener {
-    companion object {
-        const val TAG = "StepsService"
-    }
 
     override val dailySteps: StateFlow<Int> = stepState.dailySteps
     private val _timeFrom10StepsAgo = MutableStateFlow(LocalDateTime.now().minusMinutes(10))
@@ -41,14 +38,14 @@ class StepSensorService (
      * Handles the a boot up of the application.
      */
     fun startup() {
-        Log.i(TAG, "Handling startup")
+        Timber.i("Handling startup")
         val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         if(stepSensor == null) {
-            Log.e(TAG, "No Step Sensor On Device")
+            Timber.e("No Step Sensor On Device")
             return
         }
         if(!sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_NORMAL, sensorThreadHandler.handler)) {
-            Log.e(TAG, "Unable to register step sensor")
+            Timber.e("Unable to register step sensor")
             return
         }
     }
@@ -64,26 +61,26 @@ class StepSensorService (
      * start of days steps or step counter has been reset from a reboot)
      */
     private fun stepsAtBootChanges(currentStepCounter: Int, today: LocalDate): Boolean {
-        Log.i(TAG, "Performing steps on app startup")
+        Timber.i("Performing steps on app startup")
         val oldStepState = stepIOService.stepPreferences()
         val dateFromSave = LocalDate.ofEpochDay(oldStepState.timeLastReadDaysFromEpoch)
         if(dateFromSave != today) {
             // we're on a different day than the last save, so reset everything
-            Log.i(TAG, "Restarting steps with new day")
+            Timber.i("Restarting steps with new day")
             stepState.startOfDaySteps = currentStepCounter
             stepState.lastStepReading = currentStepCounter
             stepState.dailySteps.value = 0
             return true
         } else if(oldStepState.lastStepReading > currentStepCounter) {
             // we reset the step counter, so assume a reboot
-            Log.i(TAG, "Restarting steps from device reboot")
+            Timber.i("Restarting steps from device reboot")
             stepState.startOfDaySteps = currentStepCounter - oldStepState.dailySteps
             stepState.lastStepReading = oldStepState.lastStepReading
             stepState.dailySteps.value = oldStepState.dailySteps
             return true
         } else {
             // App shutdown and restarted. We're on the same day.
-            Log.i(TAG, "Restarting steps from app restart")
+            Timber.i("Restarting steps from app restart")
             stepState.startOfDaySteps = oldStepState.lastStepReading - oldStepState.dailySteps
             stepState.lastStepReading = oldStepState.lastStepReading
             stepState.dailySteps.value = currentStepCounter - stepState.startOfDaySteps
@@ -92,7 +89,7 @@ class StepSensorService (
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        // Log.i(TAG, "SensorChange Called")
+        // Timber.i("SensorChange Called")
         event?.let {
             val now = dateTimeFetcher.invoke()
             val today = now.toLocalDate()
@@ -123,7 +120,7 @@ class StepSensorService (
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        Log.i(TAG, "Received accuracy change for step sensor")
+        Timber.i("Received accuracy change for step sensor")
     }
 
     override fun hasRecentSteps(now: LocalDateTime): Boolean {

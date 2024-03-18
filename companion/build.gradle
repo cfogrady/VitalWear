@@ -85,6 +85,7 @@ dependencies {
 
     //VB-DIM-Reader and SLF4J logging
     implementation "com.github.cfogrady:vb-dim-reader:$vb_dim_reader_version"
+    implementation 'com.jakewharton.timber:timber:5.0.1'
     runtimeOnly 'org.slf4j:slf4j-android:1.7.26'
 
     //Channel Client (data transfer)

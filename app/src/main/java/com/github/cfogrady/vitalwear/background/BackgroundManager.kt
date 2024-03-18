@@ -3,16 +3,15 @@ package com.github.cfogrady.vitalwear.background
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Bitmap
-import android.util.Log
 import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import timber.log.Timber
 
 class BackgroundManager(private val cardSpritesIO: CardSpritesIO, private val sharedPreferences: SharedPreferences) {
 
     companion object {
-        const val TAG = "BackgroundManager"
         const val BACKGROUND_IS_CARD = "BACKGROUND_IS_CARD"
         const val BACKGROUND_CARD_NAME = "BACKGROUND_CARD_NAME"
         const val BACKGROUND_IDX = "BACKGROUND_IDX"
@@ -66,7 +65,7 @@ class BackgroundManager(private val cardSpritesIO: CardSpritesIO, private val sh
                 val backgrounds = cardSpritesIO.loadCardBackgrounds(context, cardName)
                 backgroundSetter.invoke(backgrounds[backgroundIdx])
             } else {
-                Log.e(TAG, "Attempting to load card background, but card background name is null!")
+                Timber.e("Attempting to load card background, but card background name is null!")
             }
         }
     }
@@ -87,7 +86,7 @@ class BackgroundManager(private val cardSpritesIO: CardSpritesIO, private val sh
             }
             preferences.apply()
         } else {
-            Log.e(TAG, "Received invalid firmware background: $index out of 4")
+            Timber.e("Received invalid firmware background: $index out of 4")
         }
     }
 

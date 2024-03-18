@@ -1,12 +1,11 @@
 package com.github.cfogrady.vitalwear.debug
 
-import android.util.Log
+import timber.log.Timber
 import java.time.LocalDateTime
 import java.util.LinkedList
 
 class ExceptionService {
     companion object {
-        const val TAG = "ExceptionService"
         var instance: ExceptionService? = null
     }
 
@@ -25,7 +24,7 @@ class ExceptionService {
 
     fun logOutExceptions() {
         for(exception in exceptions) {
-            Log.e(TAG, "${exception.first}: ", exception.second)
+            Timber.e("${exception.first}: ", exception.second)
         }
     }
 }

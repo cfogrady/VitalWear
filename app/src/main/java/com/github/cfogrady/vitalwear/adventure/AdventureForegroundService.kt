@@ -2,21 +2,18 @@ package com.github.cfogrady.vitalwear.adventure
 
 import android.app.Notification
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.IBinder
-import android.os.PowerManager
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
+import timber.log.Timber
 
 class AdventureForegroundService : Service() {
 
     companion object {
-        const val TAG = "AdventureService"
         const val CARD_NAME = "CARD_NAME"
         const val STARTING_ADVENTURE = "STARTING_ADVENTURE"
     }
@@ -35,7 +32,7 @@ class AdventureForegroundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if(intent == null) {
-            Log.e(TAG, "Attempted to start AdventureForegroundService with null intent!")
+            Timber.e("Attempted to start AdventureForegroundService with null intent!")
             return super.onStartCommand(null, flags, startId)
         }
         val cardName = intent.extras?.getString(CARD_NAME)!!
@@ -57,7 +54,7 @@ class AdventureForegroundService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-//        Log.i(TAG, "Remove Wakelock")
+//        Timber.i("Remove Wakelock")
 //        wakeLock?.let {
 //            if (it.isHeld) {
 //                it.release()

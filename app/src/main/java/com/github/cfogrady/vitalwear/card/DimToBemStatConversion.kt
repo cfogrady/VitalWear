@@ -1,14 +1,13 @@
 package com.github.cfogrady.vitalwear.card
 
-import android.util.Log
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import kotlin.math.max
 
 class DimToBemStatConversion(private val statConversionDao: StatConversionDao) {
     companion object {
-        const val TAG = "DimToBemStatConversion"
 
         val MIN_DIM_STATS = listOf(
             Stats(0f, 0f, 0f), // I
@@ -69,7 +68,7 @@ class DimToBemStatConversion(private val statConversionDao: StatConversionDao) {
         val bemPhase = withContext(Dispatchers.IO) {
             newSpeciesPhase(speciesEntity.cardName, speciesEntity.characterId, dimPhase)
         }
-        Log.i(TAG, "Phase ${dimPhase} to $bemPhase")
+        Timber.i("Phase $dimPhase to $bemPhase")
         var dimBpPhase = dimPhase
         var dimHpPhase = dimPhase
         var dimApPhase = dimPhase
@@ -79,17 +78,17 @@ class DimToBemStatConversion(private val statConversionDao: StatConversionDao) {
         if(bemPhase == dimPhase && dimPhase < AVERAGE_DIM_STATS.size-1) {
             // Lucemon and a few others with abnormally high stats for their phase
             if(speciesEntity.bp > AVERAGE_DIM_STATS[dimPhase+1].bp) {
-                Log.i(TAG, "bp stat upgrade")
+                Timber.i("bp stat upgrade")
                 dimBpPhase = dimPhase + 1
                 bemBpPhase = dimPhase + 1
             }
             if(speciesEntity.hp > AVERAGE_DIM_STATS[dimPhase+1].hp) {
-                Log.i(TAG, "hp stat upgrade")
+                Timber.i("hp stat upgrade")
                 dimHpPhase = dimPhase + 1
                 bemHpPhase = dimPhase + 1
             }
             if(speciesEntity.ap > AVERAGE_DIM_STATS[dimPhase+1].ap) {
-                Log.i(TAG, "ap stat upgrade")
+                Timber.i("ap stat upgrade")
                 dimApPhase = dimPhase + 1
                 bemApPhase = dimPhase + 1
             }
@@ -97,7 +96,7 @@ class DimToBemStatConversion(private val statConversionDao: StatConversionDao) {
         val bp = convertStat(speciesEntity.bp, dimBpPhase, bemBpPhase, Stats::bp)
         val ap = convertStat(speciesEntity.ap, dimApPhase, bemApPhase, Stats::ap)
         val hp = convertStat(speciesEntity.hp, dimHpPhase, bemHpPhase, Stats::hp)
-        Log.i(TAG, "Card ${speciesEntity.cardName} slot: ${speciesEntity.characterId} converted to new stats: {phase: $bemPhase, bp: $bp, hp: $hp, ap: $ap}")
+        Timber.i("Card ${speciesEntity.cardName} slot: ${speciesEntity.characterId} converted to new stats: {phase: $bemPhase, bp: $bp, hp: $hp, ap: $ap}")
         return speciesEntity.copy(bp = bp, hp = hp, ap = ap, phase = bemPhase)
     }
 
@@ -133,11 +132,11 @@ class DimToBemStatConversion(private val statConversionDao: StatConversionDao) {
         return withContext(Dispatchers.IO) {
             val maxJogressFromPhase =
                 statConversionDao.getFusionToCharacterPhase(cardName, slotId) ?: (currentPhase - 1)
-            Log.i(TAG, "Max Jogress From Phase: $maxJogressFromPhase")
+            Timber.i("Max Jogress From Phase: $maxJogressFromPhase")
             val maxDirectTransformationFromPhase =
                 statConversionDao.getTransformationsToCharacterPhase(cardName, slotId)
                     ?: (currentPhase - 1)
-            Log.i(TAG, "Max Transform From Phase: $maxDirectTransformationFromPhase")
+            Timber.i("Max Transform From Phase: $maxDirectTransformationFromPhase")
             val maxTransformFrom = max(maxJogressFromPhase, maxDirectTransformationFromPhase)
             val minPhaseOfNext =
                 statConversionDao.getNextTransformationPhaseFromCharacter(cardName, slotId)

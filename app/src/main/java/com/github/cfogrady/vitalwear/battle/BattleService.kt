@@ -2,7 +2,6 @@ package com.github.cfogrady.vitalwear.battle
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.util.Log
 import com.github.cfogrady.vb.dim.card.DimReader
 import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.background.BackgroundManager
@@ -24,6 +23,7 @@ import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.settings.CardSettingsDao
 import com.github.cfogrady.vitalwear.settings.CharacterSettings
 import com.github.cfogrady.vitalwear.vitals.VitalService
+import timber.log.Timber
 import java.util.*
 
 /**
@@ -43,9 +43,6 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
                     private val cardMetaEntityDao: CardMetaEntityDao,
                     private val dimToBemStatConversion: DimToBemStatConversion,
 ) {
-    companion object {
-        const val TAG = "BattleService"
-    }
 
     suspend fun createBattleModel(context: Context, battleTargetInfo: BattleCharacterInfo): PreBattleModel {
         val partnerCharacter = characterManager.getCharacterFlow().value!!
@@ -70,11 +67,11 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
     private suspend fun fetchSupportCharacter(context: Context, firmware: Firmware, franchiseId: Int?): BattleSupportCharacter? {
         val support = characterManager.fetchSupportCharacter(context) ?: return null
         if(franchiseId != null && franchiseId != support.franchiseId) {
-            Log.i(TAG, "Partner is franchise $franchiseId, but support is ${support.franchiseId}")
+            Timber.i("Partner is franchise $franchiseId, but support is ${support.franchiseId}")
             return null
         }
         if(support.phase < 2) {
-            Log.i(TAG, "Support isn't grown enough to support. Phase: ${support.phase}")
+            Timber.i("Support isn't grown enough to support. Phase: ${support.phase}")
             return null
         }
         val spriteDir = support.spriteDirName
@@ -298,8 +295,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
                     return species
                 }
             }
-            Log.w(
-                BattleActivity.TAG, "Rolled for an invalid species... This is a bad card image." +
+            Timber.w("Rolled for an invalid species... This is a bad card image." +
                         "Running through the options until our roll is reduced to 0.")
         } while (true) // always true because if it were false we would have already returned
     }

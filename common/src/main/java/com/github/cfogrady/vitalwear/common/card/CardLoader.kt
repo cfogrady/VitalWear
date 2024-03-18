@@ -1,9 +1,6 @@
 package com.github.cfogrady.vitalwear.common.card
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.util.Log
-import android.util.SparseArray
 import com.github.cfogrady.vb.dim.adventure.BemAdventureLevels.BemAdventureLevel
 import com.github.cfogrady.vb.dim.card.BemCard
 import com.github.cfogrady.vb.dim.card.Card
@@ -27,6 +24,7 @@ import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.TransformationEntity
 import com.github.cfogrady.vitalwear.common.card.db.TransformationEntityDao
 import com.google.common.io.BaseEncoding
+import timber.log.Timber
 import java.io.InputStream
 import java.security.MessageDigest
 import java.util.*
@@ -47,7 +45,6 @@ class CardLoader(
     private val dimReader: DimReader,
 ) {
     companion object {
-        private const val TAG = "NewCardLoader"
         private const val DIM_FIRST_CHARACTER_SPRITE_INDEX = 10
         private const val BEM_FIRST_CHARACTER_SPRITE_INDEX = 54
         private const val BEM_SPRITES_PER_CHARACTER = 14
@@ -259,7 +256,7 @@ class CardLoader(
     private fun collision(applicationContext: Context, characterDir: String, newSplash: Sprite): Boolean {
         val existingSprite = characterSpritesIO.loadCharacterSpriteFile(applicationContext, characterDir, CharacterSpritesIO.SPLASH)!!
         if(existingSprite.width != newSplash.width || existingSprite.height != newSplash.height) {
-            Log.e(TAG, "Splash images have wrong dimensions!")
+            Timber.e("Splash images have wrong dimensions!")
             return true
         }
         // check if the data is the same instead of a collision

@@ -1,20 +1,15 @@
 package com.github.cfogrady.vitalwear.communication
 
-import android.util.Log
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.common.communication.ChannelTypes
-import com.github.cfogrady.vitalwear.firmware.FIRMWARE_FILE
 import com.google.android.gms.wearable.ChannelClient
-import com.google.android.gms.wearable.Wearable
 import com.google.android.gms.wearable.WearableListenerService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class PhoneCommunicationService  : WearableListenerService() {
-    companion object {
-        private const val TAG = "PhoneCommunicationService"
-    }
 
     override fun onChannelOpened(channel: ChannelClient.Channel) {
         super.onChannelOpened(channel)
@@ -37,7 +32,7 @@ class PhoneCommunicationService  : WearableListenerService() {
                 }
             }
             else -> {
-                Log.i(TAG, "Unknown channel: ${channel.path}")
+                Timber.i("Unknown channel: ${channel.path}")
             }
         }
     }

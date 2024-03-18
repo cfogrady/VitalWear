@@ -12,6 +12,7 @@ import com.github.cfogrady.vitalwear.card.ValidatedCardManager
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.common.data.migrations.CreateAndPopulateMaxAdventureCompletionCardMeta
 import com.github.cfogrady.vitalwear.data.AppDatabase
+import timber.log.Timber
 
 class VitalWearCompanion : Application() {
     lateinit var cardLoader: CardLoader
@@ -20,6 +21,7 @@ class VitalWearCompanion : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        Timber.plant(Timber.DebugTree())
         buildDependencies()
     }
 

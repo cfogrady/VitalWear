@@ -1,20 +1,16 @@
 package com.github.cfogrady.vitalwear.heartrate
 
 import android.hardware.SensorManager
-import android.util.Log
 import com.github.cfogrady.vitalwear.util.SensorThreadHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import timber.log.Timber
 
 
 class HeartRateService(
     private val sensorManager: SensorManager,
     private val sensorThreadHandler: SensorThreadHandler,
 ) {
-
-    companion object {
-        const val TAG = "HeartRateService"
-    }
 
     private val _currentExerciseLevel = MutableStateFlow(0)
     val currentExerciseLevel: StateFlow<Int> = _currentExerciseLevel
@@ -25,7 +21,7 @@ class HeartRateService(
     }
 
     private fun exerciseLevelFromResult(heartRateResult: HeartRateResult, lastLevel: Int): Int {
-        Log.i(TAG, "HeartRate: ${heartRateResult.heartRate}, Status: ${heartRateResult.heartRateError}")
+        Timber.i("HeartRate: ${heartRateResult.heartRate}, Status: ${heartRateResult.heartRateError}")
         val current = if(heartRateResult.heartRateError == HeartRateResult.Companion.HeartRateError.NONE) heartRateResult.heartRate else 65
         val resting = restingHeartRate()
         val delta = current - resting

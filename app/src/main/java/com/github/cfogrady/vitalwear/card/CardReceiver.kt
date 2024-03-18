@@ -1,7 +1,6 @@
 package com.github.cfogrady.vitalwear.card
 
 import android.content.Context
-import android.util.Log
 import com.google.android.gms.wearable.ChannelClient
 import com.google.android.gms.wearable.Wearable
 import kotlinx.coroutines.Dispatchers
@@ -9,15 +8,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.nio.charset.Charset
 
 class CardReceiver(private val cardLoader: AppCardLoader) {
-
-    companion object {
-        const val TAG = "CardReceiver"
-    }
 
     private val _cardsImported = MutableStateFlow(0)
     val cardsImported: StateFlow<Int> = _cardsImported
@@ -37,7 +33,7 @@ class CardReceiver(private val cardLoader: AppCardLoader) {
                     success = true
                     _cardsImported.value++
                 } catch (e: Exception) {
-                    Log.e(TAG, "Unable to load received card data", e)
+                    Timber.e("Unable to load received card data", e)
                 }
             }
             channelClient.close(channel)

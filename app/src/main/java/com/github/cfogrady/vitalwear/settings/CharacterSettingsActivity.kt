@@ -2,7 +2,6 @@ package com.github.cfogrady.vitalwear.settings
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,18 +31,17 @@ import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.common.card.CardType
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 class CharacterSettingsActivity : ComponentActivity() {
     companion object {
-        const val TAG = "SettingsActivity"
         const val CARD_TYPE = "CardType"
         const val CHARACTER_SETTINGS = "CharacterSettings"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.i(TAG, "Configure Settings")
+        Timber.i("Configure Settings")
         val cardType = intent.getSerializableExtra(CARD_TYPE) as CardType
         setContent {
             BuildScreen(cardType)
