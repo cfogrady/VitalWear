@@ -122,6 +122,8 @@ class VitalWearApp : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         Log.i("VitalWear", "Create application")
+        val crashHandler = CrashHandler(this)
+        Thread.setDefaultUncaughtExceptionHandler(crashHandler)
         buildDependencies()
 
         applicationContext.registerReceiver(shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN))
