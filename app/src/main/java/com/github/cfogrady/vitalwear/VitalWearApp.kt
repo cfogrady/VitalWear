@@ -48,6 +48,7 @@ import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.ScrollingNameFactory
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.GameState
+import com.github.cfogrady.vitalwear.debug.TinyLogTree
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.firmware.FirmwareReceiver
 import com.github.cfogrady.vitalwear.firmware.PostFirmwareLoader
@@ -120,6 +121,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         Timber.plant(Timber.DebugTree())
+        Timber.plant(TinyLogTree(this))
         Timber.i("Create application")
         val crashHandler = CrashHandler(this)
         Thread.setDefaultUncaughtExceptionHandler(crashHandler)
@@ -134,7 +136,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         powerChangeIntentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED)
         ContextCompat.registerReceiver(applicationContext, powerBroadcastReceiver, powerChangeIntentFilter, ContextCompat.RECEIVER_EXPORTED)
 
-        val appShutdownHandler = AppShutdownHandler(shutdownManager, sharedPreferences)
+        val appShutdownHandler = AppShutdownHandler(shutdownManager)
         // This may be run on app shutdown by Android... but updating or killing via the IDE never triggers this.
         Runtime.getRuntime().addShutdownHook(appShutdownHandler)
         applicationBootManager.onStartup(this)

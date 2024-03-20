@@ -30,3 +30,8 @@
 -dontwarn org.openjsse.javax.net.ssl.SSLParameters
 -dontwarn org.openjsse.javax.net.ssl.SSLSocket
 -dontwarn org.openjsse.net.ssl.OpenJSSE
+
+# Tinylog
+-keepnames interface org.tinylog.**
+-keepnames class * implements org.tinylog.**
+-keepclassmembers class * implements org.tinylog.** { <init>(...); }
