@@ -22,29 +22,29 @@ class TinyLogTreeTest {
                 arrayOf(
                     TestCase(
                         "Most Recent Date",
-                        arrayOf(File("log_2024-03-19-0.txt"), File("log_2024-03-20-0.txt"), File("log_2024-03-21-0.txt"),),
-                        File("log_2024-03-21-0.txt")
+                        arrayOf(File("log_2024-03-19_0.txt"), File("log_2024-03-20_0.txt"), File("log_2024-03-21_0.txt"),),
+                        File("log_2024-03-21_0.txt")
                     )
                 ),
                 arrayOf(
                     TestCase(
                         "Reverse Order",
-                        arrayOf(File("log_2024-03-21-0.txt"), File("log_2024-03-20-0.txt"), File("log_2024-03-19-0.txt"),),
-                        File("log_2024-03-21-0.txt")
+                        arrayOf(File("log_2024-03-21_0.txt"), File("log_2024-03-20_0.txt"), File("log_2024-03-19_0.txt"),),
+                        File("log_2024-03-21_0.txt")
                     )
                 ),
                 arrayOf(
                     TestCase(
                         "Most Recent Date Has Count",
-                        arrayOf(File("log_2024-03-19-0.txt"), File("log_2024-03-20-0.txt"), File("log_2024-03-21-0.txt"), File("log_2024-03-21-1.txt"), File("log_2024-03-21-2.txt"),),
-                        File("log_2024-03-21-2.txt")
+                        arrayOf(File("log_2024-03-19_0.txt"), File("log_2024-03-20_0.txt"), File("log_2024-03-21_0.txt"), File("log_2024-03-21_1.txt"), File("log_2024-03-21_2.txt"),),
+                        File("log_2024-03-21_2.txt")
                     )
                 ),
                 arrayOf(
                     TestCase(
                         "Less Significant Date Has Higher Count",
-                        arrayOf(File("log_2024-03-19-0.txt"), File("log_2024-03-20-0.txt"), File("log_2024-03-20-1.txt"), File("log_2024-03-21-0.txt"),),
-                        File("log_2024-03-21-0.txt")
+                        arrayOf(File("log_2024-03-19_0.txt"), File("log_2024-03-20_0.txt"), File("log_2024-03-20_1.txt"), File("log_2024-03-21_0.txt"),),
+                        File("log_2024-03-21_0.txt")
                     )
                 ),
                 arrayOf(
@@ -57,7 +57,7 @@ class TinyLogTreeTest {
                 arrayOf(
                     TestCase(
                         "Non Log Files",
-                        arrayOf(File("log_2024-03-19-0.bad"), File("log_2024-03-19-a.txt"), File("test.txt"), File("2024-03-19-0.txt"), File("log_YYYY-03-19-0.txt")),
+                        arrayOf(File("log_2024-03-19_0.bad"), File("log_2024-03-19_a.txt"), File("test.txt"), File("2024-03-19_0.txt"), File("log_YYYY-03-19_0.txt")),
                         null
                     )
                 ),

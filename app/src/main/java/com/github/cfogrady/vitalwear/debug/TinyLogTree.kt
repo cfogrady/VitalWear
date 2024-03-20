@@ -32,7 +32,7 @@ class TinyLogTree(context: Context): Timber.DebugTree() {
             return File(context.filesDir, "logs")
         }
 
-        private val logFileRegexp = Regex("""log_(\d{4}-\d{2}-\d{2})-(\d+)\.txt""")
+        private val logFileRegexp = Regex("""log_(\d{4}-\d{2}-\d{2})_(\d+)\.txt""")
         private const val START_DATE = "0000-00-00"
 
         fun getMostRecentLogFile(context: Context): File? {
