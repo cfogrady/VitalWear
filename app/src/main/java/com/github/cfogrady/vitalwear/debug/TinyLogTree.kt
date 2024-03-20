@@ -9,6 +9,7 @@ import org.tinylog.provider.ProviderRegistry
 import timber.log.Timber
 
 @SuppressLint("LogNotTimber")
+// extend DebugTree instead of raw Tree so we get classes as tags
 class TinyLogTree(context: Context): Timber.DebugTree() {
 
     companion object {
@@ -20,7 +21,7 @@ class TinyLogTree(context: Context): Timber.DebugTree() {
             Configuration.set("writer", "rolling file")
             Configuration.set("writer.level", "info")
             Configuration.set("writer.backups", "3")
-            Configuration.set("writer.format", "{date: HH:mm:ss.SSS}{pipe}{level}{pipe}{message}")
+            Configuration.set("writer.format", "{date: HH:mm:ss.SSS}{pipe}{tag}{pipe}{level}{pipe}{message}")
             Configuration.set("writer.file", "$logsDir/log_{date:yyyy-MM-dd}_{count}.txt")
             Configuration.set("writer.policies", "daily, size: 10mb")
             Configuration.set("writer.buffered", "true")
@@ -35,13 +36,15 @@ class TinyLogTree(context: Context): Timber.DebugTree() {
     }
 
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+        val taggedLogger = Logger.tag(tag)
         when(priority) {
-            Log.VERBOSE -> Logger.debug(t, "$tag|$message")
-            Log.ASSERT -> Logger.error(t, "$tag|$message")
-            Log.DEBUG -> Logger.debug(t, "$tag|$message")
-            Log.INFO -> Logger.info(t, "$tag|$message")
-            Log.WARN -> Logger.warn(t, "$tag|$message")
-            Log.ERROR -> Logger.error(t, "$tag|$message")
+            // DebugTree already appended the throwable to the message
+            Log.VERBOSE -> taggedLogger.debug {message}
+            Log.ASSERT -> taggedLogger.error {message}
+            Log.DEBUG -> taggedLogger.debug {message}
+            Log.INFO -> taggedLogger.info {message}
+            Log.WARN -> taggedLogger.warn {message}
+            Log.ERROR -> taggedLogger.error { message }
             else -> Log.e("TinyLogTree", "Failed to interpret priority")
         }
     }
