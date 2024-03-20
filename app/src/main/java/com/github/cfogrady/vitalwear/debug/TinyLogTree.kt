@@ -7,6 +7,7 @@ import org.tinylog.Logger
 import org.tinylog.configuration.Configuration
 import org.tinylog.provider.ProviderRegistry
 import timber.log.Timber
+import java.io.File
 
 @SuppressLint("LogNotTimber")
 // extend DebugTree instead of raw Tree so we get classes as tags
@@ -26,10 +27,44 @@ class TinyLogTree(context: Context): Timber.DebugTree() {
             Configuration.set("writer.policies", "daily, size: 10mb")
             Configuration.set("writer.buffered", "true")
         }
+
+        private fun getLogsDir(context: Context): File {
+            return File(context.filesDir, "logs")
+        }
+
+        private val logFileRegexp = Regex("""log_(\d{4}-\d{2}-\d{2})-(\d+)\.txt""")
+        private const val START_DATE = "0000-00-00"
+
+        fun getMostRecentLogFile(context: Context): File? {
+            val logsDir = getLogsDir(context)
+            return getMostRecentLogFileFromFiles(logsDir.listFiles()!!)
+        }
+
+        internal fun getMostRecentLogFileFromFiles(files: Array<out File>): File? {
+            var date = START_DATE
+            var count = 0
+            var mostRecentFile: File? = null
+            for(child in files) {
+                val matchResult = logFileRegexp.find(child.name)
+                if(matchResult != null) {
+                    val childDate = matchResult.groups[1]?.value ?: START_DATE
+                    val childCount = matchResult.groups[2]?.value?.toInt() ?: 0
+                    if(childDate > date) {
+                        mostRecentFile = child
+                        date = childDate
+                        count = childCount
+                    } else if (childDate == date && childCount > count) {
+                        mostRecentFile = child
+                        count = childCount
+                    }
+                }
+            }
+            return mostRecentFile
+        }
     }
 
     init {
-        val logsDir = "${context.filesDir.absolutePath}/logs"
+        val logsDir = getLogsDir(context).absolutePath
         setupRollingLogs(logsDir)
         Configuration.set("writingthread", "true")
         Log.i("TinyLogTree", "Log Dir: $logsDir")
@@ -45,7 +80,7 @@ class TinyLogTree(context: Context): Timber.DebugTree() {
             Log.INFO -> taggedLogger.info {message}
             Log.WARN -> taggedLogger.warn {message}
             Log.ERROR -> taggedLogger.error { message }
-            else -> Log.e("TinyLogTree", "Failed to interpret priority")
+            else -> taggedLogger.error {"Invalid priority $priority For Message! $message"}
         }
     }
 }
