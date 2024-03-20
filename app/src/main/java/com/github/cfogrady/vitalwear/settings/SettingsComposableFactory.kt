@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.wear.compose.material.RadioButton
@@ -100,6 +101,15 @@ class SettingsComposableFactory(private val backgroundManager: BackgroundManager
                             Text(text = "DEBUG", fontWeight = FontWeight.Bold, fontSize = 3.em)
                         }
                     }
+                    SettingsMenuOption.SendLog -> {
+                        Box(modifier = Modifier
+                            .fillMaxSize()
+                            .clickable {
+                                activityLauncher.sendLog.invoke()
+                            }, contentAlignment = Alignment.Center) {
+                            Text(text = "SEND\nLOGS\nTO\nDEVS", fontWeight = FontWeight.Bold, fontSize = 3.em, textAlign = TextAlign.Center)
+                        }
+                    }
                     SettingsMenuOption.Save -> {
                         Box(modifier = Modifier
                             .fillMaxSize()
@@ -123,12 +133,14 @@ class SettingsComposableFactory(private val backgroundManager: BackgroundManager
         Background,
         BattleBackground,
         Debug,
+        SendLog,
         Save
     }
 
     fun buildSettingMenuPages(): List<SettingsMenuOption> {
         return listOf(SettingsMenuOption.Background,
             SettingsMenuOption.BattleBackground,
+            SettingsMenuOption.SendLog,
             SettingsMenuOption.Debug,
             SettingsMenuOption.Save)
     }
