@@ -12,12 +12,14 @@ import com.github.cfogrady.vitalwear.card.ValidatedCardManager
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.common.data.migrations.CreateAndPopulateMaxAdventureCompletionCardMeta
 import com.github.cfogrady.vitalwear.data.AppDatabase
+import com.github.cfogrady.vitalwear.logs.LogService
 import timber.log.Timber
 
 class VitalWearCompanion : Application() {
     lateinit var cardLoader: CardLoader
     lateinit var validatedCardManager: ValidatedCardManager
     lateinit var cardMetaEntityDao: CardMetaEntityDao
+    val logService = LogService()
 
     override fun onCreate() {
         super.onCreate()

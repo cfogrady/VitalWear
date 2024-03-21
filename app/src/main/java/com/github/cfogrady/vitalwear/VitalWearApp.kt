@@ -71,6 +71,10 @@ import timber.log.Timber
 import java.util.Random
 
 class VitalWearApp : Application(), Configuration.Provider {
+    companion object {
+        const val LOGGING_ENABLED = "LOGGING_ENABLED"
+    }
+
     private val spriteBitmapConverter = SpriteBitmapConverter()
     private val spriteFileIO = SpriteFileIO()
     val cardSpriteIO = CardSpritesIO(spriteFileIO, spriteBitmapConverter)
@@ -120,13 +124,16 @@ class VitalWearApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        Timber.plant(Timber.DebugTree())
-        Timber.plant(TinyLogTree(this))
+        //TODO: Should replace sharedPreferences with datastore (see https://developer.android.com/training/data-storage/shared-preferences)
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        if(BuildConfig.DEBUG || sharedPreferences.getBoolean(LOGGING_ENABLED, false)) {
+            Timber.plant(Timber.DebugTree())
+            Timber.plant(TinyLogTree(this))
+        }
         Timber.i("Create application")
         val crashHandler = CrashHandler(this)
         Thread.setDefaultUncaughtExceptionHandler(crashHandler)
         buildDependencies()
-
         applicationContext.registerReceiver(shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN))
         // NOT_EXPORTED prevents debug and release app from sending each other broadcasts
         ContextCompat.registerReceiver(applicationContext, moodBroadcastReceiver, IntentFilter(MoodBroadcastReceiver.MOOD_UPDATE), ContextCompat.RECEIVER_NOT_EXPORTED)
@@ -146,8 +153,6 @@ class VitalWearApp : Application(), Configuration.Provider {
         //TODO: Remove allowMainThread before release
         database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "VitalWear")
             .addMigrations(CreateAndPopulateMaxAdventureCompletionCardMeta()).allowMainThreadQueries().build()
-        //TODO: Should replace sharedPreferences with datastore (see https://developer.android.com/training/data-storage/shared-preferences)
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         backgroundManager = BackgroundManager(cardSpriteIO, sharedPreferences)
         val postFirmwareLoader = PostFirmwareLoader(backgroundManager)
         firmwareManager = FirmwareManager(spriteBitmapConverter, postFirmwareLoader)

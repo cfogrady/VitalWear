@@ -13,18 +13,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.github.cfogrady.vitalwear.common.commonLog
 import com.github.cfogrady.vitalwear.card.ImportCardActivity
 import com.github.cfogrady.vitalwear.firmware.FirmwareImportActivity
+import com.github.cfogrady.vitalwear.logs.LoadingLogActivity
 
 class MainActivity : ComponentActivity() {
-    companion object {
-        const val TAG = "MainActivity"
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        commonLog("Test shared data")
         setContent {
             MainComposable()
         }
@@ -42,6 +37,11 @@ class MainActivity : ComponentActivity() {
                 startActivity(Intent(applicationContext, FirmwareImportActivity::class.java))
             }) {
                 Text(text = "Import Firmware", color = Color.Cyan)
+            }
+            Button(onClick = {
+                startActivity(Intent(applicationContext, LoadingLogActivity::class.java))
+            }) {
+                Text(text = "Send Logs", color = Color.Cyan)
             }
         }
     }
