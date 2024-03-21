@@ -13,7 +13,9 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -25,15 +27,19 @@ import androidx.wear.compose.material.RadioButton
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.background.BackgroundManager
 import com.github.cfogrady.vitalwear.SaveService
+import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.background.BackgroundSelectionActivity
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
+import com.github.cfogrady.vitalwear.debug.LogSettings
+import com.github.cfogrady.vitalwear.debug.TinyLogTree
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
-class SettingsComposableFactory(private val backgroundManager: BackgroundManager, private val vitalBoxFactory: VitalBoxFactory, private val bitmapScaler: BitmapScaler, private val saveService: SaveService) {
+class SettingsComposableFactory(private val backgroundManager: BackgroundManager, private val vitalBoxFactory: VitalBoxFactory, private val bitmapScaler: BitmapScaler, private val logSettings: LogSettings, private val saveService: SaveService) {
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
@@ -101,13 +107,15 @@ class SettingsComposableFactory(private val backgroundManager: BackgroundManager
                             Text(text = "DEBUG", fontWeight = FontWeight.Bold, fontSize = 3.em)
                         }
                     }
-                    SettingsMenuOption.SendLog -> {
+                    SettingsMenuOption.ToggleLogging -> {
+                        var loggingEnabled by remember { mutableStateOf(logSettings.loggingEnabled()) }
+                        val text = if(loggingEnabled) "DISABLE\nLOGS" else "ENABLE\nLOGS"
                         Box(modifier = Modifier
                             .fillMaxSize()
                             .clickable {
-                                activityLauncher.sendLog.invoke()
+                                loggingEnabled = logSettings.toggleLogging()
                             }, contentAlignment = Alignment.Center) {
-                            Text(text = "SEND\nLOGS\nTO\nDEVS", fontWeight = FontWeight.Bold, fontSize = 3.em, textAlign = TextAlign.Center)
+                            Text(text = text, fontWeight = FontWeight.Bold, fontSize = 3.em, textAlign = TextAlign.Center)
                         }
                     }
                     SettingsMenuOption.Save -> {
@@ -133,14 +141,14 @@ class SettingsComposableFactory(private val backgroundManager: BackgroundManager
         Background,
         BattleBackground,
         Debug,
-        SendLog,
+        ToggleLogging,
         Save
     }
 
     fun buildSettingMenuPages(): List<SettingsMenuOption> {
         return listOf(SettingsMenuOption.Background,
             SettingsMenuOption.BattleBackground,
-            SettingsMenuOption.SendLog,
+            SettingsMenuOption.ToggleLogging,
             SettingsMenuOption.Debug,
             SettingsMenuOption.Save)
     }

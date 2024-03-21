@@ -48,6 +48,7 @@ import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.ScrollingNameFactory
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.GameState
+import com.github.cfogrady.vitalwear.debug.LogSettings
 import com.github.cfogrady.vitalwear.debug.TinyLogTree
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.firmware.FirmwareReceiver
@@ -71,9 +72,6 @@ import timber.log.Timber
 import java.util.Random
 
 class VitalWearApp : Application(), Configuration.Provider {
-    companion object {
-        const val LOGGING_ENABLED = "LOGGING_ENABLED"
-    }
 
     private val spriteBitmapConverter = SpriteBitmapConverter()
     private val spriteFileIO = SpriteFileIO()
@@ -101,6 +99,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var trainingService: TrainingService
     lateinit var backgroundTrainingScreenFactory: BackgroundTrainingScreenFactory
     lateinit var sharedPreferences: SharedPreferences
+    lateinit var logSettings: LogSettings
     lateinit var stepService: StepSensorService
     lateinit var shutdownReceiver: ShutdownReceiver
     lateinit var shutdownManager: ShutdownManager
@@ -126,10 +125,9 @@ class VitalWearApp : Application(), Configuration.Provider {
         super.onCreate()
         //TODO: Should replace sharedPreferences with datastore (see https://developer.android.com/training/data-storage/shared-preferences)
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-        if(BuildConfig.DEBUG || sharedPreferences.getBoolean(LOGGING_ENABLED, false)) {
-            Timber.plant(Timber.DebugTree())
-            Timber.plant(TinyLogTree(this))
-        }
+        val tinyLogTree = TinyLogTree(this)
+        logSettings = LogSettings(sharedPreferences, tinyLogTree)
+        logSettings.setupLogging()
         Timber.i("Create application")
         val crashHandler = CrashHandler(this)
         Thread.setDefaultUncaughtExceptionHandler(crashHandler)
@@ -210,7 +208,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         adventureMenuScreenFactory = AdventureMenuScreenFactory(cardSpriteIO, database.cardMetaEntityDao(), adventureService, vitalBoxFactory, characterSpritesIO, database.speciesEntityDao(), bitmapScaler, backgroundHeight)
         cardReceiver = CardReceiver(cardLoader)
         firmwareReceiver = FirmwareReceiver(firmwareManager, notificationChannelManager)
-        settingsComposableFactory = SettingsComposableFactory(backgroundManager, vitalBoxFactory, bitmapScaler, saveService)
+        settingsComposableFactory = SettingsComposableFactory(backgroundManager, vitalBoxFactory, bitmapScaler, logSettings, saveService)
     }
 
     override fun getWorkManagerConfiguration(): Configuration {
