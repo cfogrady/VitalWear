@@ -129,7 +129,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         logSettings = LogSettings(sharedPreferences, tinyLogTree)
         logSettings.setupLogging()
         Timber.i("Create application")
-        val crashHandler = CrashHandler(this)
+        val crashHandler = CrashHandler(this, logSettings)
         Thread.setDefaultUncaughtExceptionHandler(crashHandler)
         buildDependencies()
         applicationContext.registerReceiver(shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN))

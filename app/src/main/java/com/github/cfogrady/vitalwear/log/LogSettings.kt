@@ -7,6 +7,7 @@ class LogSettings(private val sharedPreferences: SharedPreferences, private val 
     companion object {
         const val LOGGING_ENABLED = "LOGGING_ENABLED"
     }
+    val debugTree = Timber.DebugTree()
 
     fun loggingEnabled(): Boolean {
         return sharedPreferences.getBoolean(LOGGING_ENABLED, false)
@@ -27,7 +28,7 @@ class LogSettings(private val sharedPreferences: SharedPreferences, private val 
     private fun setupLogging(loggingEnabled: Boolean) {
         Timber.uprootAll()
         if(loggingEnabled) {
-            Timber.plant(Timber.DebugTree())
+            Timber.plant(debugTree)
             Timber.plant(tinyLogTree)
         }
     }
