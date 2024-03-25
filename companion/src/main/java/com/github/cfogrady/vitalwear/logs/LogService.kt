@@ -27,7 +27,7 @@ class LogService {
         val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
             data = Uri.parse("mailto:")
         }
-        emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf("cfogrady@gmail.com"))
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf("vitalwear-developers@googlegroups.com"))
         emailIntent.putExtra(Intent.EXTRA_SUBJECT, "VitalWear Log")
         emailIntent.putExtra(Intent.EXTRA_TEXT, "Please take a look at these logs to help diagnose the below issue:\n")
         val fileUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
