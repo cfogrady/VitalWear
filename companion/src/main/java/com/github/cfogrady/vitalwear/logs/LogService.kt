@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import com.github.cfogrady.vitalwear.common.communication.ChannelTypes
 import com.google.android.gms.wearable.CapabilityClient
 import com.google.android.gms.wearable.ChannelClient
+import com.google.android.gms.wearable.ChannelClient.ChannelCallback
 import com.google.android.gms.wearable.MessageClient
 import com.google.android.gms.wearable.Wearable
 import kotlinx.coroutines.CoroutineScope
@@ -43,8 +44,15 @@ class LogService {
     fun receiveFile(context: Context, channel: ChannelClient.Channel) {
         val channelClient = Wearable.getChannelClient(context)
         val file = File(context.filesDir, "watch_log.txt")
+        channelClient.registerChannelCallback(channel, object: ChannelCallback() {
+            override fun onInputClosed(p0: ChannelClient.Channel, p1: Int, p2: Int) {
+                super.onInputClosed(p0, p1, p2)
+                Timber.i("Successfully downloaded log file. Input closed.")
+                sendLogFile(context, file)
+                channelClient.close(channel)
+            }
+        })
         channelClient.receiveFile(channel, Uri.fromFile(file), false).apply {
-            addOnSuccessListener { sendLogFile(context, file) }
             addOnFailureListener {
                 Toast.makeText(context, "Error receiving log file", Toast.LENGTH_SHORT).show()
                 initializedActivity?.finish()

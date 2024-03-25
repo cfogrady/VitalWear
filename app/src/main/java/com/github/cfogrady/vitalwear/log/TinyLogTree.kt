@@ -22,7 +22,7 @@ class TinyLogTree(context: Context): Timber.DebugTree() {
             Configuration.set("writer", "rolling file")
             Configuration.set("writer.level", "info")
             Configuration.set("writer.backups", "3")
-            Configuration.set("writer.format", "{date: HH:mm:ss.SSS}{pipe}{tag}{pipe}{level}{pipe}{message}")
+            Configuration.set("writer.format", "{date: yyyy-MM-dd HH:mm:ss.SSS}{pipe}{tag}{pipe}{level}{pipe}{message}")
             Configuration.set("writer.file", "$logsDir/log_{date:yyyy-MM-dd}_{count}.txt")
             Configuration.set("writer.policies", "daily, size: 10mb")
             Configuration.set("writer.buffered", "true")
@@ -59,6 +59,7 @@ class TinyLogTree(context: Context): Timber.DebugTree() {
                     }
                 }
             }
+            Log.i("TinyLogTree", "Most Recent Log: $mostRecentFile")
             return mostRecentFile
         }
     }
