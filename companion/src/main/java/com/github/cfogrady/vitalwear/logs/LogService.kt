@@ -44,6 +44,7 @@ class LogService {
     fun receiveFile(context: Context, channel: ChannelClient.Channel) {
         val channelClient = Wearable.getChannelClient(context)
         val file = File(context.filesDir, "watch_log.txt")
+        // addOnSuccessListener to receiveFile task sends file too early.
         channelClient.registerChannelCallback(channel, object: ChannelCallback() {
             override fun onInputClosed(p0: ChannelClient.Channel, p1: Int, p2: Int) {
                 super.onInputClosed(p0, p1, p2)
