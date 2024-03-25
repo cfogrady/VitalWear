@@ -58,18 +58,6 @@ abstract class VBCharacter(
         return trainingEndTime.isAfter(currentTimeProvider.invoke())
     }
 
-    fun debug(): List<Pair<String, String>> {
-        return listOf(
-            Pair("MoodVal", "${characterStats.mood}"),
-            Pair("Mood", mood().name),
-            Pair("Vitals", "${characterStats.vitals}"),
-            Pair("TimeUntilEvolveSeconds", "${characterStats.timeUntilNextTransformation}"),
-            Pair("TimeUntilEvolveMinutes", "${characterStats.timeUntilNextTransformation/60}"),
-            Pair("TimeUntilEvolveHours", "${characterStats.timeUntilNextTransformation/(60*60)}"),
-            Pair("Last Transformation Check", if(lastTransformationCheck == LocalDateTime.MIN) "NONE" else "$lastTransformationCheck"),
-        )
-    }
-
     fun mood(): Mood {
         val mood = characterStats.mood
         return if(mood > 70) {

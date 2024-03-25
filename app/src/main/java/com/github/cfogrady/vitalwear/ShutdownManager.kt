@@ -1,6 +1,6 @@
 package com.github.cfogrady.vitalwear
 
-import com.github.cfogrady.vitalwear.debug.TinyLogTree
+import com.github.cfogrady.vitalwear.log.TinyLogTree
 
 class ShutdownManager(private val saveService: SaveService) {
     fun shutdown() {

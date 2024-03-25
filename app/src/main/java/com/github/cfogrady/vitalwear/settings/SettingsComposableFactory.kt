@@ -1,6 +1,5 @@
 package com.github.cfogrady.vitalwear.settings
 
-import android.content.SharedPreferences
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -27,17 +26,14 @@ import androidx.wear.compose.material.RadioButton
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.background.BackgroundManager
 import com.github.cfogrady.vitalwear.SaveService
-import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.background.BackgroundSelectionActivity
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
-import com.github.cfogrady.vitalwear.debug.LogSettings
-import com.github.cfogrady.vitalwear.debug.TinyLogTree
+import com.github.cfogrady.vitalwear.log.LogSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 
 class SettingsComposableFactory(private val backgroundManager: BackgroundManager, private val vitalBoxFactory: VitalBoxFactory, private val bitmapScaler: BitmapScaler, private val logSettings: LogSettings, private val saveService: SaveService) {
 
@@ -98,15 +94,6 @@ class SettingsComposableFactory(private val backgroundManager: BackgroundManager
                             }
                         }
                     }
-                    SettingsMenuOption.Debug -> {
-                        Box(modifier = Modifier
-                            .fillMaxSize()
-                            .clickable {
-                                activityLauncher.launchDebug.invoke()
-                            }, contentAlignment = Alignment.Center) {
-                            Text(text = "DEBUG", fontWeight = FontWeight.Bold, fontSize = 3.em)
-                        }
-                    }
                     SettingsMenuOption.ToggleLogging -> {
                         var loggingEnabled by remember { mutableStateOf(logSettings.loggingEnabled()) }
                         val text = if(loggingEnabled) "DISABLE\nLOGS" else "ENABLE\nLOGS"
@@ -140,7 +127,6 @@ class SettingsComposableFactory(private val backgroundManager: BackgroundManager
     enum class SettingsMenuOption {
         Background,
         BattleBackground,
-        Debug,
         ToggleLogging,
         Save
     }
@@ -149,7 +135,6 @@ class SettingsComposableFactory(private val backgroundManager: BackgroundManager
         return listOf(SettingsMenuOption.Background,
             SettingsMenuOption.BattleBackground,
             SettingsMenuOption.ToggleLogging,
-            SettingsMenuOption.Debug,
             SettingsMenuOption.Save)
     }
 }

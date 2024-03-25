@@ -3,7 +3,7 @@ package com.github.cfogrady.vitalwear.communication
 import android.net.Uri
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.common.communication.ChannelTypes
-import com.github.cfogrady.vitalwear.debug.TinyLogTree
+import com.github.cfogrady.vitalwear.log.TinyLogTree
 import com.google.android.gms.wearable.ChannelClient
 import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.Wearable

@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.debug
+package com.github.cfogrady.vitalwear.log
 
 import android.content.SharedPreferences
 import timber.log.Timber

@@ -63,7 +63,7 @@ class StepSensorService (
     private fun stepsAtBootChanges(currentStepCounter: Int, today: LocalDate): Boolean {
         Timber.i("Performing steps on app startup")
         val oldStepState = stepIOService.stepPreferences()
-        val dateFromSave = LocalDate.ofEpochDay(oldStepState.timeLastReadDaysFromEpoch)
+        val dateFromSave = oldStepState.dateOfLastSave
         if(dateFromSave != today) {
             // we're on a different day than the last save, so reset everything
             Timber.i("Restarting steps with new day")
@@ -98,6 +98,9 @@ class StepSensorService (
             if(!stepState.stepSensorEnabled) {
                 stepState.dateOfLastRead = today
                 shouldSaveFromSteps = stepsAtBootChanges(newStepCount, today)
+                Timber.i("Current Steps: ${stepState.lastStepReading}")
+                Timber.i("Start Of Day Steps: ${stepState.startOfDaySteps}")
+                Timber.i("Daily Steps: ${stepState.dailySteps}")
                 stepState.stepSensorEnabled = true
             } else if (today > stepState.dateOfLastRead) {
                 stepState.dateOfLastRead = today
@@ -126,15 +129,4 @@ class StepSensorService (
     override fun hasRecentSteps(now: LocalDateTime): Boolean {
         return ChronoUnit.SECONDS.between(timeFrom10StepsAgo.value, now) < 60
     }
-
-    fun debug(): List<Pair<String, String>> {
-        return buildList {
-            this.add(Pair("currentSteps", "${stepState.lastStepReading}"))
-            this.add(Pair("startOfDaySteps", "${stepState.startOfDaySteps}"))
-            this.add(Pair("dailySteps", "${dailySteps.value}"))
-            this.add(Pair("stepSensorEnabled", "${stepState.stepSensorEnabled}"))
-            this.addAll(stepIOService.debug())
-        }
-    }
-
 }

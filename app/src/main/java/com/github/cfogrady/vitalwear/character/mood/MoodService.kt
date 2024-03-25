@@ -8,7 +8,7 @@ import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.VBUpdater
-import com.github.cfogrady.vitalwear.debug.Debuggable
+import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.heartrate.HeartRateResult
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.vitals.VitalService
@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.LinkedList
 
 class MoodService(
     private val heartRateService: HeartRateService,
@@ -27,11 +26,7 @@ class MoodService(
     private val characterManager: CharacterManager,
     private val vitalService: VitalService,
     private val saveService: SaveService,
-    private val localDateTimeProvider: () -> LocalDateTime = LocalDateTime::now): Debuggable {
-
-    companion object {
-        const val DEBUG_HISTORY = 100
-    }
+    private val localDateTimeProvider: () -> LocalDateTime = LocalDateTime::now) {
 
     var offBodySensor: Sensor? = null
     var lastWorn: LocalDateTime? = null
@@ -88,10 +83,7 @@ class MoodService(
                     it.characterStats.mood = (it.characterStats.mood - moodDecrease).coerceAtLeast(0)
                     lastLevel = 0
                     it.characterStats.updateTimeStamps(current)
-                    events.addFirst(Pair("$current", "Device back on after $minutesSinceLastWorn minutes. Lost $vitalDecrease vitals and $moodDecrease mood"))
-                    while(events.size > DEBUG_HISTORY) {
-                        events.removeLast()
-                    }
+                    logMoodUpdate(it.mood(), it.characterStats.mood, "Device Back On|$minutesSinceLastWorn|Vitals Lost|$vitalDecrease|Mood Decrease|$moodDecrease")
                 }
             }
             if(minutesSinceLastWorn >= 24*60) {
@@ -121,15 +113,15 @@ class MoodService(
             val heartRateResultStr = if(exerciseLevel.heartRate.heartRateError == HeartRateResult.Companion.HeartRateError.NONE) "${exerciseLevel.heartRate.heartRate}" else exerciseLevel.heartRate.heartRateError.name
             updateFromExerciseLevel(character, exerciseLevel.level, now)
             lastLevel = exerciseLevel.level
-            events.addFirst(Pair("$now", "Heart Rate: $heartRateResultStr yielding level ${exerciseLevel.level} and mood ${character.characterStats.mood}"))
-            while(events.size > DEBUG_HISTORY) {
-                events.removeLast()
-            }
-            Timber.i("Mood updated successfully")
+            logMoodUpdate(character.mood(), character.characterStats.mood, "Heart Rate Update|$heartRateResultStr|Exercise Level|${exerciseLevel.level}")
         } catch (ise: IllegalStateException) {
             // primarily caused in emulator by lack of step sensor
             Timber.e("Failed to update mood", ise)
         }
+    }
+
+    private fun logMoodUpdate(mood: Mood, rawMood: Int, reason: String) {
+        Timber.i("Mood|$rawMood|$mood|$reason")
     }
 
     private fun updateFromExerciseLevel(character: VBCharacter, exerciseLevel: Int, now: LocalDateTime) {
@@ -144,11 +136,5 @@ class MoodService(
             character.characterStats.mood = 100
         }
         character.characterStats.updateTimeStamps(now)
-    }
-
-    private val events = LinkedList<Pair<String, String>>()
-
-    override fun debug(): List<Pair<String, String>> {
-        return events
     }
 }

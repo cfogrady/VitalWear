@@ -2,7 +2,7 @@ package com.github.cfogrady.vitalwear
 
 import android.content.Context
 import android.widget.Toast
-import com.github.cfogrady.vitalwear.debug.TinyLogTree
+import com.github.cfogrady.vitalwear.log.TinyLogTree
 import org.tinylog.Logger
 import org.tinylog.provider.ProviderRegistry
 import timber.log.Timber

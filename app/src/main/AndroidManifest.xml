@@ -97,8 +97,6 @@
             android:taskAffinity="" />
         <activity android:name=".battle.BattleActivity"
             android:taskAffinity="" />
-        <activity android:name=".debug.DebugActivity"
-            android:taskAffinity="" />
         <activity android:name=".training.StopBackgroundTrainingActivity"
             android:taskAffinity="" />
         <activity android:name=".settings.SettingsActivity"

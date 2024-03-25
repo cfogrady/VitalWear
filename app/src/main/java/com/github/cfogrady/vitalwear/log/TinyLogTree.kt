@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.debug
+package com.github.cfogrady.vitalwear.log
 
 import android.annotation.SuppressLint
 import android.content.Context

@@ -11,8 +11,7 @@ import androidx.core.content.FileProvider
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.background.BackgroundSelectionActivity
 import com.github.cfogrady.vitalwear.common.util.ActivityHelper
-import com.github.cfogrady.vitalwear.debug.DebugActivity
-import com.github.cfogrady.vitalwear.debug.TinyLogTree
+import com.github.cfogrady.vitalwear.log.TinyLogTree
 
 class SettingsActivity : ComponentActivity() {
 
@@ -28,8 +27,7 @@ class SettingsActivity : ComponentActivity() {
     private fun buildSettingsActivityLauncher(): SettingsActivityLauncher {
         val activityHelper = ActivityHelper(this)
         return SettingsActivityLauncher (
-            activityHelper.getActivityLauncher(DebugActivity::class.java),
-            getSendLogEmailActivityLauncher(),
+            // getSendLogEmailActivityLauncher(),
             { text ->
                 Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
             },
