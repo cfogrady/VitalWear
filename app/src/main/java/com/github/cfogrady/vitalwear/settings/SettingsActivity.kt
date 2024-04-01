@@ -11,7 +11,7 @@ import androidx.core.content.FileProvider
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.background.BackgroundSelectionActivity
 import com.github.cfogrady.vitalwear.common.util.ActivityHelper
-import com.github.cfogrady.vitalwear.log.TinyLogTree
+import com.github.cfogrady.vitalwear.common.log.TinyLogTree
 
 class SettingsActivity : ComponentActivity() {
 

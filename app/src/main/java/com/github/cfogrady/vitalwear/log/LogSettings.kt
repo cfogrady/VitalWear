@@ -1,6 +1,7 @@
 package com.github.cfogrady.vitalwear.log
 
 import android.content.SharedPreferences
+import com.github.cfogrady.vitalwear.common.log.TinyLogTree
 import timber.log.Timber
 
 class LogSettings(private val sharedPreferences: SharedPreferences, private val tinyLogTree: TinyLogTree) {

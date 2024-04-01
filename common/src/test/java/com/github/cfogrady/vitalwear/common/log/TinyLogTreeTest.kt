@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.log
+package com.github.cfogrady.vitalwear.common.log
 
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert

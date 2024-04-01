@@ -49,7 +49,7 @@ import com.github.cfogrady.vitalwear.composable.util.ScrollingNameFactory
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.log.LogSettings
-import com.github.cfogrady.vitalwear.log.TinyLogTree
+import com.github.cfogrady.vitalwear.common.log.TinyLogTree
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.firmware.FirmwareReceiver
 import com.github.cfogrady.vitalwear.firmware.PostFirmwareLoader
