@@ -55,6 +55,15 @@
                 android:value="androidx.startup"
                 tools:node="remove" />
         </provider>
+        <provider
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true"
+            android:name="androidx.core.content.FileProvider">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"
+                />
+        </provider>
 
         <activity
             android:name=".activity.MainActivity"
@@ -87,8 +96,6 @@
         <activity android:name=".stats.StatsMenuActivity"
             android:taskAffinity="" />
         <activity android:name=".battle.BattleActivity"
-            android:taskAffinity="" />
-        <activity android:name=".debug.DebugActivity"
             android:taskAffinity="" />
         <activity android:name=".training.StopBackgroundTrainingActivity"
             android:taskAffinity="" />
@@ -165,6 +172,7 @@
         <service android:name=".communication.PhoneCommunicationService" android:exported="true" android:enabled="true">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.CHANNEL_EVENT" />
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
                  <data android:scheme="wear" android:host="*"/>
             </intent-filter>
         </service>

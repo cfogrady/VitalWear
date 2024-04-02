@@ -2,7 +2,6 @@ package com.github.cfogrady.vitalwear.firmware
 
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
@@ -19,13 +18,10 @@ import com.google.android.gms.wearable.Wearable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import timber.log.Timber
 
 
 class FirmwareImportActivity : ComponentActivity() {
-
-    companion object {
-        const val TAG = "FirmwareImportActivity"
-    }
 
     enum class FirmwareImportState {
         PickFirmware,
@@ -59,7 +55,7 @@ class FirmwareImportActivity : ComponentActivity() {
             if(it == null) {
                 finish()
             } else {
-                Log.i(TAG, "Path: ${it.path}")
+                Timber.i("Path: ${it.path}")
                 importFirmware(it)
             }
         }
@@ -78,11 +74,11 @@ class FirmwareImportActivity : ComponentActivity() {
                 val channel = channelClient.openChannel(node.id, ChannelTypes.FIRMWARE_DATA).await()
                 // We don't use send file because we can't make use of the uri received from the file picker with sendFile. We need a full file path, to which we don't have access.
                 channelClient.getOutputStream(channel).await().use {
-                    Log.i(TAG, "Writing to firmware to watch")
+                    Timber.i("Writing to firmware to watch")
                     it.write(firmware)
-                    Log.i(TAG, "Done writing to firmware to watch")
+                    Timber.i("Done writing to firmware to watch")
                 }
-                Log.i(TAG, "Closing channel to watch")
+                Timber.i("Closing channel to watch")
                 channelClient.close(channel)
                 finish()
             }

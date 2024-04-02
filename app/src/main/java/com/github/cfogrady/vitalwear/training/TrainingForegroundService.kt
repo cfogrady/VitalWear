@@ -9,17 +9,13 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.PowerManager
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
+import timber.log.Timber
 
 class TrainingForegroundService : Service() {
-
-    companion object {
-        const val TAG = "TrainingForegroundService"
-    }
 
     override fun onBind(intent: Intent?): IBinder? {
         TODO("Not yet implemented")
@@ -48,18 +44,18 @@ class TrainingForegroundService : Service() {
         // we need this lock so our service prevents Doze mode from taking affect
         wakeLock =
             (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$TAG:lock").apply {
+                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TrainingForegroundService:lock").apply {
                     acquire()
                 }
             }
-        Log.i(TAG, "Start foreground training")
+        Timber.i("Start foreground training")
         doTraining()
         return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.i(TAG, "Remove Wakelock")
+        Timber.i("Remove Wakelock")
         wakeLock?.let {
             if (it.isHeld) {
                 it.release()

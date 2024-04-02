@@ -4,11 +4,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
 import androidx.work.*
 import com.github.cfogrady.vitalwear.VitalWearApp
-import com.github.cfogrady.vitalwear.data.GameState
+import timber.log.Timber
 
 class ComplicationRefreshService(private val applicationContext: Context, private val complicationState: PartnerComplicationState) {
 
@@ -16,7 +15,6 @@ class ComplicationRefreshService(private val applicationContext: Context, privat
 
     companion object {
         const val PARTNER_WORK_TAG = "PartnerComplicationWork"
-        const val TAG = "ComplicationRefreshService"
     }
 
     fun refreshVitalsComplication() {
@@ -32,11 +30,11 @@ class ComplicationRefreshService(private val applicationContext: Context, privat
     fun startupPartnerComplications() {
         synchronized(this) {
             if (partnerComplicationUpdater == null) {
-                Log.i(TAG, "Starting partner complication updates")
+                Timber.i("Starting partner complication updates")
                 partnerComplicationUpdater = PartnerComplicationUpdater(applicationContext)
                 partnerComplicationUpdater!!.setupComplicationUpdate()
             } else {
-                Log.i(TAG, "Attempted to start partner complication updates, but updater is already running")
+                Timber.i("Attempted to start partner complication updates, but updater is already running")
             }
         }
     }

@@ -1,9 +1,6 @@
 package com.github.cfogrady.vitalwear.character
 
 import android.graphics.Bitmap
-import android.util.Log
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
 import com.github.cfogrady.vitalwear.card.CardMeta
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterEntity
@@ -19,13 +16,13 @@ import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntity
 import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntity
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
-import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.settings.CharacterSettings
 import com.github.cfogrady.vitalwear.training.BackgroundTrainingResults
 import com.github.cfogrady.vitalwear.training.TrainingStatChanges
 import com.github.cfogrady.vitalwear.training.TrainingType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import timber.log.Timber
 import java.time.LocalDateTime
 
 abstract class VBCharacter(
@@ -44,10 +41,6 @@ abstract class VBCharacter(
     ) {
     val readyToTransform : StateFlow<ExpectedTransformation?> = _readyToTransform
 
-    companion object {
-        const val TAG = "VBCharacter"
-    }
-
     fun isBEM() : Boolean {
         return cardMeta.cardType == CardType.BEM
     }
@@ -63,18 +56,6 @@ abstract class VBCharacter(
     fun canIncreaseStats(): Boolean {
         val trainingEndTime = characterStats.lastUpdate.plusSeconds(characterStats.trainingTimeRemainingInSeconds)
         return trainingEndTime.isAfter(currentTimeProvider.invoke())
-    }
-
-    fun debug(): List<Pair<String, String>> {
-        return listOf(
-            Pair("MoodVal", "${characterStats.mood}"),
-            Pair("Mood", mood().name),
-            Pair("Vitals", "${characterStats.vitals}"),
-            Pair("TimeUntilEvolveSeconds", "${characterStats.timeUntilNextTransformation}"),
-            Pair("TimeUntilEvolveMinutes", "${characterStats.timeUntilNextTransformation/60}"),
-            Pair("TimeUntilEvolveHours", "${characterStats.timeUntilNextTransformation/(60*60)}"),
-            Pair("Last Transformation Check", if(lastTransformationCheck == LocalDateTime.MIN) "NONE" else "$lastTransformationCheck"),
-        )
     }
 
     fun mood(): Mood {
@@ -155,11 +136,11 @@ abstract class VBCharacter(
     fun prepCharacterTransformation(support: SupportCharacter?) {
         lastTransformationCheck = LocalDateTime.now()
         val characterStats = characterStats
-        Log.i(TAG, "Checking transformations")
+        Timber.i("Checking transformations")
         support?.let {
             if(it.franchiseId == getFranchise()) {
                 checkFusion(support)?.let {
-                    Log.i(TAG, "Fusion Option Available")
+                    Timber.i("Fusion Option Available")
                     _readyToTransform.tryEmit(it)
                     return
                 }

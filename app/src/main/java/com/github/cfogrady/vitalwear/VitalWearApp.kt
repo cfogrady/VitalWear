@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.hardware.SensorManager
-import android.util.Log
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
@@ -49,7 +48,8 @@ import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.ScrollingNameFactory
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.GameState
-import com.github.cfogrady.vitalwear.debug.ExceptionService
+import com.github.cfogrady.vitalwear.log.LogSettings
+import com.github.cfogrady.vitalwear.common.log.TinyLogTree
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.firmware.FirmwareReceiver
 import com.github.cfogrady.vitalwear.firmware.PostFirmwareLoader
@@ -68,16 +68,17 @@ import com.github.cfogrady.vitalwear.workmanager.VitalWearWorkerFactory
 import com.github.cfogrady.vitalwear.workmanager.WorkProviderDependencies
 import com.google.common.collect.Lists
 import kotlinx.coroutines.flow.MutableStateFlow
+import timber.log.Timber
 import java.util.Random
 
 class VitalWearApp : Application(), Configuration.Provider {
+
     private val spriteBitmapConverter = SpriteBitmapConverter()
     private val spriteFileIO = SpriteFileIO()
     val cardSpriteIO = CardSpritesIO(spriteFileIO, spriteBitmapConverter)
     lateinit var backgroundManager: BackgroundManager
     lateinit var firmwareManager: FirmwareManager
     val partnerComplicationState = PartnerComplicationState()
-    val exceptionService = ExceptionService()
     private val characterSpritesIO = CharacterSpritesIO(spriteFileIO, spriteBitmapConverter)
 
     private val sensorThreadHandler = SensorThreadHandler()
@@ -98,6 +99,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var trainingService: TrainingService
     lateinit var backgroundTrainingScreenFactory: BackgroundTrainingScreenFactory
     lateinit var sharedPreferences: SharedPreferences
+    lateinit var logSettings: LogSettings
     lateinit var stepService: StepSensorService
     lateinit var shutdownReceiver: ShutdownReceiver
     lateinit var shutdownManager: ShutdownManager
@@ -121,9 +123,15 @@ class VitalWearApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        Log.i("VitalWear", "Create application")
+        //TODO: Should replace sharedPreferences with datastore (see https://developer.android.com/training/data-storage/shared-preferences)
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        val tinyLogTree = TinyLogTree(this)
+        logSettings = LogSettings(sharedPreferences, tinyLogTree)
+        logSettings.setupLogging()
+        Timber.i("Running VitalWear App. Version: ${BuildConfig.VERSION_NAME}  ${BuildConfig.VERSION_CODE}")
+        val crashHandler = CrashHandler(this, logSettings)
+        Thread.setDefaultUncaughtExceptionHandler(crashHandler)
         buildDependencies()
-
         applicationContext.registerReceiver(shutdownReceiver, IntentFilter(Intent.ACTION_SHUTDOWN))
         // NOT_EXPORTED prevents debug and release app from sending each other broadcasts
         ContextCompat.registerReceiver(applicationContext, moodBroadcastReceiver, IntentFilter(MoodBroadcastReceiver.MOOD_UPDATE), ContextCompat.RECEIVER_NOT_EXPORTED)
@@ -133,7 +141,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         powerChangeIntentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED)
         ContextCompat.registerReceiver(applicationContext, powerBroadcastReceiver, powerChangeIntentFilter, ContextCompat.RECEIVER_EXPORTED)
 
-        val appShutdownHandler = AppShutdownHandler(shutdownManager, sharedPreferences)
+        val appShutdownHandler = AppShutdownHandler(shutdownManager)
         // This may be run on app shutdown by Android... but updating or killing via the IDE never triggers this.
         Runtime.getRuntime().addShutdownHook(appShutdownHandler)
         applicationBootManager.onStartup(this)
@@ -143,8 +151,6 @@ class VitalWearApp : Application(), Configuration.Provider {
         //TODO: Remove allowMainThread before release
         database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "VitalWear")
             .addMigrations(CreateAndPopulateMaxAdventureCompletionCardMeta()).allowMainThreadQueries().build()
-        //TODO: Should replace sharedPreferences with datastore (see https://developer.android.com/training/data-storage/shared-preferences)
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         backgroundManager = BackgroundManager(cardSpriteIO, sharedPreferences)
         val postFirmwareLoader = PostFirmwareLoader(backgroundManager)
         firmwareManager = FirmwareManager(spriteBitmapConverter, postFirmwareLoader)
@@ -198,11 +204,11 @@ class VitalWearApp : Application(), Configuration.Provider {
         val cardCharacterImageService = CardCharacterImageService(database.speciesEntityDao(), characterSpritesIO)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardCharacterImageService)
         shutdownReceiver = ShutdownReceiver(shutdownManager)
-        applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, vbUpdater, moodService, saveService, notificationChannelManager, complicationRefreshService)
+        applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, vbUpdater, moodService, notificationChannelManager, complicationRefreshService)
         adventureMenuScreenFactory = AdventureMenuScreenFactory(cardSpriteIO, database.cardMetaEntityDao(), adventureService, vitalBoxFactory, characterSpritesIO, database.speciesEntityDao(), bitmapScaler, backgroundHeight)
         cardReceiver = CardReceiver(cardLoader)
         firmwareReceiver = FirmwareReceiver(firmwareManager, notificationChannelManager)
-        settingsComposableFactory = SettingsComposableFactory(backgroundManager, vitalBoxFactory, bitmapScaler, saveService)
+        settingsComposableFactory = SettingsComposableFactory(backgroundManager, vitalBoxFactory, bitmapScaler, logSettings, saveService)
     }
 
     override fun getWorkManagerConfiguration(): Configuration {

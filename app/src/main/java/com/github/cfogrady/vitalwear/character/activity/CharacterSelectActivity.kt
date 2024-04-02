@@ -2,7 +2,6 @@ package com.github.cfogrady.vitalwear.character.activity
 
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
@@ -16,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.wear.compose.material.*
@@ -36,8 +34,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
-const val TAG = "CharacterSelectActivity"
 const val LOADING_TEXT = "Loading..."
 
 class CharacterSelectActivity : ComponentActivity() {
@@ -66,9 +64,9 @@ class CharacterSelectActivity : ComponentActivity() {
             }
         }
         val newCharacterLauncher = activityHelper.getActivityLauncherWithResultHandling(NewCharacterActivity::class.java) {result ->
-            Log.i(TAG, "Finished from new character")
+            Timber.i("Finished from new character")
             if(newCharacterWasSelected(result)) {
-                Log.i(TAG, "Received new character")
+                Timber.i("Received new character")
                 loadingNewCharacterFlow.value = true
                 val cardFromActivity = result.data?.getParcelableExtra<CardMeta>(NewCharacterActivity.CARD_SELECTED)!!
                 val slotId = result.data?.getIntExtra(NewCharacterActivity.SLOT_SELECTED, 0)!!
@@ -200,7 +198,7 @@ class CharacterSelectActivity : ComponentActivity() {
 
     private fun newCharacterWasSelected(result: ActivityResult): Boolean {
         if(result.data == null) {
-            Log.i(TAG, "result has no data?")
+            Timber.i("result has no data?")
             return false
         }
         return result.data!!.getBooleanExtra(NewCharacterActivity.NEW_CHARACTER_SELECTED_FLAG, false)

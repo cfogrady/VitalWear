@@ -83,9 +83,15 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     implementation 'androidx.activity:activity-compose:1.8.2'
 
-    //VB-DIM-Reader and SLF4J logging
+    //VB-DIM-Reader
     implementation "com.github.cfogrady:vb-dim-reader:$vb_dim_reader_version"
-    runtimeOnly 'org.slf4j:slf4j-android:1.7.26'
+
+    //SLF4J and Logging
+    // runtimeOnly 'org.slf4j:slf4j-android:1.7.26'
+    runtimeOnly 'at.favre.lib:slf4j-timber:1.0.0'
+    implementation 'com.jakewharton.timber:timber:5.0.1'
+    implementation 'org.tinylog:tinylog-api:2.4.1'
+    runtimeOnly 'org.tinylog:tinylog-impl:2.4.1'
 
     //Channel Client (data transfer)
     implementation 'com.google.android.gms:play-services-wearable:18.1.0'

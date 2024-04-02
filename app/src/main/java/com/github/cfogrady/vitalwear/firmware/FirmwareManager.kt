@@ -2,7 +2,6 @@ package com.github.cfogrady.vitalwear.firmware
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.core.net.toUri
 import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
 import com.github.cfogrady.vb.dim.sprite.SpriteData.Sprite
@@ -19,6 +18,7 @@ import com.google.common.collect.Lists
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import timber.log.Timber
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
@@ -108,7 +108,6 @@ class FirmwareManager(
     }
 
     private val bemSpriteReader = BemSpriteReader()
-    private val TAG = "FirmwareManager"
     private val firmware = MutableStateFlow<Firmware?>(null)
     private val mutalbeFirmwareState = MutableStateFlow(FirmwareState.Loading)
     val firmwareState: StateFlow<FirmwareState> = mutalbeFirmwareState
@@ -127,7 +126,7 @@ class FirmwareManager(
                 val firmwareFile = File(filesRoot, FIRMWARE_FILE)
                 firmwareFile.delete()
                 mutalbeFirmwareState.value = FirmwareState.Missing
-                Log.w(TAG, "Imported Firmware file had errors!")
+                Timber.w("Imported Firmware file had errors!")
             }
             if(firmwareState.value == FirmwareState.Loaded) {
                 postFirmwareLoader.loadWithFirmware(applicationContext, firmware.value!!)
@@ -151,7 +150,7 @@ class FirmwareManager(
                     bemSpriteReader.readSpriteDimensions(input)
                 input.readToOffset(SPRITE_PACKAGE_LOCATION)
                 val sprites = bemSpriteReader.getSpriteData(input, dimensionsList).sprites
-                Log.i(TAG, "Time to initialize firmware: ${System.currentTimeMillis() - startFirmwareRead}")
+                Timber.i("Time to initialize firmware: ${System.currentTimeMillis() - startFirmwareRead}")
                 val loadingIcon = spriteBitmapConverter.getBitmap(sprites[TIMER_ICON])
                 val insertCardIcon = spriteBitmapConverter.getBitmap(sprites[INSERT_CARD_ICON])
                 val greenBackground = spriteBitmapConverter.getBitmap(sprites[GREEN_BACKGROUND])
@@ -188,11 +187,11 @@ class FirmwareManager(
             mutalbeFirmwareState.value = FirmwareState.Loaded
             return true
         } catch(fnfe: FileNotFoundException) {
-            Log.e(TAG, "No firmware file", fnfe)
+            Timber.e("No firmware file", fnfe)
             mutalbeFirmwareState.value = FirmwareState.Missing
             return true
         } catch (e: Exception) {
-            Log.e(TAG, "Unable to load firmware", e)
+            Timber.e("Unable to load firmware", e)
             return false
         }
     }

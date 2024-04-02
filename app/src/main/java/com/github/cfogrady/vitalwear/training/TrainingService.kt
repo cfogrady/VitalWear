@@ -7,7 +7,6 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import com.github.cfogrady.vitalwear.SaveService
 import com.github.cfogrady.vitalwear.character.VBCharacter
-import com.github.cfogrady.vitalwear.debug.Debuggable
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import java.lang.IllegalStateException
 
@@ -20,13 +19,11 @@ class TrainingService (
     private val sensorManager: SensorManager,
     private val heartRateService: HeartRateService,
     private val saveService: SaveService,
-) : Debuggable {
+) {
     companion object {
     }
 
     var backgroundTrainingProgressTracker: TrainingProgressTracker? = null
-
-    private var lastTraining: BackgroundTrainingResults? = null
 
     fun startBackgroundTraining(context: Context, trainingType: TrainingType): TrainingProgressTracker {
         backgroundTrainingProgressTracker = when(trainingType) {
@@ -47,10 +44,9 @@ class TrainingService (
         val tracker = backgroundTrainingProgressTracker!!
         backgroundTrainingProgressTracker = null
         tracker.unregister()
-        tracker.finishRep()
+        tracker.finishRep() // Might remove in the future to eliminate counting partial reps
         context.stopService(Intent(context, TrainingForegroundService::class.java))
-        lastTraining = tracker.results()
-        return lastTraining!!
+        return tracker.results()
     }
 
     fun startTraining(trainingType: TrainingType): TrainingProgressTracker {
@@ -119,12 +115,5 @@ class TrainingService (
     private fun listenToStepCounter(sensorEventListener: SensorEventListener) {
         val stepCounter = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         sensorManager.registerListener(sensorEventListener, stepCounter, SensorManager.SENSOR_DELAY_GAME)
-    }
-
-    override fun debug(): List<Pair<String, String>> {
-        if(lastTraining == null) {
-            return emptyList()
-        }
-        return lastTraining!!.reps
     }
 }

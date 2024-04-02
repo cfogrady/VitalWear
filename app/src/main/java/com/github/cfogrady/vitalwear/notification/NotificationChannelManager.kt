@@ -5,14 +5,13 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.github.cfogrady.vitalwear.R
 import com.github.cfogrady.vitalwear.activity.MainActivity
+import timber.log.Timber
 
 class NotificationChannelManager(private val notificationManager: NotificationManager) {
     companion object {
-        const val TAG = "NotificationChannelManager"
         const val NOTIFICATION_CHANNEL = "Vital Wear"
         const val CHANNEL_ID = "VitalWearMainChannel"
         const val TRANSFORMATION_READY_ID = 0
@@ -33,7 +32,7 @@ class NotificationChannelManager(private val notificationManager: NotificationMa
     }
 
     fun sendGenericNotification(context: Context, title: String, content: String, notificationId: Int = genericNotificationId++): Int {
-        Log.i(TAG, "Sending notification: $title")
+        Timber.i("Sending notification: $title")
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
         }

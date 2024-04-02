@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorManager
-import android.util.Log
 import com.github.cfogrady.vitalwear.adventure.data.CharacterAdventureDao
 import com.github.cfogrady.vitalwear.adventure.data.CharacterAdventureEntity
 import com.github.cfogrady.vitalwear.battle.data.BattleResult
@@ -25,6 +24,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.lang.IllegalStateException
 
 class AdventureService(
@@ -37,10 +37,6 @@ class AdventureService(
     private val characterAdventureDao: CharacterAdventureDao,
     private val stepService: StepSensorService,
     private val sensorManager: SensorManager) {
-
-    companion object {
-        const val TAG = "AdventureService"
-    }
 
     var activeAdventure: ActiveAdventure? = null
     var accelerometerToStepSensor: AccelerometerToStepSensor? = null
@@ -84,7 +80,7 @@ class AdventureService(
     fun completeBattle(context: Context, battleResult: BattleResult) {
         val adventure = activeAdventure
         if(adventure?.zoneCompleted?.value != true) {
-            Log.e(TAG, "Battle completed, but we haven't completed a zone...")
+            Timber.e("Battle completed, but we haven't completed a zone...")
             return
         }
         if(battleResult == BattleResult.RETREAT) {
@@ -99,7 +95,7 @@ class AdventureService(
         adventure.finishZone(battleResult == BattleResult.WIN)
     }
 
-    fun markCompletion(adventureEntity: AdventureEntity, partnerId: Int, partnerFranchise: Int, assumedFranchise: Boolean) {
+    private fun markCompletion(adventureEntity: AdventureEntity, partnerId: Int, partnerFranchise: Int, assumedFranchise: Boolean) {
         CoroutineScope(Dispatchers.IO).launch {
             val cardMeta = cardMetaEntityDao.getByName(adventureEntity.cardName)
             // only do a card adventure unlock if this was a character originally belonging to that franchise

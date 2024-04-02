@@ -2,7 +2,6 @@ package com.github.cfogrady.vitalwear.activity
 
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -12,16 +11,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.character.VBCharacter
-import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
-import com.github.cfogrady.vitalwear.character.data.Mood
-import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
-import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.steps.StepService
-import kotlinx.coroutines.flow.StateFlow
+import timber.log.Timber
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -30,9 +25,6 @@ class PartnerScreenComposable(
     private val backgroundHeight: Dp,
     private val stepService: StepService,
     private val heartRateService: HeartRateService) {
-    companion object {
-        const val TAG = "PartnerScreenComposable"
-    }
 
     @Composable
     fun PartnerScreen(character: VBCharacter, firmware: CharacterFirmwareSprites) {
@@ -50,10 +42,10 @@ class PartnerScreenComposable(
         LaunchedEffect(timeFrom10StepsAgo, now) {
             val currentNow = LocalDateTime.now()
             val millisUntilIdle = 60_000 - ChronoUnit.MILLIS.between(timeFrom10StepsAgo, currentNow)
-            Log.i(TAG, "Time To Idle: $millisUntilIdle")
+            Timber.i("Time To Idle: $millisUntilIdle")
             val millisUntilNextMinute = (60 - currentNow.second)*1_000.toLong()
             val nextUpdate = if(millisUntilIdle > 0) millisUntilIdle.coerceAtMost(millisUntilNextMinute) else millisUntilNextMinute
-            Log.i(TAG, "Next Update: $nextUpdate")
+            Timber.i("Next Update: $nextUpdate")
             Handler.createAsync(Looper.getMainLooper()).postDelayed({
                 now = LocalDateTime.now()
             }, nextUpdate)

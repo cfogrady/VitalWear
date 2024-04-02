@@ -1,16 +1,13 @@
 package com.github.cfogrady.vitalwear.vitals
 
-import android.util.Log
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.complications.ComplicationRefreshService
-import com.github.cfogrady.vitalwear.steps.StepSensorService
 import com.github.cfogrady.vitalwear.steps.StepChangeListener
-import java.time.LocalDate
+import timber.log.Timber
 import java.time.LocalDateTime
-import java.util.LinkedList
 
 class VitalService(private val characterManager: CharacterManager, private val complicationRefreshService: ComplicationRefreshService, private val bootTime: LocalDateTime = LocalDateTime.now()) : StepChangeListener {
     companion object {
@@ -18,17 +15,6 @@ class VitalService(private val characterManager: CharacterManager, private val c
     }
 
     private var remainingSteps = STEPS_PER_VITAL
-
-    private var debugList = LinkedList<Pair<LocalDateTime, String>>()
-
-    fun debug(): List<Pair<String, String>> {
-        val debugInfo = ArrayList<Pair<String, String>>()
-        debugInfo.add(Pair("Last Reboot", bootTime.toString()))
-        debugInfo.addAll(debugList.map {
-            Pair(it.first.toLocalTime().toString(), it.second)
-        })
-        return debugInfo
-    }
 
     // This could be called everytime steps % 50 == 0, but that risks missing steps.
     // So instead we call with old and new each time so if we go > 100 we don't miss vitals
@@ -55,7 +41,7 @@ class VitalService(private val characterManager: CharacterManager, private val c
                 remainingSteps -= (newSteps - oldSteps)
             }
         } else {
-            debugList.addLast(Pair(LocalDateTime.now(), "No character selected when updating vitals from steps."))
+            Timber.i("No character selected when updating vitals from steps.")
         }
         return stateChange
     }
@@ -78,15 +64,8 @@ class VitalService(private val characterManager: CharacterManager, private val c
         addVitals("heart rate measured delta from resting of ${heartRate-restingRate}", character, vitalGain)
     }
 
-    private fun clearOldDebugEntries() {
-        while(debugList.isNotEmpty() && (debugList.first().first < LocalDate.now().atStartOfDay() || debugList.size > 50)) {
-            debugList.removeFirst()
-        }
-    }
-
     fun addVitals(context: String, character: VBCharacter, newVitals: Int) {
-        clearOldDebugEntries()
-        debugList.addLast(Pair<LocalDateTime, String>(LocalDateTime.now(), "Add $newVitals for $context"))
+        Timber.i("Add Vitals|$newVitals|$context")
         character.addVitals(newVitals)
         complicationRefreshService.refreshVitalsComplication()
     }
@@ -97,7 +76,7 @@ class VitalService(private val characterManager: CharacterManager, private val c
 
     private fun vitalGainModifier(character: VBCharacter, vitals: Int) : Int {
         if(character == BEMCharacter.DEFAULT_CHARACTER) {
-            Log.w(StepSensorService.TAG, "Cannot apply vitals gain modifier for null active character.")
+            Timber.w("Cannot apply vitals gain modifier for null active character.")
             return vitals
         }
         if(character.characterStats.injured) {

@@ -2,7 +2,6 @@ package com.github.cfogrady.vitalwear.character
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.util.Log
 import com.github.cfogrady.vitalwear.adventure.data.CharacterAdventureDao
 import com.github.cfogrady.vitalwear.card.CardMeta
 import com.github.cfogrady.vitalwear.card.DimToBemStatConversion
@@ -24,11 +23,10 @@ import com.github.cfogrady.vitalwear.settings.CharacterSettingsDao
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import timber.log.Timber
 import java.time.LocalDateTime
 import kotlin.collections.ArrayList
 import kotlin.math.max
-
-const val TAG = "CharacterRepository"
 
 /**
  * Manage the character loading and updating
@@ -52,7 +50,7 @@ class CharacterManagerImpl(
     override val initialized = MutableStateFlow(false)
 
     suspend fun init(applicationContext: Context, vbUpdater: VBUpdater) {
-        Log.i(TAG, "Initializing character manager")
+        Timber.i("Initializing character manager")
         this.vbUpdater = vbUpdater
         withContext(Dispatchers.IO) {
             val character = loadActiveCharacter(applicationContext)
@@ -63,7 +61,7 @@ class CharacterManagerImpl(
                 }
             }
             initialized.value = true
-            Log.i(TAG, "Character manager initialized")
+            Timber.i("Character manager initialized")
         }
     }
 
@@ -76,7 +74,7 @@ class CharacterManagerImpl(
     }
 
     private suspend fun loadActiveCharacter(applicationContext: Context) : VBCharacter? {
-        Log.i(TAG, "Loading active character")
+        Timber.i("Loading active character")
         // replace this with a table for activePartner and fetch by character id
         val activeCharacterStats = characterDao.getCharactersByState(CharacterState.SYNCED)
         if(activeCharacterStats.isNotEmpty()) {
@@ -98,11 +96,11 @@ class CharacterManagerImpl(
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Unable to load character! Act as if empty", e)
+                Timber.e("Unable to load character! Act as if empty", e)
                 null
             }
         }
-        Log.i(TAG, "No character to load")
+        Timber.i("No character to load")
         return null
     }
 
@@ -140,7 +138,7 @@ class CharacterManagerImpl(
                 null
             } else {
                 if(supports.size > 1) {
-                    Log.w(TAG, "Multiple support characters found!")
+                    Timber.w("Multiple support characters found!")
                 }
                 val support = supports[0]
                 val card = cardMetaEntityDao.getByName(support.cardFile)
@@ -214,7 +212,7 @@ class CharacterManagerImpl(
     }
 
     fun updateActiveCharacter(now: LocalDateTime) {
-        Log.i(TAG, "Updating the active character")
+        Timber.i("Updating the active character")
         val character = activeCharacterFlow.value
         if(character != null) {
             updateCharacterStats(character.characterStats, now)
@@ -384,7 +382,7 @@ class CharacterManagerImpl(
             transformationHistoryDao.deleteByCharacterId(characterPreview.characterId)
             characterDao.deleteById(characterPreview.characterId)
         } else if(currentCharacter.characterStats.id == characterPreview.characterId) {
-            Log.e(TAG, "Cannot delete active character")
+            Timber.e("Cannot delete active character")
         } else {
             characterSettingsDao.deleteById(characterPreview.characterId)
             characterAdventureDao.deleteByCharacterId(characterPreview.characterId)

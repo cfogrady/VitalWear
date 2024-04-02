@@ -1,19 +1,17 @@
 package com.github.cfogrady.vitalwear.activity
 
 import android.util.DisplayMetrics
-import android.util.Log
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import timber.log.Timber
 import kotlin.math.atan
 import kotlin.math.cos
 import kotlin.math.floor
-import kotlin.math.sin
 
 class ImageScaler(val displayMetrics: DisplayMetrics, val screenIsRound: Boolean) {
     companion object {
         const val VB_WIDTH = 80f
         const val VB_HEIGHT = 160f
-        private const val TAG = "ImageScaler"
         private val SQRT_OF_TWO = Math.sqrt(2.0)
     }
 
@@ -36,7 +34,7 @@ class ImageScaler(val displayMetrics: DisplayMetrics, val screenIsRound: Boolean
 
     fun getPadding(): Dp {
         if(paddingDp == 0.dp) {
-            Log.i(TAG, "Converting Pixels to Dp")
+            Timber.i("Converting Pixels to Dp")
             paddingDp = convertPixelsToDp(getPaddingPixels())
         }
         return paddingDp
@@ -46,10 +44,10 @@ class ImageScaler(val displayMetrics: DisplayMetrics, val screenIsRound: Boolean
         if(padding != 0 || !screenIsRound) {
             return padding
         }
-        Log.i(TAG, "Calculating padding")
+        Timber.i("Calculating padding")
         val radius = calculateRadius()
         val halfHeight = calculateRectHalfHeight(radius)
-        Log.i(TAG, "Radius: $radius, halfHeight: $halfHeight")
+        Timber.i("Radius: $radius, halfHeight: $halfHeight")
         padding = radius - halfHeight
         return padding
     }

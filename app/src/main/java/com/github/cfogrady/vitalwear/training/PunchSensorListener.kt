@@ -3,14 +3,13 @@ package com.github.cfogrady.vitalwear.training
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
-import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import timber.log.Timber
 import java.util.LinkedList
 
 class PunchSensorListener(private val restingHeartRate: Float, private val unregisterFunctor: (SensorEventListener)->Unit, private val timeProvider: () -> Long = System::currentTimeMillis) : TrainingProgressTracker() {
     companion object {
-        const val TAG = "PunchSensorListener"
         const val THRESHOLD_VALUE = 200
         const val GOAL = 12
         const val BONUS = 16
@@ -37,7 +36,7 @@ class PunchSensorListener(private val restingHeartRate: Float, private val unreg
             }
 
             else -> {
-                Log.w(TAG, "Event for unexpected sensor type: ${maybeEvent?.sensor?.name}")
+                Timber.w("Event for unexpected sensor type: ${maybeEvent?.sensor?.name}")
             }
         }
     }
@@ -81,7 +80,7 @@ class PunchSensorListener(private val restingHeartRate: Float, private val unreg
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        Log.i(TAG, "accuracy change: $accuracy")
+        Timber.i("accuracy change: $accuracy")
     }
 
     override fun progressFlow(): StateFlow<Float> {

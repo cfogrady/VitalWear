@@ -1,15 +1,11 @@
 package com.github.cfogrady.vitalwear.battle.data
 
-import android.util.Log
 import com.github.cfogrady.vitalwear.character.data.Mood
+import timber.log.Timber
 import java.util.ArrayList
 import java.util.Random
 
 class BEMBattleLogic(private val random: Random) {
-    companion object {
-        const val TAG = "BEMBattleLogic"
-    }
-
     fun performBattle(battle: PreBattleModel, preDeterminedHits: Array<Boolean> = emptyArray()): Battle {
         val partnerCharacter = battle.partnerCharacter
         val opponent = battle.opponent
@@ -40,14 +36,14 @@ class BEMBattleLogic(private val random: Random) {
                 else if(critical)
                     playerAp * 2
                 else playerAp
-                Log.d(TAG, "Play hit on round $round. AP: $playerAp. Critical: $critical. OpponentHp Before $opponentHp and After ${opponentHp - damage}")
+                Timber.d("Play hit on round $round. AP: $playerAp. Critical: $critical. OpponentHp Before $opponentHp and After ${opponentHp - damage}")
                 opponentHp -= damage
                 playerRounds.add(BattleRound(true, playerHp))
                 opponentRounds.add(BattleRound(false, opponentHp))
             } else {
                 val critical = round == opponent.battleStats.type
                 val damage = if(critical) opponentAp * 2 else opponentAp
-                Log.d(TAG, "Opponent hit on round $round. AP: $opponentAp. Critical: $critical. PlayerHp Before $playerHp and After ${playerHp - damage}")
+                Timber.d("Opponent hit on round $round. AP: $opponentAp. Critical: $critical. PlayerHp Before $playerHp and After ${playerHp - damage}")
                 playerHp -= damage
                 playerRounds.add(BattleRound(false, playerHp))
                 opponentRounds.add(BattleRound(true, opponentHp))
