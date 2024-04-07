@@ -28,6 +28,7 @@ class VitalWearCompanion : Application() {
         Timber.plant(TinyLogTree(this))
         Timber.i("Running VitalWear Companion. Version: ${BuildConfig.VERSION_NAME}  ${BuildConfig.VERSION_CODE}")
         Thread.setDefaultUncaughtExceptionHandler{thread, throwable ->
+            Timber.e("Vital Wear Companion Version ${BuildConfig.VERSION_NAME}   ${BuildConfig.VERSION_CODE} crashed.")
             Timber.e(throwable, "Thread ${thread.name} failed:")
         }
         buildDependencies()
