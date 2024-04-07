@@ -10,6 +10,7 @@ class CrashHandler(private val context: Context, private val logSettings: LogSet
         if(!logSettings.loggingEnabled()) {
             logSettings.toggleLogging()
         }
+        Timber.e("Vital Wear version ${BuildConfig.VERSION_NAME}   ${BuildConfig.VERSION_CODE} crashed.")
         Timber.e(e, "Thread ${t.name} failed:")
         Toast.makeText(context, "VitalWear Crashed. Restart and send bug report from phone.", Toast.LENGTH_SHORT).show()
     }
