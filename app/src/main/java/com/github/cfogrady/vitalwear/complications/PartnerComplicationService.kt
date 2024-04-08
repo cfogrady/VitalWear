@@ -62,7 +62,7 @@ class PartnerComplicationService : ComplicationDataSourceService() {
         val character = characterManager.getCurrentCharacter()
         val gameState = (application as VitalWearApp).gameState.value
         return if(maybeFirmware.value == null || !characterManager.initialized.value) {
-            Icon.createWithResource(applicationContext, com.github.cfogrady.vitalwear.common.R.drawable.loading_icon)
+            Icon.createWithResource(applicationContext, com.github.cfogrady.vitalwear.common.R.drawable.loading_spinner)
         } else if(character == null) {
             Icon.createWithBitmap(maybeFirmware.value!!.insertCardIcon)
         } else if (gameState != GameState.IDLE) {
