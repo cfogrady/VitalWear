@@ -62,13 +62,15 @@ class DimToBemStatConversion(private val statConversionDao: StatConversionDao) {
     suspend fun convertSpeciesEntity(speciesEntity: SpeciesEntity): SpeciesEntity {
         val existingBemVersion = getBEMOfSameSpecies(speciesEntity.spriteDirName)
         existingBemVersion?.let {
+            Timber.i("BEM version found from ${existingBemVersion.cardName}")
             return speciesEntity.copy(phase = existingBemVersion.phase, bp = existingBemVersion.bp, hp = existingBemVersion.hp, ap = existingBemVersion.ap)
         }
         val dimPhase = speciesEntity.phase
+        Timber.i("Upscaling stats for ${speciesEntity.cardName} ${speciesEntity.characterId}. Phase: $dimPhase, DP: ${speciesEntity.bp}, AP: ${speciesEntity.ap}, HP: ${speciesEntity.hp}")
         val bemPhase = withContext(Dispatchers.IO) {
             newSpeciesPhase(speciesEntity.cardName, speciesEntity.characterId, dimPhase)
         }
-        Timber.i("Phase $dimPhase to $bemPhase")
+        Timber.i("BEM Phase: $bemPhase")
         var dimBpPhase = dimPhase
         var dimHpPhase = dimPhase
         var dimApPhase = dimPhase
@@ -78,17 +80,17 @@ class DimToBemStatConversion(private val statConversionDao: StatConversionDao) {
         if(bemPhase == dimPhase && dimPhase < AVERAGE_DIM_STATS.size-1) {
             // Lucemon and a few others with abnormally high stats for their phase
             if(speciesEntity.bp > AVERAGE_DIM_STATS[dimPhase+1].bp) {
-                Timber.i("bp stat upgrade")
+                Timber.i("bp stat phase upgrade")
                 dimBpPhase = dimPhase + 1
                 bemBpPhase = dimPhase + 1
             }
             if(speciesEntity.hp > AVERAGE_DIM_STATS[dimPhase+1].hp) {
-                Timber.i("hp stat upgrade")
+                Timber.i("hp stat phase upgrade")
                 dimHpPhase = dimPhase + 1
                 bemHpPhase = dimPhase + 1
             }
             if(speciesEntity.ap > AVERAGE_DIM_STATS[dimPhase+1].ap) {
-                Timber.i("ap stat upgrade")
+                Timber.i("ap stat phase upgrade")
                 dimApPhase = dimPhase + 1
                 bemApPhase = dimPhase + 1
             }
