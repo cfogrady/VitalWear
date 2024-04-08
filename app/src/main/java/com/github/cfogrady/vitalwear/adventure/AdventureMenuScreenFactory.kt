@@ -170,11 +170,12 @@ class AdventureMenuScreenFactory(
         if(!loaded) {
             Loading {
                 val currentMax = adventureService.getCurrentMaxAdventure(partner.characterStats.id, cardMetaEntity.cardName)
-                adventures = adventureService.getAdventureOptions(cardMetaEntity.cardName).subList(0, currentMax+1)
+                val cardAdventures = adventureService.getAdventureOptions(cardMetaEntity.cardName)
+                adventures = cardAdventures.subList(0, (currentMax+1).coerceAtMost(cardAdventures.size))
                 loaded = true
             }
         } else {
-            val pagerState = rememberPagerState(pageCount = {adventures.size})
+            val pagerState = rememberPagerState(pageCount = {adventures.size}, initialPage = adventures.size-1)
             val bitmapScaler = bitmapScaler
             vitalBoxFactory.VitalBox {
                 VerticalPager(state = pagerState) {
