@@ -40,3 +40,6 @@
 -dontwarn java.lang.**
 -dontwarn javax.naming.**
 -dontwarn sun.reflect.Reflection
+
+# Vital Wear (And VB-DIM-READER) names for logging. We don't care about obfuscation
+-dontobfuscate
