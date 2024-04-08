@@ -26,6 +26,7 @@ import com.github.cfogrady.vitalwear.common.card.db.TransformationEntityDao
 import com.google.common.io.BaseEncoding
 import timber.log.Timber
 import java.io.InputStream
+import java.lang.IllegalStateException
 import java.security.MessageDigest
 import java.util.*
 import kotlin.collections.ArrayList
@@ -63,6 +64,9 @@ class CardLoader(
 
     fun importCardImage(applicationContext: Context, cardName: String, inputStream: InputStream, uniqueSprites: Boolean = false) {
         val card = dimReader.readCard(inputStream, true)
+        if(card.calculatedCheckSum != card.checksum) {
+            throw IllegalStateException("Card Image has bad checksum. Expected: ${card.checksum} Actual: ${card.calculatedCheckSum}")
+        }
         importCardImage(applicationContext, cardName, card, uniqueSprites)
     }
 
