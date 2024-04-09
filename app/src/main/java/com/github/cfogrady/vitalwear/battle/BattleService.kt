@@ -224,7 +224,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         if(smallAttackId <= 38) {
             return firmware.battleFirmwareSprites.attackSprites[smallAttackId]
         }
-        val cardSpriteIdx = (smallAttackId - 39) + 34
+        val cardSpriteIdx = (smallAttackId - 39)
         return cardSpritesIO.loadIndexedSprite(context, cardName, CardSpritesIO.ATTACKS, cardSpriteIdx)
     }
 
@@ -232,7 +232,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         if(largeAttackId < 22) {
             return firmware.battleFirmwareSprites.largeAttackSprites[largeAttackId]
         }
-        val cardSpriteIdx = (largeAttackId - 22) + 44
+        val cardSpriteIdx = (largeAttackId - 22)
         return cardSpritesIO.loadIndexedSprite(context, cardName, CardSpritesIO.CRITICAL_ATTACKS, cardSpriteIdx)
     }
 
