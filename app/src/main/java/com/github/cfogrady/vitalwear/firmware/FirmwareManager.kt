@@ -2,6 +2,7 @@ package com.github.cfogrady.vitalwear.firmware
 
 import android.content.Context
 import android.net.Uri
+import android.widget.Toast
 import androidx.core.net.toUri
 import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
 import com.github.cfogrady.vb.dim.sprite.SpriteData.Sprite
@@ -127,6 +128,7 @@ class FirmwareManager(
                 firmwareFile.delete()
                 mutalbeFirmwareState.value = FirmwareState.Missing
                 Timber.w("Imported Firmware file had errors!")
+                Toast.makeText(applicationContext, "Invalid Firmware Detected", Toast.LENGTH_SHORT).show()
             }
             if(firmwareState.value == FirmwareState.Loaded) {
                 postFirmwareLoader.loadWithFirmware(applicationContext, firmware.value!!)
