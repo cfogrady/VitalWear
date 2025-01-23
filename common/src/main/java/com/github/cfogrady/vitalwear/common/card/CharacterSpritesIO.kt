@@ -140,7 +140,7 @@ class CharacterSpritesIO(private val spriteFileIO: SpriteFileIO, private val spr
     }
 
     private fun makeStandardSized(bitmap: Bitmap): Bitmap {
-        val standardSizedBitmap = Bitmap.createBitmap(STANDARD_WIDTH, STANDARD_HEIGHT, bitmap.getConfig())
+        val standardSizedBitmap = Bitmap.createBitmap(STANDARD_WIDTH, STANDARD_HEIGHT, bitmap.config!!)
         val canvas = Canvas(standardSizedBitmap)
         canvas.drawBitmap(bitmap, (64f-bitmap.width)/2f, 56f-bitmap.height, null)
         return standardSizedBitmap

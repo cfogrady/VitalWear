@@ -211,15 +211,15 @@ class VitalWearApp : Application(), Configuration.Provider {
         settingsComposableFactory = SettingsComposableFactory(backgroundManager, vitalBoxFactory, bitmapScaler, logSettings, saveService)
     }
 
-    override fun getWorkManagerConfiguration(): Configuration {
-        // After we've setup the workManagerConfiguration, start the service
-        val workProviderDependencies = WorkProviderDependencies(
-            characterManager,
-            notificationChannelManager,
-            vbUpdater,
-            saveService,
-            sharedPreferences,
-        )
-        return Configuration.Builder().setWorkerFactory(VitalWearWorkerFactory(workProviderDependencies)).build()
-    }
+    override val workManagerConfiguration: Configuration
+        get() {
+            val workProviderDependencies = WorkProviderDependencies(
+                characterManager,
+                notificationChannelManager,
+                vbUpdater,
+                saveService,
+                sharedPreferences,
+            )
+            return Configuration.Builder().setWorkerFactory(VitalWearWorkerFactory(workProviderDependencies)).build()
+        }
 }

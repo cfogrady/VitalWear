@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.github.cfogrady.vitalwear.common"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 28

@@ -15,7 +15,7 @@ room {
 
 android {
     namespace = "com.github.cfogrady.vitalwear"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.github.cfogrady.vitalwear"

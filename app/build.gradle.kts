@@ -14,7 +14,16 @@ room {
 
 android {
     namespace = "com.github.cfogrady.vitalwear"
-    compileSdk = 34
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = "com.github.cfogrady.vitalwear"
+        minSdk = 28
+        targetSdk = 34
+        versionCode = 13
+        versionName = "0.4.1"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -29,15 +38,6 @@ android {
     // For Kotlin projects
     kotlinOptions {
         jvmTarget = "11"
-    }
-
-    defaultConfig {
-        applicationId = "com.github.cfogrady.vitalwear"
-        minSdk = 28
-        targetSdk = 34
-        versionCode = 13
-        versionName = "0.4.1"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
