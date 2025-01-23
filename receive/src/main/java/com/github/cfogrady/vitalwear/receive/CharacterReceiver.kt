@@ -2,10 +2,8 @@ package com.github.cfogrady.vitalwear.receive
 
 import com.github.cfogrady.nearby.connections.p2p.ConnectionStatus
 import com.github.cfogrady.nearby.connections.p2p.NearbyP2PConnection
+import com.github.cfogrady.vitalwear.protos.Character
 import com.google.android.gms.nearby.connection.Payload
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class CharacterReceiver(val nearbyP2PConnection: NearbyP2PConnection) {
     init {
@@ -16,9 +14,7 @@ class CharacterReceiver(val nearbyP2PConnection: NearbyP2PConnection) {
     }
 
     fun onReceive(payload: Payload) {
-        CoroutineScope(Dispatchers.IO).launch {
-
-        }
+        Character.parseFrom(payload.asBytes())
     }
 
     suspend fun receiveCharacter()  {

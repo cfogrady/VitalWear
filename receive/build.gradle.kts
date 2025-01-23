@@ -39,6 +39,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.connections)
     implementation(libs.play.services.nearby)
+    implementation(project(":protos"))
+    implementation(libs.protobuf.javalite)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
