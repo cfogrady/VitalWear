@@ -12,11 +12,14 @@ guava = "31.1-android"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 kotlin = "2.0.21"
+kotlinxCoroutinesPlayServices = "1.4.3-native-mt"
 kotlinxCoroutinesTest = "1.8.0-RC2"
 ksp = "2.0.21-1.0.27"
 material = "1.12.0"
 playServicesNearby = "19.3.0"
+playServicesWearable = "19.0.0"
 room = "2.6.0"
+slf4jTimber = "1.0.0"
 timber = "5.0.1"
 tinyLog = "2.4.1"
 
@@ -39,14 +42,18 @@ connections = { module = "com.github.cfogrady.nearby.connections.p2p:connections
 dim-reader = { module = "com.github.cfogrady:vb-dim-reader", version.ref = "dimReader" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 junit = { module = "junit:junit", version.ref = "junit" }
+kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 play-services-nearby = { module = "com.google.android.gms:play-services-nearby", version.ref = "playServicesNearby" }
+play-services-wearable = { module = "com.google.android.gms:play-services-wearable", version.ref = "playServicesWearable" }
 room-compile = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
+slf4j-timber = { module = "at.favre.lib:slf4j-timber", version.ref = "slf4jTimber" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber"}
 tiny-log = { module = "org.tinylog:tinylog-api", version.ref = "tinyLog"}
+tiny-log-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinyLog"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
