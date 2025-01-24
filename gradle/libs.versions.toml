@@ -1,5 +1,5 @@
 [versions]
-projectVersion = "0.5.0"
+projectVersion = "0.5.0-SNAPSHOT"
 projectVersionCode = "14"
 agp = "8.7.3"
 appcompat = "1.7.0"
