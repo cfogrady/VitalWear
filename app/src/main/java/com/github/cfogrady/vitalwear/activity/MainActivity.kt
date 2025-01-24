@@ -16,6 +16,7 @@ import com.github.cfogrady.vitalwear.common.util.ActivityHelper
 import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.settings.SettingsActivity
 import com.github.cfogrady.vitalwear.training.StopBackgroundTrainingActivity
+import com.github.cfogrady.vitalwear.transfer.TransferActivity
 import java.time.LocalDateTime
 
 class MainActivity : ComponentActivity() {
@@ -54,6 +55,7 @@ class MainActivity : ComponentActivity() {
             activityHelper.getActivityLauncher(TrainingMenuActivity::class.java),
             activityHelper.getActivityLauncher(CharacterSelectActivity::class.java),
             activityHelper.getActivityLauncher(BattleActivity::class.java),
+            activityHelper.getActivityLauncher(TransferActivity::class.java),
             activityHelper.getActivityLauncher(TransformationActivity::class.java),
             activityHelper.getActivityLauncher(SettingsActivity::class.java),
             activityHelper.getActivityLauncher(StopBackgroundTrainingActivity::class.java),
