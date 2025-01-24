@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.receive
+package com.github.cfogrady.vitalwear.transfer
 
 import android.app.Activity
 import android.content.Context

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.github.cfogrady.vitalwear.receive"
+    namespace = "com.github.cfogrady.vitalwear.transfer"
     compileSdk = 35
 
     defaultConfig {
@@ -37,7 +37,7 @@ publishing {
     publications {
         register<MavenPublication>("ReleaseAar") {
             groupId = "com.github.cfogrady.vitalwear"
-            artifactId = "receive"
+            artifactId = "transfer"
             version = libs.versions.projectVersion.get()
 
             afterEvaluate { artifact(tasks.getByName("bundleReleaseAar")) }
