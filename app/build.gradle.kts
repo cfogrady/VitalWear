@@ -20,8 +20,8 @@ android {
         applicationId = "com.github.cfogrady.vitalwear"
         minSdk = 28
         targetSdk = 34
-        versionCode = 13
-        versionName = "0.4.1"
+        versionCode = libs.versions.projectVersionCode.get().toInt()
+        versionName = libs.versions.projectVersion.get()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

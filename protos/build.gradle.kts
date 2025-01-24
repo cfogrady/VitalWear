@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.protobuf)
+    alias(libs.plugins.maven.publish)
 }
 
 android {
@@ -48,6 +49,18 @@ protobuf {
                     option("lite")
                 }
             }
+        }
+    }
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("ReleaseAar") {
+            groupId = "com.github.cfogrady.vitalwear"
+            artifactId = "protos"
+            version = libs.versions.projectVersion.get()
+
+            afterEvaluate { artifact(tasks.getByName("bundleReleaseAar")) }
         }
     }
 }

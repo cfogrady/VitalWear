@@ -1,4 +1,6 @@
 [versions]
+projectVersion = "0.5.0"
+projectVersionCode = "14"
 agp = "8.7.3"
 appcompat = "1.7.0"
 compose = "1.7.6"
@@ -96,3 +98,4 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobufGradlePlugin" }
+maven-publish = { id = "maven-publish" }
