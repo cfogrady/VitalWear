@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -62,16 +60,16 @@ android {
 dependencies {
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.android.compose.ui)
-    implementation(libs.android.compose.ui.preview)
-    implementation(libs.android.compose.livedata)
-    implementation(libs.android.compose.foundation)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.preview)
+    implementation(libs.androidx.compose.livedata)
+    implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.androidx.compose.material3)
-    androidTestImplementation(libs.android.compose.ui.test)
+    androidTestImplementation(libs.androidx.compose.ui.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
-    debugImplementation(libs.android.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.androidx.watchface.complications.data.source.ktx)
     implementation(libs.androidx.preference.ktx)
     implementation(libs.androidx.concurrent.futures.ktx)
@@ -93,7 +91,7 @@ dependencies {
     implementation(libs.androidx.wear.compose.navigation)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.process)
-    implementation(libs.android.activity.compose)
+    implementation(libs.androidx.activity.compose)
     implementation(libs.guava)
     implementation(libs.androidx.percentlayout)
     implementation(libs.androidx.legacy.support.v4)

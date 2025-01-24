@@ -69,14 +69,14 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     // Compose
-    implementation(libs.android.compose.ui)
-    implementation(libs.android.compose.ui.preview)
-    implementation(libs.android.compose.material)
-    implementation(libs.android.compose.livedata)
-    implementation(libs.android.compose.foundation)
-    androidTestImplementation(libs.android.compose.ui.test)
-    debugImplementation(libs.android.compose.ui.tooling)
-    implementation(libs.android.activity.compose)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.preview)
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.livedata)
+    implementation(libs.androidx.compose.foundation)
+    androidTestImplementation(libs.androidx.compose.ui.test)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.activity.compose)
 
     //VB-DIM-Reader
     implementation(libs.dim.reader)
