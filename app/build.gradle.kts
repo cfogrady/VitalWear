@@ -67,7 +67,6 @@ dependencies {
     implementation(libs.android.compose.livedata)
     implementation(libs.android.compose.foundation)
     implementation(libs.androidx.lifecycle.service)
-    implementation(project(":common"))
     implementation(libs.androidx.compose.material3)
     androidTestImplementation(libs.android.compose.ui.test)
     testImplementation(libs.junit)
@@ -77,6 +76,11 @@ dependencies {
     implementation(libs.androidx.preference.ktx)
     implementation(libs.androidx.concurrent.futures.ktx)
     implementation(libs.kotlinx.coroutines.play.services)
+
+    implementation(project(":common"))
+    implementation(project(":protos"))
+    implementation(libs.connections)
+    implementation(libs.connections.wear.ui)
 
     // Work Manager
     implementation(libs.androidx.work.runtime)
