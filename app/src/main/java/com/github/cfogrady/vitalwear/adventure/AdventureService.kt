@@ -136,4 +136,16 @@ class AdventureService(
         }
     }
 
+    suspend fun getMaxAdventureIdxByCardCompletedForCharacter(characterId: Int): Map<String, Int> {
+        return withContext(Dispatchers.IO) {
+            val adventures = characterAdventureDao.getByCharacterId(characterId)
+            val map = mutableMapOf<String, Int>()
+            for(adventure in adventures) {
+                map.put(adventure.cardName, adventure.adventureId)
+            }
+            map
+        }
+
+    }
+
 }

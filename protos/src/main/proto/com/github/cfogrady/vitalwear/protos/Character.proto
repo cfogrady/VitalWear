@@ -5,18 +5,8 @@ option java_package = "com.github.cfogrady.vitalwear.protos";
 option java_multiple_files = true;
 
 message Character {
-  message CardMeta {
-    string card_name = 1;
-    int32 card_id = 2;
-    enum CardType {
-      DIM = 0;
-      BEM = 1;
-    }
-    CardType card_type = 3;
-    int32 franchise_id = 4;
-    optional int32 max_adventure_completion = 5; // nullable when no adventure is complete
-  }
-  CardMeta card_meta = 1;
+  string card_name = 1;
+  int32 card_id = 2;
 
   message CharacterStats {
     int32 slot_id = 1;
@@ -35,7 +25,7 @@ message Character {
     int32 current_phase_wins = 14;
     int32 mood = 15;
   }
-  CharacterStats character_stats = 2;
+  CharacterStats character_stats = 3;
 
   message Settings {
     bool training_in_background = 1;
@@ -48,7 +38,7 @@ message Character {
     AllowedBattles allowed_battles = 2;
     optional int32 assumed_franchise = 3; // nullable if no assumed franchise
   }
-  Settings settings = 3;
+  Settings settings = 4;
 
-  map<string, int32> max_adventure_completed_by_card = 4;
+  map<string, int32> max_adventure_completed_by_card = 5;
 }

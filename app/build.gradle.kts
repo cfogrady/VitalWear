@@ -77,6 +77,8 @@ dependencies {
 
     implementation(project(":common"))
     implementation(project(":protos"))
+    implementation(project(":transfer"))
+    implementation(libs.protobuf.javalite)
     implementation(libs.connections)
     implementation(libs.connections.wear.ui)
 

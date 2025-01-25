@@ -23,6 +23,7 @@ import com.github.cfogrady.vitalwear.settings.CharacterSettingsDao
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import timber.log.Timber
 import java.time.LocalDateTime
 import kotlin.collections.ArrayList
@@ -374,21 +375,34 @@ class CharacterManagerImpl(
         }
     }
 
+    override fun deleteCurrentCharacter() {
+        activeCharacterFlow.value?.let {activeCharacter->
+            deleteCharacter(activeCharacter.characterStats.id)
+            activeCharacterFlow.update {
+                var updateTo = it
+                if(it != null && it.characterStats.id == activeCharacter.characterStats.id) {
+                    updateTo = null
+                }
+                updateTo
+            }
+        }
+    }
+
     override fun deleteCharacter(characterPreview: CharacterPreview) {
         val currentCharacter = activeCharacterFlow.value
-        if(currentCharacter == null) {
-            characterSettingsDao.deleteById(characterPreview.characterId)
-            characterAdventureDao.deleteByCharacterId(characterPreview.characterId)
-            transformationHistoryDao.deleteByCharacterId(characterPreview.characterId)
-            characterDao.deleteById(characterPreview.characterId)
-        } else if(currentCharacter.characterStats.id == characterPreview.characterId) {
-            Timber.e("Cannot delete active character")
+        if(currentCharacter == null ||
+            (currentCharacter.characterStats.id != characterPreview.characterId)) {
+            deleteCharacter(characterPreview.characterId)
         } else {
-            characterSettingsDao.deleteById(characterPreview.characterId)
-            characterAdventureDao.deleteByCharacterId(characterPreview.characterId)
-            transformationHistoryDao.deleteByCharacterId(characterPreview.characterId)
-            characterDao.deleteById(characterPreview.characterId)
+            Timber.e("Cannot delete active character")
         }
+    }
+
+    private fun deleteCharacter(characterId: Int) {
+        characterSettingsDao.deleteById(characterId)
+        characterAdventureDao.deleteByCharacterId(characterId)
+        transformationHistoryDao.deleteByCharacterId(characterId)
+        characterDao.deleteById(characterId)
     }
 
     override fun maybeUpdateCardMeta(cardMeta: CardMeta) {

@@ -30,6 +30,8 @@ interface CharacterManager {
 
     fun deleteCharacter(characterPreview: CharacterPreview)
 
+    fun deleteCurrentCharacter()
+
     /**
      * Checks to see if the currentCharacter is from the same card. If not do nothing. If so,
      * set the currentCharacter's cardMeta to the new cardMeta
