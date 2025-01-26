@@ -18,6 +18,7 @@ import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.TransformationEntityDao
+import com.github.cfogrady.vitalwear.protos.Character.CharacterStats
 import com.github.cfogrady.vitalwear.settings.CharacterSettings
 import com.github.cfogrady.vitalwear.settings.CharacterSettingsDao
 import kotlinx.coroutines.*
@@ -82,7 +83,7 @@ class CharacterManagerImpl(
             val characterStats = activeCharacterStats[0]
             val settings = CharacterSettings.fromCharacterSettingsEntity(characterSettingsDao.getByCharacterId(characterStats.id))
             return try {
-                val cardMeta = CardMeta.fromCardMetaEntity(cardMetaEntityDao.getByName(characterStats.cardFile))
+                val cardMeta = CardMeta.fromCardMetaEntity(cardMetaEntityDao.getByName(characterStats.cardFile)!!)
                 if(cardMeta.cardType == CardType.BEM) {
                     buildBEMCharacter(applicationContext, cardMeta, characterStats.slotId, settings) {
                         characterStats
@@ -105,7 +106,7 @@ class CharacterManagerImpl(
         return null
     }
 
-    private fun largestTransformationTimeSeconds(cardName: String, slotId: Int) : Long {
+    override suspend fun largestTransformationTimeSeconds(cardName: String, slotId: Int) : Long {
         var transformationTimeInSeconds = 0L
         val transformationEntities = transformationEntityDao.getByCardAndFromCharacterId(cardName, slotId)
         for(transformationEntry in transformationEntities) {
@@ -142,7 +143,7 @@ class CharacterManagerImpl(
                     Timber.w("Multiple support characters found!")
                 }
                 val support = supports[0]
-                val card = cardMetaEntityDao.getByName(support.cardFile)
+                val card = cardMetaEntityDao.getByName(support.cardFile)!!
                 val characterSettings = characterSettingsDao.getByCharacterId(support.id)
                 var species = speciesEntityDao.getCharacterByCardAndCharacterId(support.cardFile, support.slotId)
                 if(characterSettings.assumedFranchise != null && card.cardType == CardType.DIM) {
@@ -251,7 +252,7 @@ class CharacterManagerImpl(
 
     }
 
-    private fun buildBEMCharacter(applicationContext: Context, cardMeta: CardMeta, slotId: Int, settings: CharacterSettings, characterEntitySupplier: (Long) -> CharacterEntity): BEMCharacter {
+    private suspend fun buildBEMCharacter(applicationContext: Context, cardMeta: CardMeta, slotId: Int, settings: CharacterSettings, characterEntitySupplier: (Long) -> CharacterEntity): BEMCharacter {
         val cardName = cardMeta.cardName
         val transformationTime = largestTransformationTimeSeconds(cardName, slotId)
         val characterEntity = characterEntitySupplier.invoke(transformationTime)
@@ -263,7 +264,7 @@ class CharacterManagerImpl(
         return BEMCharacter(cardMeta, bitmaps, characterEntity, speciesEntity, transformationTime, transformationOptions, attributeFusionEntity, specificFusionOptions, settings)
     }
 
-    private fun buildDIMCharacter(applicationContext: Context, cardMeta: CardMeta, slotId: Int, settings: CharacterSettings, characterEntitySupplier: (Long) -> CharacterEntity): DIMCharacter {
+    private suspend fun buildDIMCharacter(applicationContext: Context, cardMeta: CardMeta, slotId: Int, settings: CharacterSettings, characterEntitySupplier: (Long) -> CharacterEntity): DIMCharacter {
         val cardName = cardMeta.cardName
         val transformationTime = largestTransformationTimeSeconds(cardName, slotId)
         val characterEntity = characterEntitySupplier.invoke(transformationTime)
@@ -325,7 +326,7 @@ class CharacterManagerImpl(
 
     override suspend fun swapToCharacter(applicationContext: Context, selectedCharacterPreview : CharacterPreview) {
         withContext(Dispatchers.IO) {
-            val cardMeta = CardMeta.fromCardMetaEntity(cardMetaEntityDao.getByName(selectedCharacterPreview.cardName))
+            val cardMeta = CardMeta.fromCardMetaEntity(cardMetaEntityDao.getByName(selectedCharacterPreview.cardName)!!)
             val settings = CharacterSettings.fromCharacterSettingsEntity(characterSettingsDao.getByCharacterId(selectedCharacterPreview.characterId))
             val selectedCharacter = if(cardMeta.cardType == CardType.BEM)
                 buildBEMCharacter(applicationContext, cardMeta, selectedCharacterPreview.slotId, settings) {
@@ -373,6 +374,30 @@ class CharacterManagerImpl(
             newSupportCharacter.state = CharacterState.SUPPORT
             characterDao.update(newSupportCharacter)
         }
+    }
+
+    override suspend fun getTransformationHistory(characterId: Int): List<TransformationHistoryEntity> {
+        return transformationHistoryDao.getByCharacterId(characterId)
+    }
+
+    override suspend fun addCharacter(
+        cardName: String,
+        characterEntity: CharacterEntity,
+        characterSettings: CharacterSettings,
+        transformationHistory: List<TransformationHistoryEntity>
+    ): Int {
+        val characterId = withContext(Dispatchers.IO) {
+            val characterId = characterDao.insert(characterEntity).toInt()
+            val settingsEntity = characterSettings.copy(characterId = characterId).toCharacterSettingsEntity()
+            characterSettingsDao.insert(settingsEntity)
+            val updatedTransformationHistory = mutableListOf<TransformationHistoryEntity>()
+            for(transformation in transformationHistory) {
+                updatedTransformationHistory.add(transformation.copy(characterId = characterId))
+            }
+            transformationHistoryDao.insert(updatedTransformationHistory)
+            characterId
+        }
+        return characterId
     }
 
     override fun deleteCurrentCharacter() {

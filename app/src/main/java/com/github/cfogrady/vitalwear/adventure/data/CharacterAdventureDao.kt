@@ -13,6 +13,9 @@ interface CharacterAdventureDao {
     @Upsert
     fun upsert(characterAdventureEntity: CharacterAdventureEntity)
 
+    @Insert
+    fun insert(characterAdventureEntities: Collection<CharacterAdventureEntity>)
+
     @Query("delete from ${CharacterAdventureEntity.TABLE} where characterId = :id")
     fun deleteByCharacterId(id: Int)
 }

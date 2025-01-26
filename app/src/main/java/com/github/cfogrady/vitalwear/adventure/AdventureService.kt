@@ -97,7 +97,7 @@ class AdventureService(
 
     private fun markCompletion(adventureEntity: AdventureEntity, partnerId: Int, partnerFranchise: Int, assumedFranchise: Boolean) {
         CoroutineScope(Dispatchers.IO).launch {
-            val cardMeta = cardMetaEntityDao.getByName(adventureEntity.cardName)
+            val cardMeta = cardMetaEntityDao.getByName(adventureEntity.cardName)!!
             // only do a card adventure unlock if this was a character originally belonging to that franchise
             if(!assumedFranchise && partnerFranchise == cardMeta.franchise) {
                 val maxAdventureCompletedForCard = cardMeta.maxAdventureCompletion ?: -1
@@ -147,5 +147,16 @@ class AdventureService(
         }
 
     }
+
+    // Add adventures a character had off device (typically adding the values of a returning character back)
+    suspend fun addCharacterAdventures(characterId: Int, adventureIdxByCard: Map<String, Int>) {
+        val characterAdventureEntities = mutableListOf<CharacterAdventureEntity>()
+        for(cardNameAndMaxAdventure in adventureIdxByCard) {
+            characterAdventureEntities.add(CharacterAdventureEntity(cardNameAndMaxAdventure.key, characterId, cardNameAndMaxAdventure.value))
+        }
+        characterAdventureDao.insert(characterAdventureEntities)
+    }
+
+
 
 }

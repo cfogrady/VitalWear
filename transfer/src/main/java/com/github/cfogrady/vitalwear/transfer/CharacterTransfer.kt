@@ -49,16 +49,18 @@ class CharacterTransfer(context: Context) {
         nearbyP2PConnection.close()
     }
 
-    fun receiveCharacterFrom(senderName: String, receive: (Character)->Boolean): StateFlow<Result> {
+    fun receiveCharacterFrom(senderName: String, receive: suspend (Character)->Boolean): StateFlow<Result> {
         var result = MutableStateFlow(Result.TRANSFERRING)
         nearbyP2PConnection.onReceive = { payload ->
-            val character = Character.parseFrom(payload.asBytes())
-            if(receive(character)) {
-                nearbyP2PConnection.sendData(RECEIVED_SIGNAL)
-                result.update { Result.SUCCESS }
-            } else {
-                nearbyP2PConnection.sendData(REJECTED_SIGNAL)
-                result.update { Result.REJECTED }
+            CoroutineScope(Dispatchers.IO).launch {
+                val character = Character.parseFrom(payload.asBytes())
+                if(receive(character)) {
+                    nearbyP2PConnection.sendData(RECEIVED_SIGNAL)
+                    result.update { Result.SUCCESS }
+                } else {
+                    nearbyP2PConnection.sendData(REJECTED_SIGNAL)
+                    result.update { Result.REJECTED }
+                }
             }
         }
         CoroutineScope(Dispatchers.IO).launch {

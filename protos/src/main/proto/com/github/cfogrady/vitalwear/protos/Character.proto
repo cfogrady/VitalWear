@@ -40,5 +40,13 @@ message Character {
   }
   Settings settings = 4;
 
-  map<string, int32> max_adventure_completed_by_card = 5;
+  message TransformationEvent {
+    string card_name = 1;
+    int32 phase = 2;
+    int32 slot_id = 3;
+  }
+
+  repeated TransformationEvent transformation_history = 5;
+
+  map<string, int32> max_adventure_completed_by_card = 6;
 }

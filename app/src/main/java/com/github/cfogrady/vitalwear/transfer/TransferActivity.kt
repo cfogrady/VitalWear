@@ -1,17 +1,23 @@
 package com.github.cfogrady.vitalwear.transfer
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,20 +25,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.CompactButton
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.nearby.connections.p2p.NearbyP2PConnection
 import com.github.cfogrady.nearby.connections.p2p.wear.ui.DisplayMatchingDevices
 import com.github.cfogrady.vitalwear.VitalWearApp
+import com.github.cfogrady.vitalwear.common.character.CharacterSprites
+import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.protos.Character
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class TransferActivity: ComponentActivity() {
 
@@ -51,11 +61,17 @@ class TransferActivity: ComponentActivity() {
 
     lateinit var vitalBoxFactory: VitalBoxFactory
     lateinit var transferActivityController: TransferActivityController
+    lateinit var transferBackground: Bitmap
+    lateinit var bitmapScaler: BitmapScaler
+    var backgroundHeight: Dp = 0.dp
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         vitalBoxFactory = (application as VitalWearApp).vitalBoxFactory
         transferActivityController = (application as VitalWearApp).transferActivityController
+        transferBackground = (application as VitalWearApp).firmwareManager.getFirmware().value!!.transformationFirmwareSprites.rayOfLightBackground
+        bitmapScaler = (application as VitalWearApp).bitmapScaler
+        backgroundHeight = (application as VitalWearApp).backgroundHeight
         val missingPermissions = NearbyP2PConnection.getMissingPermissions(this)
         if(missingPermissions.isNotEmpty()) {
             buildPermissionRequestLauncher { grantedPermissions->
@@ -104,7 +120,7 @@ class TransferActivity: ComponentActivity() {
                         }
                     }
                 } else {
-                    result = characterTransfer.receiveCharacterFrom(it, this::receiveCharacter)
+                    result = characterTransfer.receiveCharacterFrom(it, transferActivityController::receiveCharacter)
                 }
                 state = TransferState.CONNECTED
             }
@@ -122,10 +138,6 @@ class TransferActivity: ComponentActivity() {
                 TransferResult(sendOrReceive, result)
             }
         }
-    }
-
-    fun receiveCharacter(character: Character): Boolean {
-        return true
     }
 
     @Composable
@@ -171,9 +183,15 @@ class TransferActivity: ComponentActivity() {
             }
             CharacterTransfer.Result.SUCCESS -> {
                 if(sendOrReceive == SendOrReceive.SEND) {
-                    // animation + remove from device
+                    val activeCharacter = transferActivityController.getActiveCharacter()!!
+                    LaunchedEffect(true) {
+                        transferActivityController.deleteActiveCharacter()
+                    }
+                    val idle = activeCharacter.characterSprites.sprites[CharacterSprites.IDLE_1]
+                    val walk = activeCharacter.characterSprites.sprites[CharacterSprites.WALK_1]
+                    SendAnimation(idleBitmap = idle, walkBitmap = walk) { finish() }
                 } else {
-                    // animation
+
                 }
             }
             CharacterTransfer.Result.REJECTED -> {
@@ -183,6 +201,34 @@ class TransferActivity: ComponentActivity() {
             CharacterTransfer.Result.FAILURE -> {
                 Toast.makeText(this, "Transfer Failed!", Toast.LENGTH_SHORT).show()
                 finish()
+            }
+        }
+    }
+
+    @Composable
+    fun SendAnimation(idleBitmap: Bitmap, walkBitmap: Bitmap, onComplete: ()->Unit) {
+        var targetAnimation by remember { mutableStateOf(0) }
+        var idle by remember { mutableStateOf(true) }
+        val flicker by animateIntAsState(targetAnimation, tween(
+            durationMillis = 3000,
+            easing = FastOutLinearInEasing
+        )) {
+            if(it == 11) {
+                finish()
+            }
+        }
+        LaunchedEffect(true) {
+            delay(500)
+            idle = false
+            delay(500)
+            targetAnimation = 11
+        }
+        vitalBoxFactory.VitalBox {
+            bitmapScaler.ScaledBitmap(transferBackground, "Background", alignment = Alignment.BottomCenter)
+
+            if(flicker % 2 == 0) {
+                bitmapScaler.ScaledBitmap(if(idle) idleBitmap else walkBitmap, "Character", alignment = Alignment.BottomCenter,
+                    modifier = Modifier.offset(y = backgroundHeight.times(-0.05f)))
             }
         }
     }
