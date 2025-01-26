@@ -191,7 +191,8 @@ class TransferActivity: ComponentActivity() {
                     val walk = activeCharacter.characterSprites.sprites[CharacterSprites.WALK_1]
                     SendAnimation(idleBitmap = idle, walkBitmap = walk) { finish() }
                 } else {
-
+                    Toast.makeText(this, "Transfer Recevied!", Toast.LENGTH_SHORT).show()
+                    finish()
                 }
             }
             CharacterTransfer.Result.REJECTED -> {

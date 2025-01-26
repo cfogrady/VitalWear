@@ -7,7 +7,6 @@ import com.github.cfogrady.vitalwear.character.data.CharacterEntity
 import com.github.cfogrady.vitalwear.character.data.CharacterState
 import com.github.cfogrady.vitalwear.character.transformation.history.TransformationHistoryEntity
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
-import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntity
 import com.github.cfogrady.vitalwear.protos.Character
 import com.github.cfogrady.vitalwear.settings.CharacterSettings
 import java.time.LocalDateTime
@@ -44,6 +43,7 @@ class TransferActivityController(private val characterManager: CharacterManager,
             character.transformationHistoryList.toTransformationHistoryEntities()
         )
         adventureService.addCharacterAdventures(characterId, character.maxAdventureCompletedByCardMap)
+        //TODO: Set as active character. Requires refactor of swapping characters
         return true
     }
 }
