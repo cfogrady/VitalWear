@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
+import androidx.wear.compose.material3.CompactButton
+import androidx.wear.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -23,13 +25,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.CompactButton
-import androidx.wear.compose.material.Text
+import androidx.wear.tooling.preview.devices.WearDevices
 import com.github.cfogrady.nearby.connections.p2p.NearbyP2PConnection
 import com.github.cfogrady.nearby.connections.p2p.wear.ui.DisplayMatchingDevices
 import com.github.cfogrady.vitalwear.VitalWearApp
@@ -40,6 +43,7 @@ import com.github.cfogrady.vitalwear.protos.Character
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
@@ -75,12 +79,16 @@ class TransferActivity: ComponentActivity() {
         backgroundHeight = (application as VitalWearApp).backgroundHeight
         val missingPermissions = NearbyP2PConnection.getMissingPermissions(this)
         if(missingPermissions.isNotEmpty()) {
-            buildPermissionRequestLauncher { grantedPermissions->
-                for(grantedPermission in grantedPermissions) {
-                    if(!grantedPermission.value) {
-                        Toast.makeText(this, "Transfers requires all requested permissions to be enabled to run", Toast.LENGTH_SHORT).show()
-                        finish()
+            buildPermissionRequestLauncher { requestedPermissions->
+                val deniedPermissions = mutableListOf<String>()
+                for(requestedPermission in requestedPermissions) {
+                    if(!requestedPermission.value) {
+                        deniedPermissions.add(requestedPermission.key)
                     }
+                }
+                if(deniedPermissions.isNotEmpty()) {
+                    Toast.makeText(this, "Permission Required For Transfers", Toast.LENGTH_SHORT).show()
+                    finish()
                 }
             }.launch(missingPermissions.toTypedArray())
         }
@@ -154,8 +162,14 @@ class TransferActivity: ComponentActivity() {
         return true
     }
 
+    @Preview(
+        device = WearDevices.LARGE_ROUND,
+        showSystemUi = true,
+        backgroundColor = 0xff000000,
+        showBackground = true
+    )
     @Composable
-    fun SelectSendOrReceive(onSelect: (SendOrReceive) -> Unit) {
+    fun SelectSendOrReceive(onSelect: (SendOrReceive) -> Unit = {}) {
         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
             CompactButton(onClick = {onSelect.invoke(SendOrReceive.SEND)}) {
                 Text("Send Character")
@@ -168,10 +182,15 @@ class TransferActivity: ComponentActivity() {
 
     @Composable
     fun FindDevices(characterTransfer: CharacterTransfer, onDeviceFound: (String)->Unit) {
-        var discoveredDevices by remember { mutableStateOf(flow<String> {}) }
+        val discoveredDevices = remember { MutableSharedFlow<String>() }
+        val coroutineScope = rememberCoroutineScope()
         var connected by remember { mutableStateOf(false) }
         DisposableEffect(true) {
-            discoveredDevices = characterTransfer.searchForOtherTransferDevices()
+            coroutineScope.launch {
+                characterTransfer.searchForOtherTransferDevices().collect {
+                    discoveredDevices.emit(it)
+                } 
+            }
 
             onDispose {
                 if(!connected) {
@@ -181,6 +200,7 @@ class TransferActivity: ComponentActivity() {
         }
         DisplayMatchingDevices(characterTransfer.deviceName, discoveredDevices, rescan = {
             connected = false
+            characterTransfer.close()
             characterTransfer.searchForOtherTransferDevices()
         }, selectDevice = {
             connected = true

@@ -66,6 +66,8 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.wear.tooling.preview)
+    implementation(libs.compose.material3)
     androidTestImplementation(libs.androidx.compose.ui.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

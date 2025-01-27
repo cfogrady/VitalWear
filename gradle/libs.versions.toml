@@ -38,6 +38,8 @@ tinyLog = "2.4.1"
 watchfaceComplicationsDataSourceKtx = "1.2.1"
 wear = "1.3.0"
 workRuntime = "2.10.0"
+wearToolingPreview = "1.0.0"
+composeMaterial3 = "1.0.0-alpha31"
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
@@ -90,6 +92,8 @@ slf4j-timber = { module = "at.favre.lib:slf4j-timber", version.ref = "slf4jTimbe
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber"}
 tiny-log = { module = "org.tinylog:tinylog-api", version.ref = "tinyLog"}
 tiny-log-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinyLog"}
+androidx-wear-tooling-preview = { group = "androidx.wear", name = "wear-tooling-preview", version.ref = "wearToolingPreview" }
+compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "composeMaterial3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
