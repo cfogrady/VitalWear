@@ -24,7 +24,7 @@ class CharacterTransfer(context: Context) {
 
         const val TRANSFER_CHARACTER_SERVICE_ID = "com.github.cfogrady.vitalwear.transfer"
 
-        fun getMissingDependencies(activity: Activity): List<String> {
+        fun getMissingPermissions(activity: Activity): List<String> {
             return NearbyP2PConnection.getMissingPermissions(activity)
         }
     }
