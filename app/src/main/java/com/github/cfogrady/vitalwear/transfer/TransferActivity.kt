@@ -97,7 +97,9 @@ class TransferActivity: ComponentActivity() {
 
     @Composable
     fun TransferScreen() {
-        val characterTransfer = remember { CharacterTransfer(this) }
+        val characterTransfer = remember {
+            CharacterTransfer.getInstance(this)
+        }
         var state by remember { mutableStateOf(TransferState.ENTRY) }
         var sendOrReceive by remember { mutableStateOf(SendOrReceive.SEND) }
         var result: StateFlow<CharacterTransfer.Result> = remember { MutableStateFlow(CharacterTransfer.Result.TRANSFERRING) }
