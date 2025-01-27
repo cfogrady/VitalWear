@@ -127,7 +127,7 @@ class TransferActivity: ComponentActivity() {
             }
             TransferState.CONNECTED -> {
                 val connectionStatus by result.collectAsState()
-                if(connectionStatus != CharacterTransfer.Result.TRANSFERRING) {
+                if(connectionStatus == CharacterTransfer.Result.TRANSFERRING) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("Transferring...")
                     }
