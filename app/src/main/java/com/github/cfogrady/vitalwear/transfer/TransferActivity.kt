@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -120,7 +121,7 @@ class TransferActivity: ComponentActivity() {
                         }
                     }
                 } else {
-                    result = characterTransfer.receiveCharacterFrom(it, transferActivityController::receiveCharacter)
+                    result = characterTransfer.receiveCharacterFrom(it, this::receiveCharacter)
                 }
                 state = TransferState.CONNECTED
             }
@@ -138,6 +139,17 @@ class TransferActivity: ComponentActivity() {
                 TransferResult(sendOrReceive, result)
             }
         }
+    }
+
+    var receiveCharacterSprites: TransferActivityController.ReceiveCharacterSprites? = null
+
+    suspend fun receiveCharacter(character: Character): Boolean {
+        val receivedCharacterSprites = transferActivityController.receiveCharacter(this, character)
+        if(receivedCharacterSprites == null) {
+            return false
+        }
+        receiveCharacterSprites = receivedCharacterSprites
+        return true
     }
 
     @Composable
@@ -191,6 +203,7 @@ class TransferActivity: ComponentActivity() {
                     val walk = activeCharacter.characterSprites.sprites[CharacterSprites.WALK_1]
                     SendAnimation(idleBitmap = idle, walkBitmap = walk) { finish() }
                 } else {
+                    ReceiveAnimation(receiveCharacterSprites!!.idle, receiveCharacterSprites!!.happy) { finish() }
                     Toast.makeText(this, "Transfer Recevied!", Toast.LENGTH_SHORT).show()
                     finish()
                 }
@@ -215,7 +228,7 @@ class TransferActivity: ComponentActivity() {
             easing = FastOutLinearInEasing
         )) {
             if(it == 11) {
-                finish()
+                onComplete.invoke()
             }
         }
         LaunchedEffect(true) {
@@ -229,6 +242,45 @@ class TransferActivity: ComponentActivity() {
 
             if(flicker % 2 == 0) {
                 bitmapScaler.ScaledBitmap(if(idle) idleBitmap else walkBitmap, "Character", alignment = Alignment.BottomCenter,
+                    modifier = Modifier.offset(y = backgroundHeight.times(-0.05f)))
+            }
+        }
+    }
+
+    @Composable
+    fun ReceiveAnimation(idleBitmap: Bitmap, happyBitmap: Bitmap, onComplete: () -> Unit) {
+        var targetAnimation by remember { mutableStateOf(0) }
+        var idle by remember { mutableStateOf(false) }
+        var startIdleFlip by remember { mutableStateOf(false) }
+        val flicker by animateIntAsState(targetAnimation, tween(
+            durationMillis = 3000,
+            easing = LinearOutSlowInEasing
+        )) {
+            if(it == 11) {
+                startIdleFlip = true
+            }
+        }
+        LaunchedEffect(true) {
+            targetAnimation = 11
+        }
+        LaunchedEffect(startIdleFlip) {
+            if(startIdleFlip) {
+                idle = true
+                delay(500)
+                idle = false
+                delay(500)
+                idle = true
+                delay(500)
+                idle = false
+                onComplete.invoke()
+
+            }
+        }
+        vitalBoxFactory.VitalBox {
+            bitmapScaler.ScaledBitmap(transferBackground, "Background", alignment = Alignment.BottomCenter)
+
+            if(flicker % 2 == 1) {
+                bitmapScaler.ScaledBitmap(if(idle) idleBitmap else happyBitmap, "Character", alignment = Alignment.BottomCenter,
                     modifier = Modifier.offset(y = backgroundHeight.times(-0.05f)))
             }
         }

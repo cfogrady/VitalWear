@@ -1,12 +1,16 @@
 package com.github.cfogrady.vitalwear.transfer
 
+import android.content.Context
+import android.graphics.Bitmap
 import com.github.cfogrady.vitalwear.adventure.AdventureService
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterEntity
 import com.github.cfogrady.vitalwear.character.data.CharacterState
 import com.github.cfogrady.vitalwear.character.transformation.history.TransformationHistoryEntity
+import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
+import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.protos.Character
 import com.github.cfogrady.vitalwear.settings.CharacterSettings
 import java.time.LocalDateTime
@@ -30,11 +34,11 @@ class TransferActivityController(private val characterManager: CharacterManager,
         characterManager.deleteCurrentCharacter()
     }
 
-    suspend fun receiveCharacter(character: Character): Boolean {
+    suspend fun receiveCharacter(context: Context, character: Character): ReceiveCharacterSprites? {
         val cardMetaEntity = cardMetaEntityDao.getByName(character.cardName)
         if(cardMetaEntity == null || cardMetaEntity.cardId != character.cardId) {
             // we can't handle this character
-            return false
+            return null
         }
         val characterId = characterManager.addCharacter(
             character.cardName,
@@ -43,9 +47,13 @@ class TransferActivityController(private val characterManager: CharacterManager,
             character.transformationHistoryList.toTransformationHistoryEntities()
         )
         adventureService.addCharacterAdventures(characterId, character.maxAdventureCompletedByCardMap)
+        val happy = characterManager.getCharacterBitmap(context, character.cardName, character.characterStats.slotId, CharacterSpritesIO.WIN)
+        val idle = characterManager.getCharacterBitmap(context, character.cardName, character.characterStats.slotId, CharacterSpritesIO.IDLE1)
         //TODO: Set as active character. Requires refactor of swapping characters
-        return true
+        return ReceiveCharacterSprites(idle, happy)
     }
+
+    data class ReceiveCharacterSprites(val idle: Bitmap, val happy: Bitmap)
 }
 
 fun VBCharacter.toProto(transformationHistory: List<TransformationHistoryEntity>, maxAdventureCompletedByCard: Map<String, Int>): Character {
