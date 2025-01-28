@@ -1,6 +1,7 @@
 package com.github.cfogrady.vitalwear.transfer
 
 import android.content.Context
+import android.util.Log
 import com.github.cfogrady.nearby.connections.p2p.ConnectionStatus
 import com.github.cfogrady.nearby.connections.p2p.NearbyP2PConnection
 import com.github.cfogrady.vitalwear.protos.Character
@@ -18,6 +19,7 @@ import java.nio.charset.StandardCharsets
 
 internal class CharacterTransferImpl(context: Context): CharacterTransfer {
     companion object {
+        const val TAG = "CharacterTransferImpl"
         val READY_SIGNAL = "READY".toByteArray(StandardCharsets.UTF_8)
         val RECEIVED_SIGNAL = "RECEIVED".toByteArray(StandardCharsets.UTF_8)
         val REJECTED_SIGNAL = "REJECTED".toByteArray(StandardCharsets.UTF_8)
@@ -45,9 +47,11 @@ internal class CharacterTransferImpl(context: Context): CharacterTransfer {
             CoroutineScope(Dispatchers.IO).launch {
                 val character = Character.parseFrom(payload.asBytes())
                 if(receive(character)) {
+                    Log.i(TAG, "Send Received Signal")
                     nearbyP2PConnection.sendData(RECEIVED_SIGNAL)
                     result.update { Result.SUCCESS }
                 } else {
+                    Log.i(TAG, "Send Rejected Signal")
                     nearbyP2PConnection.sendData(REJECTED_SIGNAL)
                     result.update { Result.REJECTED }
                 }
@@ -61,11 +65,15 @@ internal class CharacterTransferImpl(context: Context): CharacterTransfer {
                 it != ConnectionStatus.DISCONNECTED && it != ConnectionStatus.IDLE && it != ConnectionStatus.REJECTED
             }.collect {
                 if(it == ConnectionStatus.CONNECTED) {
+                    Log.i(TAG, "Send Ready Signal")
                     nearbyP2PConnection.sendData(READY_SIGNAL)
                 }
             }
             if(result.value == Result.TRANSFERRING) {
-                result.update { Result.FAILURE }
+                result.update {
+                    Log.i(TAG, "Transfer Failed")
+                    Result.FAILURE
+                }
             }
             close()
         }
@@ -77,8 +85,10 @@ internal class CharacterTransferImpl(context: Context): CharacterTransfer {
         val result = MutableStateFlow(Result.TRANSFERRING)
         nearbyP2PConnection.onReceive = { payload ->
             if(payload.asBytes().contentEquals(READY_SIGNAL)) {
+                Log.i(TAG, "Received Ready Signal. Sending Character")
                 nearbyP2PConnection.sendData(character.toByteArray())
             } else if (payload.asBytes().contentEquals(RECEIVED_SIGNAL)) {
+                Log.i(TAG, "Received Success Signal.")
                 result.update { Result.SUCCESS }
                 close()
             }
@@ -95,7 +105,10 @@ internal class CharacterTransferImpl(context: Context): CharacterTransfer {
             close()
             if(result.value == Result.TRANSFERRING) {
                 // premature disconnect
-                result.update { Result.FAILURE }
+                result.update {
+                    Log.i(TAG, "Transfer Failed")
+                    Result.FAILURE
+                }
             }
         }
         nearbyP2PConnection.connect(senderName)
