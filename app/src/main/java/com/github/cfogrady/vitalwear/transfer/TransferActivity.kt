@@ -273,9 +273,11 @@ class TransferActivity: ComponentActivity() {
         vitalBoxFactory.VitalBox {
             bitmapScaler.ScaledBitmap(transferBackground, "Background", alignment = Alignment.BottomCenter)
 
-            if(flicker % 2 == 0) {
-                bitmapScaler.ScaledBitmap(if(idle) idleBitmap else walkBitmap, "Character", alignment = Alignment.BottomCenter,
-                    modifier = Modifier.offset(y = backgroundHeight.times(-0.05f)))
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+                if(flicker % 2 == 0) {
+                    bitmapScaler.ScaledBitmap(if(idle) idleBitmap else walkBitmap, "Character", alignment = Alignment.BottomCenter,
+                        modifier = Modifier.offset(y = backgroundHeight.times(-0.05f)))
+                }
             }
         }
     }
@@ -312,9 +314,11 @@ class TransferActivity: ComponentActivity() {
         vitalBoxFactory.VitalBox {
             bitmapScaler.ScaledBitmap(transferBackground, "Background", alignment = Alignment.BottomCenter)
 
-            if(flicker % 2 == 1) {
-                bitmapScaler.ScaledBitmap(if(idle) idleBitmap else happyBitmap, "Character", alignment = Alignment.BottomCenter,
-                    modifier = Modifier.offset(y = backgroundHeight.times(-0.05f)))
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+                if(flicker % 2 == 1) {
+                    bitmapScaler.ScaledBitmap(if(idle) idleBitmap else happyBitmap, "Character", alignment = Alignment.BottomCenter,
+                        modifier = Modifier.offset(y = backgroundHeight.times(-0.05f)))
+                }
             }
         }
     }
