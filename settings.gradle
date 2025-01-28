@@ -17,3 +17,5 @@ rootProject.name = "VitalWear"
 include ':app'
 include ':companion'
 include ':common'
+include ':transfer'
+include ':protos'

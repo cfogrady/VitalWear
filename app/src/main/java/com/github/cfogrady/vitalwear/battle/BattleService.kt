@@ -48,7 +48,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         val partnerCharacter = characterManager.getCharacterFlow().value!!
         val firmware = firmwareManager.getFirmware().value!!
         val partnerBattleCharacter = battleCharacterFromBemCharacter(context, partnerCharacter)
-        val targetCard = cardMetaEntityDao.getByName(battleTargetInfo.cardName)
+        val targetCard = cardMetaEntityDao.getByName(battleTargetInfo.cardName)!!
         val battleTarget = buildTargetFromInfo(context, partnerCharacter, targetCard, battleTargetInfo)
         val battleSpriteLoader = if(targetCard.cardType == CardType.BEM)
             BemBattleSpriteLoader(context, cardSpritesIO, targetCard.cardName, battleTargetInfo.battleBackground)

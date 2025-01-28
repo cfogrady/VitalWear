@@ -11,6 +11,7 @@ class ActivityLaunchers(
     val trainingMenuLauncher: ()-> Unit,
     val characterSelectionLauncher: ()-> Unit,
     val battleLauncher: () -> Unit,
+    val transferLauncher: () -> Unit,
     val transformLauncher: () -> Unit,
     val settingsActivityLauncher: () -> Unit,
     val stopBackgroundTrainingLauncher: () -> Unit,

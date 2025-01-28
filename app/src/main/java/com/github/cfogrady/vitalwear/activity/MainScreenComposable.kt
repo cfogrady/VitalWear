@@ -183,6 +183,19 @@ class MainScreenComposable(
                             }
                         }
                     }
+                    MenuOption.TRANSFER -> {
+                        vitalBoxFactory.VitalBox {
+                            Box(modifier = Modifier
+                                .fillMaxSize()
+                                .clickable {
+                                    activityLaunchers.transferLauncher.invoke()
+                                }, contentAlignment = Alignment.Center) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(text = "TRANSFER",  fontWeight = FontWeight.Bold, fontSize = 3.em)
+                                }
+                            }
+                        }
+                    }
                     MenuOption.BATTLE -> {
                         vitalBoxFactory.VitalBox {
                             Box(modifier = Modifier
@@ -232,6 +245,7 @@ class MainScreenComposable(
         CHARACTER,
         TRAINING,
         ADVENTURE,
+        TRANSFER,
         BATTLE,
         SLEEP,
         SETTINGS,
@@ -249,6 +263,7 @@ class MainScreenComposable(
                 menuPages.add(MenuOption.BATTLE)
             }
         }
+        menuPages.add(MenuOption.TRANSFER)
         menuPages.add(MenuOption.SLEEP)
         menuPages.add(MenuOption.SETTINGS)
         return menuPages

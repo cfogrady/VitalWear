@@ -1,0 +1,52 @@
+syntax = "proto3";
+// import "google/protobuf/wrappers.proto";
+
+option java_package = "com.github.cfogrady.vitalwear.protos";
+option java_multiple_files = true;
+
+message Character {
+  string card_name = 1;
+  int32 card_id = 2;
+
+  message CharacterStats {
+    int32 slot_id = 1;
+    int32 vitals = 2;
+    int64 training_time_remaining_in_seconds = 3;
+    int64 time_until_next_transformation = 4;
+    int32 trained_bp = 5;
+    int32 trained_hp = 6;
+    int32 trained_ap = 7;
+    int32 trained_pp = 8;
+    bool injured = 9;
+    int32 accumulated_daily_injuries = 10;
+    int32 total_battles = 11;
+    int32 current_phase_battles = 12;
+    int32 total_wins = 13;
+    int32 current_phase_wins = 14;
+    int32 mood = 15;
+  }
+  CharacterStats character_stats = 3;
+
+  message Settings {
+    bool training_in_background = 1;
+    enum AllowedBattles {
+      CARD_ONLY = 0;
+      ALL_FRANCHISE = 1;
+      ALL_FRANCHISE_AND_DIM = 2;
+      ALL = 3;
+    }
+    AllowedBattles allowed_battles = 2;
+    optional int32 assumed_franchise = 3; // nullable if no assumed franchise
+  }
+  Settings settings = 4;
+
+  message TransformationEvent {
+    string card_name = 1;
+    int32 phase = 2;
+    int32 slot_id = 3;
+  }
+
+  repeated TransformationEvent transformation_history = 5;
+
+  map<string, int32> max_adventure_completed_by_card = 6;
+}

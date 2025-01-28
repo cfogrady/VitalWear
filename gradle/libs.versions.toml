@@ -1,0 +1,107 @@
+[versions]
+projectVersion = "0.5.0-SNAPSHOT"
+projectVersionCode = "14"
+exportLibraryVersion = "1.0.0"
+agp = "8.7.3"
+appcompat = "1.7.0"
+compose = "1.7.6"
+composeActivity = "1.10.0"
+coilCompose = "2.2.2"
+composeWear = "1.4.0"
+concurrentFuturesKtx = "1.2.0"
+connections = "0.1.0"
+coreKtx = "1.15.0"
+dimReader = "2.1.0.1-231156d"
+espressoCore = "3.6.1"
+guava = "31.1-android"
+junit = "4.13.2"
+junitVersion = "1.2.1"
+kotlin = "2.0.21"
+kotlinxCoroutinesPlayServices = "1.4.3-native-mt"
+kotlinxCoroutinesTest = "1.8.0-RC2"
+ksp = "2.0.21-1.0.27"
+legacySupportV4 = "1.0.0"
+lifecycleService = "2.8.7"
+material = "1.12.0"
+material3 = "1.3.1"
+percentlayout = "1.0.0"
+playServicesNearby = "19.3.0"
+playServicesWearable = "19.0.0"
+preferenceKtx = "1.2.1"
+protobufGradlePlugin = "0.9.4"
+protobufJavalite = "4.27.0"
+recyclerview = "1.4.0"
+room = "2.6.1"
+slf4jTimber = "1.0.0"
+tiles = "1.4.1"
+timber = "5.0.1"
+tinyLog = "2.4.1"
+watchfaceComplicationsDataSourceKtx = "1.2.1"
+wear = "1.3.0"
+workRuntime = "2.10.0"
+wearToolingPreview = "1.0.0"
+composeMaterial3 = "1.0.0-alpha31"
+
+[libraries]
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "composeActivity" }
+androidx-concurrent-futures-ktx = { module = "androidx.concurrent:concurrent-futures-ktx", version.ref = "concurrentFuturesKtx" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
+androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
+androidx-compose-ui-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
+androidx-compose-ui-test = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose" }
+androidx-compose-material = { module = "androidx.compose.material:material", version.ref = "compose" }
+androidx-compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+androidx-compose-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "compose" }
+androidx-compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
+androidx-junit = { module = "androidx.test.ext:junit", version.ref = "junitVersion" }
+androidx-legacy-support-v4 = { module = "androidx.legacy:legacy-support-v4", version.ref = "legacySupportV4" }
+androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycleService" }
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleService" }
+androidx-lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycleService" }
+androidx-percentlayout = { module = "androidx.percentlayout:percentlayout", version.ref = "percentlayout" }
+androidx-preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
+androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
+androidx-watchface-complications-data-source-ktx = { module = "androidx.wear.watchface:watchface-complications-data-source-ktx", version.ref = "watchfaceComplicationsDataSourceKtx" }
+androidx-wear-tiles-renderer = { module = "androidx.wear.tiles:tiles-renderer", version.ref = "tiles" }
+androidx-wear-tiles = { module = "androidx.wear.tiles:tiles", version.ref = "tiles" }
+androidx-wear = { module = "androidx.wear:wear", version.ref = "wear" }
+androidx-wear-compose-navigation = { module = "androidx.wear.compose:compose-navigation", version.ref = "composeWear" }
+androidx-wear-compose-material = { module = "androidx.wear.compose:compose-material", version.ref = "composeWear" }
+androidx-wear-compose-foundation = { module = "androidx.wear.compose:compose-foundation", version.ref = "composeWear" }
+androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntime" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntime" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coilCompose" }
+connections = { module = "com.github.cfogrady.nearby.connections.p2p:connections", version.ref = "connections" }
+connections-wear-ui = { module = "com.github.cfogrady.nearby.connections.p2p:wear-ui", version.ref = "connections" }
+dim-reader = { module = "com.github.cfogrady:vb-dim-reader", version.ref = "dimReader" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
+junit = { module = "junit:junit", version.ref = "junit" }
+kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+play-services-nearby = { module = "com.google.android.gms:play-services-nearby", version.ref = "playServicesNearby" }
+play-services-wearable = { module = "com.google.android.gms:play-services-wearable", version.ref = "playServicesWearable" }
+protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobufJavalite" }
+room-compile = { module = "androidx.room:room-compiler", version.ref = "room" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
+slf4j-timber = { module = "at.favre.lib:slf4j-timber", version.ref = "slf4jTimber" }
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber"}
+tiny-log = { module = "org.tinylog:tinylog-api", version.ref = "tinyLog"}
+tiny-log-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinyLog"}
+androidx-wear-tooling-preview = { group = "androidx.wear", name = "wear-tooling-preview", version.ref = "wearToolingPreview" }
+compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "composeMaterial3" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+android-room = { id = "androidx.room", version.ref = "room" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+protobuf = { id = "com.google.protobuf", version.ref = "protobufGradlePlugin" }
+maven-publish = { id = "maven-publish" }

@@ -63,6 +63,7 @@ import com.github.cfogrady.vitalwear.training.BackgroundTrainingScreenFactory
 import com.github.cfogrady.vitalwear.util.SensorThreadHandler
 import com.github.cfogrady.vitalwear.training.TrainingScreenFactory
 import com.github.cfogrady.vitalwear.training.TrainingService
+import com.github.cfogrady.vitalwear.transfer.TransferActivityController
 import com.github.cfogrady.vitalwear.vitals.VitalService
 import com.github.cfogrady.vitalwear.workmanager.VitalWearWorkerFactory
 import com.github.cfogrady.vitalwear.workmanager.WorkProviderDependencies
@@ -112,6 +113,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var vitalService: VitalService
     lateinit var adventureMenuScreenFactory: AdventureMenuScreenFactory
     lateinit var adventureService: AdventureService
+    lateinit var transferActivityController: TransferActivityController
     lateinit var cardReceiver: CardReceiver
     lateinit var firmwareReceiver: FirmwareReceiver
     lateinit var moodService: MoodService
@@ -200,6 +202,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService, heartRateService)
         adventureService = AdventureService(gameState, database.cardMetaEntityDao(), characterManager, database.adventureEntityDao(), cardSpriteIO, notificationChannelManager, database.characterAdventureDao(), stepService, sensorManager)
         val adventureScreenFactory = AdventureScreenFactory(adventureService, vitalBoxFactory, bitmapScaler, backgroundHeight)
+        transferActivityController = TransferActivityController(characterManager, adventureService, cardMetaEntityDao)
         mainScreenComposable = MainScreenComposable(gameState, characterManager, saveService, firmwareManager, backgroundManager, backgroundTrainingScreenFactory, bitmapScaler, partnerScreenComposable, vitalBoxFactory, adventureScreenFactory)
         val cardCharacterImageService = CardCharacterImageService(database.speciesEntityDao(), characterSpritesIO)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardCharacterImageService)
@@ -211,15 +214,15 @@ class VitalWearApp : Application(), Configuration.Provider {
         settingsComposableFactory = SettingsComposableFactory(backgroundManager, vitalBoxFactory, bitmapScaler, logSettings, saveService)
     }
 
-    override fun getWorkManagerConfiguration(): Configuration {
-        // After we've setup the workManagerConfiguration, start the service
-        val workProviderDependencies = WorkProviderDependencies(
-            characterManager,
-            notificationChannelManager,
-            vbUpdater,
-            saveService,
-            sharedPreferences,
-        )
-        return Configuration.Builder().setWorkerFactory(VitalWearWorkerFactory(workProviderDependencies)).build()
-    }
+    override val workManagerConfiguration: Configuration
+        get() {
+            val workProviderDependencies = WorkProviderDependencies(
+                characterManager,
+                notificationChannelManager,
+                vbUpdater,
+                saveService,
+                sharedPreferences,
+            )
+            return Configuration.Builder().setWorkerFactory(VitalWearWorkerFactory(workProviderDependencies)).build()
+        }
 }

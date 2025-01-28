@@ -91,6 +91,8 @@
             android:taskAffinity="" />
         <activity android:name=".training.TrainingActivity"
             android:taskAffinity="" />
+        <activity android:name=".transfer.TransferActivity"
+            android:taskAffinity="" />
         <activity android:name=".settings.CharacterSettingsActivity"
             android:taskAffinity="" />
         <activity android:name=".stats.StatsMenuActivity"

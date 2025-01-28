@@ -24,7 +24,9 @@ data class CharacterEntity (
     @ColumnInfo(name = "trained_hp") var trainedHp: Int,
     @ColumnInfo(name = "trained_ap") var trainedAp: Int,
     @ColumnInfo(name = "trained_pp") var trainedPP: Int,
+    // currently injured
     @ColumnInfo(name = "injured") var injured: Boolean,
+    // battles lost while injured (planned future field)
     @ColumnInfo(name = "lost_battles_injured") var lostBattlesInjured: Int,
     @ColumnInfo(name = "accumulated_daily_injuries") var accumulatedDailyInjuries: Int,
     @ColumnInfo(name = "total_battles") var totalBattles: Int,
