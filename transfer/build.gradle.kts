@@ -38,7 +38,7 @@ publishing {
         register<MavenPublication>("ReleaseAar") {
             groupId = "com.github.cfogrady.vitalwear"
             artifactId = "transfer"
-            version = libs.versions.projectVersion.get()
+            version = libs.versions.exportLibraryVersion.get()
 
             afterEvaluate { artifact(tasks.getByName("bundleReleaseAar")) }
         }
