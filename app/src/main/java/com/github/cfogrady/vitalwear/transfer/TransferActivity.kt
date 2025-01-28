@@ -46,7 +46,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class TransferActivity: ComponentActivity() {
@@ -105,12 +105,13 @@ class TransferActivity: ComponentActivity() {
 
     @Composable
     fun TransferScreen() {
+        val coroutineScope = rememberCoroutineScope()
         val characterTransfer = remember {
             CharacterTransfer.getInstance(this)
         }
         var state by remember { mutableStateOf(TransferState.ENTRY) }
         var sendOrReceive by remember { mutableStateOf(SendOrReceive.SEND) }
-        var result: StateFlow<CharacterTransfer.Result> = remember { MutableStateFlow(CharacterTransfer.Result.TRANSFERRING) }
+        var result = remember { MutableStateFlow(CharacterTransfer.Result.TRANSFERRING) }
         when(state) {
             TransferState.ENTRY -> SelectSendOrReceive(onSelect = {
                 sendOrReceive = it
@@ -127,11 +128,21 @@ class TransferActivity: ComponentActivity() {
                                 finish()
                             }
                         } else {
-                            result = characterTransfer.sendCharacterToDevice(it, character)
+                            val transferResult = characterTransfer.sendCharacterToDevice(it, character)
+                            coroutineScope.launch {
+                                transferResult.collect{ transferResultValue ->
+                                    result.update { transferResultValue }
+                                }
+                            }
                         }
                     }
                 } else {
-                    result = characterTransfer.receiveCharacterFrom(it, this::receiveCharacter)
+                    val transferResult = characterTransfer.receiveCharacterFrom(it, this::receiveCharacter)
+                    coroutineScope.launch {
+                        transferResult.collect{ transferResultValue ->
+                            result.update { transferResultValue }
+                        }
+                    }
                 }
                 state = TransferState.CONNECTED
             }
