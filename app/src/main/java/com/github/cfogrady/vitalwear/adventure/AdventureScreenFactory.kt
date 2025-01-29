@@ -46,5 +46,4 @@ class AdventureScreenFactory(
     private val backgroundHeight: Dp
 ) {
 
-
 }

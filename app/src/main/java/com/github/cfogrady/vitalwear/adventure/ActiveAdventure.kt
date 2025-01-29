@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
+import com.github.cfogrady.vitalwear.battle.BattleCharacterInfo
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntity
 import kotlinx.coroutines.CoroutineScope
@@ -67,4 +68,27 @@ class ActiveAdventure(private val context: Context, private val service: Adventu
         internalZoneCompleted.value = false
         Handler.createAsync(Looper.getMainLooper()).postDelayed(this::checkSteps, 500)
     }
+}
+
+fun AdventureEntity.toBattleCharacterInfo(): BattleCharacterInfo {
+    var builder = BattleCharacterInfo.newBuilder()
+        .setCardName(this.cardName)
+        .setCharacterId(this.characterId)
+        .setBackground(this.bossBackgroundId)
+    this.bp?.let {
+        builder = builder.setBp(it)
+    }
+    this.ap?.let {
+        builder = builder.setAp(it)
+    }
+    this.hp?.let {
+        builder = builder.setHp(it)
+    }
+    this.attackId?.let {
+        builder = builder.setAttack(it)
+    }
+    this.criticalAttackId?.let {
+        builder = builder.setCritical(it)
+    }
+    return builder.build()
 }

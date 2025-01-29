@@ -51,9 +51,9 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         val targetCard = cardMetaEntityDao.getByName(battleTargetInfo.cardName)!!
         val battleTarget = buildTargetFromInfo(context, partnerCharacter, targetCard, battleTargetInfo)
         val battleSpriteLoader = if(targetCard.cardType == CardType.BEM)
-            BemBattleSpriteLoader(context, cardSpritesIO, targetCard.cardName, battleTargetInfo.battleBackground)
+            BemBattleSpriteLoader(context, cardSpritesIO, targetCard.cardName, battleTargetInfo.background)
         else
-            DimBattleSpriteLoader(context, firmware, cardSpritesIO, targetCard.cardName, battleTargetInfo.battleBackground)
+            DimBattleSpriteLoader(context, firmware, cardSpritesIO, targetCard.cardName, battleTargetInfo.background)
         return PreBattleModel(
             partnerBattleCharacter,
             fetchSupportCharacter(context, firmware, partnerCharacter.getFranchise()),
@@ -114,7 +114,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
     private suspend fun buildTargetFromInfo(context: Context, partner: VBCharacter, opponentCardMeta: CardMetaEntity, battleTargetInfo: BattleCharacterInfo): BattleCharacter {
         var speciesEntity = speciesEntityDao.getCharacterByCardAndCharacterId(battleTargetInfo.cardName, battleTargetInfo.characterId)
         val battleStats =
-        if(battleTargetInfo.hp == null || battleTargetInfo.ap == null || battleTargetInfo.bp == null || battleTargetInfo.attack == null || battleTargetInfo.critical == null) {
+        if(!battleTargetInfo.hasHp() || !battleTargetInfo.hasAp() || !battleTargetInfo.hasBp() || !battleTargetInfo.hasAttack() || !battleTargetInfo.hasCritical()) {
             if(partner.otherCardNeedsStatConversion(opponentCardMeta)) {
                 speciesEntity = dimToBemStatConversion.convertSpeciesEntity(speciesEntity)
             }

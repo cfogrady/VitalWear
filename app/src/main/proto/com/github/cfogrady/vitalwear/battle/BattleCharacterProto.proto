@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option java_package = "com.github.cfogrady.vitalwear.battle";
+option java_multiple_files = true;
+
+message BattleCharacterInfo {
+  string card_name = 1;
+  int32 character_id = 2;
+  optional int32 bp = 3;
+  optional int32 hp = 4;
+  optional int32 ap = 5;
+  optional int32 attack = 6;
+  optional int32 critical = 7;
+  optional int32 background = 8;
+}
