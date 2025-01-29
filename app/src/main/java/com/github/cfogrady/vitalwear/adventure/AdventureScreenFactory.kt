@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.battle.BattleActivity
+import com.github.cfogrady.vitalwear.battle.BattleCharacterInfo
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
@@ -62,14 +63,9 @@ class AdventureScreenFactory(
                 Handler.createAsync(Looper.getMainLooper()).postDelayed({
                     adventureActivityLauncher.launchBattle {
                         val adventureEntity = adventure.currentAdventureEntity()
-                        it.putExtra(BattleActivity.CARD_NAME, adventureEntity.cardName)
-                        it.putExtra(BattleActivity.CHARACTER_ID, adventureEntity.characterId)
-                        it.putExtra(BattleActivity.OPPONENT_BP, adventureEntity.bp)
-                        it.putExtra(BattleActivity.OPPONENT_AP, adventureEntity.ap)
-                        it.putExtra(BattleActivity.OPPONENT_HP, adventureEntity.hp)
-                        it.putExtra(BattleActivity.BACKGROUND, adventureEntity.bossBackgroundId)
-                        it.putExtra(BattleActivity.OPPONENT_ATTACK, adventureEntity.attackId)
-                        it.putExtra(BattleActivity.OPPONENT_CRITICAL, adventureEntity.criticalAttackId)
+                        BattleCharacterInfo.newBuilder()
+                            .setCardName(adventureEntity.cardName)
+                        it.putExtra(BattleActivity.BATTLE_CHARACTER_INFO, adventureEntity.toBattleCharacterInfo().toByteArray())
                     }
                 }, 500)
             }

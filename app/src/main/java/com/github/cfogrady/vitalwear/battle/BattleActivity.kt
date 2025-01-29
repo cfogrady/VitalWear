@@ -8,7 +8,6 @@ import androidx.compose.runtime.*
 import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.battle.composable.FightTargetFactory
-import com.github.cfogrady.vitalwear.battle.data.BattleCharacterInfo
 import com.github.cfogrady.vitalwear.battle.data.BattleResult
 import com.github.cfogrady.vitalwear.battle.data.PreBattleModel
 import com.github.cfogrady.vitalwear.common.composable.util.KeepScreenOn
@@ -18,14 +17,7 @@ import java.util.*
 
 class BattleActivity : ComponentActivity() {
     companion object {
-        const val CARD_NAME = "CARD_NAME"
-        const val CHARACTER_ID = "CHARACTER_ID"
-        const val OPPONENT_BP = "BP"
-        const val OPPONENT_HP = "HP"
-        const val OPPONENT_AP = "AP"
-        const val OPPONENT_ATTACK = "ATTACK"
-        const val OPPONENT_CRITICAL = "CRITICAL_ATTACK"
-        const val BACKGROUND = "BATTLE_BACKGROUND"
+        const val BATTLE_CHARACTER_INFO = "BATTLE_CHARACTER"
         const val RESULT = "RESULT"
     }
 
@@ -56,27 +48,11 @@ class BattleActivity : ComponentActivity() {
     }
 
     private fun buildBattleCharacterInfo(intent: Intent): BattleCharacterInfo? {
-        val cardName = intent.getStringExtra(CARD_NAME) ?: return null
-        val characterId = intent.getIntExtra(CHARACTER_ID, -1)
-        if(characterId == -1) {
-            return null
+        val battleCharacterBytes = intent.getByteArrayExtra(BATTLE_CHARACTER_INFO)
+        battleCharacterBytes?.let {
+            return BattleCharacterInfo.parseFrom(it)
         }
-        val bp = intent.getIntExtra(OPPONENT_BP, -1)
-        val hp = intent.getIntExtra(OPPONENT_HP, -1)
-        val ap = intent.getIntExtra(OPPONENT_AP, -1)
-        val attack = intent.getIntExtra(OPPONENT_ATTACK, -1)
-        val critical = intent.getIntExtra(OPPONENT_CRITICAL, -1)
-        val battleBackground = intent.getIntExtra(BACKGROUND, -1)
-        return BattleCharacterInfo(
-            cardName,
-            characterId,
-            if(bp == -1) null else bp,
-            if(hp == -1) null else hp,
-            if(ap == -1) null else ap,
-            if(attack == -1) null else attack,
-            if(critical == -1) null else critical,
-            if(battleBackground == -1) null else battleBackground
-            )
+        return null
     }
 
     @Composable
