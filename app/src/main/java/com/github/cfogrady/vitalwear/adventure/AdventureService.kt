@@ -150,11 +150,13 @@ class AdventureService(
 
     // Add adventures a character had off device (typically adding the values of a returning character back)
     suspend fun addCharacterAdventures(characterId: Int, adventureIdxByCard: Map<String, Int>) {
-        val characterAdventureEntities = mutableListOf<CharacterAdventureEntity>()
-        for(cardNameAndMaxAdventure in adventureIdxByCard) {
-            characterAdventureEntities.add(CharacterAdventureEntity(cardNameAndMaxAdventure.key, characterId, cardNameAndMaxAdventure.value))
+        withContext(Dispatchers.IO) {
+            val characterAdventureEntities = mutableListOf<CharacterAdventureEntity>()
+            for(cardNameAndMaxAdventure in adventureIdxByCard) {
+                characterAdventureEntities.add(CharacterAdventureEntity(cardNameAndMaxAdventure.key, characterId, cardNameAndMaxAdventure.value))
+            }
+            characterAdventureDao.insert(characterAdventureEntities)
         }
-        characterAdventureDao.insert(characterAdventureEntities)
     }
 
 

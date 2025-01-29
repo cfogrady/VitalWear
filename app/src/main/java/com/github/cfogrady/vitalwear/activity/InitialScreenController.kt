@@ -34,7 +34,7 @@ interface InitialScreenController {
             override val characterLoadingDone = MutableStateFlow(characterLoaded)
             override val backgroundLoaded = MutableStateFlow(backgroundLoaded)
             override val gameState = MutableStateFlow(gameState)
-            override val backgroundTrainingController = BackgroundTrainingController.emptyController(context )
+            override val backgroundTrainingController = BackgroundTrainingController.EmptyController(context)
         }
     }
 

@@ -36,7 +36,6 @@ class ActiveAdventure(private val context: Context, private val service: Adventu
     }
 
     fun stepsTowardsGoal(): Int {
-        Timber.i("Steps towards goal: ${dailySteps.value - startingStep}")
         return dailySteps.value - startingStep
     }
 

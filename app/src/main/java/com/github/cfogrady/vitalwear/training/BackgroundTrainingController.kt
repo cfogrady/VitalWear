@@ -7,6 +7,7 @@ import androidx.compose.ui.unit.Dp
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.activity.ImageScaler
 import com.github.cfogrady.vitalwear.common.card.CardSpriteLoader
+import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.GameState
@@ -29,22 +30,22 @@ interface BackgroundTrainingController {
                 coroutineScope = coroutineScope,
             )
         }
+    }
 
-
-        fun emptyController(context: Context,
-                            trainingProgress: Float = 0.0f
-            ) = object: BackgroundTrainingController {
-            val imageScaler = ImageScaler.getContextImageScaler(context)
-            val characterSprites = CardSpriteLoader.loadTestCharacterSprites(context, 2)
-            override val background: StateFlow<Bitmap> = MutableStateFlow(BitmapFactory.decodeStream(context.assets.open("test_background.png")))
-            override val backgroundTrainingProgress = MutableStateFlow(trainingProgress)
-            override val partnerTrainingSprites = MutableStateFlow(GameState.TRAINING.bitmaps(characterSprites.sprites))
-
-            override val backgroundHeight = imageScaler.calculateBackgroundHeight()
-            override val vitalBoxFactory = VitalBoxFactory(imageScaler)
-            override val bitmapScaler = BitmapScaler(imageScaler)
-            override val firmware = Firmware.loadPreviewFirmwareFromDisk(context)
-        }
+    class EmptyController(
+        context: Context,
+        trainingProgress: Float = 0.0f,
+        characterSprites: CharacterSprites = CardSpriteLoader.loadTestCharacterSprites(context, 2),
+        background: Bitmap = BitmapFactory.decodeStream(context.assets.open("test_background.png")),
+        override val firmware: Firmware = Firmware.loadPreviewFirmwareFromDisk(context),
+        imageScaler: ImageScaler = ImageScaler.getContextImageScaler(context),
+        override val backgroundHeight: Dp = imageScaler.calculateBackgroundHeight(),
+        override val vitalBoxFactory: VitalBoxFactory = VitalBoxFactory(imageScaler),
+        override val bitmapScaler: BitmapScaler = BitmapScaler(imageScaler),
+    ): BackgroundTrainingController {
+        override val background: StateFlow<Bitmap> = MutableStateFlow(background)
+        override val backgroundTrainingProgress = MutableStateFlow(trainingProgress)
+        override val partnerTrainingSprites = MutableStateFlow(GameState.TRAINING.bitmaps(characterSprites.sprites))
     }
 
     // dynamic
