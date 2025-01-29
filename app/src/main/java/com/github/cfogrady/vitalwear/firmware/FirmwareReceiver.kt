@@ -5,8 +5,11 @@ import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 import com.google.android.gms.wearable.ChannelClient
 import com.google.android.gms.wearable.ChannelClient.Channel
 import com.google.android.gms.wearable.Wearable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class FirmwareReceiver(private val firmwareManager: FirmwareManager, private val notificationChannelManager: NotificationChannelManager) {
@@ -25,10 +28,12 @@ class FirmwareReceiver(private val firmwareManager: FirmwareManager, private val
                 super.onInputClosed(channel, closeReason, errorCode)
                 channelClient.close(channel)
                 channelClient.unregisterChannelCallback(this)
-                firmwareManager.loadFirmware(context)
-                Timber.i("Firmware fully received")
-                _firmwareUpdates.value++
-                notificationChannelManager.sendGenericNotification(context, "New Firmware Loaded", "")
+                CoroutineScope(Dispatchers.IO).launch {
+                    firmwareManager.loadFirmware(context)
+                    _firmwareUpdates.value++
+                    Timber.i("Firmware fully received")
+                    notificationChannelManager.sendGenericNotification(context, "New Firmware Loaded", "")
+                }
             }
         }
     }

@@ -3,12 +3,14 @@ package com.github.cfogrady.vitalwear.common.card
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Matrix
 import com.github.cfogrady.vb.dim.sprite.SpriteData
 import com.github.cfogrady.vb.dim.sprite.SpriteData.Sprite
 import com.github.cfogrady.vb.dim.sprite.SpriteData.SpriteDimensions
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
+import timber.log.Timber
 import java.io.File
+import java.io.FileFilter
+import java.io.FilenameFilter
 
 class CharacterSpritesIO(private val spriteFileIO: SpriteFileIO, private val spriteBitmapConverter: SpriteBitmapConverter) {
     companion object {
@@ -31,6 +33,17 @@ class CharacterSpritesIO(private val spriteFileIO: SpriteFileIO, private val spr
 
         private const val STANDARD_WIDTH = 64
         private const val STANDARD_HEIGHT = 56
+
+        // sprite to use when they key is missing.
+        private val BACKUP_SPRITES = mapOf(
+            Pair(RUN1, IDLE1),
+            Pair(RUN2, IDLE2),
+            Pair(TRAIN1, IDLE1),
+            Pair(TRAIN2, IDLE2),
+            Pair(ATTACK, IDLE2),
+            Pair(DODGE, IDLE1),
+            Pair(SPLASH, IDLE1),
+        )
     }
 
     fun loadCharacterBitmapFile(applicationContext: Context, characterDir: String, spriteFile: String, resize: Boolean = false): Bitmap? {
@@ -45,12 +58,17 @@ class CharacterSpritesIO(private val spriteFileIO: SpriteFileIO, private val spr
     }
 
     internal fun loadCharacterSpriteFile(applicationContext: Context, characterDir: String, spriteFile: String): Sprite? {
-        val file = File(applicationContext.filesDir, "${SpriteFileIO.LIBRARY_DIR}/$CHARACTERS/$characterDir/$spriteFile")
+        var file = File(applicationContext.filesDir, "${SpriteFileIO.LIBRARY_DIR}/$CHARACTERS/$characterDir/$spriteFile")
         if(file.exists()) {
             return spriteFileIO.loadSpriteFile(file)
-        } else {
-            return null
         }
+        val backup = BACKUP_SPRITES[spriteFile]
+        file = File(applicationContext.filesDir, "${SpriteFileIO.LIBRARY_DIR}/$CHARACTERS/$characterDir/$backup")
+        if(file.exists()) {
+            return spriteFileIO.loadSpriteFile(file)
+        }
+        Timber.w("Attempted to load sprite $spriteFile which doesn't exist. Backup $backup, also doesn't exist!")
+        return null
     }
 
     fun characterSpritesExist(applicationContext: Context, characterDir: String): Boolean {
@@ -76,55 +94,9 @@ class CharacterSpritesIO(private val spriteFileIO: SpriteFileIO, private val spr
         if (!characterDirFile.mkdirs()) {
             throw java.lang.UnsupportedOperationException("Unable to create character directories")
         }
-        if(phase >= 2) {
-            saveCharacterSpriteFile(applicationContext, sprites[0], characterDir, NAME)
-            saveCharacterSpriteFile(applicationContext, sprites[1], characterDir, IDLE1)
-            saveCharacterSpriteFile(applicationContext, sprites[2], characterDir, IDLE2)
-            saveCharacterSpriteFile(applicationContext, sprites[3], characterDir, WALK1)
-            saveCharacterSpriteFile(applicationContext, sprites[4], characterDir, WALK2)
-            saveCharacterSpriteFile(applicationContext, sprites[5], characterDir, RUN1)
-            saveCharacterSpriteFile(applicationContext, sprites[6], characterDir, RUN2)
-            saveCharacterSpriteFile(applicationContext, sprites[7], characterDir, TRAIN1)
-            saveCharacterSpriteFile(applicationContext, sprites[8], characterDir, TRAIN2)
-            saveCharacterSpriteFile(applicationContext, sprites[9], characterDir, WIN)
-            saveCharacterSpriteFile(applicationContext, sprites[10], characterDir, DOWN)
-            saveCharacterSpriteFile(applicationContext, sprites[11], characterDir, ATTACK)
-            saveCharacterSpriteFile(applicationContext, sprites[12], characterDir, DODGE)
-            saveCharacterSpriteFile(applicationContext, sprites[13], characterDir, SPLASH)
-        } else if(phase == 1) {
-            if(contiguous) {//DIM
-                saveCharacterSpriteFile(applicationContext, sprites[0], characterDir, NAME)
-                saveCharacterSpriteFile(applicationContext, sprites[1], characterDir, IDLE1)
-                saveCharacterSpriteFile(applicationContext, sprites[2], characterDir, IDLE2)
-                saveCharacterSpriteFile(applicationContext, sprites[3], characterDir, WALK1)
-                saveCharacterSpriteFile(applicationContext, sprites[4], characterDir, WIN)
-                saveCharacterSpriteFile(applicationContext, sprites[5], characterDir, DOWN)
-                saveCharacterSpriteFile(applicationContext, sprites[6], characterDir, SPLASH)
-            } else {//BEM
-                saveCharacterSpriteFile(applicationContext, sprites[0], characterDir, NAME)
-                saveCharacterSpriteFile(applicationContext, sprites[1], characterDir, IDLE1)
-                saveCharacterSpriteFile(applicationContext, sprites[2], characterDir, IDLE2)
-                saveCharacterSpriteFile(applicationContext, sprites[3], characterDir, WALK1)
-                saveCharacterSpriteFile(applicationContext, sprites[9], characterDir, WIN)
-                saveCharacterSpriteFile(applicationContext, sprites[10], characterDir, DOWN)
-                saveCharacterSpriteFile(applicationContext, sprites[13], characterDir, SPLASH)
-            }
-        } else {
-            if(contiguous) {//DIM
-                saveCharacterSpriteFile(applicationContext, sprites[0], characterDir, NAME)
-                saveCharacterSpriteFile(applicationContext, sprites[1], characterDir, IDLE1)
-                saveCharacterSpriteFile(applicationContext, sprites[2], characterDir, IDLE2)
-                saveCharacterSpriteFile(applicationContext, sprites[3], characterDir, WALK1)
-                saveCharacterSpriteFile(applicationContext, sprites[4], characterDir, WIN)
-                saveCharacterSpriteFile(applicationContext, sprites[5], characterDir, DOWN)
-            } else {//BEM
-                saveCharacterSpriteFile(applicationContext, sprites[0], characterDir, NAME)
-                saveCharacterSpriteFile(applicationContext, sprites[1], characterDir, IDLE1)
-                saveCharacterSpriteFile(applicationContext, sprites[2], characterDir, IDLE2)
-                saveCharacterSpriteFile(applicationContext, sprites[3], characterDir, WALK1)
-                saveCharacterSpriteFile(applicationContext, sprites[9], characterDir, WIN)
-                saveCharacterSpriteFile(applicationContext, sprites[10], characterDir, DOWN)
-            }
+        val spriteToSpriteType = generateSpriteMap(sprites, phase, contiguous)
+        for(entry in spriteToSpriteType) {
+            saveCharacterSpriteFile(applicationContext, entry.value, characterDir, entry.key)
         }
     }
 
@@ -135,11 +107,11 @@ class CharacterSpritesIO(private val spriteFileIO: SpriteFileIO, private val spr
         return loadCharacterSprite(file)
     }
 
-    private fun smallerThanStandardSize(dimensions: SpriteDimensions): Boolean {
+    internal fun smallerThanStandardSize(dimensions: SpriteDimensions): Boolean {
         return dimensions.width < STANDARD_WIDTH && dimensions.height < STANDARD_HEIGHT
     }
 
-    private fun makeStandardSized(bitmap: Bitmap): Bitmap {
+    internal fun makeStandardSized(bitmap: Bitmap): Bitmap {
         val standardSizedBitmap = Bitmap.createBitmap(STANDARD_WIDTH, STANDARD_HEIGHT, bitmap.config!!)
         val canvas = Canvas(standardSizedBitmap)
         canvas.drawBitmap(bitmap, (64f-bitmap.width)/2f, 56f-bitmap.height, null)
@@ -156,39 +128,93 @@ class CharacterSpritesIO(private val spriteFileIO: SpriteFileIO, private val spr
     }
 
     fun loadCharacterSprites(applicationContext: Context, characterDir: String) : CharacterSprites {
-        val sprites = ArrayList<Bitmap>()
+        val spriteMap = loadCharacterSpritesIntoMap(applicationContext, characterDir)
+        return generateCharacterSpritesFromMap(spriteMap)
+    }
+
+    internal fun loadCharacterSpritesIntoMap(applicationContext: Context, characterDir: String): Map<String, Bitmap> {
+        val map = mutableMapOf<String, Bitmap>()
         val rootCharDir = getCharacterFileDir(applicationContext, characterDir)
-        val nameFile = File(rootCharDir, NAME)
-        val nameSprite = spriteFileIO.loadSpriteFile(nameFile)
-        sprites.add(spriteBitmapConverter.getBitmap(nameSprite))
-        val idleFile = File(rootCharDir, IDLE1)
-        val idle1Bitmap = loadCharacterSprite(idleFile)
-        sprites.add(idle1Bitmap)
-        val idle2File = File(rootCharDir, IDLE2)
-        val idle2Bitmap = loadCharacterSprite(idle2File)
-        sprites.add(idle2Bitmap)
-        val walk1File = File(rootCharDir, WALK1)
-        sprites.add(loadCharacterSprite(walk1File))
-        val walk2File = File(rootCharDir, WALK2)
-        sprites.add(loadCharacterSpriteOrDefault(walk2File, idle1Bitmap))
-        val run1File = File(rootCharDir, RUN1)
-        sprites.add(loadCharacterSpriteOrDefault(run1File, idle1Bitmap))
-        val run2File = File(rootCharDir, RUN2)
-        sprites.add(loadCharacterSpriteOrDefault(run2File, idle2Bitmap))
-        val train1File = File(rootCharDir, TRAIN1)
-        sprites.add(loadCharacterSpriteOrDefault(train1File, idle1Bitmap))
-        val train2File = File(rootCharDir, TRAIN2)
-        sprites.add(loadCharacterSpriteOrDefault(train2File, idle2Bitmap))
-        val winFile = File(rootCharDir, WIN)
-        sprites.add(loadCharacterSprite(winFile))
-        val downFile = File(rootCharDir, DOWN)
-        sprites.add(loadCharacterSprite(downFile))
-        val attackFile = File(rootCharDir, ATTACK)
-        sprites.add(loadCharacterSpriteOrDefault(attackFile, idle2Bitmap))
-        val dodgeFile = File(rootCharDir, DODGE)
-        sprites.add(loadCharacterSpriteOrDefault(dodgeFile, idle1Bitmap))
-        val splashFile = File(rootCharDir, SPLASH)
-        sprites.add(loadCharacterSpriteOrDefault(splashFile, idle1Bitmap))
+        val spriteFiles = rootCharDir.listFiles({ file ->
+            file.name.endsWith(".img")
+        })!!
+        for(spriteFile in spriteFiles) {
+            map[spriteFile.name] = loadCharacterSprite(spriteFile)
+        }
+        return map
+    }
+
+    internal fun generateSpriteMap(sprites: List<Sprite>, phase: Int, isDim: Boolean): Map<String, Sprite> {
+        val map = mutableMapOf<String, Sprite>()
+        if(phase >= 2) {
+            map[NAME] = sprites[0]
+            map[IDLE1] = sprites[1]
+            map[IDLE2] = sprites[2]
+            map[WALK1] = sprites[3]
+            map[WALK2] = sprites[4]
+            map[RUN1] = sprites[5]
+            map[RUN2] = sprites[6]
+            map[TRAIN1] = sprites[7]
+            map[TRAIN2] = sprites[8]
+            map[WIN] = sprites[9]
+            map[DOWN] = sprites[10]
+            map[ATTACK] = sprites[11]
+            map[DODGE] = sprites[12]
+            map[SPLASH] = sprites[13]
+        } else if(phase == 1) {
+            if(isDim) {//DIM
+                map[NAME] = sprites[0]
+                map[IDLE1] = sprites[1]
+                map[IDLE2] = sprites[2]
+                map[WALK1] = sprites[3]
+                map[WIN] = sprites[4]
+                map[DOWN] = sprites[5]
+                map[SPLASH] = sprites[6]
+            } else {//BEM
+                map[NAME] = sprites[0]
+                map[IDLE1] = sprites[1]
+                map[IDLE2] = sprites[2]
+                map[WALK1] = sprites[3]
+                map[WIN] = sprites[9]
+                map[DOWN] = sprites[10]
+                map[SPLASH] = sprites[13]
+            }
+        } else {
+            if(isDim) {//DIM
+                map[NAME] = sprites[0]
+                map[IDLE1] = sprites[1]
+                map[IDLE2] = sprites[2]
+                map[WALK1] = sprites[3]
+                map[WIN] = sprites[4]
+                map[DOWN] = sprites[5]
+            } else {//BEM
+                map[NAME] = sprites[0]
+                map[IDLE1] = sprites[1]
+                map[IDLE2] = sprites[2]
+                map[WALK1] = sprites[3]
+                map[WIN] = sprites[9]
+                map[DOWN] = sprites[10]
+            }
+        }
+        return map
+    }
+
+    internal fun generateCharacterSpritesFromMap(spritesByType: Map<String, Bitmap>): CharacterSprites {
+        val sprites = ArrayList<Bitmap>()
+        sprites.add(spritesByType[NAME]!!)
+        sprites.add(spritesByType[IDLE1]!!)
+        sprites.add(spritesByType[IDLE2]!!)
+        sprites.add(spritesByType[WALK1]!!)
+        sprites.add(spritesByType[WALK2]?: spritesByType[BACKUP_SPRITES[WALK2]]!!)
+        sprites.add(spritesByType[RUN1]?: spritesByType[BACKUP_SPRITES[RUN1]]!!)
+        sprites.add(spritesByType[RUN2]?: spritesByType[BACKUP_SPRITES[RUN2]]!!)
+        sprites.add(spritesByType[TRAIN1]?: spritesByType[BACKUP_SPRITES[TRAIN1]]!!)
+        sprites.add(spritesByType[TRAIN2]?: spritesByType[BACKUP_SPRITES[TRAIN2]]!!)
+        sprites.add(spritesByType[WIN]!!)
+        sprites.add(spritesByType[DOWN]!!)
+        sprites.add(spritesByType[ATTACK]?: spritesByType[BACKUP_SPRITES[ATTACK]]!!)
+        sprites.add(spritesByType[DODGE]?: spritesByType[BACKUP_SPRITES[DODGE]]!!)
+        sprites.add(spritesByType[SPLASH]?: spritesByType[BACKUP_SPRITES[SPLASH]]!!)
         return CharacterSprites(sprites)
     }
 }

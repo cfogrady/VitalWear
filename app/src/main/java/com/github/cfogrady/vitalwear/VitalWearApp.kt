@@ -36,6 +36,7 @@ import com.github.cfogrady.vitalwear.character.mood.MoodService
 import com.github.cfogrady.vitalwear.character.transformation.TransformationScreenFactory
 import com.github.cfogrady.vitalwear.common.card.CardCharacterImageService
 import com.github.cfogrady.vitalwear.common.card.CardLoader
+import com.github.cfogrady.vitalwear.common.card.CardSpriteLoader
 import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
 import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
@@ -69,6 +70,7 @@ import com.github.cfogrady.vitalwear.workmanager.VitalWearWorkerFactory
 import com.github.cfogrady.vitalwear.workmanager.WorkProviderDependencies
 import com.google.common.collect.Lists
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import timber.log.Timber
 import java.util.Random
 
@@ -162,7 +164,8 @@ class VitalWearApp : Application(), Configuration.Provider {
         complicationRefreshService = ComplicationRefreshService(this, partnerComplicationState)
         characterManager = CharacterManagerImpl(complicationRefreshService, database.characterDao(), characterSpritesIO, database.speciesEntityDao(), database.cardMetaEntityDao(), database.transformationEntityDao(), database.characterSettingsDao(), database.characterAdventureDao(), database.transformationHistoryDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao(), dimToBemStatConversion)
         cardMetaEntityDao = database.cardMetaEntityDao()
-        val commonCardLoader = CardLoader(characterSpritesIO, cardSpriteIO, cardMetaEntityDao, database.speciesEntityDao(), database.transformationEntityDao(), database.adventureEntityDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao(), DimReader())
+        val cardSpriteLoader = CardSpriteLoader()
+        val commonCardLoader = CardLoader(characterSpritesIO, cardSpriteLoader, cardSpriteIO, cardMetaEntityDao, database.speciesEntityDao(), database.transformationEntityDao(), database.adventureEntityDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao(), DimReader())
         cardLoader = AppCardLoader(commonCardLoader, database.cardSettingsDao())
         val sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         vitalService = VitalService(characterManager, complicationRefreshService)
@@ -177,12 +180,11 @@ class VitalWearApp : Application(), Configuration.Provider {
 
         trainingService = TrainingService(sensorManager, heartRateService, saveService)
         shutdownManager = ShutdownManager(saveService)
-        firmwareManager.loadFirmware(applicationContext)
         val random = Random()
         val bemBattleLogic = BEMBattleLogic(random)
         battleService = BattleService(cardSpriteIO, database.speciesEntityDao(), characterSpritesIO, characterManager, firmwareManager, bemBattleLogic, saveService, vitalService, backgroundManager, random, database.cardSettingsDao(), database.cardMetaEntityDao(), dimToBemStatConversion)
         imageScaler = ImageScaler(applicationContext.resources.displayMetrics, applicationContext.resources.configuration.isScreenRound)
-        backgroundHeight = imageScaler.scaledDpValueFromPixels(ImageScaler.VB_HEIGHT.toInt())
+        backgroundHeight = imageScaler.calculateBackgroundHeight()
         bitmapScaler = BitmapScaler(imageScaler)
         scrollingNameFactory = ScrollingNameFactory(backgroundHeight, bitmapScaler)
         vitalBoxFactory = VitalBoxFactory(imageScaler, ImageScaler.VB_WIDTH.toInt(), ImageScaler.VB_HEIGHT.toInt())
@@ -207,7 +209,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         val cardCharacterImageService = CardCharacterImageService(database.speciesEntityDao(), characterSpritesIO)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardCharacterImageService)
         shutdownReceiver = ShutdownReceiver(shutdownManager)
-        applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, stepService, vbUpdater, moodService, notificationChannelManager, complicationRefreshService)
+        applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, firmwareManager, stepService, vbUpdater, moodService, notificationChannelManager, complicationRefreshService)
         adventureMenuScreenFactory = AdventureMenuScreenFactory(cardSpriteIO, database.cardMetaEntityDao(), adventureService, vitalBoxFactory, characterSpritesIO, database.speciesEntityDao(), bitmapScaler, backgroundHeight)
         cardReceiver = CardReceiver(cardLoader)
         firmwareReceiver = FirmwareReceiver(firmwareManager, notificationChannelManager)

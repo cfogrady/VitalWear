@@ -36,6 +36,7 @@ import kotlin.collections.ArrayList
  */
 class CardLoader(
     private val characterSpritesIO: CharacterSpritesIO,
+    private val cardSpriteLoader: CardSpriteLoader,
     private val cardSpritesIO: CardSpritesIO,
     private val cardMetaEntityDao: CardMetaEntityDao,
     private val speciesEntityDao: SpeciesEntityDao,
@@ -45,14 +46,9 @@ class CardLoader(
     private val specificFusionEntityDao: SpecificFusionEntityDao,
     private val dimReader: DimReader,
 ) {
-    companion object {
-        private const val DIM_FIRST_CHARACTER_SPRITE_INDEX = 10
-        private const val BEM_FIRST_CHARACTER_SPRITE_INDEX = 54
-        private const val BEM_SPRITES_PER_CHARACTER = 14
-    }
 
     fun importCardImage(applicationContext: Context, cardName: String, card: Card<*, *, *, *, *, *>, uniqueSprites: Boolean = false) {
-        val spritesByCharacterId = spritesByCharacterId(card)
+        val spritesByCharacterId = cardSpriteLoader.spritesByCharacterId(card)
         writeCardMeta(cardName, card)
         writeSpeciesEntitiesAndSprites(applicationContext, cardName, card, uniqueSprites, spritesByCharacterId)
         writeTransformations(cardName, card)
@@ -273,45 +269,5 @@ class CardLoader(
 
     private fun getUniqueSprites(cardName: String, characterId: Int): String {
         return "$cardName-$characterId"
-    }
-
-    private fun spritesByCharacterId(card: Card<*, *, *, *, *, *>) : List<List<Sprite>> {
-        return if(card is BemCard) {
-            bemCharacterSprites(card)
-        } else {
-            dimCharacterSprites(card)
-        }
-    }
-
-    private fun bemCharacterSprites(card: BemCard) : List<List<Sprite>> {
-        val spritesByCharacterId = ArrayList<List<Sprite>>()
-        val sprites = card.spriteData.sprites
-        for(slotId in 0 until card.characterStats.characterEntries.size) {
-            val start: Int = BEM_FIRST_CHARACTER_SPRITE_INDEX + slotId * BEM_SPRITES_PER_CHARACTER
-            val end: Int = BEM_FIRST_CHARACTER_SPRITE_INDEX + (slotId + 1) * BEM_SPRITES_PER_CHARACTER
-            spritesByCharacterId.add(sprites.subList(start, end))
-        }
-
-        return spritesByCharacterId
-    }
-
-    private fun dimCharacterSprites(card: Card<*, *, *, *, *, *>) : List<List<Sprite>> {
-        val spritesByCharacterId = ArrayList<List<Sprite>>()
-        val sprites = card.spriteData.sprites
-        var startingSprite = DIM_FIRST_CHARACTER_SPRITE_INDEX
-        for(slotId in 0 until card.characterStats.characterEntries.size) {
-            val spritesForCharacterId = sprites.subList(startingSprite, startingSprite + numberOfSpritesForDimSlot(slotId))
-            startingSprite += spritesForCharacterId.size
-            spritesByCharacterId.add(spritesForCharacterId)
-        }
-        return spritesByCharacterId
-    }
-
-    private fun numberOfSpritesForDimSlot(characterId: Int): Int {
-        return when(characterId) {
-            0 -> 6
-            1 -> 7
-            else -> 14
-        }
     }
 }

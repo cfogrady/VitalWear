@@ -85,3 +85,7 @@ lint/tmp/
 # lint/reports/
 
 .idea/
+
+app/src/debug/assets/test_dim.bin
+
+app/src/debug/assets/VBBE_10B.vb2
