@@ -8,8 +8,9 @@ import com.github.cfogrady.vitalwear.battle.data.BattleResult
 import com.github.cfogrady.vitalwear.common.util.ActivityHelper
 
 class AdventureActivityLauncher(
-    val launchMenu: () -> Unit,
-    val launchBattle: ((Intent) -> Unit) -> Unit) {
+    val launchMenu: () -> Unit = {},
+    val launchBattle: ((Intent) -> Unit) -> Unit = {},
+) {
 
     companion object {
         fun buildFromContextAndActivityHelper(context: Context, activityHelper: ActivityHelper): AdventureActivityLauncher {

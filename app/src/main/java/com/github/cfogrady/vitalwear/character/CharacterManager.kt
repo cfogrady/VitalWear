@@ -3,19 +3,17 @@ package com.github.cfogrady.vitalwear.character
 import android.content.Context
 import android.graphics.Bitmap
 import com.github.cfogrady.vitalwear.card.CardMeta
-import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
-import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterEntity
 import com.github.cfogrady.vitalwear.character.data.CharacterPreview
 import com.github.cfogrady.vitalwear.character.data.SupportCharacter
 import com.github.cfogrady.vitalwear.character.transformation.ExpectedTransformation
 import com.github.cfogrady.vitalwear.character.transformation.history.TransformationHistoryEntity
 import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
-import com.github.cfogrady.vitalwear.protos.Character.CharacterStats
 import com.github.cfogrady.vitalwear.settings.CharacterSettings
 import kotlinx.coroutines.flow.StateFlow
 
 interface CharacterManager {
+
     val initialized: StateFlow<Boolean>
     fun getCurrentCharacter(): VBCharacter?
 

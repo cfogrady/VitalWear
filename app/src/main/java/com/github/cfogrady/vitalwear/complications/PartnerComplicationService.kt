@@ -66,7 +66,7 @@ class PartnerComplicationService : ComplicationDataSourceService() {
         } else if(character == null) {
             Icon.createWithBitmap(maybeFirmware.value!!.insertCardIcon)
         } else if (gameState != GameState.IDLE) {
-            val characterBitmaps = gameState.bitmaps(character)
+            val characterBitmaps = gameState.bitmaps(character.characterSprites.sprites)
             Icon.createWithBitmap(characterBitmaps[state.spriteIndex])
         } else {
             val vitalWearApp = (application as VitalWearApp)

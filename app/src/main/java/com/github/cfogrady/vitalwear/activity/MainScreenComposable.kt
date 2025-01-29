@@ -18,24 +18,18 @@ import com.github.cfogrady.vitalwear.*
 import com.github.cfogrady.vitalwear.R
 import com.github.cfogrady.vitalwear.adventure.AdventureScreenFactory
 import com.github.cfogrady.vitalwear.background.BackgroundManager
-import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
-import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.training.BackgroundTrainingScreenFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.util.ArrayList
 
 class MainScreenComposable(
-    private val gameStateFlow: StateFlow<GameState>,
-    private val characterManager: CharacterManager,
     private val saveService: SaveService,
     private val firmwareManager: FirmwareManager,
     private val backgroundManager: BackgroundManager,
@@ -46,82 +40,6 @@ class MainScreenComposable(
     private val adventureScreenFactory: AdventureScreenFactory,
 ) {
     companion object {
-    }
-    @Composable
-    fun MainScreen(activityLaunchers: ActivityLaunchers) {
-        val characterManagerInitialized by characterManager.initialized.collectAsState()
-        val firmwareState by firmwareManager.firmwareState.collectAsState()
-        if(!characterManagerInitialized || firmwareState == FirmwareManager.FirmwareState.Loading) {
-            Timber.i("Loading in mainScreen")
-            Timber.i("Character Manager Initialized: $characterManagerInitialized")
-            Timber.i("Firmware Manager Initialized: $firmwareState")
-            Loading(loadingText = "Initializing") {}
-        } else if(firmwareState == FirmwareManager.FirmwareState.Missing) {
-            activityLaunchers.firmwareLoadingLauncher.invoke()
-        } else {
-            val activeCharacter = characterManager.getCharacterFlow()
-            val firmware = firmwareManager.getFirmware()
-            val background = backgroundManager.selectedBackground
-            EverythingLoadedScreen(firmwareData = firmware, activeCharacterData = activeCharacter, background, activityLaunchers)
-        }
-    }
-
-    @Composable
-    fun EverythingLoadedScreen(firmwareData: StateFlow<Firmware?>, activeCharacterData: StateFlow<VBCharacter?>, backgroundData: StateFlow<Bitmap?>, activityLaunchers: ActivityLaunchers) {
-        val firmware by firmwareData.collectAsState()
-        val character by activeCharacterData.collectAsState()
-        val background by backgroundData.collectAsState()
-        val gameState by gameStateFlow.collectAsState()
-        if(background == null) {
-            Timber.i("Loading in everythingLoadedScreen background is null")
-            Loading {}
-        } else if(character == null) {
-            activityLaunchers.characterSelectionLauncher.invoke()
-        } else if(gameState == GameState.TRAINING) {
-            BackgroundTraining(firmware = firmware!!, character = character!!, background = background!!, activityLaunchers = activityLaunchers)
-        } else if (gameState == GameState.ADVENTURE) {
-            adventureScreenFactory.AdventureScreen(activityLaunchers.context, activityLaunchers.adventureActivityLauncher, firmware!!, character!!)
-        } else {
-            DailyScreen(firmware!!, character = character!!, background!!, activityLaunchers)
-        }
-    }
-
-    @OptIn(ExperimentalFoundationApi::class)
-    @Composable
-    fun BackgroundTraining(firmware: Firmware, character: VBCharacter, background: Bitmap, activityLaunchers: ActivityLaunchers) {
-        vitalBoxFactory.VitalBox {
-            bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
-            val pagerState = rememberPagerState(pageCount = {
-                2
-            })
-            VerticalPager(state = pagerState) { page ->
-                when (page) {
-                    0 -> {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            backgroundTrainingScreenFactory.BackgroundTraining(character, firmware)
-                        }
-                    }
-                    1 -> {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clickable {
-                                    activityLaunchers.stopBackgroundTrainingLauncher.invoke()
-                                },
-                            verticalArrangement = Arrangement.SpaceAround,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            bitmapScaler.ScaledBitmap(
-                                bitmap = firmware.menuFirmwareSprites.stopText,
-                                contentDescription = "stop")
-                            bitmapScaler.ScaledBitmap(
-                                bitmap = firmware.menuFirmwareSprites.stopIcon,
-                                contentDescription = "training")
-                        }
-                    }
-                }
-            }
-        }
     }
 
     @OptIn(ExperimentalFoundationApi::class)

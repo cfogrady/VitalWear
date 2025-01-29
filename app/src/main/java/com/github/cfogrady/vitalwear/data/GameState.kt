@@ -9,15 +9,15 @@ enum class GameState {
     TRAINING,
     ADVENTURE;
 
-    fun bitmaps(character: VBCharacter): List<Bitmap> {
+    fun bitmaps(characterSprites: List<Bitmap>): List<Bitmap> {
         return when(this) {
             IDLE -> {
-                character.characterSprites.sprites.subList(1, 3)
+                characterSprites.subList(1, 3)
             }
             TRAINING -> {
-                character.characterSprites.sprites.subList(7, 9)
+                characterSprites.subList(7, 9)
             }
-            ADVENTURE -> character.characterSprites.sprites.subList(3, 5)
+            ADVENTURE -> characterSprites.subList(3, 5)
         }
     }
 }

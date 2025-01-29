@@ -205,7 +205,7 @@ class VitalWearApp : Application(), Configuration.Provider {
         adventureService = AdventureService(gameState, database.cardMetaEntityDao(), characterManager, database.adventureEntityDao(), cardSpriteIO, notificationChannelManager, database.characterAdventureDao(), stepService, sensorManager)
         val adventureScreenFactory = AdventureScreenFactory(adventureService, vitalBoxFactory, bitmapScaler, backgroundHeight)
         transferActivityController = TransferActivityController(characterManager, adventureService, cardMetaEntityDao)
-        mainScreenComposable = MainScreenComposable(gameState, characterManager, saveService, firmwareManager, backgroundManager, backgroundTrainingScreenFactory, bitmapScaler, partnerScreenComposable, vitalBoxFactory, adventureScreenFactory)
+        mainScreenComposable = MainScreenComposable(saveService, firmwareManager, backgroundManager, backgroundTrainingScreenFactory, bitmapScaler, partnerScreenComposable, vitalBoxFactory, adventureScreenFactory)
         val cardCharacterImageService = CardCharacterImageService(database.speciesEntityDao(), characterSpritesIO)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardCharacterImageService)
         shutdownReceiver = ShutdownReceiver(shutdownManager)

@@ -1,7 +1,6 @@
 package com.github.cfogrady.vitalwear.adventure
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -33,7 +32,6 @@ import androidx.compose.ui.unit.em
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.battle.BattleActivity
 import com.github.cfogrady.vitalwear.character.VBCharacter
-import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler

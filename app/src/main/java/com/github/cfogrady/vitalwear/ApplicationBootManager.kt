@@ -10,7 +10,6 @@ import com.github.cfogrady.vitalwear.notification.NotificationChannelManager
 import com.github.cfogrady.vitalwear.steps.StepSensorService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class ApplicationBootManager(private val characterManager: CharacterManagerImpl,

@@ -4,16 +4,12 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,42 +18,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.wear.compose.material.Text
-import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
-import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
-import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
-import com.github.cfogrady.vitalwear.composable.util.PositionOffsetRatios
-import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.firmware.Firmware
-import com.github.cfogrady.vitalwear.firmware.FirmwareManager
-import kotlinx.coroutines.flow.MutableStateFlow
 
 class BackgroundTrainingScreenFactory(
     private val trainingScreenFactory: TrainingScreenFactory,
     private val trainingService: TrainingService,
 ) {
-    @Composable
-    fun BackgroundTraining(partner: VBCharacter, firmware: Firmware) {
-        val trainingSprites = GameState.TRAINING.bitmaps(partner)
-        val swearIcon = firmware.characterFirmwareSprites.emoteFirmwareSprites.sweatEmote
-        if(trainingService.backgroundTrainingProgressTracker == null) {
-            return
-        }
-        val progress by trainingService.backgroundTrainingProgressTracker!!.progressFlow().collectAsState()
-
-        trainingScreenFactory.ActiveTraining(
-            characterSprites = trainingSprites,
-            progress = progress,
-            firmware = firmware,
-            sweatIcon = swearIcon,
-        )
-    }
+    
 
     enum class EndTrainingScreen {
         CLEAR,

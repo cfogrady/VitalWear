@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.lifecycle.lifecycleScope
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.adventure.AdventureActivityLauncher
 import com.github.cfogrady.vitalwear.battle.BattleActivity
@@ -31,7 +32,7 @@ class MainActivity : ComponentActivity() {
         mainScreenComposable = (application as VitalWearApp).mainScreenComposable
         val activityLaunchers = buildActivityLaunchers()
         setContent {
-            mainScreenComposable.MainScreen(activityLaunchers)
+            InitialScreen(activityLaunchers, InitialScreenController.buildInitialScreenController(application as VitalWearApp, this.lifecycleScope))
         }
     }
 
@@ -49,7 +50,6 @@ class MainActivity : ComponentActivity() {
     private fun buildActivityLaunchers(): ActivityLaunchers {
         val activityHelper = ActivityHelper(this)
         return ActivityLaunchers(
-            this,
             activityHelper.getActivityLauncher(LoadFirmwareActivity::class.java),
             activityHelper.getActivityLauncher(StatsMenuActivity::class.java),
             activityHelper.getActivityLauncher(TrainingMenuActivity::class.java),
