@@ -1,5 +1,6 @@
 package com.github.cfogrady.vitalwear.activity
 
+import android.content.Context
 import android.util.DisplayMetrics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -7,12 +8,17 @@ import timber.log.Timber
 import kotlin.math.atan
 import kotlin.math.cos
 import kotlin.math.floor
+import kotlin.math.sqrt
 
 class ImageScaler(val displayMetrics: DisplayMetrics, val screenIsRound: Boolean) {
     companion object {
         const val VB_WIDTH = 80f
         const val VB_HEIGHT = 160f
-        private val SQRT_OF_TWO = Math.sqrt(2.0)
+        private val SQRT_OF_TWO = sqrt(2.0)
+
+        fun getContextImageScaler(context: Context): ImageScaler {
+            return ImageScaler(context.resources.displayMetrics, context.resources.configuration.isScreenRound)
+        }
     }
 
     private var scale = 0f
@@ -73,5 +79,9 @@ class ImageScaler(val displayMetrics: DisplayMetrics, val screenIsRound: Boolean
 
     fun convertPixelsToDp(px: Int): Dp {
         return (px / (displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)).dp
+    }
+
+    fun calculateBackgroundHeight(): Dp {
+        return scaledDpValueFromPixels(VB_HEIGHT.toInt())
     }
 }
