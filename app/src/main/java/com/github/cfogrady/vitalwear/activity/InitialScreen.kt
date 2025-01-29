@@ -5,7 +5,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.wear.tooling.preview.devices.WearDevices
 import com.github.cfogrady.vitalwear.Loading
+import com.github.cfogrady.vitalwear.adventure.AdventureScreen
 import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.training.BackgroundTraining
@@ -13,12 +15,11 @@ import timber.log.Timber
 
 @Composable
 fun InitialScreen(
-    activityLaunchers: ActivityLaunchers,
-    initialScreenController: InitialScreenController,
+    controller: InitialScreenController,
 ) {
-    val firmwareState by initialScreenController.firmwareState.collectAsState()
-    val characterLoadingDone by initialScreenController.characterLoadingDone.collectAsState()
-    val backgroundLoaded by initialScreenController.backgroundLoaded.collectAsState()
+    val firmwareState by controller.firmwareState.collectAsState()
+    val characterLoadingDone by controller.characterLoadingDone.collectAsState()
+    val backgroundLoaded by controller.backgroundLoaded.collectAsState()
 
     if(!characterLoadingDone || firmwareState == FirmwareManager.FirmwareState.Loading || !backgroundLoaded) {
         Timber.i("Loading in mainScreen")
@@ -27,31 +28,34 @@ fun InitialScreen(
         Timber.i("Background Initialized: $backgroundLoaded")
         Loading(loadingText = "Initializing") {}
     } else if(firmwareState == FirmwareManager.FirmwareState.Missing) {
-        activityLaunchers.firmwareLoadingLauncher.invoke()
+        controller.activityLaunchers.firmwareLoadingLauncher.invoke()
     } else {
-        GameStateScreen(initialScreenController, activityLaunchers)
+        GameStateScreen(controller)
     }
 }
 
-@Preview
+@Preview(
+    device = WearDevices.LARGE_ROUND,
+    showSystemUi = true,
+    backgroundColor = 0xff000000,
+    showBackground = true
+)
 @Composable
 private fun InitialScreenPreviewLoading() {
 
     InitialScreen(
-        activityLaunchers = ActivityLaunchers(),
-        initialScreenController = InitialScreenController.emptyController(LocalContext.current),
+        controller = InitialScreenController.emptyController(context = LocalContext.current),
     )
 }
 
 @Composable
 fun GameStateScreen(
-    initialScreenController: InitialScreenController,
-    activityLaunchers: ActivityLaunchers) {
-    val gameState by initialScreenController.gameState.collectAsState()
+    controller: InitialScreenController) {
+    val gameState by controller.gameState.collectAsState()
     if(gameState == GameState.TRAINING) {
-        BackgroundTraining(initialScreenController.backgroundTrainingController, activityLaunchers = activityLaunchers)
+        BackgroundTraining(controller.backgroundTrainingController, activityLaunchers = controller.activityLaunchers)
     } else if (gameState == GameState.ADVENTURE) {
-        // adventureScreenFactory.AdventureScreen(activityLaunchers.context, activityLaunchers.adventureActivityLauncher, character!!)
+        AdventureScreen(controller.adventureScreenController)
     } else {
         // DailyScreen(firmware, character = character!!, activityLaunchers)
     }

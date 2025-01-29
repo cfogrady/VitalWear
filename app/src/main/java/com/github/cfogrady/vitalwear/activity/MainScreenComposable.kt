@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.em
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.*
 import com.github.cfogrady.vitalwear.R
-import com.github.cfogrady.vitalwear.adventure.AdventureScreenFactory
 import com.github.cfogrady.vitalwear.background.BackgroundManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
@@ -31,13 +30,9 @@ import java.util.ArrayList
 
 class MainScreenComposable(
     private val saveService: SaveService,
-    private val firmwareManager: FirmwareManager,
-    private val backgroundManager: BackgroundManager,
-    private val backgroundTrainingScreenFactory: BackgroundTrainingScreenFactory,
     private val bitmapScaler: BitmapScaler,
     private val partnerScreenComposable: PartnerScreenComposable,
     private val vitalBoxFactory: VitalBoxFactory,
-    private val adventureScreenFactory: AdventureScreenFactory,
 ) {
     companion object {
     }

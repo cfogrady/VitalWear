@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
         mainScreenComposable = (application as VitalWearApp).mainScreenComposable
         val activityLaunchers = buildActivityLaunchers()
         setContent {
-            InitialScreen(activityLaunchers, InitialScreenController.buildInitialScreenController(application as VitalWearApp, this.lifecycleScope))
+            InitialScreen(InitialScreenController.buildInitialScreenController(application as VitalWearApp, activityLaunchers, this.lifecycleScope))
         }
     }
 
@@ -61,6 +61,7 @@ class MainActivity : ComponentActivity() {
             activityHelper.getActivityLauncher(StopBackgroundTrainingActivity::class.java),
             {text -> Toast.makeText(this, text, Toast.LENGTH_SHORT).show() },
             AdventureActivityLauncher.buildFromContextAndActivityHelper(application, activityHelper),
+            this,
         )
     }
 }

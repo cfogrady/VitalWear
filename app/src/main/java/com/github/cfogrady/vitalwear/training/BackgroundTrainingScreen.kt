@@ -89,7 +89,7 @@ fun BackgroundTrainingPartner(
 @Composable
 private fun BackgroundTrainingPreview() {
     BackgroundTraining(
-        controller = BackgroundTrainingController.emptyController(LocalContext.current, trainingProgress = .6f),
+        controller = BackgroundTrainingController.EmptyController(LocalContext.current, trainingProgress = .6f),
         activityLaunchers = ActivityLaunchers()
     )
 }

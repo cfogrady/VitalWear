@@ -1,6 +1,5 @@
 package com.github.cfogrady.vitalwear.adventure
 
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.foundation.clickable
@@ -23,50 +22,38 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.material.Text
-import com.github.cfogrady.vitalwear.battle.BattleActivity
-import com.github.cfogrady.vitalwear.battle.BattleCharacterProto
-import com.github.cfogrady.vitalwear.character.VBCharacter
-import com.github.cfogrady.vitalwear.common.character.CharacterSprites
+import androidx.wear.tooling.preview.devices.WearDevices
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import java.time.LocalDateTime
 
 @Composable
-fun AdventureScreen(controller: AdventureScreenController, adventureActivityLauncher: AdventureActivityLauncher, firmware: Firmware, partner: VBCharacter) {
+fun AdventureScreen(controller: AdventureScreenController) {
     val vitalBoxFactory = controller.vitalBoxFactory
     val bitmapScaler = controller.bitmapScaler
     val goalComplete by controller.zoneCompleted.collectAsStateWithLifecycle()
-    val stepsToGoal by controller.stepsToGoal().collectAsStateWithLifecycle()
+    val background by controller.adventureBackground.collectAsStateWithLifecycle()
     LaunchedEffect(goalComplete) {
         if(goalComplete) {
             Handler.createAsync(Looper.getMainLooper()).postDelayed({
-                adventureActivityLauncher.launchBattle {
-                    val adventureEntity = adventure.currentAdventureEntity()
-                    it.putExtra("", BattleCharacterProto.getDefaultInstance().toByteArray())
-                    it.putExtra(BattleActivity.CARD_NAME, adventureEntity.cardName)
-                    it.putExtra(BattleActivity.CHARACTER_ID, adventureEntity.characterId)
-                    it.putExtra(BattleActivity.OPPONENT_BP, adventureEntity.bp)
-                    it.putExtra(BattleActivity.OPPONENT_AP, adventureEntity.ap)
-                    it.putExtra(BattleActivity.OPPONENT_HP, adventureEntity.hp)
-                    it.putExtra(BattleActivity.BACKGROUND, adventureEntity.bossBackgroundId)
-                    it.putExtra(BattleActivity.OPPONENT_ATTACK, adventureEntity.attackId)
-                    it.putExtra(BattleActivity.OPPONENT_CRITICAL, adventureEntity.criticalAttackId)
-                }
+                controller.launchBattle()
             }, 500)
         }
     }
     vitalBoxFactory.VitalBox {
-        bitmapScaler.ScaledBitmap(bitmap = adventure.currentBackground(), contentDescription = "background")
+        bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "background")
         val pagerState = rememberPagerState(pageCount = {2})
         VerticalPager(state = pagerState) {
             when(it) {
-                0 -> PartnerScreen(firmware = firmware, partner = partner, steps = stepsToGoal, goal = adventure.goal())
-                1 -> CancelScreen(controller, firmware)
+                0 -> PartnerScreen(controller)
+                1 -> CancelScreen(controller, controller.firmware)
             }
 
         }
@@ -74,8 +61,13 @@ fun AdventureScreen(controller: AdventureScreenController, adventureActivityLaun
 }
 
 @Composable
-fun PartnerScreen(firmware: Firmware, partner: VBCharacter, steps: Int, goal: Int) {
+fun PartnerScreen(controller: AdventureScreenController) {
     var now by remember { mutableStateOf(LocalDateTime.now()) }
+    val bitmapScaler = controller.bitmapScaler
+    val firmware = controller.firmware
+    val partnerWalkingSprites by controller.partnerWalkingSprites.collectAsStateWithLifecycle()
+    val stepsToGoal by controller.stepsToGoal.collectAsStateWithLifecycle()
+    val goal by controller.goal.collectAsStateWithLifecycle()
     LaunchedEffect(key1 = now) {
         val secondsUntilNextMinute = 60 - now.second
         Handler.createAsync(Looper.getMainLooper()).postDelayed({
@@ -85,7 +77,7 @@ fun PartnerScreen(firmware: Firmware, partner: VBCharacter, steps: Int, goal: In
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
         Column(verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
             .fillMaxWidth()
-            .offset(y = backgroundHeight.times(-.05f))) {
+            .offset(y = controller.backgroundHeight.times(-.05f))) {
             Text(text="${formatNumber(now.hour, 2)}:${formatNumber(now.minute, 2)}", fontWeight = FontWeight.Bold, fontSize = 4.em)
             Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                 bitmapScaler.ScaledBitmap(bitmap = firmware.adventureFirmwareSprites.flagImage, contentDescription = "Goal")
@@ -93,9 +85,9 @@ fun PartnerScreen(firmware: Firmware, partner: VBCharacter, steps: Int, goal: In
             }
             Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 10.dp)) {
                 bitmapScaler.ScaledBitmap(bitmap = firmware.characterFirmwareSprites.stepsIcon, contentDescription = "Steps")
-                Text(text = formatNumber(steps, 4), color = Color.White, modifier = Modifier.padding(5.dp, 0.dp))
+                Text(text = formatNumber(stepsToGoal, 4), color = Color.White, modifier = Modifier.padding(5.dp, 0.dp))
             }
-            bitmapScaler.AnimatedScaledBitmap(bitmaps = partner.characterSprites.sprites, startIdx = CharacterSprites.WALK_1, frames = 2, contentDescription = "Character", alignment = Alignment.BottomCenter)
+            bitmapScaler.AnimatedScaledBitmap(bitmaps = partnerWalkingSprites, contentDescription = "Character", alignment = Alignment.BottomCenter)
         }
     }
 }
@@ -119,4 +111,17 @@ fun CancelScreen(controller: AdventureScreenController, firmware: Firmware) {
             bitmap = firmware.menuFirmwareSprites.stopIcon,
             contentDescription = "adventure")
     }
+}
+
+@Preview(
+    device = WearDevices.LARGE_ROUND,
+    showSystemUi = true,
+    backgroundColor = 0xff000000,
+    showBackground = true
+)
+@Composable
+private fun AdventureScreenPreview() {
+    AdventureScreen(
+        controller = AdventureScreenController.EmptyController(LocalContext.current)
+    )
 }

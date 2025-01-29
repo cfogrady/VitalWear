@@ -1,5 +1,6 @@
 package com.github.cfogrady.vitalwear.activity
 
+import android.content.Context
 import com.github.cfogrady.vitalwear.adventure.AdventureActivityLauncher
 
 class ActivityLaunchers(
@@ -14,6 +15,7 @@ class ActivityLaunchers(
     val stopBackgroundTrainingLauncher: () -> Unit = {},
     val toastLauncher: (String) -> Unit = {},
     val adventureActivityLauncher: AdventureActivityLauncher = AdventureActivityLauncher(),
+    val context: Context
 ) {
 
 }

@@ -17,7 +17,7 @@ class AdventureActivityLauncher(
             val adventureBattle = activityHelper.getActivityLauncherWithResultHandling(
                 BattleActivity::class.java) {
                 val ordinal = it.data?.extras?.getInt(BattleActivity.RESULT) ?: BattleResult.RETREAT.ordinal
-                val result = BattleResult.values()[ordinal]
+                val result = BattleResult.entries[ordinal]
                 (context as VitalWearApp).adventureService.completeBattle(context, result)
             }
             return AdventureActivityLauncher(

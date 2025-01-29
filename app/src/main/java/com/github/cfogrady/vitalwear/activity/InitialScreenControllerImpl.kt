@@ -1,5 +1,6 @@
 package com.github.cfogrady.vitalwear.activity
 
+import com.github.cfogrady.vitalwear.adventure.AdventureScreenController
 import com.github.cfogrady.vitalwear.background.BackgroundManager
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.data.GameState
@@ -17,6 +18,8 @@ class InitialScreenControllerImpl(
     backgroundManager: BackgroundManager,
     override val gameState: StateFlow<GameState>,
     override val backgroundTrainingController: BackgroundTrainingController,
+    override val adventureScreenController: AdventureScreenController,
+    override val activityLaunchers: ActivityLaunchers,
     coroutineScope: CoroutineScope,
     ): InitialScreenController {
 

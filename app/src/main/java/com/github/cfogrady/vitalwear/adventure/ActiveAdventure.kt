@@ -20,6 +20,12 @@ class ActiveAdventure(private val context: Context, private val service: Adventu
     private var startingStep: Int = dailySteps.value
     private val internalZoneCompleted = MutableStateFlow(false)
     val zoneCompleted: StateFlow<Boolean> = internalZoneCompleted
+
+    val internalGoal = MutableStateFlow(getCurrentGoal())
+    val goal: StateFlow<Int> = internalGoal
+
+    val internalBackground = MutableStateFlow(currentBackground())
+    val currentBackground: StateFlow<Bitmap> = internalBackground
     val job: Job
 
     init {
@@ -32,19 +38,19 @@ class ActiveAdventure(private val context: Context, private val service: Adventu
         }
     }
 
+    private fun getCurrentGoal(): Int {
+        return adventures[currentZone].steps
+    }
+
     fun end() {
         job.cancel()
     }
 
-    fun stepsTowardsGoal(): Int {
+    fun stepsTowardsGoal(currentStepValue: Int = dailySteps.value): Int {
         return dailySteps.value - startingStep
     }
 
-    fun goal(): Int {
-        return adventures[currentZone].steps
-    }
-
-    fun currentBackground(): Bitmap {
+    private fun currentBackground(): Bitmap {
         return backgrounds[adventures[currentZone].walkingBackgroundId]
     }
 
@@ -64,6 +70,8 @@ class ActiveAdventure(private val context: Context, private val service: Adventu
         startingStep = startingStep!! + goalSteps
         if(moveToNext) {
             currentZone = (currentZone + 1) % adventures.size
+            internalGoal.value = getCurrentGoal()
+            internalBackground.value = currentBackground()
         }
         internalZoneCompleted.value = false
         Handler.createAsync(Looper.getMainLooper()).postDelayed(this::checkSteps, 500)
