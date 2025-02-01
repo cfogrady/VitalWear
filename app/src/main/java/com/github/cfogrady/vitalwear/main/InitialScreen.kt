@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.activity
+package com.github.cfogrady.vitalwear.main
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -50,7 +50,8 @@ private fun InitialScreenPreviewLoading() {
 
 @Composable
 fun GameStateScreen(
-    controller: InitialScreenController) {
+    controller: InitialScreenController
+) {
     val gameState by controller.gameState.collectAsState()
     if(gameState == GameState.TRAINING) {
         BackgroundTraining(controller.backgroundTrainingController, activityLaunchers = controller.activityLaunchers)

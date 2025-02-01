@@ -20,7 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.wear.tooling.preview.devices.WearDevices
-import com.github.cfogrady.vitalwear.activity.ImageScaler
+import com.github.cfogrady.vitalwear.composable.util.ImageScaler
 import com.github.cfogrady.vitalwear.common.card.CardSpriteLoader
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.PositionOffsetRatios

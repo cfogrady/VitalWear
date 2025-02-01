@@ -22,7 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.wear.tooling.preview.devices.WearDevices
-import com.github.cfogrady.vitalwear.activity.ImageScaler
 
 class BitmapScaler(val imageScaler: ImageScaler) {
     companion object {

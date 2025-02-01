@@ -5,7 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.ui.unit.Dp
 import com.github.cfogrady.vitalwear.VitalWearApp
-import com.github.cfogrady.vitalwear.activity.ImageScaler
+import com.github.cfogrady.vitalwear.composable.util.ImageScaler
 import com.github.cfogrady.vitalwear.common.card.CardSpriteLoader
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler

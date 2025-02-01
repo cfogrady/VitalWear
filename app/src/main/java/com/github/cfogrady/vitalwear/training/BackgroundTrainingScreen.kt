@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.wear.tooling.preview.devices.WearDevices
-import com.github.cfogrady.vitalwear.activity.ActivityLaunchers
+import com.github.cfogrady.vitalwear.menu.ActivityLaunchers
 import com.github.cfogrady.vitalwear.firmware.Firmware
 
 @Composable

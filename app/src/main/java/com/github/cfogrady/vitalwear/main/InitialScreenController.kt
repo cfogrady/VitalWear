@@ -1,9 +1,8 @@
-package com.github.cfogrady.vitalwear.activity
+package com.github.cfogrady.vitalwear.main
 
 import android.content.Context
-import androidx.compose.ui.platform.LocalContext
 import com.github.cfogrady.vitalwear.VitalWearApp
-import com.github.cfogrady.vitalwear.adventure.AdventureActivityLauncher
+import com.github.cfogrady.vitalwear.menu.ActivityLaunchers
 import com.github.cfogrady.vitalwear.adventure.AdventureScreenController
 import com.github.cfogrady.vitalwear.common.card.CardSpriteLoader
 import com.github.cfogrady.vitalwear.data.GameState

@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.activity
+package com.github.cfogrady.vitalwear.main
 
 class MainScreenControllerImpl: MainScreenController {
 }

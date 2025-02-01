@@ -7,7 +7,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.github.cfogrady.vitalwear.R
-import com.github.cfogrady.vitalwear.activity.MainActivity
+import com.github.cfogrady.vitalwear.main.MainActivity
 import timber.log.Timber
 
 class NotificationChannelManager(private val notificationManager: NotificationManager) {

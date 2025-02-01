@@ -13,9 +13,9 @@ import androidx.preference.PreferenceManager
 import androidx.room.Room
 import androidx.work.Configuration
 import com.github.cfogrady.vb.dim.card.DimReader
-import com.github.cfogrady.vitalwear.activity.ImageScaler
-import com.github.cfogrady.vitalwear.activity.MainScreenComposable
-import com.github.cfogrady.vitalwear.activity.PartnerScreenComposable
+import com.github.cfogrady.vitalwear.composable.util.ImageScaler
+import com.github.cfogrady.vitalwear.main.MainScreenComposable
+import com.github.cfogrady.vitalwear.character.PartnerScreenComposable
 import com.github.cfogrady.vitalwear.adventure.AdventureMenuScreenFactory
 import com.github.cfogrady.vitalwear.adventure.AdventureService
 import com.github.cfogrady.vitalwear.background.BackgroundManager

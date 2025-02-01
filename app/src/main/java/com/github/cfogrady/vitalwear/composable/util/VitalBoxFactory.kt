@@ -10,7 +10,6 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.wear.tooling.preview.devices.WearDevices
-import com.github.cfogrady.vitalwear.activity.ImageScaler
 
 
 class VitalBoxFactory(
