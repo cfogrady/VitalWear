@@ -8,14 +8,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.tooling.preview.devices.WearDevices
-import com.github.cfogrady.vitalwear.menu.ActivityLaunchers
+import com.github.cfogrady.vitalwear.main.ActivityLaunchers
 import com.github.cfogrady.vitalwear.firmware.Firmware
 
 @Composable
@@ -26,7 +26,7 @@ fun BackgroundTraining(
     val vitalBoxFactory = controller.vitalBoxFactory
     val bitmapScalingFactory = controller.bitmapScaler
     val firmware = controller.firmware
-    val background by controller.background.collectAsState()
+    val background by controller.background.collectAsStateWithLifecycle()
     vitalBoxFactory.VitalBox {
         bitmapScalingFactory.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
         val pagerState = rememberPagerState(pageCount = {
@@ -66,9 +66,9 @@ fun BackgroundTraining(
 fun BackgroundTrainingPartner(
     controller: BackgroundTrainingController,
     firmware: Firmware) {
-    val trainingSprites by controller.partnerTrainingSprites.collectAsState()
+    val trainingSprites by controller.partnerTrainingSprites.collectAsStateWithLifecycle()
     val swearIcon = firmware.characterFirmwareSprites.emoteFirmwareSprites.sweatEmote
-    val progress by controller.backgroundTrainingProgress.collectAsState()
+    val progress by controller.backgroundTrainingProgress.collectAsStateWithLifecycle()
     ActiveTraining(
         characterSprites = trainingSprites,
         progress = progress,
@@ -90,6 +90,6 @@ fun BackgroundTrainingPartner(
 private fun BackgroundTrainingPreview() {
     BackgroundTraining(
         controller = BackgroundTrainingController.EmptyController(LocalContext.current, trainingProgress = .6f),
-        activityLaunchers = ActivityLaunchers()
+        activityLaunchers = ActivityLaunchers(context = LocalContext.current)
     )
 }

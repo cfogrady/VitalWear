@@ -1,7 +1,5 @@
 package com.github.cfogrady.vitalwear.adventure
 
-import android.os.Handler
-import android.os.Looper
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +30,8 @@ import androidx.wear.compose.material.Text
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.firmware.Firmware
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import java.time.LocalDateTime
 
 @Composable
@@ -42,9 +42,8 @@ fun AdventureScreen(controller: AdventureScreenController) {
     val background by controller.adventureBackground.collectAsStateWithLifecycle()
     LaunchedEffect(goalComplete) {
         if(goalComplete) {
-            Handler.createAsync(Looper.getMainLooper()).postDelayed({
-                controller.launchBattle()
-            }, 500)
+            delay(500)
+            controller.launchBattle()
         }
     }
     vitalBoxFactory.VitalBox {
@@ -68,11 +67,13 @@ fun PartnerScreen(controller: AdventureScreenController) {
     val partnerWalkingSprites by controller.partnerWalkingSprites.collectAsStateWithLifecycle()
     val stepsToGoal by controller.stepsToGoal.collectAsStateWithLifecycle()
     val goal by controller.goal.collectAsStateWithLifecycle()
-    LaunchedEffect(key1 = now) {
-        val secondsUntilNextMinute = 60 - now.second
-        Handler.createAsync(Looper.getMainLooper()).postDelayed({
+    LaunchedEffect(true) {
+        while(isActive) {
+            val secondsUntilNextMinute = 60 - now.second
+            val millisUntilNextMinute = secondsUntilNextMinute * 1000L
+            delay(millisUntilNextMinute)
             now = LocalDateTime.now()
-        }, 1000L*secondsUntilNextMinute)
+        }
     }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
         Column(verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
