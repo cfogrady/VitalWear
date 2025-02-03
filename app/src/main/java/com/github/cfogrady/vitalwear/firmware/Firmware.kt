@@ -8,7 +8,7 @@ import com.github.cfogrady.vitalwear.battle.data.BattleFirmwareSprites
 import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
 import com.github.cfogrady.vitalwear.character.transformation.TransformationFirmwareSprites
 import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
-import com.github.cfogrady.vitalwear.menu.MenuFirmwareSprites
+import com.github.cfogrady.vitalwear.main.MenuFirmwareSprites
 import com.github.cfogrady.vitalwear.training.TrainingFirmwareSprites
 
 class Firmware(

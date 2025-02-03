@@ -230,6 +230,9 @@ abstract class VBCharacter(
         }
     }
 
+    // getEmoteBitmaps gets the list of bitmaps corresponding to the current emote if any.
+    // Returns an list of optional bitmap. Optional because a null value indicates an emote which
+    // flashes on then off.
     fun getEmoteBitmaps(firmware: EmoteFirmwareSprites, exerciseLevel: Int): List<Bitmap?> {
         return if(characterStats.sleeping) {
             firmware.sleepEmote

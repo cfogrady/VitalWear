@@ -1,4 +1,4 @@
-package com.github.cfogrady.vitalwear.menu
+package com.github.cfogrady.vitalwear.main
 
 import android.content.Context
 import com.github.cfogrady.vitalwear.adventure.AdventureActivityLauncher

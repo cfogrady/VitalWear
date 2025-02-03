@@ -1,10 +1,10 @@
 package com.github.cfogrady.vitalwear.main
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.adventure.AdventureScreen
@@ -17,9 +17,9 @@ import timber.log.Timber
 fun InitialScreen(
     controller: InitialScreenController,
 ) {
-    val firmwareState by controller.firmwareState.collectAsState()
-    val characterLoadingDone by controller.characterLoadingDone.collectAsState()
-    val backgroundLoaded by controller.backgroundLoaded.collectAsState()
+    val firmwareState by controller.firmwareState.collectAsStateWithLifecycle()
+    val characterLoadingDone by controller.characterLoadingDone.collectAsStateWithLifecycle()
+    val backgroundLoaded by controller.backgroundLoaded.collectAsStateWithLifecycle()
 
     if(!characterLoadingDone || firmwareState == FirmwareManager.FirmwareState.Loading || !backgroundLoaded) {
         Timber.i("Loading in mainScreen")
@@ -52,7 +52,7 @@ private fun InitialScreenPreviewLoading() {
 fun GameStateScreen(
     controller: InitialScreenController
 ) {
-    val gameState by controller.gameState.collectAsState()
+    val gameState by controller.gameState.collectAsStateWithLifecycle()
     if(gameState == GameState.TRAINING) {
         BackgroundTraining(controller.backgroundTrainingController, activityLaunchers = controller.activityLaunchers)
     } else if (gameState == GameState.ADVENTURE) {

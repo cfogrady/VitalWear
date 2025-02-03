@@ -75,8 +75,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.FileExploreActivity"
-            android:taskAffinity="" />
         <activity android:name=".adventure.AdventureMenuActivity"
             android:taskAffinity="" />
         <activity android:name=".character.activity.CharacterSelectActivity"

@@ -1,6 +1,5 @@
 package com.github.cfogrady.vitalwear.main
 
-import com.github.cfogrady.vitalwear.menu.ActivityLaunchers
 import com.github.cfogrady.vitalwear.adventure.AdventureScreenController
 import com.github.cfogrady.vitalwear.background.BackgroundManager
 import com.github.cfogrady.vitalwear.character.CharacterManager
