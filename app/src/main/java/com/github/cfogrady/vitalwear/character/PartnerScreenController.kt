@@ -19,7 +19,7 @@ interface PartnerScreenController {
     val bitmapScaler: BitmapScaler
     val characterFirmwareSprites: CharacterFirmwareSprites
     val dailyStepCount: StateFlow<Int>
-    val characterBitmaps: StateFlow<List<Bitmap>>
+    fun getCharacterBitmaps(coroutineScope: CoroutineScope): StateFlow<List<Bitmap>>
     fun getEmoteBitmaps(coroutineScope: CoroutineScope): StateFlow<List<Bitmap?>>
     fun getVitalsFlow(coroutineScope: CoroutineScope): StateFlow<Int>
     fun getTimeFlow(coroutineScope: CoroutineScope): StateFlow<LocalDateTime>
@@ -32,10 +32,14 @@ interface PartnerScreenController {
         val firmware: Firmware = Firmware.loadPreviewFirmwareFromDisk(context),
         override val characterFirmwareSprites: CharacterFirmwareSprites = firmware.characterFirmwareSprites,
         override val dailyStepCount: StateFlow<Int> = MutableStateFlow(8674),
-        override val characterBitmaps: StateFlow<List<Bitmap>> = MutableStateFlow(CardSpriteLoader.loadTestCharacterSprites(context, 3).sprites.subList(CharacterSprites.IDLE_1, CharacterSprites.IDLE_2+1)),
+        private val characterBitmaps: StateFlow<List<Bitmap>> = MutableStateFlow(CardSpriteLoader.loadTestCharacterSprites(context, 3).sprites.subList(CharacterSprites.IDLE_1, CharacterSprites.IDLE_2+1)),
         private val emoteBitmaps: StateFlow<List<Bitmap>> = MutableStateFlow(firmware.characterFirmwareSprites.emoteFirmwareSprites.happyEmote),
         private val vitals: StateFlow<Int> = MutableStateFlow(3784),
     ): PartnerScreenController {
+
+        override fun getCharacterBitmaps(coroutineScope: CoroutineScope): StateFlow<List<Bitmap>> {
+            return characterBitmaps
+        }
 
         override fun getEmoteBitmaps(coroutineScope: CoroutineScope): StateFlow<List<Bitmap?>> {
             return emoteBitmaps
