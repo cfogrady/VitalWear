@@ -40,7 +40,7 @@ interface InitialScreenController {
             override val gameState = MutableStateFlow(gameState)
             val firmware = Firmware.loadPreviewFirmwareFromDisk(context)
             val characterSprites = CardSpriteLoader.loadTestCharacterSprites(context, 2)
-            override val activityLaunchers = ActivityLaunchers(context = context)
+            override val activityLaunchers = ActivityLaunchers()
             override val backgroundTrainingController = BackgroundTrainingController.EmptyController(
                 context = context,
                 firmware = firmware,

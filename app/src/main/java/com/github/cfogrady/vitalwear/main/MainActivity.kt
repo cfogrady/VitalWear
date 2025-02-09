@@ -57,7 +57,6 @@ class MainActivity : ComponentActivity() {
             activityHelper.getActivityLauncher(StopBackgroundTrainingActivity::class.java),
             {text -> Toast.makeText(this, text, Toast.LENGTH_SHORT).show() },
             AdventureActivityLauncher.buildFromContextAndActivityHelper(application, activityHelper),
-            this,
         )
     }
 }

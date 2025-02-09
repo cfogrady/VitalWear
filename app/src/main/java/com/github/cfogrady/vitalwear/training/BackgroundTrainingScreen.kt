@@ -90,6 +90,6 @@ fun BackgroundTrainingPartner(
 private fun BackgroundTrainingPreview() {
     BackgroundTraining(
         controller = BackgroundTrainingController.EmptyController(LocalContext.current, trainingProgress = .6f),
-        activityLaunchers = ActivityLaunchers(context = LocalContext.current)
+        activityLaunchers = ActivityLaunchers()
     )
 }
