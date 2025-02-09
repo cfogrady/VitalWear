@@ -1,8 +1,6 @@
 package com.github.cfogrady.vitalwear.util.flow
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class TransformedStateFlow<T, R>(
@@ -33,4 +31,15 @@ fun <T,R> StateFlow<T>.transformState(
     transformer: suspend FlowCollector<R>.(value: T)->Unit
 ): StateFlow<R> {
     return TransformedStateFlow(this, initialValue, transformer)
+}
+
+fun <T> StateFlow<T>.filterState(
+    initialValue: T = this.value,
+    predicate: (T)->Boolean,
+): StateFlow<T> {
+    return TransformedStateFlow(this, initialValue) {
+        if(predicate(it)) {
+            emit(it)
+        }
+    }
 }
