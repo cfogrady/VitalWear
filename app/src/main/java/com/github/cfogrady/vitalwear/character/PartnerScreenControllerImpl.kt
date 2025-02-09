@@ -7,17 +7,14 @@ import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
 import com.github.cfogrady.vitalwear.steps.StepSensorService
+import com.github.cfogrady.vitalwear.util.flow.combineStates
+import com.github.cfogrady.vitalwear.util.flow.mapState
+import com.github.cfogrady.vitalwear.util.flow.transformState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -36,12 +33,23 @@ internal class PartnerScreenControllerImpl(
 
     override val characterFirmwareSprites: CharacterFirmwareSprites
         get() = firmwareManager.getFirmware().value!!.characterFirmwareSprites
-    override val dailyStepCount: StateFlow<Int>
-        get() = stepSensorService.dailySteps
+    override val dailyStepCount: StateFlow<Int> = stepSensorService.dailySteps
+    override val emoteBitmaps = combineStates(characterManager.getCharacterFlow(), heartRateService.currentExerciseLevel) { character, exerciseLevel->
+        if(character == null) {
+            emptyList<Bitmap>()
+        }
+        character!!.getEmoteBitmaps(characterFirmwareSprites.emoteFirmwareSprites, exerciseLevel)
+    }
+    override val vitals = characterManager.getCharacterFlow().mapState {
+        if(it == null) {
+            return@mapState 0
+        }
+        return@mapState it.characterStats.vitals
+    }
 
-    private fun getIdleFlow(coroutineScope: CoroutineScope): Flow<Boolean> {
+    private fun getIdleFlow(coroutineScope: CoroutineScope): StateFlow<Boolean> {
         var job: Job? = null
-        return stepSensorService.timeFrom10StepsAgo.transform { timeFrom10StepsAgo->
+        return stepSensorService.timeFrom10StepsAgo.transformState(false) { timeFrom10StepsAgo->
             job?.let {
                 if(it.isActive) {
                     it.cancel()
@@ -63,30 +71,12 @@ internal class PartnerScreenControllerImpl(
     }
 
     override fun getCharacterBitmaps(coroutineScope: CoroutineScope): StateFlow<List<Bitmap>> {
-        return combine(characterManager.getCharacterFlow(), getIdleFlow(coroutineScope), heartRateService.currentExerciseLevel) {character, idle, exerciseLevel->
+        return combineStates(characterManager.getCharacterFlow(), getIdleFlow(coroutineScope), heartRateService.currentExerciseLevel) {character, idle, exerciseLevel->
             if(character == null) {
                 emptyList<Bitmap>()
             }
             character!!.getNormalBitmaps(!idle, exerciseLevel)
-        }.stateIn(coroutineScope, SharingStarted.Lazily, emptyList())
-    }
-
-    override fun getEmoteBitmaps(coroutineScope: CoroutineScope): StateFlow<List<Bitmap?>> {
-        return characterManager.getCharacterFlow().combine(heartRateService.currentExerciseLevel) { character, exerciseLevel->
-            if(character == null) {
-                emptyList<Bitmap>()
-            }
-            character!!.getEmoteBitmaps(characterFirmwareSprites.emoteFirmwareSprites, exerciseLevel)
-        }.stateIn(coroutineScope, SharingStarted.Lazily, emptyList<Bitmap>())
-    }
-
-    override fun getVitalsFlow(coroutineScope: CoroutineScope): StateFlow<Int> {
-        return characterManager.getCharacterFlow().map {
-            if(it == null) {
-                return@map 0
-            }
-            return@map it.characterStats.vitals
-        }.stateIn(coroutineScope, SharingStarted.Lazily, 0)
+        }
     }
 
     override fun getTimeFlow(coroutineScope: CoroutineScope): StateFlow<LocalDateTime> {
@@ -101,4 +91,5 @@ internal class PartnerScreenControllerImpl(
         }
         return dateTimeFlow
     }
+
 }

@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 interface InitialScreenController {
 
     companion object {
-        fun buildInitialScreenController(vitalWearApp: VitalWearApp, activityLaunchers: ActivityLaunchers, coroutineScope: CoroutineScope): InitialScreenController {
+        fun buildInitialScreenController(context: Context, vitalWearApp: VitalWearApp, activityLaunchers: ActivityLaunchers, coroutineScope: CoroutineScope): InitialScreenController {
             return InitialScreenControllerImpl(
                 characterManager = vitalWearApp.characterManager,
                 firmwareManager = vitalWearApp.firmwareManager,
@@ -23,6 +23,7 @@ interface InitialScreenController {
                 gameState = vitalWearApp.gameState,
                 backgroundTrainingController = BackgroundTrainingController.buildBackgroundTrainingController(vitalWearApp, coroutineScope),
                 adventureScreenController = AdventureScreenController.buildAdventureScreenController(vitalWearApp, activityLaunchers.context, activityLaunchers.adventureActivityLauncher, coroutineScope),
+                mainScreenController = MainScreenController.buildMainScreenController(vitalWearApp, activityLaunchers),
                 activityLaunchers = activityLaunchers,
                 coroutineScope,
                 )
@@ -52,6 +53,11 @@ interface InitialScreenController {
                 firmware = firmware,
                 characterSprites = characterSprites
             )
+            override val mainScreenController: MainScreenController = MainScreenController.EmptyController(
+                context = context,
+                firmware = firmware,
+                characterSprites = characterSprites
+            )
 
         }
     }
@@ -63,4 +69,5 @@ interface InitialScreenController {
     val gameState: StateFlow<GameState>
     val backgroundTrainingController: BackgroundTrainingController
     val adventureScreenController: AdventureScreenController
+    val mainScreenController: MainScreenController
 }

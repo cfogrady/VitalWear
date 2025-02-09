@@ -24,14 +24,11 @@ class MainActivity : ComponentActivity() {
         val TAG = "MainActivity"
     }
 
-    private lateinit var mainScreenComposable: MainScreenComposable
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mainScreenComposable = (application as VitalWearApp).mainScreenComposable
         val activityLaunchers = buildActivityLaunchers()
         setContent {
-            InitialScreen(InitialScreenController.buildInitialScreenController(application as VitalWearApp, activityLaunchers, this.lifecycleScope))
+            InitialScreen(InitialScreenController.buildInitialScreenController(this, application as VitalWearApp, activityLaunchers, this.lifecycleScope))
         }
     }
 

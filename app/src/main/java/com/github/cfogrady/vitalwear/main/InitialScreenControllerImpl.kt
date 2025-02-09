@@ -19,6 +19,7 @@ class InitialScreenControllerImpl(
     override val gameState: StateFlow<GameState>,
     override val backgroundTrainingController: BackgroundTrainingController,
     override val adventureScreenController: AdventureScreenController,
+    override val mainScreenController: MainScreenController,
     override val activityLaunchers: ActivityLaunchers,
     coroutineScope: CoroutineScope,
     ): InitialScreenController {

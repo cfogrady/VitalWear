@@ -10,13 +10,17 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.em
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.material.Text
+import androidx.wear.tooling.preview.devices.WearDevices
 import com.github.cfogrady.vitalwear.R
 import com.github.cfogrady.vitalwear.character.PartnerScreen
 import com.github.cfogrady.vitalwear.main.MenuOption.ADVENTURE
@@ -28,19 +32,18 @@ import com.github.cfogrady.vitalwear.main.MenuOption.SLEEP
 import com.github.cfogrady.vitalwear.main.MenuOption.STATS
 import com.github.cfogrady.vitalwear.main.MenuOption.TRAINING
 import com.github.cfogrady.vitalwear.main.MenuOption.TRANSFER
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.ArrayList
 
 @Composable
-fun DailyScreen(controller: MainScreenController) {
+fun MainScreen(controller: MainScreenController) {
     val vitalBoxFactory = controller.vitalBoxFactory
     val bitmapScaler = controller.bitmapScaler
-    val readyToTransform by controller.characterReadyToTransform.collectAsStateWithLifecycle()
-    val sleeping by controller.characterSleepStatus.collectAsStateWithLifecycle()
+    val coroutineScope = rememberCoroutineScope()
+    val readyToTransform by controller.readyToTransform.collectAsStateWithLifecycle()
+    val sleeping by controller.characterIsAsleep.collectAsStateWithLifecycle()
     val phase by controller.characterPhase.collectAsStateWithLifecycle()
-    val background by controller.background.collectAsStateWithLifecycle()
+    val background by remember{controller.getBackgroundFlow()}.collectAsStateWithLifecycle()
     val menuPages = remember(key1 = phase, key2 = sleeping) {
         buildMenuPages(phase, sleeping)
     }
@@ -127,10 +130,7 @@ fun DailyScreen(controller: MainScreenController) {
                             val sleepButton = if(sleeping) controller.menuFirmwareSprites.wakeIcon else controller.menuFirmwareSprites.sleepIcon
                             bitmapScaler.ScaledBitmap(bitmap = sleepButton, contentDescription = "Sleep", modifier = Modifier.clickable {
                                 controller.toggleSleep()
-//                                sleeping = !sleeping
-//                                character.characterStats.sleeping = sleeping
-//                                saveService.saveAsync()
-                                CoroutineScope(Dispatchers.Main).launch {
+                                coroutineScope.launch {
                                     pagerState.scrollToPage(0)
                                 }
                             })
@@ -167,4 +167,15 @@ fun buildMenuPages(phase: Int, sleeping: Boolean): ArrayList<MenuOption> {
     menuPages.add(SLEEP)
     menuPages.add(SETTINGS)
     return menuPages
+}
+
+@Preview(
+    device = WearDevices.LARGE_ROUND,
+    showSystemUi = true,
+    backgroundColor = 0xff000000,
+    showBackground = true
+)
+@Composable
+private fun MenuScreenPreview() {
+    MainScreen(MainScreenController.EmptyController(LocalContext.current))
 }

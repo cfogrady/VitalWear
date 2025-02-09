@@ -14,7 +14,6 @@ import androidx.room.Room
 import androidx.work.Configuration
 import com.github.cfogrady.vb.dim.card.DimReader
 import com.github.cfogrady.vitalwear.composable.util.ImageScaler
-import com.github.cfogrady.vitalwear.main.MainScreenComposable
 import com.github.cfogrady.vitalwear.character.PartnerScreenComposable
 import com.github.cfogrady.vitalwear.adventure.AdventureMenuScreenFactory
 import com.github.cfogrady.vitalwear.adventure.AdventureService
@@ -94,7 +93,6 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var battleService: BattleService
     lateinit var vitalBoxFactory: VitalBoxFactory
     lateinit var partnerScreenComposable: PartnerScreenComposable
-    lateinit var mainScreenComposable: MainScreenComposable
     lateinit var fightTargetFactory: FightTargetFactory
     lateinit var trainingScreenFactory: TrainingScreenFactory
     lateinit var trainingService: TrainingService
@@ -202,7 +200,6 @@ class VitalWearApp : Application(), Configuration.Provider {
         partnerScreenComposable = PartnerScreenComposable(bitmapScaler, backgroundHeight, stepService, heartRateService)
         adventureService = AdventureService(gameState, database.cardMetaEntityDao(), characterManager, database.adventureEntityDao(), cardSpriteIO, notificationChannelManager, database.characterAdventureDao(), stepService, sensorManager)
         transferActivityController = TransferActivityController(characterManager, adventureService, cardMetaEntityDao)
-        mainScreenComposable = MainScreenComposable(saveService, bitmapScaler, partnerScreenComposable, vitalBoxFactory)
         val cardCharacterImageService = CardCharacterImageService(database.speciesEntityDao(), characterSpritesIO)
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardCharacterImageService)
         shutdownReceiver = ShutdownReceiver(shutdownManager)

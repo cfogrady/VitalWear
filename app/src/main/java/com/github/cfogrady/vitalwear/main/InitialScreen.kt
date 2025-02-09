@@ -58,6 +58,6 @@ fun GameStateScreen(
     } else if (gameState == GameState.ADVENTURE) {
         AdventureScreen(controller.adventureScreenController)
     } else {
-        // DailyScreen(firmware, character = character!!, activityLaunchers)
+        MainScreen(controller.mainScreenController)
     }
 }

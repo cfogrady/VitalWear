@@ -34,30 +34,12 @@ fun PartnerScreen(controller: PartnerScreenController) {
     val backgroundHeight = controller.backgroundHeight
     val coroutineScope = rememberCoroutineScope()
     val dailyStepCount by controller.dailyStepCount.collectAsStateWithLifecycle()
-    val characterBitmaps by controller.characterBitmaps.collectAsStateWithLifecycle()
+    val characterBitmaps by remember {controller.getCharacterBitmaps(coroutineScope)}.collectAsStateWithLifecycle()
     val emoteBitmaps by controller.emoteBitmaps.collectAsStateWithLifecycle()
-    val vitals by remember { controller.getVitalsFlow(coroutineScope)}.collectAsStateWithLifecycle()
+    val vitals by controller.vitals.collectAsStateWithLifecycle()
     val emojiHeight = bitmapScaler.scaledDimension(firmware.emoteFirmwareSprites.sweatEmote.height)
-    // val timeFrom10StepsAgo by stepService.timeFrom10StepsAgo.collectAsState()
     val now by remember {controller.getTimeFlow(coroutineScope)}.collectAsStateWithLifecycle()
 
-//    val characterBitmaps = remember(exerciseLevel, now, timeFrom10StepsAgo) {
-//        character.getNormalBitmaps(stepService.hasRecentSteps(now), exerciseLevel)
-//    }
-//    val emoteBitmaps = remember(exerciseLevel, now) {
-//        character.getEmoteBitmaps(firmware.emoteFirmwareSprites, exerciseLevel)
-//    }
-//    LaunchedEffect(timeFrom10StepsAgo, now) {
-//        val currentNow = LocalDateTime.now()
-//        val millisUntilIdle = 60_000 - ChronoUnit.MILLIS.between(timeFrom10StepsAgo, currentNow)
-//        Timber.i("Time To Idle: $millisUntilIdle")
-//        val millisUntilNextMinute = (60 - currentNow.second)*1_000.toLong()
-//        val nextUpdate = if(millisUntilIdle > 0) millisUntilIdle.coerceAtMost(millisUntilNextMinute) else millisUntilNextMinute
-//        Timber.i("Next Update: $nextUpdate")
-//        Handler.createAsync(Looper.getMainLooper()).postDelayed({
-//            now = LocalDateTime.now()
-//        }, nextUpdate)
-//    }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
         Column(verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
             .fillMaxWidth()
