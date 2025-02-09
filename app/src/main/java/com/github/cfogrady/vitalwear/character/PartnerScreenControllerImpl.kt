@@ -35,10 +35,8 @@ internal class PartnerScreenControllerImpl(
         get() = firmwareManager.getFirmware().value!!.characterFirmwareSprites
     override val dailyStepCount: StateFlow<Int> = stepSensorService.dailySteps
     override val emoteBitmaps = combineStates(characterManager.getCharacterFlow(), heartRateService.currentExerciseLevel) { character, exerciseLevel->
-        if(character == null) {
-            emptyList<Bitmap>()
-        }
-        character!!.getEmoteBitmaps(characterFirmwareSprites.emoteFirmwareSprites, exerciseLevel)
+        character?.getEmoteBitmaps(characterFirmwareSprites.emoteFirmwareSprites, exerciseLevel)
+            ?: emptyList<Bitmap>()
     }
     override val vitals = characterManager.getCharacterFlow().mapState {
         if(it == null) {
@@ -72,10 +70,7 @@ internal class PartnerScreenControllerImpl(
 
     override fun getCharacterBitmaps(coroutineScope: CoroutineScope): StateFlow<List<Bitmap>> {
         return combineStates(characterManager.getCharacterFlow(), getIdleFlow(coroutineScope), heartRateService.currentExerciseLevel) {character, idle, exerciseLevel->
-            if(character == null) {
-                emptyList<Bitmap>()
-            }
-            character!!.getNormalBitmaps(!idle, exerciseLevel)
+            character?.getNormalBitmaps(!idle, exerciseLevel) ?: emptyList()
         }
     }
 

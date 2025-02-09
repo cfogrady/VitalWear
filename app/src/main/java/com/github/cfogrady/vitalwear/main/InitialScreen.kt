@@ -21,14 +21,14 @@ fun InitialScreen(
     val characterLoadingDone by controller.characterLoadingDone.collectAsStateWithLifecycle()
     val backgroundLoaded by controller.backgroundLoaded.collectAsStateWithLifecycle()
 
-    if(!characterLoadingDone || firmwareState == FirmwareManager.FirmwareState.Loading || !backgroundLoaded) {
+    if(firmwareState == FirmwareManager.FirmwareState.Missing) {
+        controller.activityLaunchers.firmwareLoadingLauncher.invoke()
+    } else if(!characterLoadingDone || firmwareState == FirmwareManager.FirmwareState.Loading || !backgroundLoaded) {
         Timber.i("Loading in mainScreen")
         Timber.i("Character Manager Initialized: $characterLoadingDone")
         Timber.i("Firmware Manager Initialized: $firmwareState")
         Timber.i("Background Initialized: $backgroundLoaded")
         Loading(loadingText = "Initializing") {}
-    } else if(firmwareState == FirmwareManager.FirmwareState.Missing) {
-        controller.activityLaunchers.firmwareLoadingLauncher.invoke()
     } else {
         GameStateScreen(controller)
     }

@@ -19,6 +19,7 @@ interface MainScreenController {
     val vitalBoxFactory: VitalBoxFactory
     val menuFirmwareSprites: MenuFirmwareSprites
     val partnerScreenController: PartnerScreenController
+    val hasActivePartner: StateFlow<Boolean>
     val readyToTransform: StateFlow<Boolean>
     val characterPhase: StateFlow<Int>
     val characterIsAsleep: StateFlow<Boolean>
@@ -57,6 +58,7 @@ interface MainScreenController {
         firmware: Firmware = Firmware.loadPreviewFirmwareFromDisk(context),
         override val menuFirmwareSprites: MenuFirmwareSprites = firmware.menuFirmwareSprites,
         private val background: StateFlow<Bitmap> = MutableStateFlow(BitmapFactory.decodeStream(context.assets.open("test_background.png"))),
+        override val hasActivePartner: StateFlow<Boolean> = MutableStateFlow(true),
         override val characterPhase: StateFlow<Int> = MutableStateFlow(2),
         override val characterIsAsleep: StateFlow<Boolean> = MutableStateFlow(false),
         characterSprites: CharacterSprites = CardSpriteLoader.loadTestCharacterSprites(context, 3),

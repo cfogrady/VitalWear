@@ -27,6 +27,9 @@ class MainScreenControllerImpl(
 ) : MainScreenController {
     override val menuFirmwareSprites: MenuFirmwareSprites
         get() = firmwareManager.getFirmware().value!!.menuFirmwareSprites
+
+    override val hasActivePartner: StateFlow<Boolean> = characterManager.getCharacterFlow().mapState { it != null }
+
     override val readyToTransform: StateFlow<Boolean> = characterManager.getCharacterFlow().transformState<VBCharacter?, ExpectedTransformation?>(null) {
         if(it == null) {
             emit(null)
@@ -74,7 +77,7 @@ class MainScreenControllerImpl(
     }
 
     override fun launchTransferActivity() {
-        activityLaunchers.transformLauncher()
+        activityLaunchers.transferLauncher()
     }
 
     override fun launchBattleActivity() {

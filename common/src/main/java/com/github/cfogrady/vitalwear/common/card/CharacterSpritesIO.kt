@@ -9,8 +9,6 @@ import com.github.cfogrady.vb.dim.sprite.SpriteData.SpriteDimensions
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import timber.log.Timber
 import java.io.File
-import java.io.FileFilter
-import java.io.FilenameFilter
 
 class CharacterSpritesIO(private val spriteFileIO: SpriteFileIO, private val spriteBitmapConverter: SpriteBitmapConverter) {
     companion object {
@@ -36,6 +34,7 @@ class CharacterSpritesIO(private val spriteFileIO: SpriteFileIO, private val spr
 
         // sprite to use when they key is missing.
         private val BACKUP_SPRITES = mapOf(
+            Pair(WALK2, IDLE1),
             Pair(RUN1, IDLE1),
             Pair(RUN2, IDLE2),
             Pair(TRAIN1, IDLE1),
@@ -98,13 +97,6 @@ class CharacterSpritesIO(private val spriteFileIO: SpriteFileIO, private val spr
         for(entry in spriteToSpriteType) {
             saveCharacterSpriteFile(applicationContext, entry.value, characterDir, entry.key)
         }
-    }
-
-    private fun loadCharacterSpriteOrDefault(file: File, default: Bitmap): Bitmap {
-        if(!file.exists()) {
-            return default
-        }
-        return loadCharacterSprite(file)
     }
 
     internal fun smallerThanStandardSize(dimensions: SpriteDimensions): Boolean {

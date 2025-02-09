@@ -40,12 +40,13 @@ fun MainScreen(controller: MainScreenController) {
     val vitalBoxFactory = controller.vitalBoxFactory
     val bitmapScaler = controller.bitmapScaler
     val coroutineScope = rememberCoroutineScope()
+    val hasActivePartner by controller.hasActivePartner.collectAsStateWithLifecycle()
     val readyToTransform by controller.readyToTransform.collectAsStateWithLifecycle()
     val sleeping by controller.characterIsAsleep.collectAsStateWithLifecycle()
     val phase by controller.characterPhase.collectAsStateWithLifecycle()
     val background by remember{controller.getBackgroundFlow()}.collectAsStateWithLifecycle()
-    val menuPages = remember(key1 = phase, key2 = sleeping) {
-        buildMenuPages(phase, sleeping)
+    val menuPages = remember(key1 = hasActivePartner, key2 = phase, key3 = sleeping) {
+        buildMenuPages(hasActivePartner, phase, sleeping)
     }
     if (readyToTransform && !sleeping) {
         controller.launchTransformActivity()
@@ -151,12 +152,14 @@ fun MainScreen(controller: MainScreenController) {
     }
 }
 
-fun buildMenuPages(phase: Int, sleeping: Boolean): ArrayList<MenuOption> {
+fun buildMenuPages(hasActivePartner: Boolean, phase: Int, sleeping: Boolean): ArrayList<MenuOption> {
     val menuPages = ArrayList<MenuOption>()
-    menuPages.add(PARTNER)
-    menuPages.add(STATS)
+    if(hasActivePartner) {
+        menuPages.add(PARTNER)
+        menuPages.add(STATS)
+    }
     menuPages.add(CHARACTER)
-    if(!sleeping) {
+    if(hasActivePartner && !sleeping) {
         menuPages.add(TRAINING)
         if(phase > 1) {
             menuPages.add(ADVENTURE)
@@ -164,7 +167,9 @@ fun buildMenuPages(phase: Int, sleeping: Boolean): ArrayList<MenuOption> {
         }
     }
     menuPages.add(TRANSFER)
-    menuPages.add(SLEEP)
+    if(hasActivePartner) {
+        menuPages.add(SLEEP)
+    }
     menuPages.add(SETTINGS)
     return menuPages
 }
