@@ -13,17 +13,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.material.Text
 import com.github.cfogrady.vitalwear.background.BackgroundManager
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.common.util.ActivityHelper
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
+import com.github.cfogrady.vitalwear.util.flow.filterState
+import com.github.cfogrady.vitalwear.util.flow.transformState
 
 class TrainingMenuActivity : ComponentActivity() {
 
@@ -45,8 +49,13 @@ class TrainingMenuActivity : ComponentActivity() {
                 finish()
             }
         }
+        val backgroundOnLoad = backgroundManager.selectedBackground.value!! //do here because value shouldn't be called within composable
         setContent {
-            val background = backgroundManager.selectedBackground.value!!
+            val background by backgroundManager.selectedBackground.transformState(backgroundOnLoad) {
+                if(it != null) {
+                    emit(it!!)
+                }
+            }.collectAsStateWithLifecycle()
             vitalBoxFactory.VitalBox {
                 bitmapScaler.ScaledBitmap(bitmap = background, contentDescription = "Background", alignment = Alignment.BottomCenter)
                 val pagerState = rememberPagerState(pageCount = {4})
