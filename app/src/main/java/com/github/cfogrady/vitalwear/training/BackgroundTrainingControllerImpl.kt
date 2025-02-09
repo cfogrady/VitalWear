@@ -9,35 +9,32 @@ import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
+import com.github.cfogrady.vitalwear.util.flow.filterState
+import com.github.cfogrady.vitalwear.util.flow.transformState
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.transform
 
 class BackgroundTrainingControllerImpl(
     override val backgroundHeight: Dp,
     override val vitalBoxFactory: VitalBoxFactory,
     override val bitmapScaler: BitmapScaler,
-    backgroundManager: BackgroundManager,
+    private val backgroundManager: BackgroundManager,
     private val firmwareManager: FirmwareManager,
     private val trainingService: TrainingService,
-    characterManager: CharacterManager,
-    coroutineScope: CoroutineScope): BackgroundTrainingController {
-    override val background: StateFlow<Bitmap> = backgroundManager.selectedBackground
-        .filter { it != null }
-        .transform { emit(it!!) }
-        // Test... this may need to be changed to an actual fake background
-        .stateIn(coroutineScope, SharingStarted.Lazily, backgroundManager.selectedBackground.value!!)
+    characterManager: CharacterManager): BackgroundTrainingController {
+    override val background: StateFlow<Bitmap> // create our flow on the get because the initial state needs to be non-null
+        get() = backgroundManager.selectedBackground
+        .filterState { it != null }
+        .transformState(initialValue = backgroundManager.selectedBackground.value!!) { emit(it!!) }
     override val firmware: Firmware
         get() = firmwareManager.getFirmware().value!!
     override val backgroundTrainingProgress: StateFlow<Float>
         get() = trainingService.backgroundTrainingProgressTracker!!.progressFlow()
     override val partnerTrainingSprites: StateFlow<List<Bitmap>> =
         characterManager.getCharacterFlow()
-            .filter { it != null }
-            .map { GameState.TRAINING.bitmaps(it!!.characterSprites.sprites) }
-            .stateIn(coroutineScope, SharingStarted.Lazily, listOf())
+            .transformState(initialValue = emptyList()) {
+                if(it != null) {
+                    emit(GameState.TRAINING.bitmaps(it.characterSprites.sprites))
+                }
+
+            }
 }

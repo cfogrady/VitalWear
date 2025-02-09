@@ -47,7 +47,7 @@ class ActiveAdventure(private val context: Context, private val service: Adventu
     }
 
     fun stepsTowardsGoal(currentStepValue: Int = dailySteps.value): Int {
-        return dailySteps.value - startingStep
+        return currentStepValue - startingStep
     }
 
     private fun currentBackground(): Bitmap {

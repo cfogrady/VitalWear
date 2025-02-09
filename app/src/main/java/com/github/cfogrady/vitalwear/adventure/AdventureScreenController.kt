@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 interface AdventureScreenController {
 
     companion object {
-        fun buildAdventureScreenController(vitalWearApp: VitalWearApp, context: Context, adventureActivityLauncher: AdventureActivityLauncher, coroutineScope: CoroutineScope): AdventureScreenController {
+        fun buildAdventureScreenController(vitalWearApp: VitalWearApp, context: Context, adventureActivityLauncher: AdventureActivityLauncher): AdventureScreenController {
             return AdventureScreenControllerImpl(
                 backgroundHeight = vitalWearApp.backgroundHeight,
                 vitalBoxFactory = vitalWearApp.vitalBoxFactory,
@@ -28,7 +28,6 @@ interface AdventureScreenController {
                 adventureActivityLauncher = adventureActivityLauncher,
                 characterFlow = vitalWearApp.characterManager.getCharacterFlow(),
                 context = context,
-                coroutineScope = coroutineScope
             )
         }
     }

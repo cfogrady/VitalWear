@@ -8,24 +8,22 @@ import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.training.BackgroundTrainingController
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 interface InitialScreenController {
 
     companion object {
-        fun buildInitialScreenController(context: Context, vitalWearApp: VitalWearApp, activityLaunchers: ActivityLaunchers, coroutineScope: CoroutineScope): InitialScreenController {
+        fun buildInitialScreenController(context: Context, vitalWearApp: VitalWearApp, activityLaunchers: ActivityLaunchers): InitialScreenController {
             return InitialScreenControllerImpl(
                 characterManager = vitalWearApp.characterManager,
                 firmwareManager = vitalWearApp.firmwareManager,
                 backgroundManager = vitalWearApp.backgroundManager,
                 gameState = vitalWearApp.gameState,
-                backgroundTrainingController = BackgroundTrainingController.buildBackgroundTrainingController(vitalWearApp, coroutineScope),
-                adventureScreenController = AdventureScreenController.buildAdventureScreenController(vitalWearApp, activityLaunchers.context, activityLaunchers.adventureActivityLauncher, coroutineScope),
+                backgroundTrainingController = BackgroundTrainingController.buildBackgroundTrainingController(vitalWearApp),
+                adventureScreenController = AdventureScreenController.buildAdventureScreenController(vitalWearApp, context, activityLaunchers.adventureActivityLauncher),
                 mainScreenController = MainScreenController.buildMainScreenController(vitalWearApp, activityLaunchers),
                 activityLaunchers = activityLaunchers,
-                coroutineScope,
                 )
         }
 

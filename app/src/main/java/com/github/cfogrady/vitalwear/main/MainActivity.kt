@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val activityLaunchers = buildActivityLaunchers()
         setContent {
-            InitialScreen(InitialScreenController.buildInitialScreenController(this, application as VitalWearApp, activityLaunchers, this.lifecycleScope))
+            InitialScreen(InitialScreenController.buildInitialScreenController(this, application as VitalWearApp, activityLaunchers))
         }
     }
 

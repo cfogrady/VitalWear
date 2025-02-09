@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface BackgroundTrainingController {
     companion object {
-        fun buildBackgroundTrainingController(vitalWearApp: VitalWearApp, coroutineScope: CoroutineScope): BackgroundTrainingController {
+        fun buildBackgroundTrainingController(vitalWearApp: VitalWearApp): BackgroundTrainingController {
             return BackgroundTrainingControllerImpl(
                 backgroundHeight = vitalWearApp.backgroundHeight,
                 vitalBoxFactory = vitalWearApp.vitalBoxFactory,
@@ -27,7 +27,6 @@ interface BackgroundTrainingController {
                 firmwareManager = vitalWearApp.firmwareManager,
                 trainingService = vitalWearApp.trainingService,
                 characterManager = vitalWearApp.characterManager,
-                coroutineScope = coroutineScope,
             )
         }
     }
