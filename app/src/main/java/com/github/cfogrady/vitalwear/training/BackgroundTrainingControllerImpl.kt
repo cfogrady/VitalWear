@@ -12,6 +12,7 @@ import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.util.flow.filterState
 import com.github.cfogrady.vitalwear.util.flow.transformState
 import kotlinx.coroutines.flow.StateFlow
+import timber.log.Timber
 
 class BackgroundTrainingControllerImpl(
     override val backgroundHeight: Dp,
@@ -20,7 +21,7 @@ class BackgroundTrainingControllerImpl(
     private val backgroundManager: BackgroundManager,
     private val firmwareManager: FirmwareManager,
     private val trainingService: TrainingService,
-    characterManager: CharacterManager): BackgroundTrainingController {
+    private val characterManager: CharacterManager): BackgroundTrainingController {
     override val background: StateFlow<Bitmap> // create our flow on the get because the initial state needs to be non-null
         get() = backgroundManager.selectedBackground
         .filterState { it != null }
@@ -29,12 +30,11 @@ class BackgroundTrainingControllerImpl(
         get() = firmwareManager.getFirmware().value!!
     override val backgroundTrainingProgress: StateFlow<Float>
         get() = trainingService.backgroundTrainingProgressTracker!!.progressFlow()
-    override val partnerTrainingSprites: StateFlow<List<Bitmap>> =
-        characterManager.getCharacterFlow()
-            .transformState(initialValue = emptyList()) {
+    override val partnerTrainingSprites: StateFlow<List<Bitmap>>
+        get() = characterManager.getCharacterFlow()
+            .transformState(initialValue = GameState.TRAINING.bitmaps(characterManager.getCurrentCharacter()!!.characterSprites.sprites)) {
                 if(it != null) {
                     emit(GameState.TRAINING.bitmaps(it.characterSprites.sprites))
                 }
-
             }
 }

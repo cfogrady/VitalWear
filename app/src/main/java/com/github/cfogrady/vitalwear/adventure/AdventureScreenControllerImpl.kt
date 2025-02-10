@@ -20,7 +20,7 @@ class AdventureScreenControllerImpl(
     private val firmwareManager: FirmwareManager,
     private val adventureService: AdventureService,
     private val adventureActivityLauncher: AdventureActivityLauncher,
-    characterFlow: StateFlow<VBCharacter?>,
+    private val characterFlow: StateFlow<VBCharacter?>,
     private val context: Context,
 ) : AdventureScreenController {
     override val firmware: Firmware
@@ -35,7 +35,8 @@ class AdventureScreenControllerImpl(
         get() = adventureService.activeAdventure!!.goal
     override val adventureBackground: StateFlow<Bitmap>
         get() = adventureService.activeAdventure!!.currentBackground
-    override val partnerWalkingSprites = characterFlow.mapState {
+    override val partnerWalkingSprites
+        get() = characterFlow.mapState {
             it?.characterSprites?.sprites?.subList(CharacterSprites.WALK_1, CharacterSprites.WALK_2+1)?: emptyList()
         }
 

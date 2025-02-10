@@ -64,7 +64,7 @@ fun PartnerScreen(controller: AdventureScreenController) {
     var now by remember { mutableStateOf(LocalDateTime.now()) }
     val bitmapScaler = controller.bitmapScaler
     val firmware = controller.firmware
-    val partnerWalkingSprites by controller.partnerWalkingSprites.collectAsStateWithLifecycle()
+    val partnerWalkingSprites by remember {controller.partnerWalkingSprites}.collectAsStateWithLifecycle()
     val stepsToGoal by controller.stepsToGoal.collectAsStateWithLifecycle()
     val goal by controller.goal.collectAsStateWithLifecycle()
     LaunchedEffect(true) {
