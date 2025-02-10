@@ -32,10 +32,15 @@ class BackgroundManager(private val cardSpritesIO: CardSpritesIO, private val sh
         Static,
     }
 
+    // standard background
     private val _selectedBackground = MutableStateFlow<Bitmap?>(null)
     val selectedBackground: StateFlow<Bitmap?> = _selectedBackground
+
+    // preferred battle background option
     private val _battleBackgroundOption = MutableStateFlow(BattleBackgroundType.PartnerCard)
     val battleBackgroundOption: StateFlow<BattleBackgroundType> = _battleBackgroundOption
+
+    // static battle background when set
     private val _staticBattleBackground = MutableStateFlow<Bitmap?>(null)
     val staticBattleBackground: StateFlow<Bitmap?> = _staticBattleBackground
     lateinit var firmware: Firmware

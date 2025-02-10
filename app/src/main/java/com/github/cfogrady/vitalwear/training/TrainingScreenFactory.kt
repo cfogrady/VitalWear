@@ -159,43 +159,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
                 finished.invoke()
             }, durationSeconds * 1000L)
         }
-        ActiveTraining(characterSprites, progress, firmware, sweatIcon)
-    }
-
-    @Composable
-    fun ActiveTraining(characterSprites: List<Bitmap>, progress: Float, firmware: Firmware, sweatIcon: Bitmap) {
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-            var spriteIdx = (progress * firmware.trainingFirmwareSprites.trainingState.size).toInt()
-            if (spriteIdx >= firmware.trainingFirmwareSprites.trainingState.size) {
-                spriteIdx = firmware.trainingFirmwareSprites.trainingState.size-1
-            }
-            bitmapScaler.ScaledBitmap(bitmap = firmware.trainingFirmwareSprites.trainingState[spriteIdx], contentDescription = "level", modifier = Modifier.offset(y = backgroundHeight.times(.2f)))
-        }
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
-                .fillMaxWidth()
-                .offset(
-                    y = backgroundHeight.times(
-                        PositionOffsetRatios.CHARACTER_OFFSET_FROM_BOTTOM
-                    )
-                )) {
-                var spriteIdx by remember { mutableStateOf(0) }
-                LaunchedEffect(key1 = spriteIdx) {
-                    Handler(Looper.getMainLooper()!!).postDelayed({
-                        spriteIdx = (spriteIdx + 1) % 2
-                    }, 500)
-                }
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomEnd) {
-                    if(spriteIdx % 2 == 1) {
-                        bitmapScaler.ScaledBitmap(bitmap = sweatIcon, contentDescription = "Emote")
-                    }
-                }
-                bitmapScaler.ScaledBitmap(
-                    bitmap = characterSprites[spriteIdx],
-                    contentDescription = "Character"
-                )
-            }
-        }
+        ActiveTraining(characterSprites, progress, firmware, sweatIcon, backgroundHeight, bitmapScaler)
     }
 
     @Composable

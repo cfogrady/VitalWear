@@ -7,11 +7,8 @@ import androidx.wear.watchface.complications.data.*
 import androidx.wear.watchface.complications.datasource.ComplicationDataSourceService
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import com.github.cfogrady.vitalwear.VitalWearApp
-import com.github.cfogrady.vitalwear.activity.MainActivity
-import com.github.cfogrady.vitalwear.common.character.CharacterSprites
+import com.github.cfogrady.vitalwear.main.MainActivity
 import com.github.cfogrady.vitalwear.data.GameState
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 
 class PartnerComplicationService : ComplicationDataSourceService() {
 
@@ -66,7 +63,7 @@ class PartnerComplicationService : ComplicationDataSourceService() {
         } else if(character == null) {
             Icon.createWithBitmap(maybeFirmware.value!!.insertCardIcon)
         } else if (gameState != GameState.IDLE) {
-            val characterBitmaps = gameState.bitmaps(character)
+            val characterBitmaps = gameState.bitmaps(character.characterSprites.sprites)
             Icon.createWithBitmap(characterBitmaps[state.spriteIndex])
         } else {
             val vitalWearApp = (application as VitalWearApp)

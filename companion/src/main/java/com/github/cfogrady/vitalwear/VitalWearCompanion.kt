@@ -9,6 +9,7 @@ import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
 import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
 import com.github.cfogrady.vitalwear.common.card.SpriteFileIO
 import com.github.cfogrady.vitalwear.card.ValidatedCardManager
+import com.github.cfogrady.vitalwear.common.card.CardSpriteLoader
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.common.data.migrations.CreateAndPopulateMaxAdventureCompletionCardMeta
 import com.github.cfogrady.vitalwear.common.log.TinyLogTree
@@ -45,7 +46,8 @@ class VitalWearCompanion : Application() {
         val spriteBitmapConverter = SpriteBitmapConverter()
         val characterSpritesIO = CharacterSpritesIO(spritesFileIO, spriteBitmapConverter)
         val cardSpritesIO = CardSpritesIO(spritesFileIO, spriteBitmapConverter)
-        cardLoader = CardLoader(characterSpritesIO, cardSpritesIO, database.cardMetaEntityDao(), database.speciesEntityDao(), database.transformationEntityDao(), database.adventureEntityDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao(), DimReader())
+        val cardSpriteLoader = CardSpriteLoader()
+        cardLoader = CardLoader(characterSpritesIO, cardSpriteLoader, cardSpritesIO, database.cardMetaEntityDao(), database.speciesEntityDao(), database.transformationEntityDao(), database.adventureEntityDao(), database.attributeFusionEntityDao(), database.specificFusionEntityDao(), DimReader())
         validatedCardManager = ValidatedCardManager(database.validatedCardEntityDao())
     }
 }

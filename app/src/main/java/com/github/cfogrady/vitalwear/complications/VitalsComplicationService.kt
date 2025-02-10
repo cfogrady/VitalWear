@@ -7,7 +7,7 @@ import androidx.wear.watchface.complications.data.*
 import androidx.wear.watchface.complications.datasource.ComplicationDataSourceService
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import com.github.cfogrady.vitalwear.VitalWearApp
-import com.github.cfogrady.vitalwear.activity.MainActivity
+import com.github.cfogrady.vitalwear.main.MainActivity
 
 class VitalsComplicationService : ComplicationDataSourceService() {
     // TODO: Merge common logic with PartnerComplicationService into shared dependency
