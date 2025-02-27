@@ -48,7 +48,6 @@ class MainActivity : ComponentActivity() {
         }
         val activityLaunchers = buildActivityLaunchers()
         setContent {
-            val saveData by saveDataRepository.saveDataFlow.collectAsStateWithLifecycle(SaveData.getDefaultInstance())
             InitialScreen(InitialScreenController.buildInitialScreenController(this, application as VitalWearApp, activityLaunchers))
         }
     }
