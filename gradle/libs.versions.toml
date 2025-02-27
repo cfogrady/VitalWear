@@ -41,6 +41,7 @@ wear = "1.3.0"
 workRuntime = "2.10.0"
 wearToolingPreview = "1.0.0"
 composeMaterial3 = "1.0.0-alpha31"
+datastore = "1.1.2"
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
@@ -95,6 +96,7 @@ tiny-log = { module = "org.tinylog:tinylog-api", version.ref = "tinyLog"}
 tiny-log-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinyLog"}
 androidx-wear-tooling-preview = { group = "androidx.wear", name = "wear-tooling-preview", version.ref = "wearToolingPreview" }
 compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "composeMaterial3" }
+androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

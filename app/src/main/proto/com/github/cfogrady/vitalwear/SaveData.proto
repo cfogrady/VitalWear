@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+option java_package = "com.github.cfogrady.vitalwear";
+option java_multiple_files = true;
+
+message SaveData {
+  bool permissions_already_requested = 1;
+}

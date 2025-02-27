@@ -80,6 +80,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var firmwareManager: FirmwareManager
     val partnerComplicationState = PartnerComplicationState()
     private val characterSpritesIO = CharacterSpritesIO(spriteFileIO, spriteBitmapConverter)
+    lateinit var saveDataRepository: SaveDataRepository
 
     private val sensorThreadHandler = SensorThreadHandler()
     private lateinit var imageScaler : ImageScaler
@@ -123,7 +124,9 @@ class VitalWearApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        //TODO: Should replace sharedPreferences with datastore (see https://developer.android.com/training/data-storage/shared-preferences)
+
+        //TODO: Migrate sharedPreferences over to saveDataRepository
+        saveDataRepository = SaveDataRepository(this.saveDataStore)
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val tinyLogTree = TinyLogTree(this)
         logSettings = LogSettings(sharedPreferences, tinyLogTree)
