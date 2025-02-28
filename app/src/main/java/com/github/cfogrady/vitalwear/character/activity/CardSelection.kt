@@ -28,14 +28,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 
-interface NewCharacterController {
+interface CardSelectController {
     val cardsImported: StateFlow<Int>
     fun loadCards(): List<CardMetaEntity>
     fun selectCard(card: CardMetaEntity)
 }
 
 @Composable
-fun BuildScreen(controller: NewCharacterController) {
+fun CardSelection(controller: CardSelectController) {
     val cardsImported by controller.cardsImported.collectAsState()
     var loaded by remember { mutableStateOf(false) }
     var cards by remember { mutableStateOf(ArrayList<CardMetaEntity>() as List<CardMetaEntity>) }
@@ -77,8 +77,8 @@ fun BuildScreen(controller: NewCharacterController) {
     showBackground = true
 )
 @Composable
-private fun PreviewBuildScreen() {
-    BuildScreen(object: NewCharacterController{
+private fun PreviewCardSelection() {
+    CardSelection(object: CardSelectController{
         override val cardsImported: StateFlow<Int>
             get() = MutableStateFlow(0)
 

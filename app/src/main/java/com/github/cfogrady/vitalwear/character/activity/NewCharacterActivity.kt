@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 /**
  * NewCardActivity is used to start a new character.
  */
-class NewCharacterActivity : ComponentActivity(), NewCharacterController {
+class NewCharacterActivity : ComponentActivity(), CardSelectController {
 
     companion object {
         const val NEW_CHARACTER_SELECTED_FLAG = "newCharacterStarted"
@@ -35,7 +35,7 @@ class NewCharacterActivity : ComponentActivity(), NewCharacterController {
         cardSpritesIO = (application as VitalWearApp).cardSpriteIO
         cardMetaEntityDao = (application as VitalWearApp).cardMetaEntityDao
         setContent {
-            BuildScreen(this)
+            CardSelection(this)
         }
     }
 
