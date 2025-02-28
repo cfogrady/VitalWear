@@ -16,10 +16,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.ScalingLazyColumn
-import androidx.wear.compose.material.Text
-import androidx.wear.compose.material.items
+import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
+import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.material3.Button
+import androidx.wear.compose.material3.Text
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.github.cfogrady.vitalwear.common.card.CardType
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
