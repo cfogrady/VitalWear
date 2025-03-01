@@ -28,10 +28,10 @@ class CharacterSettings(val characterId: Int,
     }
 
     enum class AllowedBattles(val descr: String, val showOnDIM: Boolean, val interactsWithDIMs: Boolean) {
-        CARD_ONLY("Random Battles Against Card Only", true, false),
-        ALL_FRANCHISE("Random Battles Against Any Card In Franchise", true, false),
-        ALL_FRANCHISE_AND_DIM("Random Battles Against Any Card In Franchise And DIMs", false, true),
-        ALL("Random Battles Against Any Card", false, true);
+        CARD_ONLY("Card Only", true, false),
+        ALL_FRANCHISE("Any Card In Franchise", true, false),
+        ALL_FRANCHISE_AND_DIM("Any Card In Franchise And DIMs", false, true),
+        ALL("Any Card", false, true);
     }
 
     constructor(parcel: Parcel) : this(
