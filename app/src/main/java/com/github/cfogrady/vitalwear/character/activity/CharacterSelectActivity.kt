@@ -29,8 +29,6 @@ class CharacterSelectActivity : ComponentActivity(), CharacterSelectionControlle
 
     class NewCharacter(val cardMeta: CardMeta, val slotId: Int)
 
-    private val vitalWearApp: VitalWearApp = application as VitalWearApp
-
     // used between launchers which have to be instantiated in onCreate.
     private lateinit var selectedNewCharacter : NewCharacter
 
@@ -38,6 +36,20 @@ class CharacterSelectActivity : ComponentActivity(), CharacterSelectionControlle
     override val loadingNewCharacterState: StateFlow<Boolean> = loadingNewCharacterFlow
 
     private lateinit var newCharacterLauncher: ((Intent)->Unit)->Unit
+
+    // Need to do as getter because the application is null when first initialized.
+    private val vitalWearApp: VitalWearApp
+        get() = application as VitalWearApp
+    override val vitalBoxFactory: VitalBoxFactory
+        get() = vitalWearApp.vitalBoxFactory
+    override val bitmapScaler: BitmapScaler
+        get() = vitalWearApp.bitmapScaler
+    override val supportIcon: Bitmap
+        get() = vitalWearApp.firmwareManager.getFirmware().value!!.characterFirmwareSprites.supportIcon
+    override val backgroundFlow: StateFlow<Bitmap>
+        get() = vitalWearApp.backgroundManager.selectedBackground.transformState(vitalWearApp.backgroundManager.selectedBackground.value!!) {
+        it!!
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,12 +120,5 @@ class CharacterSelectActivity : ComponentActivity(), CharacterSelectionControlle
             vitalWearApp.characterManager.swapToCharacter(applicationContext, character)
             finish()
         }
-    }
-
-    override val vitalBoxFactory: VitalBoxFactory = vitalWearApp.vitalBoxFactory
-    override val bitmapScaler: BitmapScaler = vitalWearApp.bitmapScaler
-    override val supportIcon: Bitmap = vitalWearApp.firmwareManager.getFirmware().value!!.characterFirmwareSprites.supportIcon
-    override val backgroundFlow: StateFlow<Bitmap> = vitalWearApp.backgroundManager.selectedBackground.transformState(vitalWearApp.backgroundManager.selectedBackground.value!!) {
-        it!!
     }
 }
