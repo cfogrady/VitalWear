@@ -1,6 +1,7 @@
 package com.github.cfogrady.vitalwear.common.card
 
 import android.content.Context
+import android.graphics.Bitmap
 import com.github.cfogrady.vb.dim.card.BemCard
 import com.github.cfogrady.vb.dim.card.Card
 import com.github.cfogrady.vb.dim.card.DimCard
@@ -13,6 +14,20 @@ class CardSpriteLoader {
         private const val DIM_FIRST_CHARACTER_SPRITE_INDEX = 10
         private const val BEM_FIRST_CHARACTER_SPRITE_INDEX = 54
         private const val BEM_SPRITES_PER_CHARACTER = 14
+
+        fun loadTestCardSprite(
+            context: Context,
+            spriteIdx: Int,
+            cardName: String = "test_dim.bin",
+        ): Bitmap {
+            val dimReader = DimReader()
+            val spriteBitmapConverter = SpriteBitmapConverter()
+            context.assets.open(cardName).use {
+                val card = dimReader.readCard(it, false)
+                val sprite = card.spriteData.sprites[spriteIdx]
+                return spriteBitmapConverter.getBitmap(sprite)
+            }
+        }
 
         fun loadTestCharacterSprites(
             context: Context,

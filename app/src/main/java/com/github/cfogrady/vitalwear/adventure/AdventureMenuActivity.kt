@@ -1,71 +1,94 @@
 package com.github.cfogrady.vitalwear.adventure
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.pager.VerticalPager
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.Button
-import androidx.wear.compose.material.ScalingLazyColumn
-import androidx.wear.compose.material.Text
-import androidx.wear.compose.material.items
-import com.github.cfogrady.vitalwear.Loading
+import androidx.compose.ui.unit.Dp
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.adventure.firmware.AdventureFirmwareSprites
-import com.github.cfogrady.vitalwear.character.activity.LOADING_TEXT
-import com.github.cfogrady.vitalwear.character.data.BEMCharacter
+import com.github.cfogrady.vitalwear.card.CardMeta
 import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntity
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
-import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntityDao
-import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
+import com.github.cfogrady.vitalwear.common.character.CharacterSprites
+import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
+import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.firmware.Firmware
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope.coroutineContext
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlin.coroutines.coroutineContext
+import com.github.cfogrady.vitalwear.settings.CharacterSettings
 
-class AdventureMenuActivity : ComponentActivity() {
+class AdventureMenuActivity : ComponentActivity(), AdventureMenuScreenController {
 
+    // need to use getters because application is during construction
+    val vitalWearApp: VitalWearApp
+        get() = application as VitalWearApp
 
+    override val firmware: Firmware
+        get() = vitalWearApp.firmwareManager.getFirmware().value!!
+    override val backgroundHeight: Dp
+        get() = vitalWearApp.backgroundHeight
+    override val characterSprites: CharacterSprites
+        get() = vitalWearApp.characterManager.getCurrentCharacter()!!.characterSprites
+    override val adventureFirmwareSprites: AdventureFirmwareSprites
+        get() = firmware.adventureFirmwareSprites
+    override val bitmapScaler: BitmapScaler
+        get() = vitalWearApp.bitmapScaler
+    override val vitalBoxFactory: VitalBoxFactory
+        get() = vitalWearApp.vitalBoxFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val character = (application as VitalWearApp).characterManager.getCurrentCharacter()!!
-        val firmware = (application as VitalWearApp).firmwareManager.getFirmware().value!!
-        val adventureMenuScreenFactory: AdventureMenuScreenFactory = (application as VitalWearApp).adventureMenuScreenFactory
         setContent {
-            adventureMenuScreenFactory.AdventureMenuScreen(
-                context = this,
-                firmware = firmware,
-                character = character,
-            ) {
+            AdventureMenuScreen(this) {
                 finish()
             }
         }
     }
 
+    override fun loadCardBackgrounds(cardName: String): List<Bitmap> {
+        return vitalWearApp.cardSpriteIO.loadCardBackgrounds(this, cardName)
+    }
+
+    override fun loadCardIcon(cardName: String): Bitmap {
+        return vitalWearApp.cardSpriteIO.loadCardSprite(this, cardName, CardSpritesIO.ICON)
+    }
+
+    override fun startAdventure(cardName: String, selectedAdventureId: Int) {
+        val foregroundIntent = Intent(this, AdventureForegroundService::class.java)
+        foregroundIntent.putExtra(AdventureForegroundService.CARD_NAME, cardName)
+        foregroundIntent.putExtra(AdventureForegroundService.STARTING_ADVENTURE, selectedAdventureId)
+        startForegroundService(foregroundIntent)
+    }
+
+    override fun loadCardsForActiveCharacterFranchise(): List<CardMetaEntity> {
+        val activeCharacter = vitalWearApp.characterManager.getCurrentCharacter()!!
+        val characterSettings = activeCharacter.settings
+        val franchise = activeCharacter.getFranchise()
+        return when(characterSettings.allowedBattles) {
+            CharacterSettings.AllowedBattles.ALL_FRANCHISE_AND_DIM -> {
+                vitalWearApp.cardMetaEntityDao.getByFranchiseIn(listOf(franchise, CardMeta.DIM_FRANCHISE))
+            }
+            CharacterSettings.AllowedBattles.ALL -> {
+                vitalWearApp.cardMetaEntityDao.getAll()
+            }
+            else -> vitalWearApp.cardMetaEntityDao.getByFranchise(franchise)
+        }
+    }
+
+    override suspend fun getMaxAdventureForActiveCharacter(cardName: String): Int {
+        val activeCharacter = vitalWearApp.characterManager.getCurrentCharacter()!!
+        return vitalWearApp.adventureService.getCurrentMaxAdventure(activeCharacter.characterStats.id, cardName)
+    }
+
+    override suspend fun getAdventuresForCard(cardName: String): List<AdventureEntity> {
+        return vitalWearApp.adventureService.getAdventureOptions(cardName)
+    }
+
+    override suspend fun loadBossCharacterBitmap(cardName: String, characterId: Int): Bitmap {
+        val bossSpecies = vitalWearApp.database.speciesEntityDao().getCharacterByCardAndCharacterId(cardName, characterId)
+        return vitalWearApp.characterSpritesIO.loadCharacterBitmapFile(this, bossSpecies.spriteDirName, CharacterSpritesIO.IDLE1)!!
+    }
 
 }

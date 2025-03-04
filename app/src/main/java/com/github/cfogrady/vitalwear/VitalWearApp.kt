@@ -79,7 +79,7 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var backgroundManager: BackgroundManager
     lateinit var firmwareManager: FirmwareManager
     val partnerComplicationState = PartnerComplicationState()
-    private val characterSpritesIO = CharacterSpritesIO(spriteFileIO, spriteBitmapConverter)
+    val characterSpritesIO = CharacterSpritesIO(spriteFileIO, spriteBitmapConverter)
     lateinit var saveDataRepository: SaveDataRepository
 
     private val sensorThreadHandler = SensorThreadHandler()
