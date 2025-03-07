@@ -8,9 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,10 +44,11 @@ fun MainScreen(controller: MainScreenController) {
     val vitalBoxFactory = controller.vitalBoxFactory
     val bitmapScaler = controller.bitmapScaler
     val coroutineScope = rememberCoroutineScope()
-    val hasActivePartner by controller.hasActivePartner.collectAsStateWithLifecycle()
+    val vbCharacter by controller.activePartner.collectAsStateWithLifecycle()
     val readyToTransform by controller.readyToTransform.collectAsStateWithLifecycle()
-    val sleeping by controller.characterIsAsleep.collectAsStateWithLifecycle()
-    val phase by controller.characterPhase.collectAsStateWithLifecycle()
+    var sleeping by remember(vbCharacter) { mutableStateOf(vbCharacter?.characterStats?.sleeping?: false) }
+    val phase by remember(vbCharacter, readyToTransform) { mutableIntStateOf(vbCharacter?.speciesStats?.phase?: 0) }
+    val hasActivePartner = vbCharacter != null
     val background by remember{controller.getBackgroundFlow()}.collectAsStateWithLifecycle()
     val menuPages = remember(key1 = hasActivePartner, key2 = phase, key3 = sleeping) {
         buildMenuPages(hasActivePartner, phase, sleeping)
@@ -131,6 +136,7 @@ fun MainScreen(controller: MainScreenController) {
                             val sleepButton = if(sleeping) controller.menuFirmwareSprites.wakeIcon else controller.menuFirmwareSprites.sleepIcon
                             bitmapScaler.ScaledBitmap(bitmap = sleepButton, contentDescription = "Sleep", modifier = Modifier.clickable {
                                 controller.toggleSleep()
+                                sleeping = !sleeping
                                 coroutineScope.launch {
                                     pagerState.scrollToPage(0)
                                 }

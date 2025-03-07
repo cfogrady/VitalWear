@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.character.PartnerScreenController
+import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.common.card.CardSpriteLoader
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
@@ -19,10 +20,8 @@ interface MainScreenController {
     val vitalBoxFactory: VitalBoxFactory
     val menuFirmwareSprites: MenuFirmwareSprites
     val partnerScreenController: PartnerScreenController
-    val hasActivePartner: StateFlow<Boolean>
+    val activePartner: StateFlow<VBCharacter?>
     val readyToTransform: StateFlow<Boolean>
-    val characterPhase: StateFlow<Int>
-    val characterIsAsleep: StateFlow<Boolean>
     fun getBackgroundFlow(): StateFlow<Bitmap>
 
     fun launchStatsMenuActivity()
@@ -58,9 +57,7 @@ interface MainScreenController {
         firmware: Firmware = Firmware.loadPreviewFirmwareFromDisk(context),
         override val menuFirmwareSprites: MenuFirmwareSprites = firmware.menuFirmwareSprites,
         private val background: StateFlow<Bitmap> = MutableStateFlow(BitmapFactory.decodeStream(context.assets.open("test_background.png"))),
-        override val hasActivePartner: StateFlow<Boolean> = MutableStateFlow(true),
-        override val characterPhase: StateFlow<Int> = MutableStateFlow(2),
-        override val characterIsAsleep: StateFlow<Boolean> = MutableStateFlow(false),
+        override val activePartner: StateFlow<VBCharacter?> = MutableStateFlow(null),
         characterSprites: CharacterSprites = CardSpriteLoader.loadTestCharacterSprites(context, 3),
         override val partnerScreenController: PartnerScreenController =
             PartnerScreenController.EmptyController(

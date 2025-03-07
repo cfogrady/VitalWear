@@ -28,7 +28,7 @@ class MainScreenControllerImpl(
     override val menuFirmwareSprites: MenuFirmwareSprites
         get() = firmwareManager.getFirmware().value!!.menuFirmwareSprites
 
-    override val hasActivePartner: StateFlow<Boolean> = characterManager.getCharacterFlow().mapState { it != null }
+    override val activePartner: StateFlow<VBCharacter?> = characterManager.getCharacterFlow()
 
     override val readyToTransform: StateFlow<Boolean> = characterManager.getCharacterFlow().transformState<VBCharacter?, ExpectedTransformation?>(null) {
         if(it == null) {
@@ -39,13 +39,6 @@ class MainScreenControllerImpl(
             )
         }
     }.mapState { it != null }
-    override val characterPhase = characterManager.getCharacterFlow().mapState {
-        it?.speciesStats?.phase ?: 0
-    }
-
-    override val characterIsAsleep: StateFlow<Boolean> = characterManager.getCharacterFlow().mapState {
-        it?.characterStats?.sleeping ?: false
-    }
 
     override fun getBackgroundFlow(): StateFlow<Bitmap> {
         return backgroundManager.selectedBackground.transformState(
