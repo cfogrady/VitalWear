@@ -46,8 +46,8 @@ internal class CharacterTransferImpl(context: Context): CharacterTransfer {
     }
 
     override fun receiveCharacterFrom(senderName: String, receive: suspend (Character)->Boolean): StateFlow<Result> {
-        var result = MutableStateFlow(Result.TRANSFERRING)
-        var packetsReceived = 0
+        val result = MutableStateFlow(Result.TRANSFERRING)
+        val packetsReceived = 0
         nearbyP2PConnection.onReceive = { payload ->
             CoroutineScope(Dispatchers.IO).launch {
                 when(packetsReceived) {
