@@ -152,7 +152,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
     private fun Exercise(partner: VBCharacter, firmware: Firmware, progressFlow: StateFlow<Float>, durationSeconds: Int, finished:() -> Unit) {
         val characterSprites = arrayListOf(partner.characterSprites.sprites[CharacterSprites.TRAIN_1],
             partner.characterSprites.sprites[CharacterSprites.TRAIN_2])
-        val sweatIcon = firmware.characterFirmwareSprites.emoteFirmwareSprites.sweatEmote
+        val sweatIcon = firmware.characterIconBitmaps.emoteBitmaps.sweatEmote
         val progress by progressFlow.collectAsState()
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({

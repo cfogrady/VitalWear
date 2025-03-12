@@ -87,7 +87,7 @@ private fun PreviewActiveTraining() {
         characterSprites = trainingSprites,
         progress = 0.6f,
         firmware = firmware,
-        sweatIcon = firmware.characterFirmwareSprites.emoteFirmwareSprites.sweatEmote,
+        sweatIcon = firmware.characterIconBitmaps.emoteBitmaps.sweatEmote,
         backgroundHeight = imageScaler.calculateBackgroundHeight(),
         bitmapScaler = bitmapScaler,
     )

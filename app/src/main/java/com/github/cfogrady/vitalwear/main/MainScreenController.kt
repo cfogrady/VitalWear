@@ -12,13 +12,14 @@ import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.ImageScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.firmware.Firmware
+import com.github.cfogrady.vitalwear.firmware.components.MenuBitmaps
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 interface MainScreenController {
     val bitmapScaler: BitmapScaler
     val vitalBoxFactory: VitalBoxFactory
-    val menuFirmwareSprites: MenuFirmwareSprites
+    val menuBitmaps: MenuBitmaps
     val partnerScreenController: PartnerScreenController
     val activePartner: StateFlow<VBCharacter?>
     val readyToTransform: StateFlow<Boolean>
@@ -55,7 +56,7 @@ interface MainScreenController {
         override val bitmapScaler: BitmapScaler = BitmapScaler(imageScaler),
         override val vitalBoxFactory: VitalBoxFactory = VitalBoxFactory(imageScaler, ImageScaler.VB_WIDTH.toInt(), ImageScaler.VB_HEIGHT.toInt()),
         firmware: Firmware = Firmware.loadPreviewFirmwareFromDisk(context),
-        override val menuFirmwareSprites: MenuFirmwareSprites = firmware.menuFirmwareSprites,
+        override val menuBitmaps: MenuBitmaps = firmware.menuBitmaps,
         private val background: StateFlow<Bitmap> = MutableStateFlow(BitmapFactory.decodeStream(context.assets.open("test_background.png"))),
         override val activePartner: StateFlow<VBCharacter?> = MutableStateFlow(null),
         characterSprites: CharacterSprites = CardSpriteLoader.loadTestCharacterSprites(context, 3),

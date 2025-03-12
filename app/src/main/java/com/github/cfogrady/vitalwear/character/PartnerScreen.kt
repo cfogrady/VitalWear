@@ -37,7 +37,7 @@ fun PartnerScreen(controller: PartnerScreenController) {
     val characterBitmaps by remember {controller.getCharacterBitmaps(coroutineScope)}.collectAsStateWithLifecycle()
     val emoteBitmaps by controller.emoteBitmaps.collectAsStateWithLifecycle()
     val vitals by controller.vitals.collectAsStateWithLifecycle()
-    val emojiHeight = bitmapScaler.scaledDimension(firmware.emoteFirmwareSprites.sweatEmote.height)
+    val emojiHeight = bitmapScaler.scaledDimension(firmware.emoteBitmaps.sweatEmote.height)
     val now by remember {controller.getTimeFlow(coroutineScope)}.collectAsStateWithLifecycle()
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {

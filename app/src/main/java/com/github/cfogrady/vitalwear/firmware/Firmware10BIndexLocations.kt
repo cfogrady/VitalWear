@@ -1,8 +1,51 @@
 package com.github.cfogrady.vitalwear.firmware
 
-class Firmware10BIndexLocations: FirmwareIndexLocations {
-    override val spritePackageLocation = 0x80000
-    override val spriteDimensionsLocation = 0x90a4
+import com.github.cfogrady.vitalwear.firmware.components.AdventureSpriteIndexes
+import com.github.cfogrady.vitalwear.firmware.components.CharacterIconSpriteIndexes
+import com.github.cfogrady.vitalwear.firmware.components.MenuSpriteIndexes
+
+class Firmware10BIndexLocations() {
+    companion object {
+
+        val characterIconSpriteIndexesInstance = CharacterIconSpriteIndexes(
+            stepsIconIdx = 55,
+            vitalsIconIdx = 54,
+            supportIconIdx = 408
+        )
+
+        val menuSpriteIndexesInstance = MenuSpriteIndexes(
+            characterSelectorIcon = 267,
+            trainingMenuIcon = 265,
+            adventureMenuIcon = 266,
+            statsIconIdx = 264,
+            connectIcon = 268,
+            stopIcon = 44,
+            stopText = 169,
+            settingsMenuIcon = 269,
+            sleep = 76,
+            wakeup = 75,
+        )
+
+        val adventureSpriteIndexes = AdventureSpriteIndexes(
+            advImageIdx = 206,
+            missionImageIdx = 204,
+            nextMissionIdx = 61,
+            stageIdx = 170,
+            flagIdx = 56,
+            hiddenIdx = 58,
+            underlineIdx = 88,
+        )
+
+        val instance = FirmwareIndexLocations(
+            spritePackageLocation = 0x80000,
+            spriteDimensionsLocation = 0x90a4,
+            characterIconSpriteIndexes = characterIconSpriteIndexesInstance,
+            menuSpriteIndexes = menuSpriteIndexesInstance,
+            adventureSpriteIndexes = adventureSpriteIndexes,
+        )
+    }
+} {
+
 
     override val timerIcon = 81
     override val insertCardIcon = 38
@@ -13,8 +56,6 @@ class Firmware10BIndexLocations: FirmwareIndexLocations {
     override val rayOfLightBackground = 5
     override val orangeBackground = 6
     override val blueBackground = 7
-    override val stepsIcon = 55
-    override val vitalsIcon = 54
     override val battleBackground = 350
     override val smallAttackStartIdx = 310
     override val smallAttackEndIdx = 350
@@ -53,7 +94,6 @@ class Firmware10BIndexLocations: FirmwareIndexLocations {
     override val failedIdx = 176
     override val goodIdx = 184
     override val greatIdx = 185
-    override val supportIdx = 408
     override val bpIdx = 409
     override val hpIdx = 410
     override val apIdx = 411
@@ -71,16 +111,4 @@ class Firmware10BIndexLocations: FirmwareIndexLocations {
     override val transformationSquatIcon = 78
     override val transformationLocked = 418
 
-    override val menuIndexLocations = FirmwareIndexLocations.MenuIndexLocations(
-        characterSelectorIcon = 267,
-        trainingMenuIcon = 265,
-        adventureMenuIcon = 266,
-        statsIconIdx = 264,
-        connectIcon = 268,
-        stopIcon = 44,
-        stopText = 169,
-        settingsMenuIcon = 269,
-        sleep = 76,
-        wakeup = 75,
-    )
 }

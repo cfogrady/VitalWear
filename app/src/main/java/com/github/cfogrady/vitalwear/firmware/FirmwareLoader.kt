@@ -1,26 +1,15 @@
 package com.github.cfogrady.vitalwear.firmware
 
 import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
-import com.github.cfogrady.vb.dim.sprite.SpriteData
 import com.github.cfogrady.vb.dim.sprite.SpriteData.Sprite
 import com.github.cfogrady.vb.dim.util.RelativeByteOffsetInputStream
-import com.github.cfogrady.vitalwear.adventure.firmware.AdventureFirmwareSprites
-import com.github.cfogrady.vitalwear.battle.data.BattleFirmwareSprites
-import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
-import com.github.cfogrady.vitalwear.character.data.EmoteFirmwareSprites
+import com.github.cfogrady.vitalwear.firmware.components.AdventureBitmaps
+import com.github.cfogrady.vitalwear.firmware.components.BattleBitmaps
+import com.github.cfogrady.vitalwear.firmware.components.CharacterIconBitmaps
+import com.github.cfogrady.vitalwear.firmware.components.EmoteBitmaps
 import com.github.cfogrady.vitalwear.character.transformation.TransformationFirmwareSprites
 import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
-import com.github.cfogrady.vitalwear.main.MenuFirmwareSprites
-import com.github.cfogrady.vitalwear.main.MenuFirmwareSprites.Companion.ADVENTURE_MENU_ICON
-import com.github.cfogrady.vitalwear.main.MenuFirmwareSprites.Companion.CHARACTER_SELECTOR_ICON
-import com.github.cfogrady.vitalwear.main.MenuFirmwareSprites.Companion.CONNECT_ICON
-import com.github.cfogrady.vitalwear.main.MenuFirmwareSprites.Companion.SETTINGS_MENU_ICON
-import com.github.cfogrady.vitalwear.main.MenuFirmwareSprites.Companion.SLEEP
-import com.github.cfogrady.vitalwear.main.MenuFirmwareSprites.Companion.STATS_ICON_IDX
-import com.github.cfogrady.vitalwear.main.MenuFirmwareSprites.Companion.STOP_ICON
-import com.github.cfogrady.vitalwear.main.MenuFirmwareSprites.Companion.STOP_TEXT
-import com.github.cfogrady.vitalwear.main.MenuFirmwareSprites.Companion.TRAINING_MENU_ICON
-import com.github.cfogrady.vitalwear.main.MenuFirmwareSprites.Companion.WAKEUP
+import com.github.cfogrady.vitalwear.firmware.components.MenuBitmaps
 import com.github.cfogrady.vitalwear.training.TrainingFirmwareSprites
 import com.google.common.collect.Lists
 import timber.log.Timber
@@ -50,10 +39,12 @@ class FirmwareLoader(private val bemSpriteReader: BemSpriteReader, private val s
         val missionIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.missionIdx])
         val failedIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.failedIdx])
 
+        val emoteBitmaps = buildEmoteFirmwareSprites(firmwareIndexLocations, sprites)
+
         return Firmware(
-            characterFirmwareSprites(firmwareIndexLocations, sprites),
-            MenuFirmwareSprites.menuFirmwareSprites(spriteBitmapConverter, sprites),
-            AdventureFirmwareSprites.fromSprites(sprites, spriteBitmapConverter),
+            CharacterIconBitmaps.build(firmwareIndexLocations.characterIconSpriteIndexes, emoteBitmaps, sprites, spriteBitmapConverter),
+            MenuBitmaps.build(firmwareIndexLocations.menuSpriteIndexes, sprites, spriteBitmapConverter),
+            AdventureBitmaps.fromSprites(sprites, spriteBitmapConverter),
             battleFirmwareSprites(firmwareIndexLocations, sprites),
             trainingFirmwareSprites(firmwareIndexLocations, sprites),
             transformationFirmwareSprites(firmwareIndexLocations, sprites),
@@ -68,28 +59,7 @@ class FirmwareLoader(private val bemSpriteReader: BemSpriteReader, private val s
         )
     }
 
-    private fun characterFirmwareSprites(firmwareIndexLocations: FirmwareIndexLocations, sprites: List<Sprite>): CharacterFirmwareSprites {
-        val stepsIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.stepsIcon])
-        val vitalsIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.vitalsIcon])
-        val supportIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.supportIdx])
-        return CharacterFirmwareSprites(stepsIcon, vitalsIcon, supportIcon, emoteFirmwareSprites(firmwareIndexLocations, sprites))
-    }
-
-    private fun menuFirmwareSprites(firmwareIndexLocations: FirmwareIndexLocations, firmwareSprites: List<Sprite>): MenuFirmwareSprites {
-        val statsMenuIcon = spriteBitmapConverter.getBitmap(firmwareSprites[STATS_ICON_IDX])
-        val characterSelectorIcon = spriteBitmapConverter.getBitmap(firmwareSprites[CHARACTER_SELECTOR_ICON])
-        val trainingMenuIcon = spriteBitmapConverter.getBitmap(firmwareSprites[TRAINING_MENU_ICON])
-        val adventureIcon = spriteBitmapConverter.getBitmap(firmwareSprites[ADVENTURE_MENU_ICON])
-        val connectMenuIcon = spriteBitmapConverter.getBitmap(firmwareSprites[CONNECT_ICON])
-        val stopText = spriteBitmapConverter.getBitmap(firmwareSprites[STOP_TEXT])
-        val stopIcon = spriteBitmapConverter.getBitmap(firmwareSprites[STOP_ICON])
-        val settingsIcon = spriteBitmapConverter.getBitmap(firmwareSprites[SETTINGS_MENU_ICON])
-        val sleepIcon = spriteBitmapConverter.getBitmap(firmwareSprites[SLEEP])
-        val wakeIcon = spriteBitmapConverter.getBitmap(firmwareSprites[WAKEUP])
-        return MenuFirmwareSprites(statsMenuIcon, characterSelectorIcon, trainingMenuIcon, adventureIcon, stopText, stopIcon, connectMenuIcon, settingsIcon, sleepIcon, wakeIcon)
-    }
-
-    private fun emoteFirmwareSprites(firmwareIndexLocations: FirmwareIndexLocations, sprites: List<Sprite>) : EmoteFirmwareSprites {
+    private fun buildEmoteFirmwareSprites(firmwareIndexLocations: FirmwareIndexLocations, sprites: List<Sprite>) : EmoteBitmaps {
         val happyEmote = spriteBitmapConverter.getBitmaps(sprites.subList(
             firmwareIndexLocations.happyEmoteStartIdx, firmwareIndexLocations.happyEmoteEndIdx
         ))
@@ -101,10 +71,10 @@ class FirmwareLoader(private val bemSpriteReader: BemSpriteReader, private val s
             firmwareIndexLocations.injuredEmoteStartIdx, firmwareIndexLocations.injuredEmoteEndIdx
         ))
         val sleepEmote = spriteBitmapConverter.getBitmaps(sprites.subList(firmwareIndexLocations.sleepEmoteStartIdx, firmwareIndexLocations.sleepEmoteEndIdx))
-        return EmoteFirmwareSprites(happyEmote, loseEmote, sweatEmote, injuredEmote, sleepEmote)
+        return EmoteBitmaps(happyEmote, loseEmote, sweatEmote, injuredEmote, sleepEmote)
     }
 
-    private fun battleFirmwareSprites(firmwareIndexLocations: FirmwareIndexLocations, sprites: List<Sprite>): BattleFirmwareSprites {
+    private fun battleFirmwareSprites(firmwareIndexLocations: FirmwareIndexLocations, sprites: List<Sprite>): BattleBitmaps {
         val battleBackground = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.battleBackground])
         val attackSprites = spriteBitmapConverter.getBitmaps(sprites.subList(
             firmwareIndexLocations.smallAttackStartIdx, firmwareIndexLocations.smallAttackEndIdx
@@ -125,7 +95,7 @@ class FirmwareLoader(private val bemSpriteReader: BemSpriteReader, private val s
         val vitalRangeSprites = spriteBitmapConverter.getBitmaps(sprites.subList(
             firmwareIndexLocations.vitalsRangeStartIdx, firmwareIndexLocations.vitalsRangeEndIdx
         ))
-        return BattleFirmwareSprites(attackSprites, largeAttackSprites, battleBackground, partnerHPIcons, opponentHPIcons, hitSprites, vitalRangeSprites)
+        return BattleBitmaps(attackSprites, largeAttackSprites, battleBackground, partnerHPIcons, opponentHPIcons, hitSprites, vitalRangeSprites)
     }
 
     private fun transformationFirmwareSprites(firmwareIndexLocations: FirmwareIndexLocations, sprites: List<Sprite>): TransformationFirmwareSprites {

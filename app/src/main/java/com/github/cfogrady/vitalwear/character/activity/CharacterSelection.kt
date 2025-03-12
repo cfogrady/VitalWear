@@ -207,7 +207,7 @@ private fun PreviewPagedCharacterSelectionMenu() {
         override fun swapToCharacter(character: CharacterPreview) {}
         override val vitalBoxFactory: VitalBoxFactory = vitalBoxFactory
         override val bitmapScaler: BitmapScaler = bitmapScaler
-        override val supportIcon: Bitmap = firmware.characterFirmwareSprites.supportIcon
+        override val supportIcon: Bitmap = firmware.characterIconBitmaps.supportIcon
     }
     PagedCharacterSelectionMenu(characterPreviews, controller)
 }
@@ -230,7 +230,7 @@ private fun PreviewPreviewCharacter() {
         override fun swapToCharacter(character: CharacterPreview) {}
         override val vitalBoxFactory: VitalBoxFactory = vitalBoxFactory
         override val bitmapScaler: BitmapScaler = bitmapScaler
-        override val supportIcon: Bitmap = firmware.characterFirmwareSprites.supportIcon
+        override val supportIcon: Bitmap = firmware.characterIconBitmaps.supportIcon
     }
     val characterPreview = CharacterPreview(
         cardName = "TestCard",

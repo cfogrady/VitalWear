@@ -3,13 +3,13 @@ package com.github.cfogrady.vitalwear.firmware
 import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
 import com.github.cfogrady.vb.dim.sprite.SpriteData.Sprite
 import com.github.cfogrady.vb.dim.util.RelativeByteOffsetInputStream
-import com.github.cfogrady.vitalwear.adventure.firmware.AdventureFirmwareSprites
-import com.github.cfogrady.vitalwear.battle.data.BattleFirmwareSprites
-import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
-import com.github.cfogrady.vitalwear.character.data.EmoteFirmwareSprites
+import com.github.cfogrady.vitalwear.firmware.components.AdventureBitmaps
+import com.github.cfogrady.vitalwear.firmware.components.BattleBitmaps
+import com.github.cfogrady.vitalwear.firmware.components.CharacterIconBitmaps
+import com.github.cfogrady.vitalwear.firmware.components.EmoteBitmaps
 import com.github.cfogrady.vitalwear.character.transformation.TransformationFirmwareSprites
 import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
-import com.github.cfogrady.vitalwear.main.MenuFirmwareSprites
+import com.github.cfogrady.vitalwear.firmware.components.MenuBitmaps
 import com.github.cfogrady.vitalwear.training.TrainingFirmwareSprites
 import com.google.common.collect.Lists
 import timber.log.Timber
@@ -114,8 +114,8 @@ class Firmware20ALoader(private val bemSpriteReader: BemSpriteReader, private va
 
         return Firmware(
             characterFirmwareSprites(sprites),
-            MenuFirmwareSprites.menuFirmwareSprites(spriteBitmapConverter, sprites),
-            AdventureFirmwareSprites.fromSprites(sprites, spriteBitmapConverter),
+            MenuBitmaps.menuFirmwareSprites(spriteBitmapConverter, sprites),
+            AdventureBitmaps.fromSprites(sprites, spriteBitmapConverter),
             battleFirmwareSprites(sprites),
             trainingFirmwareSprites(sprites),
             transformationFirmwareSprites(sprites),
@@ -130,14 +130,14 @@ class Firmware20ALoader(private val bemSpriteReader: BemSpriteReader, private va
         )
     }
 
-    private fun characterFirmwareSprites(sprites: List<Sprite>): CharacterFirmwareSprites {
+    private fun characterFirmwareSprites(sprites: List<Sprite>): CharacterIconBitmaps {
         val stepsIcon = spriteBitmapConverter.getBitmap(sprites[Firmware10BLoader.STEPS_ICON])
         val vitalsIcon = spriteBitmapConverter.getBitmap(sprites[Firmware10BLoader.VITALS_ICON])
         val supportIcon = spriteBitmapConverter.getBitmap(sprites[Firmware10BLoader.SUPPORT_IDX])
-        return CharacterFirmwareSprites(stepsIcon, vitalsIcon, supportIcon, emoteFirmwareSprites(sprites))
+        return CharacterIconBitmaps(stepsIcon, vitalsIcon, supportIcon, emoteFirmwareSprites(sprites))
     }
 
-    private fun emoteFirmwareSprites(sprites: List<Sprite>) : EmoteFirmwareSprites {
+    private fun emoteFirmwareSprites(sprites: List<Sprite>) : EmoteBitmaps {
         val happyEmote = spriteBitmapConverter.getBitmaps(sprites.subList(
             Firmware10BLoader.HAPPY_EMOTE_START_IDX, Firmware10BLoader.HAPPY_EMOTE_END_IDX
         ))
@@ -152,10 +152,10 @@ class Firmware20ALoader(private val bemSpriteReader: BemSpriteReader, private va
             Firmware10BLoader.SLEEP_EMOTE_START_IDX,
             Firmware10BLoader.SLEEP_EMOTE_END_IDX
         ))
-        return EmoteFirmwareSprites(happyEmote, loseEmote, sweatEmote, injuredEmote, sleepEmote)
+        return EmoteBitmaps(happyEmote, loseEmote, sweatEmote, injuredEmote, sleepEmote)
     }
 
-    private fun battleFirmwareSprites(sprites: List<Sprite>): BattleFirmwareSprites {
+    private fun battleFirmwareSprites(sprites: List<Sprite>): BattleBitmaps {
         val battleBackground = spriteBitmapConverter.getBitmap(sprites[Firmware10BLoader.BATTLE_BACKGROUND])
         val attackSprites = spriteBitmapConverter.getBitmaps(sprites.subList(
             Firmware10BLoader.SMALL_ATTACK_START_IDX, Firmware10BLoader.SMALL_ATTACK_END_IDX
@@ -179,7 +179,7 @@ class Firmware20ALoader(private val bemSpriteReader: BemSpriteReader, private va
         val vitalRangeSprites = spriteBitmapConverter.getBitmaps(sprites.subList(
             Firmware10BLoader.VITALS_RANGE_START_IDX, Firmware10BLoader.VITALS_RANGE_END_IDX
         ))
-        return BattleFirmwareSprites(attackSprites, largeAttackSprites, battleBackground, partnerHPIcons, opponentHPIcons, hitSprites, vitalRangeSprites)
+        return BattleBitmaps(attackSprites, largeAttackSprites, battleBackground, partnerHPIcons, opponentHPIcons, hitSprites, vitalRangeSprites)
     }
 
     private fun transformationFirmwareSprites(sprites: List<Sprite>): TransformationFirmwareSprites {

@@ -36,7 +36,7 @@ import androidx.wear.compose.material3.Button
 import androidx.wear.compose.material3.Text
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.github.cfogrady.vitalwear.Loading
-import com.github.cfogrady.vitalwear.adventure.firmware.AdventureFirmwareSprites
+import com.github.cfogrady.vitalwear.firmware.components.AdventureBitmaps
 import com.github.cfogrady.vitalwear.character.activity.LOADING_TEXT
 import com.github.cfogrady.vitalwear.common.card.CardSpriteLoader
 import com.github.cfogrady.vitalwear.common.card.CardType
@@ -144,7 +144,7 @@ private fun AdventureMenuScreenPreview() {
 
                 )
         }
-        override val adventureFirmwareSprites: AdventureFirmwareSprites = firmware.adventureFirmwareSprites
+        val adventureBitmaps: AdventureBitmaps = firmware.adventureBitmaps
 
         override suspend fun getMaxAdventureForActiveCharacter(cardName: String): Int {
             return 2
@@ -239,7 +239,7 @@ private fun CardSelectionPreview() {
 interface ZoneSelectionController {
     val bitmapScaler: BitmapScaler
     val vitalBoxFactory: VitalBoxFactory
-    val adventureFirmwareSprites: AdventureFirmwareSprites
+    val adventureBitmaps: AdventureBitmaps
 
     suspend fun getMaxAdventureForActiveCharacter(cardName: String): Int
     suspend fun getAdventuresForCard(cardName: String): List<AdventureEntity>
@@ -279,16 +279,16 @@ fun ZoneSelection(
                         }, verticalArrangement = Arrangement.SpaceAround, horizontalAlignment = Alignment.CenterHorizontally) {
                         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                             bitmapScaler.ScaledBitmap(
-                                bitmap = controller.adventureFirmwareSprites.advImage,
+                                bitmap = controller.adventureBitmaps.advImage,
                                 contentDescription = "adv text"
                             )
                             bitmapScaler.ScaledBitmap(
-                                bitmap = controller.adventureFirmwareSprites.missionImage,
+                                bitmap = controller.adventureBitmaps.missionImage,
                                 contentDescription = "mission text"
                             )
                         }
                         bitmapScaler.ScaledBitmap(bitmap = cardIcon, contentDescription = "card icon")
-                        bitmapScaler.ScaledBitmap(bitmap = controller.adventureFirmwareSprites.stageImage, contentDescription = "stage text")
+                        bitmapScaler.ScaledBitmap(bitmap = controller.adventureBitmaps.stageImage, contentDescription = "stage text")
                         Text(text = formatNumber(it+1, 2), fontWeight = FontWeight.Bold, fontSize = 3.em)
                     }
                 }
@@ -328,7 +328,7 @@ private fun ZoneSelectionPreview() {
     val bitmapScaler = BitmapScaler(imageScaler)
     val vitalBoxFactory = VitalBoxFactory(imageScaler)
     val controller = object: ZoneSelectionController {
-        override val adventureFirmwareSprites = firmware.adventureFirmwareSprites
+        override val adventureBitmaps = firmware.adventureBitmaps
         override suspend fun getMaxAdventureForActiveCharacter(cardName: String): Int {
             return 4
         }
@@ -362,7 +362,7 @@ private fun ZoneSelectionPreview() {
 interface ZoneConfirmController {
     val bitmapScaler: BitmapScaler
     val vitalBoxFactory: VitalBoxFactory
-    val adventureFirmwareSprites: AdventureFirmwareSprites
+    val adventureBitmaps: AdventureBitmaps
 
     suspend fun loadBossCharacterBitmap(cardName: String, characterId: Int): Bitmap
 }
@@ -370,7 +370,7 @@ interface ZoneConfirmController {
 @Composable
 fun ZoneConfirm(controller: ZoneConfirmController, cardMetaEntity: CardMetaEntity, adventureEntity: AdventureEntity, backgrounds: List<Bitmap>, onConfirm: () -> Unit) {
     val bitmapScaler = controller.bitmapScaler
-    val adventureFirmwareSprites = controller.adventureFirmwareSprites
+    val adventureFirmwareSprites = controller.adventureBitmaps
     var loading by remember { mutableStateOf(true) }
     var boss by remember { mutableStateOf<Bitmap?>(null) }
     if(loading) {
@@ -425,7 +425,7 @@ private fun ZoneConfirmPreview() {
     val vitalBoxFactory = VitalBoxFactory(imageScaler)
     val controllerContext = LocalContext.current
     val controller = object: ZoneConfirmController {
-        override val adventureFirmwareSprites = firmware.adventureFirmwareSprites
+        override val adventureBitmaps = firmware.adventureBitmaps
         override val vitalBoxFactory = vitalBoxFactory
         override val bitmapScaler = bitmapScaler
 

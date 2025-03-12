@@ -7,7 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.ui.unit.Dp
 import com.github.cfogrady.vitalwear.VitalWearApp
-import com.github.cfogrady.vitalwear.adventure.firmware.AdventureFirmwareSprites
+import com.github.cfogrady.vitalwear.firmware.components.AdventureBitmaps
 import com.github.cfogrady.vitalwear.card.CardMeta
 import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
@@ -31,8 +31,8 @@ class AdventureMenuActivity : ComponentActivity(), AdventureMenuScreenController
         get() = vitalWearApp.backgroundHeight
     override val characterSprites: CharacterSprites
         get() = vitalWearApp.characterManager.getCurrentCharacter()!!.characterSprites
-    override val adventureFirmwareSprites: AdventureFirmwareSprites
-        get() = firmware.adventureFirmwareSprites
+    val adventureBitmaps: AdventureBitmaps
+        get() = firmware.adventureBitmaps
     override val bitmapScaler: BitmapScaler
         get() = vitalWearApp.bitmapScaler
     override val vitalBoxFactory: VitalBoxFactory

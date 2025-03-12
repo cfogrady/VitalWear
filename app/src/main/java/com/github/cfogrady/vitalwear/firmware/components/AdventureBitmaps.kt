@@ -1,10 +1,10 @@
-package com.github.cfogrady.vitalwear.adventure.firmware
+package com.github.cfogrady.vitalwear.firmware.components
 
 import android.graphics.Bitmap
 import com.github.cfogrady.vb.dim.sprite.SpriteData.Sprite
 import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
 
-class AdventureFirmwareSprites(
+class AdventureBitmaps(
     val advImage: Bitmap,
     val missionImage: Bitmap,
     val nextMissionImage: Bitmap,
@@ -22,8 +22,8 @@ class AdventureFirmwareSprites(
         const val HIDDEN_IDX = 58
         const val UNDERLINE_IDX = 88
 
-        fun fromSprites(sprites: List<Sprite>, spriteToBitmapConverter: SpriteBitmapConverter): AdventureFirmwareSprites {
-            return AdventureFirmwareSprites(
+        fun fromSprites(sprites: List<Sprite>, spriteToBitmapConverter: SpriteBitmapConverter): AdventureBitmaps {
+            return AdventureBitmaps(
                 spriteToBitmapConverter.getBitmap(sprites[ADV_IMAGE_IDX]),
                 spriteToBitmapConverter.getBitmap(sprites[MISSION_IMAGE_IDX]),
                 spriteToBitmapConverter.getBitmap(sprites[NEXT_MISSION_IDX]),

@@ -51,10 +51,10 @@ fun BackgroundTraining(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         bitmapScalingFactory.ScaledBitmap(
-                            bitmap = firmware.menuFirmwareSprites.stopText,
+                            bitmap = firmware.menuBitmaps.stopText,
                             contentDescription = "stop")
                         bitmapScalingFactory.ScaledBitmap(
-                            bitmap = firmware.menuFirmwareSprites.stopIcon,
+                            bitmap = firmware.menuBitmaps.stopIcon,
                             contentDescription = "training")
                     }
                 }
@@ -68,7 +68,7 @@ fun BackgroundTrainingPartner(
     controller: BackgroundTrainingController,
     firmware: Firmware) {
     val trainingSprites by remember {controller.partnerTrainingSprites}.collectAsStateWithLifecycle()
-    val swearIcon = firmware.characterFirmwareSprites.emoteFirmwareSprites.sweatEmote
+    val swearIcon = firmware.characterIconBitmaps.emoteBitmaps.sweatEmote
     val progress by controller.backgroundTrainingProgress.collectAsStateWithLifecycle()
     ActiveTraining(
         characterSprites = trainingSprites,
