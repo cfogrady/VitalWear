@@ -32,7 +32,6 @@ class Firmware10BLoader(private val bemSpriteReader: BemSpriteReader, private va
         const val BLUE_BACKGROUND = 7
         const val STEPS_ICON = 55
         const val VITALS_ICON = 54
-        const val BATTLE_ICON = 370
         const val BATTLE_BACKGROUND = 350
         const val SMALL_ATTACK_START_IDX = 310
         const val SMALL_ATTACK_END_IDX = 350
@@ -155,7 +154,6 @@ class Firmware10BLoader(private val bemSpriteReader: BemSpriteReader, private va
     }
 
     private fun battleFirmwareSprites(sprites: List<Sprite>): BattleFirmwareSprites {
-        val battleIcon = spriteBitmapConverter.getBitmap(sprites[BATTLE_ICON])
         val battleBackground = spriteBitmapConverter.getBitmap(sprites[BATTLE_BACKGROUND])
         val attackSprites = spriteBitmapConverter.getBitmaps(sprites.subList(
             SMALL_ATTACK_START_IDX, SMALL_ATTACK_END_IDX
@@ -175,7 +173,7 @@ class Firmware10BLoader(private val bemSpriteReader: BemSpriteReader, private va
         val hitSprites = spriteBitmapConverter.getBitmaps(sprites.subList(HIT_START_IDX, HIT_END_IDX))
         val vitalRangeSprites = spriteBitmapConverter.getBitmaps(sprites.subList(
             VITALS_RANGE_START_IDX, VITALS_RANGE_END_IDX))
-        return BattleFirmwareSprites(attackSprites, largeAttackSprites, battleBackground, battleIcon, partnerHPIcons, opponentHPIcons, hitSprites, vitalRangeSprites)
+        return BattleFirmwareSprites(attackSprites, largeAttackSprites, battleBackground, partnerHPIcons, opponentHPIcons, hitSprites, vitalRangeSprites)
     }
 
     private fun transformationFirmwareSprites(sprites: List<Sprite>): TransformationFirmwareSprites {
