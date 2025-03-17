@@ -1,5 +1,6 @@
 package com.github.cfogrady.vitalwear.firmware
 
+import android.graphics.Bitmap
 import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
 import com.github.cfogrady.vb.dim.sprite.SpriteData.Sprite
 import com.github.cfogrady.vb.dim.util.RelativeByteOffsetInputStream
@@ -11,6 +12,9 @@ import com.github.cfogrady.vitalwear.firmware.components.MenuBitmaps
 import com.github.cfogrady.vitalwear.firmware.components.TrainingBitmaps
 import com.github.cfogrady.vitalwear.firmware.components.TransformationBitmaps
 import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
+import com.github.cfogrady.vitalwear.firmware.components.BattleSpriteIndexes
+import com.github.cfogrady.vitalwear.firmware.components.TrainingSpriteIndexes
+import com.github.cfogrady.vitalwear.firmware.components.TransformationSpriteIndexes
 import com.google.common.collect.Lists
 import timber.log.Timber
 import java.io.InputStream
@@ -30,7 +34,6 @@ class FirmwareLoader(private val bemSpriteReader: BemSpriteReader, private val s
         val greenBackground = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.greenBackground])
         val orangeBackground = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.orangeBackground])
         val blueBackground = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.blueBackground])
-        val battleBackground = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.battleBackground])
 
         val readyIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.readyIdx])
         val goIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.goIdx])
@@ -41,16 +44,18 @@ class FirmwareLoader(private val bemSpriteReader: BemSpriteReader, private val s
 
         val emoteBitmaps = buildEmoteBitmaps(firmwareIndexLocations, sprites)
 
+        val battleBitmaps = buildBattleBitmaps(firmwareIndexLocations.battleSpriteIndexes, sprites)
+
         return Firmware(
             CharacterIconBitmaps.build(firmwareIndexLocations.characterIconSpriteIndexes, emoteBitmaps, sprites, spriteBitmapConverter),
             MenuBitmaps.build(firmwareIndexLocations.menuSpriteIndexes, sprites, spriteBitmapConverter),
             AdventureBitmaps.fromSprites(sprites, spriteBitmapConverter),
-            buildBattleBitmaps(firmwareIndexLocations.battleSpriteIndexes, sprites),
+            battleBitmaps,
             buildTrainingBitmaps(firmwareIndexLocations.trainingSpriteIndexes, sprites),
             buildTransformationBitmaps(firmwareIndexLocations.transformationSpriteIndexes, sprites),
             loadingIcon,
             insertCardIcon,
-            arrayListOf(greenBackground, orangeBackground, blueBackground, battleBackground),
+            arrayListOf(greenBackground, orangeBackground, blueBackground, battleBitmaps.battleBackground),
             readyIcon,
             goIcon,
             missionIcon,
@@ -75,12 +80,12 @@ class FirmwareLoader(private val bemSpriteReader: BemSpriteReader, private val s
     }
 
     private fun buildBattleBitmaps(battleSpriteIndexes: BattleSpriteIndexes, sprites: List<Sprite>): BattleBitmaps {
-        val battleBackground = spriteBitmapConverter.getBitmap(sprites[battleSpriteIndexes.battleBackground])
+        val battleBackground = spriteBitmapConverter.getBitmap(sprites[battleSpriteIndexes.battleBackgroundIdx])
         val attackSprites = spriteBitmapConverter.getBitmaps(sprites.subList(
-            battleSpriteIndexes.smallAttackStartIdx, battleSpriteIndexes.smallAttackEndIdx
+            battleSpriteIndexes.attackStartIdx, battleSpriteIndexes.attackEndIdx
         ))
         val largeAttackSprites= spriteBitmapConverter.getBitmaps(sprites.subList(
-            battleSpriteIndexes.bigAttackStartIdx, battleSpriteIndexes.bigAttackEndIdx
+            battleSpriteIndexes.criticalAttackStartIdx, battleSpriteIndexes.criticalAttackEndIdx
         ))
         val emptyHP = spriteBitmapConverter.getBitmap(sprites[battleSpriteIndexes.emptyHpIdx])
         val partnerHPIcons = Lists.newArrayList(emptyHP)
