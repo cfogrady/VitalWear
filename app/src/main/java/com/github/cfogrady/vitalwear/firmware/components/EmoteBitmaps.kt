@@ -2,7 +2,7 @@ package com.github.cfogrady.vitalwear.firmware.components
 
 import android.graphics.Bitmap
 
-class EmoteBitmaps(
+data class EmoteBitmaps(
     val happyEmote: List<Bitmap>,
     val loseEmote: List<Bitmap>,
     val sweatEmote: Bitmap,

@@ -144,7 +144,7 @@ private fun AdventureMenuScreenPreview() {
 
                 )
         }
-        val adventureBitmaps: AdventureBitmaps = firmware.adventureBitmaps
+        override val adventureBitmaps: AdventureBitmaps = firmware.adventureBitmaps
 
         override suspend fun getMaxAdventureForActiveCharacter(cardName: String): Int {
             return 2

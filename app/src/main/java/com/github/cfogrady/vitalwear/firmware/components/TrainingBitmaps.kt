@@ -18,4 +18,7 @@ data class TrainingBitmaps(
     val hpIcon: Bitmap,
     val apIcon: Bitmap,
     val ppIcon: Bitmap,
+    val mission: Bitmap,
+    val clear: Bitmap,
+    val failed: Bitmap,
 )

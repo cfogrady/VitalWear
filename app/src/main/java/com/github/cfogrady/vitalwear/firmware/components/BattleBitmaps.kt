@@ -2,7 +2,7 @@ package com.github.cfogrady.vitalwear.firmware.components
 
 import android.graphics.Bitmap
 
-class BattleBitmaps(
+data class BattleBitmaps(
     val attackSprites: List<Bitmap>,
     val largeAttackSprites: List<Bitmap>,
     val battleBackground: Bitmap,

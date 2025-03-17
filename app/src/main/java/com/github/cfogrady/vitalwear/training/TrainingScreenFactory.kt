@@ -192,7 +192,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
         }
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
             Column(modifier = Modifier.offset(y = backgroundHeight.times(.3f))) {
-                bitmapScaler.ScaledBitmap(bitmap = firmware.trainingBitmaps.failedIcon, contentDescription = "failed")
+                bitmapScaler.ScaledBitmap(bitmap = firmware.trainingBitmaps.failed, contentDescription = "failed")
             }
         }
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {

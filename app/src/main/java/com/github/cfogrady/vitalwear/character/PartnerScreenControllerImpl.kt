@@ -31,7 +31,7 @@ internal class PartnerScreenControllerImpl(
     private val delayWrapper: suspend (Long)->Unit = { delay(it) } // we wrap delay so we can test without actually delaying test code
 ): PartnerScreenController {
 
-    val characterIconBitmaps: CharacterIconBitmaps
+    override val characterIconBitmaps: CharacterIconBitmaps
         get() = firmwareManager.getFirmware().value!!.characterIconBitmaps
     override val dailyStepCount: StateFlow<Int> = stepSensorService.dailySteps
     override val emoteBitmaps = combineStates(characterManager.getCharacterFlow(), heartRateService.currentExerciseLevel) { character, exerciseLevel->

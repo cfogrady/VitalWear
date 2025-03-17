@@ -18,7 +18,7 @@ import java.time.LocalDateTime
 interface PartnerScreenController {
     val backgroundHeight: Dp
     val bitmapScaler: BitmapScaler
-    val characterFirmwareSprites: CharacterIconBitmaps
+    val characterIconBitmaps: CharacterIconBitmaps
     val dailyStepCount: StateFlow<Int>
     val emoteBitmaps: StateFlow<List<Bitmap?>> // nullable because some emotes blink instead of animate. A null indicates a blink frame.
     val vitals: StateFlow<Int>
@@ -44,7 +44,7 @@ interface PartnerScreenController {
         override val backgroundHeight: Dp = imageScaler.calculateBackgroundHeight(),
         override val bitmapScaler: BitmapScaler = BitmapScaler(imageScaler),
         firmware: Firmware = Firmware.loadPreviewFirmwareFromDisk(context),
-        override val characterFirmwareSprites: CharacterIconBitmaps = firmware.characterIconBitmaps,
+        override val characterIconBitmaps: CharacterIconBitmaps = firmware.characterIconBitmaps,
         override val dailyStepCount: StateFlow<Int> = MutableStateFlow(8674),
         characterSprites: CharacterSprites = CardSpriteLoader.loadTestCharacterSprites(context, 3),
         private val characterBitmaps: StateFlow<List<Bitmap>> = MutableStateFlow(characterSprites.sprites.subList(CharacterSprites.IDLE_1, CharacterSprites.IDLE_2+1)),

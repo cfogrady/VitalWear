@@ -17,4 +17,7 @@ data class TrainingSpriteIndexes(
     val hpIdx: Int,
     val apIdx: Int,
     val ppIdx: Int,
+    val mission: Int,
+    val clear: Int,
+    val failed: Int,
 )

@@ -30,7 +30,7 @@ import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 @Composable
 fun PartnerScreen(controller: PartnerScreenController) {
     val bitmapScaler = controller.bitmapScaler
-    val firmware = controller.characterFirmwareSprites
+    val firmware = controller.characterIconBitmaps
     val backgroundHeight = controller.backgroundHeight
     val coroutineScope = rememberCoroutineScope()
     val dailyStepCount by controller.dailyStepCount.collectAsStateWithLifecycle()

@@ -21,7 +21,7 @@ class FirmwareManager(
     val postFirmwareLoader: PostFirmwareLoader
 ) {
 
-    private val firmware10BLoader = Firmware10BLoader(BemSpriteReader(), spriteBitmapConverter)
+    private val firmwareLoader = FirmwareLoader(BemSpriteReader(), spriteBitmapConverter)
 
     enum class FirmwareState {
         Loading,
@@ -63,9 +63,11 @@ class FirmwareManager(
     private fun internalLoadFirmware(applicationContext: Context) : Boolean {
         val filesRoot = applicationContext.filesDir
         val firmwareFile = File(filesRoot, FIRMWARE_FILE)
+        val firmwareSpriteIndexes = if(firmwareFile.endsWith("_10B.vb2"))
+            Firmware10BSpriteIndexes.instance else Firmware20ASpriteIndexes.instance
         try {
             FileInputStream(firmwareFile).use { fileInput ->
-                firmware.value = firmware10BLoader.load10BFirmware(fileInput)
+                firmware.value = firmwareLoader.loadFirmware(firmwareSpriteIndexes ,fileInput)
             }
             mutalbeFirmwareState.value = FirmwareState.Loaded
             return true

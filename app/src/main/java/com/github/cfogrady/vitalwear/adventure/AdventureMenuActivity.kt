@@ -31,7 +31,7 @@ class AdventureMenuActivity : ComponentActivity(), AdventureMenuScreenController
         get() = vitalWearApp.backgroundHeight
     override val characterSprites: CharacterSprites
         get() = vitalWearApp.characterManager.getCurrentCharacter()!!.characterSprites
-    val adventureBitmaps: AdventureBitmaps
+    override val adventureBitmaps: AdventureBitmaps
         get() = firmware.adventureBitmaps
     override val bitmapScaler: BitmapScaler
         get() = vitalWearApp.bitmapScaler
