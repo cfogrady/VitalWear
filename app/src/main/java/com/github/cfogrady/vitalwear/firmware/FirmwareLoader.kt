@@ -7,10 +7,10 @@ import com.github.cfogrady.vitalwear.firmware.components.AdventureBitmaps
 import com.github.cfogrady.vitalwear.firmware.components.BattleBitmaps
 import com.github.cfogrady.vitalwear.firmware.components.CharacterIconBitmaps
 import com.github.cfogrady.vitalwear.firmware.components.EmoteBitmaps
-import com.github.cfogrady.vitalwear.character.transformation.TransformationFirmwareSprites
-import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
 import com.github.cfogrady.vitalwear.firmware.components.MenuBitmaps
-import com.github.cfogrady.vitalwear.training.TrainingFirmwareSprites
+import com.github.cfogrady.vitalwear.firmware.components.TrainingBitmaps
+import com.github.cfogrady.vitalwear.firmware.components.TransformationBitmaps
+import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
 import com.google.common.collect.Lists
 import timber.log.Timber
 import java.io.InputStream
@@ -39,15 +39,15 @@ class FirmwareLoader(private val bemSpriteReader: BemSpriteReader, private val s
         val missionIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.missionIdx])
         val failedIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.failedIdx])
 
-        val emoteBitmaps = buildEmoteFirmwareSprites(firmwareIndexLocations, sprites)
+        val emoteBitmaps = buildEmoteBitmaps(firmwareIndexLocations, sprites)
 
         return Firmware(
             CharacterIconBitmaps.build(firmwareIndexLocations.characterIconSpriteIndexes, emoteBitmaps, sprites, spriteBitmapConverter),
             MenuBitmaps.build(firmwareIndexLocations.menuSpriteIndexes, sprites, spriteBitmapConverter),
             AdventureBitmaps.fromSprites(sprites, spriteBitmapConverter),
-            battleFirmwareSprites(firmwareIndexLocations, sprites),
-            trainingFirmwareSprites(firmwareIndexLocations, sprites),
-            transformationFirmwareSprites(firmwareIndexLocations, sprites),
+            buildBattleBitmaps(firmwareIndexLocations.battleSpriteIndexes, sprites),
+            buildTrainingBitmaps(firmwareIndexLocations.trainingSpriteIndexes, sprites),
+            buildTransformationBitmaps(firmwareIndexLocations.transformationSpriteIndexes, sprites),
             loadingIcon,
             insertCardIcon,
             arrayListOf(greenBackground, orangeBackground, blueBackground, battleBackground),
@@ -59,7 +59,7 @@ class FirmwareLoader(private val bemSpriteReader: BemSpriteReader, private val s
         )
     }
 
-    private fun buildEmoteFirmwareSprites(firmwareIndexLocations: FirmwareIndexLocations, sprites: List<Sprite>) : EmoteBitmaps {
+    private fun buildEmoteBitmaps(firmwareIndexLocations: FirmwareIndexLocations, sprites: List<Sprite>) : EmoteBitmaps {
         val happyEmote = spriteBitmapConverter.getBitmaps(sprites.subList(
             firmwareIndexLocations.happyEmoteStartIdx, firmwareIndexLocations.happyEmoteEndIdx
         ))
@@ -74,89 +74,72 @@ class FirmwareLoader(private val bemSpriteReader: BemSpriteReader, private val s
         return EmoteBitmaps(happyEmote, loseEmote, sweatEmote, injuredEmote, sleepEmote)
     }
 
-    private fun battleFirmwareSprites(firmwareIndexLocations: FirmwareIndexLocations, sprites: List<Sprite>): BattleBitmaps {
-        val battleBackground = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.battleBackground])
+    private fun buildBattleBitmaps(battleSpriteIndexes: BattleSpriteIndexes, sprites: List<Sprite>): BattleBitmaps {
+        val battleBackground = spriteBitmapConverter.getBitmap(sprites[battleSpriteIndexes.battleBackground])
         val attackSprites = spriteBitmapConverter.getBitmaps(sprites.subList(
-            firmwareIndexLocations.smallAttackStartIdx, firmwareIndexLocations.smallAttackEndIdx
+            battleSpriteIndexes.smallAttackStartIdx, battleSpriteIndexes.smallAttackEndIdx
         ))
         val largeAttackSprites= spriteBitmapConverter.getBitmaps(sprites.subList(
-            firmwareIndexLocations.bigAttackStartIdx, firmwareIndexLocations.bigAttackEndIdx
+            battleSpriteIndexes.bigAttackStartIdx, battleSpriteIndexes.bigAttackEndIdx
         ))
-        val emptyHP = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.emptyHpIdx])
+        val emptyHP = spriteBitmapConverter.getBitmap(sprites[battleSpriteIndexes.emptyHpIdx])
         val partnerHPIcons = Lists.newArrayList(emptyHP)
         partnerHPIcons.addAll(spriteBitmapConverter.getBitmaps(sprites.subList(
-            firmwareIndexLocations.partnerHpStartIdx, firmwareIndexLocations.partnerHpEndIdx
+            battleSpriteIndexes.partnerHpStartIdx, battleSpriteIndexes.partnerHpEndIdx
         )))
         val opponentHPIcons = Lists.newArrayList(emptyHP)
         opponentHPIcons.addAll(spriteBitmapConverter.getBitmaps(sprites.subList(
-            firmwareIndexLocations.opponentHpStartIdx, firmwareIndexLocations.opponentHpEndIdx
+            battleSpriteIndexes.opponentHpStartIdx, battleSpriteIndexes.opponentHpEndIdx
         )))
-        val hitSprites = spriteBitmapConverter.getBitmaps(sprites.subList(firmwareIndexLocations.hitStartIdx, firmwareIndexLocations.hitEndIdx))
+        val hitSprites = spriteBitmapConverter.getBitmaps(sprites.subList(battleSpriteIndexes.hitStartIdx, battleSpriteIndexes.hitEndIdx))
         val vitalRangeSprites = spriteBitmapConverter.getBitmaps(sprites.subList(
-            firmwareIndexLocations.vitalsRangeStartIdx, firmwareIndexLocations.vitalsRangeEndIdx
+            battleSpriteIndexes.vitalsRangeStartIdx, battleSpriteIndexes.vitalsRangeEndIdx
         ))
         return BattleBitmaps(attackSprites, largeAttackSprites, battleBackground, partnerHPIcons, opponentHPIcons, hitSprites, vitalRangeSprites)
     }
 
-    private fun transformationFirmwareSprites(firmwareIndexLocations: FirmwareIndexLocations, sprites: List<Sprite>): TransformationFirmwareSprites {
-        val blackBackground = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.blackBackground])
-        val weakPulse = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.weakPulse])
-        val strongPulse = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.strongPulse])
+    private fun buildTransformationBitmaps(transformationSpriteIndexes: TransformationSpriteIndexes, sprites: List<Sprite>): TransformationBitmaps {
+        val blackBackground = spriteBitmapConverter.getBitmap(sprites[transformationSpriteIndexes.blackBackground])
+        val weakPulse = spriteBitmapConverter.getBitmap(sprites[transformationSpriteIndexes.weakPulse])
+        val strongPulse = spriteBitmapConverter.getBitmap(sprites[transformationSpriteIndexes.strongPulse])
         val newBackgrounds = spriteBitmapConverter.getBitmaps(sprites.subList(
-            firmwareIndexLocations.newBackgroundStartIdx, firmwareIndexLocations.newBackgroundEndIdx
+            transformationSpriteIndexes.newBackgroundStartIdx, transformationSpriteIndexes.newBackgroundEndIdx
         ))
-        val rayOfLightBackground = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.rayOfLightBackground])
-        return TransformationFirmwareSprites(
+        val rayOfLightBackground = spriteBitmapConverter.getBitmap(sprites[transformationSpriteIndexes.rayOfLightBackground])
+        return TransformationBitmaps(
             blackBackground,
             weakPulse,
             strongPulse,
             newBackgrounds,
             rayOfLightBackground,
-            spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.star]),
-            spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.transformationHourglass]),
-            spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.transformationVitalsIcon]),
-            spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.transformationBattlesIcon]),
-            spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.transformationWinRatioIcon]),
-            spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.transformationPpIcon]),
-            spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.transformationSquatIcon]),
-            spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.transformationLocked]),
+            spriteBitmapConverter.getBitmap(sprites[transformationSpriteIndexes.star]),
+            spriteBitmapConverter.getBitmap(sprites[transformationSpriteIndexes.hourglass]),
+            spriteBitmapConverter.getBitmap(sprites[transformationSpriteIndexes.vitalsIcon]),
+            spriteBitmapConverter.getBitmap(sprites[transformationSpriteIndexes.battlesIcon]),
+            spriteBitmapConverter.getBitmap(sprites[transformationSpriteIndexes.winRatioIcon]),
+            spriteBitmapConverter.getBitmap(sprites[transformationSpriteIndexes.ppIcon]),
+            spriteBitmapConverter.getBitmap(sprites[transformationSpriteIndexes.squatIcon]),
+            spriteBitmapConverter.getBitmap(sprites[transformationSpriteIndexes.locked])
         )
     }
 
-    private fun trainingFirmwareSprites(firmwareIndexLocations: FirmwareIndexLocations, sprites: List<Sprite>): TrainingFirmwareSprites {
-        val squatText = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.squatTextIdx])
-        val squatIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.squatIconIdx])
-        val crunchText = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.crunchTextIdx])
-        val crunchIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.crunchIconIdx])
-        val punchText = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.punchTextIdx])
-        val punchIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.punchIconIdx])
-        val dashText = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.dashTextIdx])
-        val dashIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.dashIconIdx])
-        val trainingStateIcons = spriteBitmapConverter.getBitmaps(sprites.subList(
-            firmwareIndexLocations.trainingStateStartIdx, firmwareIndexLocations.trainingStateEndIdx
-        ))
-        val goodIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.goodIdx])
-        val greatIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.greatIdx])
-        val bpIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.bpIdx])
-        val hpIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.hpIdx])
-        val apIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.apIdx])
-        val ppIcon = spriteBitmapConverter.getBitmap(sprites[firmwareIndexLocations.ppIdx])
-        return TrainingFirmwareSprites(
-            squatText,
-            squatIcon,
-            crunchText,
-            crunchIcon,
-            punchText,
-            punchIcon,
-            dashText,
-            dashIcon,
-            trainingStateIcons,
-            goodIcon,
-            greatIcon,
-            bpIcon,
-            hpIcon,
-            apIcon,
-            ppIcon,
+    private fun buildTrainingBitmaps(trainingSpriteIndexes: TrainingSpriteIndexes, sprites: List<Sprite>): TrainingBitmaps {
+        return TrainingBitmaps(
+            spriteBitmapConverter.getBitmap(sprites[trainingSpriteIndexes.squatTextIdx]),
+            spriteBitmapConverter.getBitmap(sprites[trainingSpriteIndexes.squatIconIdx]),
+            spriteBitmapConverter.getBitmap(sprites[trainingSpriteIndexes.crunchTextIdx]),
+            spriteBitmapConverter.getBitmap(sprites[trainingSpriteIndexes.crunchIconIdx]),
+            spriteBitmapConverter.getBitmap(sprites[trainingSpriteIndexes.punchTextIdx]),
+            spriteBitmapConverter.getBitmap(sprites[trainingSpriteIndexes.punchIconIdx]),
+            spriteBitmapConverter.getBitmap(sprites[trainingSpriteIndexes.dashTextIdx]),
+            spriteBitmapConverter.getBitmap(sprites[trainingSpriteIndexes.dashIconIdx]),
+            spriteBitmapConverter.getBitmaps(sprites.subList(trainingSpriteIndexes.trainingStateStartIdx, trainingSpriteIndexes.trainingStateEndIdx)),
+            spriteBitmapConverter.getBitmap(sprites[trainingSpriteIndexes.goodIdx]),
+            spriteBitmapConverter.getBitmap(sprites[trainingSpriteIndexes.greatIdx]),
+            spriteBitmapConverter.getBitmap(sprites[trainingSpriteIndexes.bpIdx]),
+            spriteBitmapConverter.getBitmap(sprites[trainingSpriteIndexes.hpIdx]),
+            spriteBitmapConverter.getBitmap(sprites[trainingSpriteIndexes.apIdx]),
+            spriteBitmapConverter.getBitmap(sprites[trainingSpriteIndexes.ppIdx])
         )
     }
 }

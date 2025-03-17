@@ -6,18 +6,18 @@ import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
 import com.github.cfogrady.vitalwear.firmware.components.AdventureBitmaps
 import com.github.cfogrady.vitalwear.firmware.components.BattleBitmaps
 import com.github.cfogrady.vitalwear.firmware.components.CharacterIconBitmaps
-import com.github.cfogrady.vitalwear.character.transformation.TransformationFirmwareSprites
-import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
 import com.github.cfogrady.vitalwear.firmware.components.MenuBitmaps
-import com.github.cfogrady.vitalwear.training.TrainingFirmwareSprites
+import com.github.cfogrady.vitalwear.firmware.components.TrainingBitmaps
+import com.github.cfogrady.vitalwear.firmware.components.TransformationBitmaps
+import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
 
 class Firmware(
     val characterIconBitmaps: CharacterIconBitmaps,
     val menuBitmaps: MenuBitmaps,
     val adventureBitmaps: AdventureBitmaps,
     val battleBitmaps: BattleBitmaps,
-    val trainingFirmwareSprites: TrainingFirmwareSprites,
-    val transformationFirmwareSprites: TransformationFirmwareSprites,
+    val trainingBitmaps: TrainingBitmaps,
+    val transformationBitmaps: TransformationBitmaps,
     val loadingIcon : Bitmap,
     val insertCardIcon: Bitmap,
     val backgrounds: List<Bitmap>,

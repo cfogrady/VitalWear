@@ -36,11 +36,11 @@ fun ActiveTraining(
     backgroundHeight: Dp,
     bitmapScaler: BitmapScaler) {
     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-        var spriteIdx = (progress * firmware.trainingFirmwareSprites.trainingState.size).toInt()
-        if (spriteIdx >= firmware.trainingFirmwareSprites.trainingState.size) {
-            spriteIdx = firmware.trainingFirmwareSprites.trainingState.size-1
+        var spriteIdx = (progress * firmware.trainingBitmaps.trainingState.size).toInt()
+        if (spriteIdx >= firmware.trainingBitmaps.trainingState.size) {
+            spriteIdx = firmware.trainingBitmaps.trainingState.size-1
         }
-        bitmapScaler.ScaledBitmap(bitmap = firmware.trainingFirmwareSprites.trainingState[spriteIdx], contentDescription = "level", modifier = Modifier.offset(y = backgroundHeight.times(.2f)))
+        bitmapScaler.ScaledBitmap(bitmap = firmware.trainingBitmaps.trainingState[spriteIdx], contentDescription = "level", modifier = Modifier.offset(y = backgroundHeight.times(.2f)))
     }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
