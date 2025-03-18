@@ -17,14 +17,14 @@ class Firmware20ASpriteIndexes {
         )
 
         val menuSpriteIndexesInstance = MenuSpriteIndexes(
-            characterSelectorIcon = 267,
-            trainingMenuIcon = 265,
-            adventureMenuIcon = 266,
-            statsIconIdx = 264,
-            connectIcon = 268,
+            characterSelectorIcon = 266,
+            trainingMenuIcon = 264,
+            adventureMenuIcon = 265,
+            statsIconIdx = 263,
+            connectIcon = 267,
             stopIcon = 44,
             stopText = 169,
-            settingsMenuIcon = 269,
+            settingsMenuIcon = 268,
             sleep = 76,
             wakeup = 75,
         )

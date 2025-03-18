@@ -26,7 +26,7 @@ class Firmware(
     companion object {
         fun loadPreviewFirmwareFromDisk(context: Context): Firmware {
             val firmwareLoader = FirmwareLoader(BemSpriteReader(), SpriteBitmapConverter())
-            val use10BFirmware = true
+            val use10BFirmware = false
             if (use10BFirmware) {
                 return firmwareLoader.loadFirmware(Firmware10BSpriteIndexes.instance, context.assets.open("VBBE_10B.vb2"))
             } else {
