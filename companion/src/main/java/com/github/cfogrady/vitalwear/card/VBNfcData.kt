@@ -5,14 +5,17 @@ import com.github.cfogrady.vitalwear.util.Endian
 import com.github.cfogrady.vitalwear.util.getUInt16
 import com.github.cfogrady.vitalwear.util.getUInt32
 import com.github.cfogrady.vitalwear.util.toByteArray
+import kotlin.experimental.and
+import kotlin.experimental.or
 
 class VBNfcData(nfcData: MifareUltralight) {
     companion object {
-        const val ITEM_ID_BE: UShort = 4u
-        const val STATUS_READY: Byte = 1
-        const val STATUS_DIM_READY: Byte = 3
-        const val OPERATION_READY: Byte = 1
-        const val OPERATION_CHECK_DIM: Byte = 3
+        private const val ITEM_ID_BE: UShort = 4u
+        private const val STATUS_READY_FLAG: Byte = 0b00000001
+        private const val STATUS_DIM_READY_FLAG: Byte = 0b00000010
+        private val STATUS_DIM_IS_READY = STATUS_READY_FLAG or STATUS_DIM_READY_FLAG
+        private const val OPERATION_READY: Byte = 1
+        private const val OPERATION_CHECK_DIM: Byte = 3
     }
 
     val magic: UInt
@@ -39,13 +42,13 @@ class VBNfcData(nfcData: MifareUltralight) {
     fun writeCardCheck(nfcData: MifareUltralight, dimId: UShort) {
         if (itemId == ITEM_ID_BE) {
             val dimData = dimId.toByteArray(endian = Endian.Big)
-            nfcData.writePage(6, byteArrayOf(STATUS_READY, OPERATION_CHECK_DIM, dimData[0], dimData[1]))
+            nfcData.writePage(6, byteArrayOf(STATUS_READY_FLAG, OPERATION_CHECK_DIM, dimData[0], dimData[1]))
         } else {
-            nfcData.writePage(6, byteArrayOf(STATUS_READY, dimId.toByte(), OPERATION_CHECK_DIM, 0))
+            nfcData.writePage(6, byteArrayOf(STATUS_READY_FLAG, dimId.toByte(), OPERATION_CHECK_DIM, 0))
         }
     }
 
     fun wasCardIdValidated(dimId: UShort): Boolean {
-        return dimId == this.dimId && operation == OPERATION_READY && status == STATUS_DIM_READY
+        return dimId == this.dimId && operation == OPERATION_READY && (status and STATUS_DIM_IS_READY == STATUS_DIM_IS_READY)
     }
 }
