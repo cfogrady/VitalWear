@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -73,14 +72,14 @@ fun MainScreen(controller: MainScreenController) {
                 }
                 STATS -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        bitmapScaler.ScaledBitmap(bitmap = controller.menuFirmwareSprites.statsIcon, contentDescription = "stats", modifier = Modifier.clickable {
+                        bitmapScaler.ScaledBitmap(bitmap = controller.menuBitmaps.statsIcon, contentDescription = "stats", modifier = Modifier.clickable {
                             controller.launchStatsMenuActivity()
                         })
                     }
                 }
                 CHARACTER -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        bitmapScaler.ScaledBitmap(bitmap = controller.menuFirmwareSprites.characterSelectorIcon, contentDescription = "Character", modifier = Modifier.clickable {
+                        bitmapScaler.ScaledBitmap(bitmap = controller.menuBitmaps.characterSelectorIcon, contentDescription = "Character", modifier = Modifier.clickable {
                             controller.launchCharacterSelectionActivity()
                         })
                     }
@@ -88,7 +87,7 @@ fun MainScreen(controller: MainScreenController) {
                 TRAINING -> {
                     vitalBoxFactory.VitalBox {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            bitmapScaler.ScaledBitmap(bitmap = controller.menuFirmwareSprites.trainingIcon, contentDescription = "Training", modifier = Modifier.clickable {
+                            bitmapScaler.ScaledBitmap(bitmap = controller.menuBitmaps.trainingIcon, contentDescription = "Training", modifier = Modifier.clickable {
                                 controller.launchTrainingMenuActivity()
                             })
                         }
@@ -97,7 +96,7 @@ fun MainScreen(controller: MainScreenController) {
                 ADVENTURE -> {
                     vitalBoxFactory.VitalBox {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            bitmapScaler.ScaledBitmap(bitmap = controller.menuFirmwareSprites.adventureIcon, contentDescription = "Adventure", modifier = Modifier.clickable {
+                            bitmapScaler.ScaledBitmap(bitmap = controller.menuBitmaps.adventureIcon, contentDescription = "Adventure", modifier = Modifier.clickable {
                                 controller.launchAdventureActivity()
                             })
                         }
@@ -133,7 +132,7 @@ fun MainScreen(controller: MainScreenController) {
                 SLEEP -> {
                     vitalBoxFactory.VitalBox {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            val sleepButton = if(sleeping) controller.menuFirmwareSprites.wakeIcon else controller.menuFirmwareSprites.sleepIcon
+                            val sleepButton = if(sleeping) controller.menuBitmaps.wakeIcon else controller.menuBitmaps.sleepIcon
                             bitmapScaler.ScaledBitmap(bitmap = sleepButton, contentDescription = "Sleep", modifier = Modifier.clickable {
                                 controller.toggleSleep()
                                 sleeping = !sleeping
@@ -147,7 +146,7 @@ fun MainScreen(controller: MainScreenController) {
                 SETTINGS -> {
                     vitalBoxFactory.VitalBox {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            bitmapScaler.ScaledBitmap(bitmap = controller.menuFirmwareSprites.settingsIcon, contentDescription = "Settings", modifier = Modifier.clickable {
+                            bitmapScaler.ScaledBitmap(bitmap = controller.menuBitmaps.settingsIcon, contentDescription = "Settings", modifier = Modifier.clickable {
                                 controller.launchSettingsActivity()
                             })
                         }

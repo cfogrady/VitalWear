@@ -10,6 +10,7 @@ import com.github.cfogrady.vitalwear.character.transformation.ExpectedTransforma
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
+import com.github.cfogrady.vitalwear.firmware.components.MenuBitmaps
 import com.github.cfogrady.vitalwear.util.flow.mapState
 import com.github.cfogrady.vitalwear.util.flow.transformState
 import kotlinx.coroutines.flow.StateFlow
@@ -25,8 +26,8 @@ class MainScreenControllerImpl(
     private val saveService: SaveService,
     private val backgroundManager: BackgroundManager,
 ) : MainScreenController {
-    override val menuFirmwareSprites: MenuFirmwareSprites
-        get() = firmwareManager.getFirmware().value!!.menuFirmwareSprites
+    override val menuBitmaps: MenuBitmaps
+        get() = firmwareManager.getFirmware().value!!.menuBitmaps
 
     override val activePartner: StateFlow<VBCharacter?> = characterManager.getCharacterFlow()
 

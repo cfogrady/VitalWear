@@ -32,7 +32,7 @@ class EndFightVitalsFactory(
     @Composable
     fun EndFightVitals(postBattleModel: PostBattleModel, onComplete: () -> Unit) {
         val background = remember { backgroundManager.selectedBackground.value!! }
-        val vitalsFilledSprites = remember { firmwareManager.getFirmware().value!!.battleFirmwareSprites.vitalsRangeIcons }
+        val vitalsFilledSprites = remember { firmwareManager.getFirmware().value!!.battleBitmaps.vitalsRangeIcons }
         val idx = remember {getIdx(postBattleModel.vitalChange + postBattleModel.partnerCharacter.vitals(), 9999, vitalsFilledSprites.size-1)}
         remember {
             Handler(Looper.getMainLooper()!!).postDelayed({

@@ -21,6 +21,7 @@ import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.composable.util.*
 import com.github.cfogrady.vitalwear.data.GameState
 import com.github.cfogrady.vitalwear.firmware.Firmware
+import com.github.cfogrady.vitalwear.firmware.components.TrainingBitmaps
 import com.google.common.collect.Lists
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -152,7 +153,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
     private fun Exercise(partner: VBCharacter, firmware: Firmware, progressFlow: StateFlow<Float>, durationSeconds: Int, finished:() -> Unit) {
         val characterSprites = arrayListOf(partner.characterSprites.sprites[CharacterSprites.TRAIN_1],
             partner.characterSprites.sprites[CharacterSprites.TRAIN_2])
-        val sweatIcon = firmware.characterFirmwareSprites.emoteFirmwareSprites.sweatEmote
+        val sweatIcon = firmware.characterIconBitmaps.emoteBitmaps.sweatEmote
         val progress by progressFlow.collectAsState()
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
@@ -172,8 +173,8 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
         }
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
             Column(modifier = Modifier.offset(y = backgroundHeight.times(.3f)), horizontalAlignment = Alignment.CenterHorizontally) {
-                bitmapScaler.ScaledBitmap(bitmap = firmware.mission, contentDescription = "mission")
-                bitmapScaler.ScaledBitmap(bitmap = firmware.clear, contentDescription = "clear")
+                bitmapScaler.ScaledBitmap(bitmap = firmware.trainingBitmaps.mission, contentDescription = "mission")
+                bitmapScaler.ScaledBitmap(bitmap = firmware.trainingBitmaps.clear, contentDescription = "clear")
             }
         }
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
@@ -191,7 +192,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
         }
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
             Column(modifier = Modifier.offset(y = backgroundHeight.times(.3f))) {
-                bitmapScaler.ScaledBitmap(bitmap = firmware.failedIcon, contentDescription = "failed")
+                bitmapScaler.ScaledBitmap(bitmap = firmware.trainingBitmaps.failed, contentDescription = "failed")
             }
         }
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
@@ -202,7 +203,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
     @Composable
     fun Result(partner: VBCharacter, firmware: Firmware, trainingResult: TrainingResult, statChange: TrainingStatChanges, finished: () -> Unit) {
         val characterAnimation = remember {Lists.newArrayList(partner.characterSprites.sprites[CharacterSprites.IDLE_1], partner.characterSprites.sprites[CharacterSprites.WIN])}
-        val resultIcon = remember {if(trainingResult == TrainingResult.GREAT) firmware.trainingFirmwareSprites.greatIcon else firmware.trainingFirmwareSprites.goodIcon}
+        val resultIcon = remember {if(trainingResult == TrainingResult.GREAT) firmware.trainingBitmaps.greatIcon else firmware.trainingBitmaps.goodIcon}
         LaunchedEffect(true) {
             Handler(Looper.getMainLooper()!!).postDelayed({
                 finished.invoke()
@@ -211,7 +212,7 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
             Column(modifier = Modifier.offset(y = backgroundHeight.times(.3f)), horizontalAlignment = Alignment.CenterHorizontally) {
                 bitmapScaler.ScaledBitmap(bitmap = resultIcon, contentDescription = "result")
-                ResultTextRow(statChange, trainingFirmwareSprites = firmware.trainingFirmwareSprites)
+                ResultTextRow(statChange, firmware)
             }
         }
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
@@ -220,13 +221,13 @@ class TrainingScreenFactory(private val vitalBoxFactory: VitalBoxFactory,
     }
 
     @Composable
-    fun ResultTextRow(statChange: TrainingStatChanges, trainingFirmwareSprites: TrainingFirmwareSprites) {
+    fun ResultTextRow(statChange: TrainingStatChanges, firmware: Firmware) {
         val typeIcon = remember {
             when(statChange.stat) {
-                StatType.PP -> trainingFirmwareSprites.ppIcon
-                StatType.HP -> trainingFirmwareSprites.hpIcon
-                StatType.AP -> trainingFirmwareSprites.apIcon
-                StatType.BP -> trainingFirmwareSprites.bpIcon
+                StatType.PP -> firmware.trainingBitmaps.ppIcon
+                StatType.HP -> firmware.trainingBitmaps.hpIcon
+                StatType.AP -> firmware.trainingBitmaps.apIcon
+                StatType.BP -> firmware.trainingBitmaps.bpIcon
             }
         }
         val digits = if(statChange.increase >= 100) 3 else 2

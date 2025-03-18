@@ -22,6 +22,7 @@ import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
+import com.github.cfogrady.vitalwear.firmware.components.TransformationBitmaps
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -60,7 +61,7 @@ class TransformationScreenFactory(
         }
 
         val firmware by firmwareManager.getFirmware().collectAsState()
-        val transformationFirmwareSprites = firmware!!.transformationFirmwareSprites
+        val transformationBitmaps = firmware!!.transformationBitmaps
         LaunchedEffect(key1 = transformation) {
             // assume we click back and need to setup the next check
             bemUpdater.setupTransformationChecker(character)
@@ -68,14 +69,14 @@ class TransformationScreenFactory(
 
         vitalBoxFactory.VitalBox {
             when(transformationProgress) {
-                TransformationState.FUSION_PAIR -> FusionPair(context, character, transformation as FusionTransformation, transformationFirmwareSprites) {
+                TransformationState.FUSION_PAIR -> FusionPair(context, character, transformation as FusionTransformation, transformationBitmaps) {
                     transformationProgress = TransformationState.NEW_CHARACTER
                 }
-                TransformationState.POWER_INCREASING -> PowerIncreasing(character, transformationFirmwareSprites) {
+                TransformationState.POWER_INCREASING -> PowerIncreasing(character, transformationBitmaps) {
                     transformationProgress = TransformationState.NEW_CHARACTER
                 }
                 TransformationState.NEW_CHARACTER -> NewCharacter(
-                    firmwareSprites = transformationFirmwareSprites
+                    firmwareSprites = transformationBitmaps
                 ) {
                     CoroutineScope(Dispatchers.IO).launch {
                         character = characterManager.doActiveCharacterTransformation(context, transformation)
@@ -87,7 +88,7 @@ class TransformationScreenFactory(
                 }
                 TransformationState.LIGHT_OF_TRANSFORMATION -> LightOfTransformation(
                     partner = character,
-                    firmwareSprites = transformationFirmwareSprites
+                    firmwareSprites = transformationBitmaps
                 ) {
                     onFinish.invoke()
                 }
@@ -96,17 +97,17 @@ class TransformationScreenFactory(
     }
 
     @Composable
-    fun FusionPair(context: Context, partner: VBCharacter, transformation: FusionTransformation, firmwareSprites: TransformationFirmwareSprites, onFinish: () -> Unit) {
+    fun FusionPair(context: Context, partner: VBCharacter, transformation: FusionTransformation, transformationBitmaps: TransformationBitmaps, onFinish: () -> Unit) {
         var fusionPhase by remember { mutableStateOf(1) }
         var newCharacterAttack by remember { mutableStateOf<Bitmap?>(null) }
         LaunchedEffect(true) {
             newCharacterAttack = characterManager.getCharacterBitmap(context, partner.cardName(), transformation.slotId, CharacterSpritesIO.ATTACK, CharacterSpritesIO.IDLE2)
         }
         when(fusionPhase) {
-            1 -> FusionIdle(partner = partner, transformation = transformation, firmwareSprites = firmwareSprites) {
+            1 -> FusionIdle(partner = partner, transformation = transformation, transformationBitmaps = transformationBitmaps) {
                 fusionPhase = 2
             }
-            2 -> FusionFly(partner.characterSprites.sprites[CharacterSprites.ATTACK], transformation.supportAttack, firmwareSprites) {
+            2 -> FusionFly(partner.characterSprites.sprites[CharacterSprites.ATTACK], transformation.supportAttack, transformationBitmaps) {
                 fusionPhase = 3
             }
             3 -> {
@@ -115,7 +116,7 @@ class TransformationScreenFactory(
                         partner.characterSprites.sprites[CharacterSprites.ATTACK],
                         transformation.supportAttack,
                         newCharacterAttack!!,
-                        firmwareSprites
+                        transformationBitmaps
                     ) {
                         onFinish.invoke()
                     }
@@ -128,10 +129,10 @@ class TransformationScreenFactory(
     }
 
     @Composable
-    fun FusionIdle(partner: VBCharacter, transformation: FusionTransformation, firmwareSprites: TransformationFirmwareSprites, onFinish: () -> Unit) {
+    fun FusionIdle(partner: VBCharacter, transformation: FusionTransformation, transformationBitmaps: TransformationBitmaps, onFinish: () -> Unit) {
         var characterSprite by remember { mutableStateOf(partner.characterSprites.sprites[CharacterSprites.IDLE_1]) }
         var supportSprite by remember { mutableStateOf(transformation.supportIdle) }
-        var pulseSprite by remember { mutableStateOf(firmwareSprites.weakPulse) }
+        var pulseSprite by remember { mutableStateOf(transformationBitmaps.weakPulse) }
         var elapsedIterations by remember { mutableStateOf(0) }
         LaunchedEffect(key1 = elapsedIterations) {
             Handler.createAsync(Looper.getMainLooper()).postDelayed({
@@ -141,15 +142,15 @@ class TransformationScreenFactory(
                 } else if(elapsedIterations % 2 == 0) {
                     characterSprite = partner.characterSprites.sprites[CharacterSprites.IDLE_2]
                     supportSprite = transformation.supportIdle2
-                    pulseSprite = firmwareSprites.strongPulse
+                    pulseSprite = transformationBitmaps.strongPulse
                 } else {
                     characterSprite = partner.characterSprites.sprites[CharacterSprites.IDLE_1]
                     supportSprite = transformation.supportIdle
-                    pulseSprite = firmwareSprites.weakPulse
+                    pulseSprite = transformationBitmaps.weakPulse
                 }
             }, PRIMARY_DELAY)
         }
-        bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.blackBackground, contentDescription = "Background", alignment = Alignment.BottomCenter)
+        bitmapScaler.ScaledBitmap(bitmap = transformationBitmaps.blackBackground, contentDescription = "Background", alignment = Alignment.BottomCenter)
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             Column(verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
                 .fillMaxWidth()
@@ -168,9 +169,9 @@ class TransformationScreenFactory(
     }
 
     @Composable
-    fun FusionFly(partnerAttackSprite: Bitmap, supportAttackSprite: Bitmap, firmwareSprites: TransformationFirmwareSprites, onFinish: () -> Unit) {
+    fun FusionFly(partnerAttackSprite: Bitmap, supportAttackSprite: Bitmap, transformationBitmaps: TransformationBitmaps, onFinish: () -> Unit) {
         var horizontalTarget by remember { mutableStateOf(0.2f) }
-        var pulseSprite by remember { mutableStateOf(firmwareSprites.weakPulse) }
+        var pulseSprite by remember { mutableStateOf(transformationBitmaps.weakPulse) }
         var lastIteration by remember { mutableStateOf(0) }
         val horizontalOffset by animateFloatAsState(
             targetValue = horizontalTarget,
@@ -185,16 +186,16 @@ class TransformationScreenFactory(
             Handler.createAsync(Looper.getMainLooper()).postDelayed({
                 lastIteration++
                 pulseSprite = if(lastIteration % 2 == 0) {
-                    firmwareSprites.weakPulse
+                    transformationBitmaps.weakPulse
                 } else {
-                    firmwareSprites.strongPulse
+                    transformationBitmaps.strongPulse
                 }
             }, PRIMARY_DELAY)
         }
         LaunchedEffect(true) {
             horizontalTarget = 0f
         }
-        bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.blackBackground, contentDescription = "Background", alignment = Alignment.BottomCenter)
+        bitmapScaler.ScaledBitmap(bitmap = transformationBitmaps.blackBackground, contentDescription = "Background", alignment = Alignment.BottomCenter)
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             Column(verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
                 .fillMaxWidth()
@@ -213,8 +214,8 @@ class TransformationScreenFactory(
     }
 
     @Composable
-    fun FusionFlip(partnerAttack: Bitmap, supportAttack: Bitmap, fusedAttack: Bitmap, firmwareSprites: TransformationFirmwareSprites, onFinish: () -> Unit) {
-        var pulseSprite by remember { mutableStateOf(firmwareSprites.weakPulse) }
+    fun FusionFlip(partnerAttack: Bitmap, supportAttack: Bitmap, fusedAttack: Bitmap, transformationBitmaps: TransformationBitmaps, onFinish: () -> Unit) {
+        var pulseSprite by remember { mutableStateOf(transformationBitmaps.weakPulse) }
         var elapsedIterations by remember { mutableStateOf(0) }
         LaunchedEffect(elapsedIterations) {
             val delay = if(elapsedIterations < 2)
@@ -230,13 +231,13 @@ class TransformationScreenFactory(
                     onFinish.invoke()
                 }
                 pulseSprite = if(elapsedIterations % 2 == 0) {
-                    firmwareSprites.weakPulse
+                    transformationBitmaps.weakPulse
                 } else {
-                    firmwareSprites.strongPulse
+                    transformationBitmaps.strongPulse
                 }
             }, delay)
         }
-        bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.blackBackground, contentDescription = "Background", alignment = Alignment.BottomCenter)
+        bitmapScaler.ScaledBitmap(bitmap = transformationBitmaps.blackBackground, contentDescription = "Background", alignment = Alignment.BottomCenter)
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             Column(verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
                 .fillMaxWidth()
@@ -259,35 +260,35 @@ class TransformationScreenFactory(
     }
 
     @Composable
-    fun PowerIncreasing(partner: VBCharacter, firmwareSprites: TransformationFirmwareSprites, onFinish: () -> Unit) {
+    fun PowerIncreasing(partner: VBCharacter, transformationBitmaps: TransformationBitmaps, onFinish: () -> Unit) {
         /*
         Black screen with Heartbeat above idle partner
         6 iterations of weal pulse then strong pulse
         attack sprite on last iteration of strong pulse
          */
         var characterSprite by remember { mutableStateOf(partner.characterSprites.sprites[CharacterSprites.IDLE_1]) }
-        var pulseSprite by remember { mutableStateOf(firmwareSprites.weakPulse) }
+        var pulseSprite by remember { mutableStateOf(transformationBitmaps.weakPulse) }
         var iterations by remember { mutableStateOf(0) }
         Handler(Looper.getMainLooper()!!).postDelayed({
             iterations++
             if (iterations % 2 == 0 && iterations < 12) {
                 characterSprite = partner.characterSprites.sprites[CharacterSprites.IDLE_1]
-                pulseSprite = firmwareSprites.weakPulse
+                pulseSprite = transformationBitmaps.weakPulse
             } else if (iterations < 11) {
                 characterSprite = partner.characterSprites.sprites[CharacterSprites.IDLE_2]
-                pulseSprite = firmwareSprites.strongPulse
+                pulseSprite = transformationBitmaps.strongPulse
             } else if (iterations == 11) {
                 characterSprite = if (partner.speciesStats.phase < 2) {
                     partner.characterSprites.sprites[CharacterSprites.IDLE_2]
                 } else {
                     partner.characterSprites.sprites[CharacterSprites.ATTACK]
                 }
-                pulseSprite = firmwareSprites.strongPulse
+                pulseSprite = transformationBitmaps.strongPulse
             } else {
                 onFinish.invoke()
             }
         }, PRIMARY_DELAY)
-        bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.blackBackground, contentDescription = "Background", alignment = Alignment.BottomCenter)
+        bitmapScaler.ScaledBitmap(bitmap = transformationBitmaps.blackBackground, contentDescription = "Background", alignment = Alignment.BottomCenter)
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             Column(verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
                 .fillMaxWidth()
@@ -299,7 +300,7 @@ class TransformationScreenFactory(
     }
 
     @Composable
-    fun NewCharacter(firmwareSprites: TransformationFirmwareSprites, onFinish: () -> Unit) {
+    fun NewCharacter(firmwareSprites: TransformationBitmaps, onFinish: () -> Unit) {
         // 4 full loops
         var iterations by remember { mutableStateOf(0) }
         Handler(Looper.getMainLooper()!!).postDelayed({
@@ -322,7 +323,7 @@ class TransformationScreenFactory(
     }
 
     @Composable
-    fun LightOfTransformation(partner: VBCharacter, firmwareSprites: TransformationFirmwareSprites, onFinish: () -> Unit) {
+    fun LightOfTransformation(partner: VBCharacter, firmwareSprites: TransformationBitmaps, onFinish: () -> Unit) {
         /*
         Light background with
         3 times

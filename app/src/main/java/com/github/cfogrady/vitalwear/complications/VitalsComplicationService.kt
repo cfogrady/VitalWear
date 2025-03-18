@@ -39,7 +39,7 @@ class VitalsComplicationService : ComplicationDataSourceService() {
         val firmwareManager = (application as VitalWearApp).firmwareManager
         if(firmwareManager.getFirmware().value != null) {
             val firmware = firmwareManager.getFirmware().value!!
-            iconImage = Icon.createWithBitmap(firmware.characterFirmwareSprites.vitalsIcon)
+            iconImage = Icon.createWithBitmap(firmware.characterIconBitmaps.vitalsIcon)
         }
         val descr = PlainComplicationText.Builder("VITALS").build()
         val valueText = PlainComplicationText.Builder("$vitals").build()

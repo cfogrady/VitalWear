@@ -45,7 +45,7 @@ class CharacterSelectActivity : ComponentActivity(), CharacterSelectionControlle
     override val bitmapScaler: BitmapScaler
         get() = vitalWearApp.bitmapScaler
     override val supportIcon: Bitmap
-        get() = vitalWearApp.firmwareManager.getFirmware().value!!.characterFirmwareSprites.supportIcon
+        get() = vitalWearApp.firmwareManager.getFirmware().value!!.characterIconBitmaps.supportIcon
     override val backgroundFlow: StateFlow<Bitmap>
         get() = vitalWearApp.backgroundManager.selectedBackground.transformState(vitalWearApp.backgroundManager.selectedBackground.value!!) {
         it!!

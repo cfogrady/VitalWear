@@ -81,11 +81,11 @@ fun PartnerScreen(controller: AdventureScreenController) {
             .offset(y = controller.backgroundHeight.times(-.05f))) {
             Text(text="${formatNumber(now.hour, 2)}:${formatNumber(now.minute, 2)}", fontWeight = FontWeight.Bold, fontSize = 4.em)
             Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                bitmapScaler.ScaledBitmap(bitmap = firmware.adventureFirmwareSprites.flagImage, contentDescription = "Goal")
+                bitmapScaler.ScaledBitmap(bitmap = firmware.adventureBitmaps.flagImage, contentDescription = "Goal")
                 Text(text = formatNumber(goal, 4), color = Color.Yellow, modifier = Modifier.padding(5.dp, 0.dp))
             }
             Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 10.dp)) {
-                bitmapScaler.ScaledBitmap(bitmap = firmware.characterFirmwareSprites.stepsIcon, contentDescription = "Steps")
+                bitmapScaler.ScaledBitmap(bitmap = firmware.characterIconBitmaps.stepsIcon, contentDescription = "Steps")
                 Text(text = formatNumber(stepsToGoal, 4), color = Color.White, modifier = Modifier.padding(5.dp, 0.dp))
             }
             bitmapScaler.AnimatedScaledBitmap(bitmaps = partnerWalkingSprites, contentDescription = "Character", alignment = Alignment.BottomCenter)
@@ -106,10 +106,10 @@ fun CancelScreen(controller: AdventureScreenController, firmware: Firmware) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         bitmapScaler.ScaledBitmap(
-            bitmap = firmware.menuFirmwareSprites.stopText,
+            bitmap = firmware.menuBitmaps.stopText,
             contentDescription = "stop")
         bitmapScaler.ScaledBitmap(
-            bitmap = firmware.menuFirmwareSprites.stopIcon,
+            bitmap = firmware.menuBitmaps.stopIcon,
             contentDescription = "adventure")
     }
 }

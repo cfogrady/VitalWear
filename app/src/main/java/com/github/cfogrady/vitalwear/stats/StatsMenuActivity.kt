@@ -23,11 +23,11 @@ import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.character.transformation.TransformationOption
-import com.github.cfogrady.vitalwear.character.transformation.TransformationFirmwareSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.common.composable.util.formatNumber
 import com.github.cfogrady.vitalwear.firmware.Firmware
+import com.github.cfogrady.vitalwear.firmware.components.TransformationBitmaps
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
@@ -81,7 +81,7 @@ class StatsMenuActivity : ComponentActivity() {
                 contentDescription = "Background",
                 alignment = Alignment.BottomCenter
             )
-            val pagerState = rememberPagerState(pageCount = {1 + partner. transformationOptions.size})
+            val pagerState = rememberPagerState(pageCount = {1 + partner.transformationOptions.size})
             VerticalPager(state = pagerState) {rootPage ->
                 when(rootPage) {
                     0 -> {
@@ -91,7 +91,7 @@ class StatsMenuActivity : ComponentActivity() {
                         val potentialOption = partner.transformationOptions[rootPage - 1]
                         val highestCompletedAdventure = partner.cardMeta.maxAdventureCompletion ?: -1
                         PotentialTransformation(
-                            firmwareSprites = firmware.transformationFirmwareSprites,
+                            transformationBitmaps = firmware.transformationBitmaps,
                             bemCharacter = partner,
                             transformationOption = potentialOption,
                             expectedTransformation = currentOption == potentialOption,
@@ -124,7 +124,7 @@ class StatsMenuActivity : ComponentActivity() {
                         Stats(partner)
                     }
                     3 -> {
-                        TransformationFulfilment(partner, firmware.transformationFirmwareSprites)
+                        TransformationFulfilment(partner, firmware.transformationBitmaps)
                     }
                 }
             }
@@ -165,19 +165,19 @@ class StatsMenuActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun PotentialTransformation(firmwareSprites: TransformationFirmwareSprites, bemCharacter: VBCharacter, transformationOption: TransformationOption, expectedTransformation: Boolean, locked: Boolean) {
+    private fun PotentialTransformation(transformationBitmaps: TransformationBitmaps, bemCharacter: VBCharacter, transformationOption: TransformationOption, expectedTransformation: Boolean, locked: Boolean) {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
             Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                 if(expectedTransformation) {
-                    bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.star, contentDescription = "star")
+                    bitmapScaler.ScaledBitmap(bitmap = transformationBitmaps.star, contentDescription = "star")
                     Text(text = "NEXT", fontSize = 2.em, fontStyle = FontStyle.Italic)
-                    bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.star, contentDescription = "star")
+                    bitmapScaler.ScaledBitmap(bitmap = transformationBitmaps.star, contentDescription = "star")
                 } else {
                     Text(text = "NEXT", fontSize = 2.em, fontStyle = FontStyle.Italic)
                 }
             }
             if(locked) {
-                bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.locked, contentDescription = "Potential Transformation Locked")
+                bitmapScaler.ScaledBitmap(bitmap = transformationBitmaps.locked, contentDescription = "Potential Transformation Locked")
             } else {
                 bitmapScaler.ScaledBitmap(bitmap = transformationOption.sprite, contentDescription = "Potential Transformation")
             }
@@ -188,13 +188,13 @@ class StatsMenuActivity : ComponentActivity() {
             Row(modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
-                bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.hourglass, contentDescription = "time icon", modifier = Modifier.weight(
+                bitmapScaler.ScaledBitmap(bitmap = transformationBitmaps.hourglass, contentDescription = "time icon", modifier = Modifier.weight(
                     TRANSFORMATION_ICON_COLUMN_WEIGHT))
                 Text(text = "${formatNumber(timeRemaining.toInt(), 2)}$timeUnit", textAlign = TextAlign.Right, modifier = Modifier.weight(
                     TRANSFORMATION_VALUE_COLUMN_WEIGHT))
             }
             TransformationStats(
-                firmwareSprites,
+                transformationBitmaps,
                 transformationOption.requiredVitals,
                 transformationOption.requiredBattles,
                 transformationOption.requiredWinRatio,
@@ -208,11 +208,11 @@ class StatsMenuActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun TransformationStats(firmwareSprites: TransformationFirmwareSprites, vitals: Int, battles: Int, winRatio: Int, pp: Int, vitalsColor: Color = Color.White,  battlesColor: Color = Color.White, winRatioColor: Color = Color.White, ppColor: Color = Color.White) {
+    private fun TransformationStats(transformationBitmaps: TransformationBitmaps, vitals: Int, battles: Int, winRatio: Int, pp: Int, vitalsColor: Color = Color.White,  battlesColor: Color = Color.White, winRatioColor: Color = Color.White, ppColor: Color = Color.White) {
         Row(modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
-            bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.vitalsIcon, contentDescription = "vitals icon", modifier = Modifier.weight(
+            bitmapScaler.ScaledBitmap(bitmap = transformationBitmaps.vitalsIcon, contentDescription = "vitals icon", modifier = Modifier.weight(
                 TRANSFORMATION_ICON_COLUMN_WEIGHT))
             Text(text = formatNumber(vitals, 4), color = vitalsColor, textAlign = TextAlign.Right, modifier = Modifier.weight(
                 TRANSFORMATION_VALUE_COLUMN_WEIGHT))
@@ -220,7 +220,7 @@ class StatsMenuActivity : ComponentActivity() {
         Row(modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
-            bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.battlesIcon, contentDescription = "battles icon", modifier = Modifier.weight(
+            bitmapScaler.ScaledBitmap(bitmap = transformationBitmaps.battlesIcon, contentDescription = "battles icon", modifier = Modifier.weight(
                 TRANSFORMATION_ICON_COLUMN_WEIGHT))
             Text(text = formatNumber(battles, 3), color = battlesColor, textAlign = TextAlign.Right, modifier = Modifier.weight(
                 TRANSFORMATION_VALUE_COLUMN_WEIGHT))
@@ -228,7 +228,7 @@ class StatsMenuActivity : ComponentActivity() {
         Row(modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
-            bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.winRatioIcon, contentDescription = "win ratio icon", modifier = Modifier.weight(
+            bitmapScaler.ScaledBitmap(bitmap = transformationBitmaps.winRatioIcon, contentDescription = "win ratio icon", modifier = Modifier.weight(
                 TRANSFORMATION_ICON_COLUMN_WEIGHT))
             Text(text = "${formatNumber(winRatio, 3)}%", color = winRatioColor, textAlign = TextAlign.Right, modifier = Modifier.weight(
                 TRANSFORMATION_VALUE_COLUMN_WEIGHT))
@@ -236,10 +236,10 @@ class StatsMenuActivity : ComponentActivity() {
         Row(modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = TRANSFORMATION_ROW_PADDING), verticalAlignment = Alignment.CenterVertically) {
-            bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.ppIcon, contentDescription = "pp icon", modifier = Modifier.weight(
+            bitmapScaler.ScaledBitmap(bitmap = transformationBitmaps.ppIcon, contentDescription = "pp icon", modifier = Modifier.weight(
                 TRANSFORMATION_ICON_COLUMN_WEIGHT))
             Row(modifier = Modifier.weight(TRANSFORMATION_VALUE_COLUMN_WEIGHT), horizontalArrangement = Arrangement.End) {
-                bitmapScaler.ScaledBitmap(bitmap = firmwareSprites.squatIcon, contentDescription = "squat icon")
+                bitmapScaler.ScaledBitmap(bitmap = transformationBitmaps.squatIcon, contentDescription = "squat icon")
                 Text(text = formatNumber(pp, 3), color = ppColor, textAlign = TextAlign.Right)
             }
         }
@@ -278,9 +278,9 @@ class StatsMenuActivity : ComponentActivity() {
     }
 
     @Composable
-    fun TransformationFulfilment(partner: VBCharacter, firmwareSprites: TransformationFirmwareSprites) {
+    fun TransformationFulfilment(partner: VBCharacter, transformationBitmaps: TransformationBitmaps) {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-            TransformationStats(firmwareSprites = firmwareSprites, vitals = partner.characterStats.vitals, battles = partner.characterStats.currentPhaseBattles, winRatio = partner.characterStats.currentPhaseWinRatio(), pp = partner.characterStats.trainedPP)
+            TransformationStats(transformationBitmaps = transformationBitmaps, vitals = partner.characterStats.vitals, battles = partner.characterStats.currentPhaseBattles, winRatio = partner.characterStats.currentPhaseWinRatio(), pp = partner.characterStats.trainedPP)
         }
     }
 

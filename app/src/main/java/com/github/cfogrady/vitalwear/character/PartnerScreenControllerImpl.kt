@@ -2,7 +2,7 @@ package com.github.cfogrady.vitalwear.character
 
 import android.graphics.Bitmap
 import androidx.compose.ui.unit.Dp
-import com.github.cfogrady.vitalwear.character.data.CharacterFirmwareSprites
+import com.github.cfogrady.vitalwear.firmware.components.CharacterIconBitmaps
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.firmware.FirmwareManager
 import com.github.cfogrady.vitalwear.heartrate.HeartRateService
@@ -31,11 +31,11 @@ internal class PartnerScreenControllerImpl(
     private val delayWrapper: suspend (Long)->Unit = { delay(it) } // we wrap delay so we can test without actually delaying test code
 ): PartnerScreenController {
 
-    override val characterFirmwareSprites: CharacterFirmwareSprites
-        get() = firmwareManager.getFirmware().value!!.characterFirmwareSprites
+    override val characterIconBitmaps: CharacterIconBitmaps
+        get() = firmwareManager.getFirmware().value!!.characterIconBitmaps
     override val dailyStepCount: StateFlow<Int> = stepSensorService.dailySteps
     override val emoteBitmaps = combineStates(characterManager.getCharacterFlow(), heartRateService.currentExerciseLevel) { character, exerciseLevel->
-        character?.getEmoteBitmaps(characterFirmwareSprites.emoteFirmwareSprites, exerciseLevel)
+        character?.getEmoteBitmaps(characterIconBitmaps.emoteBitmaps, exerciseLevel)
             ?: emptyList<Bitmap>()
     }
     override val vitals = characterManager.getCharacterFlow().mapState {
