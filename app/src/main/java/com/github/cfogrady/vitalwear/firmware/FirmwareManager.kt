@@ -6,15 +6,16 @@ import android.widget.Toast
 import androidx.core.net.toUri
 import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
 import com.github.cfogrady.vitalwear.common.card.SpriteBitmapConverter
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 
-const val FIRMWARE_FILE = "VBBE_10B.vb2"
+const val FIRMWARE_FILE = "VBBE_FIRMWARE.vb2"
 
 class FirmwareManager(
     spriteBitmapConverter: SpriteBitmapConverter,
@@ -60,14 +61,14 @@ class FirmwareManager(
         return firmware
     }
 
-    private fun internalLoadFirmware(applicationContext: Context) : Boolean {
+    private suspend fun internalLoadFirmware(applicationContext: Context) : Boolean {
         val filesRoot = applicationContext.filesDir
         val firmwareFile = File(filesRoot, FIRMWARE_FILE)
-        val firmwareSpriteIndexes = if(firmwareFile.endsWith("_10B.vb2"))
-            Firmware10BSpriteIndexes.instance else Firmware20ASpriteIndexes.instance
         try {
-            FileInputStream(firmwareFile).use { fileInput ->
-                firmware.value = firmwareLoader.loadFirmware(firmwareSpriteIndexes ,fileInput)
+            withContext(Dispatchers.IO) {
+                FileInputStream(firmwareFile).use { fileInput ->
+                    firmware.value = firmwareLoader.loadFirmware(fileInput)
+                }
             }
             mutalbeFirmwareState.value = FirmwareState.Loaded
             return true
@@ -75,6 +76,12 @@ class FirmwareManager(
             Timber.e("No firmware file", fnfe)
             mutalbeFirmwareState.value = FirmwareState.Missing
             return true
+        } catch(iae: IllegalArgumentException) {
+            Timber.e("Unable to load firmware", iae)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(applicationContext, iae.message, Toast.LENGTH_SHORT).show()
+            }
+            return false
         } catch (e: Exception) {
             Timber.e("Unable to load firmware", e)
             return false

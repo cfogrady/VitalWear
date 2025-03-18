@@ -28,9 +28,9 @@ class Firmware(
             val firmwareLoader = FirmwareLoader(BemSpriteReader(), SpriteBitmapConverter())
             val use10BFirmware = false
             if (use10BFirmware) {
-                return firmwareLoader.loadFirmware(Firmware10BSpriteIndexes.instance, context.assets.open("VBBE_10B.vb2"))
+                return firmwareLoader.loadFirmware(context.assets.open("VBBE_10B.vb2"))
             } else {
-                return firmwareLoader.loadFirmware(Firmware20ASpriteIndexes.instance, context.assets.open("VBBE_20A.vb2"))
+                return firmwareLoader.loadFirmware(context.assets.open("VBBE_20A.vb2"))
             }
         }
     }

@@ -2,6 +2,7 @@ package com.github.cfogrady.vitalwear.firmware
 
 import com.github.cfogrady.vb.dim.sprite.BemSpriteReader
 import com.github.cfogrady.vb.dim.sprite.SpriteData.Sprite
+import com.github.cfogrady.vb.dim.util.ByteUtils
 import com.github.cfogrady.vb.dim.util.RelativeByteOffsetInputStream
 import com.github.cfogrady.vitalwear.firmware.components.AdventureBitmaps
 import com.github.cfogrady.vitalwear.firmware.components.BattleBitmaps
@@ -21,12 +22,24 @@ import com.github.cfogrady.vitalwear.firmware.components.TransformationSpriteInd
 import com.google.common.collect.Lists
 import timber.log.Timber
 import java.io.InputStream
+import java.nio.charset.StandardCharsets
 
 class FirmwareLoader(private val bemSpriteReader: BemSpriteReader, private val spriteBitmapConverter: SpriteBitmapConverter) {
 
-    fun loadFirmware(firmwareSpriteIndexes: FirmwareSpriteIndexes, fileInput: InputStream): Firmware {
-        val startFirmwareRead = System.currentTimeMillis()
+    fun loadFirmware(fileInput: InputStream): Firmware {
         val input = RelativeByteOffsetInputStream(fileInput)
+        val version = versionFromHeader(input.readNBytes(16))
+        val firmwareSpriteIndexes = firmwareSpriteIndexesFromVersion(version)
+        return internalLoadFirmware(firmwareSpriteIndexes, input)
+    }
+
+    fun loadFirmware(firmwareSpriteIndexes: FirmwareSpriteIndexes, fileInput: InputStream) {
+        val input = RelativeByteOffsetInputStream(fileInput)
+        internalLoadFirmware(firmwareSpriteIndexes, input)
+    }
+
+    private fun internalLoadFirmware(firmwareSpriteIndexes: FirmwareSpriteIndexes, input: RelativeByteOffsetInputStream): Firmware {
+        val startFirmwareRead = System.currentTimeMillis()
         input.readToOffset(firmwareSpriteIndexes.spriteDimensionsLocation)
         val dimensionsList = bemSpriteReader.readSpriteDimensions(input)
         input.readToOffset(firmwareSpriteIndexes.spritePackageLocation)
@@ -56,6 +69,19 @@ class FirmwareLoader(private val bemSpriteReader: BemSpriteReader, private val s
             readyIcon,
             goIcon,
         )
+    }
+
+    private fun versionFromHeader(headerBytes: ByteArray): String {
+        return headerBytes.toString(StandardCharsets.UTF_16LE) // UTF-16 Little Endian Byte Order
+    }
+
+    private fun firmwareSpriteIndexesFromVersion(version: String): FirmwareSpriteIndexes {
+        if("VBBE_10B" == version) {
+            return Firmware10BSpriteIndexes.instance
+        } else if ("VBBE_20A" == version) {
+            return Firmware20ASpriteIndexes.instance
+        }
+        throw IllegalArgumentException("Unknown firmware version: $version")
     }
 
     private fun buildEmoteBitmaps(emoteSpriteIndexes: EmoteSpriteIndexes, sprites: List<Sprite>) : EmoteBitmaps {
