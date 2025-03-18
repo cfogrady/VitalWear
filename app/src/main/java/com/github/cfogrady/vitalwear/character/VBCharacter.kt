@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import com.github.cfogrady.vitalwear.card.CardMeta
 import com.github.cfogrady.vitalwear.character.data.BEMCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterEntity
-import com.github.cfogrady.vitalwear.character.data.EmoteFirmwareSprites
+import com.github.cfogrady.vitalwear.firmware.components.EmoteBitmaps
 import com.github.cfogrady.vitalwear.character.data.Mood
 import com.github.cfogrady.vitalwear.character.data.SupportCharacter
 import com.github.cfogrady.vitalwear.character.transformation.ExpectedTransformation
@@ -233,7 +233,7 @@ abstract class VBCharacter(
     // getEmoteBitmaps gets the list of bitmaps corresponding to the current emote if any.
     // Returns an list of optional bitmap. Optional because a null value indicates an emote which
     // flashes on then off.
-    fun getEmoteBitmaps(firmware: EmoteFirmwareSprites, exerciseLevel: Int): List<Bitmap?> {
+    fun getEmoteBitmaps(firmware: EmoteBitmaps, exerciseLevel: Int): List<Bitmap?> {
         return if(characterStats.sleeping) {
             firmware.sleepEmote
         } else if(exerciseLevel == 3) {

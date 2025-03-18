@@ -74,7 +74,7 @@ class TransferActivity: ComponentActivity() {
         super.onCreate(savedInstanceState)
         vitalBoxFactory = (application as VitalWearApp).vitalBoxFactory
         transferActivityController = (application as VitalWearApp).transferActivityController
-        transferBackground = (application as VitalWearApp).firmwareManager.getFirmware().value!!.transformationFirmwareSprites.rayOfLightBackground
+        transferBackground = (application as VitalWearApp).firmwareManager.getFirmware().value!!.transformationBitmaps.rayOfLightBackground
         bitmapScaler = (application as VitalWearApp).bitmapScaler
         backgroundHeight = (application as VitalWearApp).backgroundHeight
         val missingPermissions = NearbyP2PConnection.getMissingPermissions(this)

@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 class DimBattleSpriteLoader(private val context: Context, private val firmware: Firmware, private val cardSpritesIO: CardSpritesIO, private val cardName: String, private val backgroundId: Int? = null) : BattleSpriteLoader {
     override suspend fun getBackground(): Bitmap {
         return if(backgroundId == null) {
-            firmware.battleFirmwareSprites.battleBackground
+            firmware.battleBitmaps.battleBackground
         } else {
             withContext(Dispatchers.IO) {
                 cardSpritesIO.loadIndexedSprite(context, cardName, CardSpritesIO.BACKGROUNDS, backgroundId)

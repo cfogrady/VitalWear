@@ -95,7 +95,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
             BackgroundManager.BattleBackgroundType.Static -> backgroundManager.staticBattleBackground.value!!
             BackgroundManager.BattleBackgroundType.OpponentCard -> {
                 if (randomOpponent.cardType == CardType.DIM) {
-                    firmware.battleFirmwareSprites.battleBackground
+                    firmware.battleBitmaps.battleBackground
                 } else {
                     cardSpritesIO.loadCardBackgrounds(context, randomOpponent.cardName)[1]
                 }
@@ -153,8 +153,8 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
             preBattleModel.opponent,
             battle,
             preBattleModel.background,
-            firmware.battleFirmwareSprites.partnerHpIcons,
-            firmware.battleFirmwareSprites.opponentHpIcons,
+            firmware.battleBitmaps.partnerHpIcons,
+            firmware.battleBitmaps.opponentHpIcons,
             vitalChange
         )
     }
@@ -222,7 +222,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
 
     private fun getSmallAttackSprite(context: Context, cardName: String, firmware: Firmware, smallAttackId: Int) : Bitmap {
         if(smallAttackId <= 38) {
-            return firmware.battleFirmwareSprites.attackSprites[smallAttackId]
+            return firmware.battleBitmaps.attackSprites[smallAttackId]
         }
         val cardSpriteIdx = (smallAttackId - 39)
         return cardSpritesIO.loadIndexedSprite(context, cardName, CardSpritesIO.ATTACKS, cardSpriteIdx)
@@ -230,7 +230,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
 
     private fun getLargeAttackSprite(context: Context, cardName: String, firmware: Firmware, largeAttackId: Int) : Bitmap {
         if(largeAttackId < 22) {
-            return firmware.battleFirmwareSprites.largeAttackSprites[largeAttackId]
+            return firmware.battleBitmaps.largeAttackSprites[largeAttackId]
         }
         val cardSpriteIdx = (largeAttackId - 22)
         return cardSpritesIO.loadIndexedSprite(context, cardName, CardSpritesIO.CRITICAL_ATTACKS, cardSpriteIdx)
@@ -240,7 +240,7 @@ class BattleService(private val cardSpritesIO: CardSpritesIO,
         if(hasCardHits) {
             return cardSpritesIO.loadCardSpriteList(context, cardName, CardSpritesIO.RECEIVE_HIT_ICONS)
         }
-        return firmware.battleFirmwareSprites.hitIcons
+        return firmware.battleBitmaps.hitIcons
     }
 
     private suspend fun loadRandomTarget(context: Context, partner: VBCharacter, phase: Int, allowedBattles: CharacterSettings.AllowedBattles, franchiseId: Int): BattleCharacter {
