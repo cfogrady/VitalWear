@@ -1,5 +1,6 @@
 package com.github.cfogrady.vitalwear.transfer
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.widget.Toast
@@ -36,10 +37,20 @@ import androidx.wear.tooling.preview.devices.WearDevices
 import com.github.cfogrady.nearby.connections.p2p.NearbyP2PConnection
 import com.github.cfogrady.nearby.connections.p2p.wear.ui.DisplayMatchingDevices
 import com.github.cfogrady.vitalwear.VitalWearApp
+import com.github.cfogrady.vitalwear.adventure.AdventureService
+import com.github.cfogrady.vitalwear.character.CharacterManager
+import com.github.cfogrady.vitalwear.character.VBCharacter
+import com.github.cfogrady.vitalwear.character.data.CharacterEntity
+import com.github.cfogrady.vitalwear.character.data.CharacterPreview
+import com.github.cfogrady.vitalwear.character.data.CharacterState
+import com.github.cfogrady.vitalwear.character.transformation.history.TransformationHistoryEntity
+import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
+import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.protos.Character
+import com.github.cfogrady.vitalwear.settings.CharacterSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -48,8 +59,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
-class TransferActivity: ComponentActivity() {
+class TransferActivity: ComponentActivity(), TransferScreenController {
 
 
     enum class TransferState {
@@ -64,19 +76,15 @@ class TransferActivity: ComponentActivity() {
         RECEIVE
     }
 
-    lateinit var vitalBoxFactory: VitalBoxFactory
-    lateinit var transferActivityController: TransferActivityController
-    lateinit var transferBackground: Bitmap
-    lateinit var bitmapScaler: BitmapScaler
-    var backgroundHeight: Dp = 0.dp
+    private val characterManager: CharacterManager
+        get() = (application as VitalWearApp).characterManager
+    private val adventureService: AdventureService
+        get() = (application as VitalWearApp).adventureService
+    private val cardMetaEntityDao: CardMetaEntityDao
+        get() = (application as VitalWearApp).cardMetaEntityDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        vitalBoxFactory = (application as VitalWearApp).vitalBoxFactory
-        transferActivityController = (application as VitalWearApp).transferActivityController
-        transferBackground = (application as VitalWearApp).firmwareManager.getFirmware().value!!.transformationBitmaps.rayOfLightBackground
-        bitmapScaler = (application as VitalWearApp).bitmapScaler
-        backgroundHeight = (application as VitalWearApp).backgroundHeight
         val missingPermissions = NearbyP2PConnection.getMissingPermissions(this)
         if(missingPermissions.isNotEmpty()) {
             buildPermissionRequestLauncher { requestedPermissions->
@@ -93,7 +101,7 @@ class TransferActivity: ComponentActivity() {
             }.launch(missingPermissions.toTypedArray())
         }
         setContent {
-            TransferScreen()
+            TransferScreen(this)
         }
     }
 
@@ -103,223 +111,180 @@ class TransferActivity: ComponentActivity() {
         return launcher
     }
 
-    @Composable
-    fun TransferScreen() {
-        val coroutineScope = rememberCoroutineScope()
-        val characterTransfer = remember {
-            CharacterTransfer.getInstance(this)
-        }
-        var state by remember { mutableStateOf(TransferState.ENTRY) }
-        var sendOrReceive by remember { mutableStateOf(SendOrReceive.SEND) }
-        var result = remember { MutableStateFlow(CharacterTransfer.Result.TRANSFERRING) }
-        when(state) {
-            TransferState.ENTRY -> SelectSendOrReceive(onSelect = {
-                sendOrReceive = it
-                state = TransferState.FIND_DEVICES
-            })
-            TransferState.FIND_DEVICES -> FindDevices(characterTransfer) {
-                if(sendOrReceive == SendOrReceive.SEND) {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val character = transferActivityController.getActiveCharacterProto()
-                        if(character == null) {
-                            runOnUiThread {
-                                Toast.makeText(this@TransferActivity, "No active character!", Toast.LENGTH_SHORT).show()
-                                characterTransfer.close()
-                                finish()
-                            }
-                        } else {
-                            val transferResult = characterTransfer.sendCharacterToDevice(it, character)
-                            coroutineScope.launch {
-                                transferResult.collect{ transferResultValue ->
-                                    result.update { transferResultValue }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    val transferResult = characterTransfer.receiveCharacterFrom(it, this::receiveCharacter)
-                    coroutineScope.launch {
-                        transferResult.collect{ transferResultValue ->
-                            result.update { transferResultValue }
-                        }
-                    }
-                }
-                state = TransferState.CONNECTED
-            }
-            TransferState.CONNECTED -> {
-                val connectionStatus by result.collectAsState()
-                if(connectionStatus == CharacterTransfer.Result.TRANSFERRING) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Transferring...")
-                    }
-                } else {
-                    state = TransferState.TRANSFERRED
-                }
-            }
-            TransferState.TRANSFERRED -> {
-                TransferResult(sendOrReceive, result)
-            }
+    //------------------------------- Controller Members ---------------------------------------//
+
+    override val vitalBoxFactory: VitalBoxFactory
+        get() = (application as VitalWearApp).vitalBoxFactory
+    override val transferBackground: Bitmap
+        get() = (application as VitalWearApp).firmwareManager.getFirmware().value!!.transformationBitmaps.rayOfLightBackground
+    override val bitmapScaler: BitmapScaler
+        get() = (application as VitalWearApp).bitmapScaler
+    override val backgroundHeight: Dp
+        get() = (application as VitalWearApp).backgroundHeight
+
+    override fun endActivityWithToast(msg: String) {
+        runOnUiThread {
+            Toast.makeText(this@TransferActivity, msg, Toast.LENGTH_SHORT).show()
+            finish()
         }
     }
 
-    var receiveCharacterSprites: TransferActivityController.ReceiveCharacterSprites? = null
+    override fun getCharacterTransfer(): CharacterTransfer {
+        return CharacterTransfer.getInstance(this)
+    }
 
-    suspend fun receiveCharacter(character: Character): Boolean {
-        val receivedCharacterSprites = transferActivityController.receiveCharacter(this, character)
-        if(receivedCharacterSprites == null) {
+    override suspend fun getActiveCharacterProto(): Character? {
+        val activeCharacter = characterManager.getCurrentCharacter()
+        activeCharacter?.let {
+            val maxAdventureIdxCompletedByCard = adventureService.getMaxAdventureIdxByCardCompletedForCharacter(it.characterStats.id)
+            val transformationHistory = characterManager.getTransformationHistory(it.characterStats.id)
+            return activeCharacter.toProto(transformationHistory, maxAdventureIdxCompletedByCard)
+        }
+        return null
+    }
+
+    override fun getActiveCharacter(): VBCharacter? {
+        return characterManager.getCurrentCharacter()
+    }
+
+    override fun deleteActiveCharacter() {
+        characterManager.deleteCurrentCharacter()
+    }
+
+    val lastReceiedCharacter = MutableStateFlow<TransferScreenController.ReceiveCharacterSprites?>(null)
+
+    override suspend fun receiveCharacter(character: Character): Boolean {
+        val cardMetaEntity = cardMetaEntityDao.getByName(character.cardName)
+        if(cardMetaEntity == null || cardMetaEntity.cardId != character.cardId) {
+            // we can't handle this character
+            lastReceiedCharacter.emit(null)
             return false
         }
-        receiveCharacterSprites = receivedCharacterSprites
+        val characterId = characterManager.addCharacter(
+            character.cardName,
+            character.characterStats.toCharacterEntity(character.cardName),
+            character.settings.toCharacterSettings(),
+            character.transformationHistoryList.toTransformationHistoryEntities()
+        )
+        adventureService.addCharacterAdventures(characterId, character.maxAdventureCompletedByCardMap)
+        val happy = characterManager.getCharacterBitmap(this, character.cardName, character.characterStats.slotId, CharacterSpritesIO.WIN)
+        val idle = characterManager.getCharacterBitmap(this, character.cardName, character.characterStats.slotId, CharacterSpritesIO.IDLE1)
+        characterManager.swapToCharacter(this, CharacterManager.SwapCharacterIdentifier.buildAnonymous(character.cardName, characterId, character.characterStats.slotId, CharacterState.STORED))
+        lastReceiedCharacter.emit(TransferScreenController.ReceiveCharacterSprites(idle, happy))
         return true
     }
 
-    @Preview(
-        device = WearDevices.LARGE_ROUND,
-        showSystemUi = true,
-        backgroundColor = 0xff000000,
-        showBackground = true
+    override fun getLastReceivedCharacterSprites(): TransferScreenController.ReceiveCharacterSprites {
+        return lastReceiedCharacter.value!!
+    }
+}
+
+fun VBCharacter.toProto(transformationHistory: List<TransformationHistoryEntity>, maxAdventureCompletedByCard: Map<String, Int>): Character {
+    return Character.newBuilder()
+        .setCardId(this.cardMeta.cardId)
+        .setCardName(this.cardName())
+        .setCharacterStats(this.characterStats.toProto())
+        .setSettings(this.settings.toProto())
+        .addAllTransformationHistory(transformationHistory.toProtoList())
+        .putAllMaxAdventureCompletedByCard(maxAdventureCompletedByCard)
+        .build()
+}
+
+fun List<TransformationHistoryEntity>.toProtoList(): List<Character.TransformationEvent> {
+    val transformations = mutableListOf<Character.TransformationEvent>()
+    for(transformation in this) {
+        transformations.add(transformation.toProto())
+    }
+    return transformations
+}
+
+fun TransformationHistoryEntity.toProto(): Character.TransformationEvent {
+    return Character.TransformationEvent.newBuilder()
+        .setCardName(this.cardName)
+        .setSlotId(this.speciesId)
+        .setPhase(this.phase)
+        .build()
+}
+
+fun List<Character.TransformationEvent>.toTransformationHistoryEntities(): List<TransformationHistoryEntity> {
+    val transformations = mutableListOf<TransformationHistoryEntity>()
+    for(transformation in this) {
+        transformations.add(transformation.toTransformationHistoryEntitiy())
+    }
+    return transformations
+}
+
+fun Character.TransformationEvent.toTransformationHistoryEntitiy(): TransformationHistoryEntity {
+    return TransformationHistoryEntity(
+        characterId = 0,
+        phase = this.phase,
+        cardName = this.cardName,
+        speciesId = this.slotId
     )
-    @Composable
-    fun SelectSendOrReceive(onSelect: (SendOrReceive) -> Unit = {}) {
-        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            CompactButton(onClick = {onSelect.invoke(SendOrReceive.SEND)}) {
-                Text("Send Character")
-            }
-            CompactButton(onClick = {onSelect.invoke(SendOrReceive.RECEIVE)}) {
-                Text("Receive Character")
-            }
-        }
+}
+
+fun CharacterEntity.toProto(): Character.CharacterStats {
+    return Character.CharacterStats.newBuilder()
+        .setMood(this.mood)
+        .setVitals(this.vitals)
+        .setInjured(this.injured)
+        .setSlotId(this.slotId)
+        .setTotalWins(this.totalWins)
+        .setAccumulatedDailyInjuries(this.accumulatedDailyInjuries)
+        .setCurrentPhaseBattles(this.currentPhaseBattles)
+        .setCurrentPhaseWins(this.currentPhaseWins)
+        .setTimeUntilNextTransformation(this.timeUntilNextTransformation)
+        .setTotalBattles(this.totalBattles)
+        .setTrainedAp(this.trainedAp)
+        .setTrainedBp(this.trainedBp)
+        .setTrainedHp(this.trainedHp)
+        .setTrainedPp(this.trainedPP)
+        .build()
+}
+
+fun CharacterSettings.toProto(): Character.Settings {
+    var builder = Character.Settings.newBuilder()
+        .setTrainingInBackground(this.trainInBackground)
+        .setAllowedBattlesValue(this.allowedBattles.ordinal)
+    if(this.assumedFranchise != null) {
+        builder = builder.setAssumedFranchise(this.assumedFranchise)
     }
+    return builder.build()
+}
 
-    @Composable
-    fun FindDevices(characterTransfer: CharacterTransfer, onDeviceFound: (String)->Unit) {
-        val discoveredDevices = remember { MutableSharedFlow<String>() }
-        val coroutineScope = rememberCoroutineScope()
-        var connected by remember { mutableStateOf(false) }
-        DisposableEffect(true) {
-            coroutineScope.launch {
-                characterTransfer.searchForOtherTransferDevices().collect {
-                    discoveredDevices.emit(it)
-                } 
-            }
+fun Character.CharacterStats.toCharacterEntity(cardName: String): CharacterEntity {
+    return CharacterEntity(
+        id = 0,
+        state = CharacterState.STORED,
+        cardFile = cardName,
+        slotId = this.slotId,
+        lastUpdate = LocalDateTime.now(),
+        vitals = this.vitals,
+        trainingTimeRemainingInSeconds = this.trainingTimeRemainingInSeconds,
+        hasTransformations = this.timeUntilNextTransformation > 0,
+        timeUntilNextTransformation = this.timeUntilNextTransformation,
+        trainedBp = this.trainedBp,
+        trainedHp = this.trainedHp,
+        trainedAp = this.trainedAp,
+        trainedPP = this.trainedPp,
+        injured = this.injured,
+        lostBattlesInjured = 0,
+        accumulatedDailyInjuries = this.accumulatedDailyInjuries,
+        totalBattles = this.totalBattles,
+        currentPhaseBattles = this.currentPhaseBattles,
+        totalWins = this.totalWins,
+        currentPhaseWins = this.currentPhaseWins,
+        mood = this.mood,
+        sleeping = false,
+        dead = false,
+    )
+}
 
-            onDispose {
-                if(!connected) {
-                    characterTransfer.close()
-                }
-            }
-        }
-        DisplayMatchingDevices(characterTransfer.deviceName, discoveredDevices, rescan = {
-            connected = false
-            characterTransfer.close()
-            characterTransfer.searchForOtherTransferDevices()
-        }, selectDevice = {
-            connected = true
-            onDeviceFound.invoke(it)
-        })
-    }
-
-    @Composable
-    fun TransferResult(sendOrReceive: SendOrReceive, resultStatusFlow: StateFlow<CharacterTransfer.Result>) {
-        val resultStatus = remember { resultStatusFlow.value }
-        when(resultStatus) {
-            CharacterTransfer.Result.TRANSFERRING -> {
-                throw IllegalStateException("Shouldn't be looking at result is the status is still Trasnferring")
-            }
-            CharacterTransfer.Result.SUCCESS -> {
-                if(sendOrReceive == SendOrReceive.SEND) {
-                    val activeCharacter = transferActivityController.getActiveCharacter()!!
-                    LaunchedEffect(true) {
-                        transferActivityController.deleteActiveCharacter()
-                    }
-                    val idle = activeCharacter.characterSprites.sprites[CharacterSprites.IDLE_1]
-                    val walk = activeCharacter.characterSprites.sprites[CharacterSprites.WALK_1]
-                    SendAnimation(idleBitmap = idle, walkBitmap = walk) { finish() }
-                } else {
-                    ReceiveAnimation(receiveCharacterSprites!!.idle, receiveCharacterSprites!!.happy) { finish() }
-                    Toast.makeText(this, "Transfer Recevied!", Toast.LENGTH_SHORT).show()
-                    finish()
-                }
-            }
-            CharacterTransfer.Result.REJECTED -> {
-                Toast.makeText(this, "Transfer Rejected!", Toast.LENGTH_SHORT).show()
-                finish()
-            }
-            CharacterTransfer.Result.FAILURE -> {
-                Toast.makeText(this, "Transfer Failed!", Toast.LENGTH_SHORT).show()
-                finish()
-            }
-        }
-    }
-
-    @Composable
-    fun SendAnimation(idleBitmap: Bitmap, walkBitmap: Bitmap, onComplete: ()->Unit) {
-        var targetAnimation by remember { mutableStateOf(0) }
-        var idle by remember { mutableStateOf(true) }
-        val flicker by animateIntAsState(targetAnimation, tween(
-            durationMillis = 3000,
-            easing = FastOutLinearInEasing
-        )) {
-            if(it == 11) {
-                onComplete.invoke()
-            }
-        }
-        LaunchedEffect(true) {
-            delay(500)
-            idle = false
-            delay(500)
-            targetAnimation = 11
-        }
-        vitalBoxFactory.VitalBox {
-            bitmapScaler.ScaledBitmap(transferBackground, "Background", alignment = Alignment.BottomCenter)
-
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-                if(flicker % 2 == 0) {
-                    bitmapScaler.ScaledBitmap(if(idle) idleBitmap else walkBitmap, "Character", alignment = Alignment.BottomCenter,
-                        modifier = Modifier.offset(y = backgroundHeight.times(-0.05f)))
-                }
-            }
-        }
-    }
-
-    @Composable
-    fun ReceiveAnimation(idleBitmap: Bitmap, happyBitmap: Bitmap, onComplete: () -> Unit) {
-        var targetAnimation by remember { mutableStateOf(0) }
-        var idle by remember { mutableStateOf(false) }
-        var startIdleFlip by remember { mutableStateOf(false) }
-        val flicker by animateIntAsState(targetAnimation, tween(
-            durationMillis = 3000,
-            easing = LinearOutSlowInEasing
-        )) {
-            if(it == 11) {
-                startIdleFlip = true
-            }
-        }
-        LaunchedEffect(true) {
-            targetAnimation = 11
-        }
-        LaunchedEffect(startIdleFlip) {
-            if(startIdleFlip) {
-                idle = true
-                delay(500)
-                idle = false
-                delay(500)
-                idle = true
-                delay(500)
-                idle = false
-                onComplete.invoke()
-
-            }
-        }
-        vitalBoxFactory.VitalBox {
-            bitmapScaler.ScaledBitmap(transferBackground, "Background", alignment = Alignment.BottomCenter)
-
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-                if(flicker % 2 == 1) {
-                    bitmapScaler.ScaledBitmap(if(idle) idleBitmap else happyBitmap, "Character", alignment = Alignment.BottomCenter,
-                        modifier = Modifier.offset(y = backgroundHeight.times(-0.05f)))
-                }
-            }
-        }
-    }
+fun Character.Settings.toCharacterSettings(): CharacterSettings {
+    return CharacterSettings(
+        characterId = 0,
+        trainInBackground = this.trainingInBackground,
+        allowedBattles = CharacterSettings.AllowedBattles.entries[this.allowedBattlesValue],
+        if(this.hasAssumedFranchise()) this.assumedFranchise else null
+    )
 }
