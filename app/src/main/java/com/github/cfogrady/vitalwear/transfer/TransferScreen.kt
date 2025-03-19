@@ -50,7 +50,6 @@ import kotlinx.coroutines.launch
 enum class TransferState {
     ENTRY,
     FIND_DEVICES,
-    UNKNOWN_CARD,
     CONNECTED,
     TRANSFERRED,
 }
