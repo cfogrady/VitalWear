@@ -31,11 +31,10 @@ import kotlinx.coroutines.withContext
 interface CardSelectController {
     val cardsImported: StateFlow<Int>
     fun loadCards(): List<CardMetaEntity>
-    fun selectCard(card: CardMetaEntity)
 }
 
 @Composable
-fun CardSelection(controller: CardSelectController) {
+fun CardSelection(controller: CardSelectController, onSelect: (CardMetaEntity) -> Unit) {
     val cardsImported by controller.cardsImported.collectAsState()
     var loaded by remember { mutableStateOf(false) }
     var cards by remember { mutableStateOf(ArrayList<CardMetaEntity>() as List<CardMetaEntity>) }
@@ -55,20 +54,64 @@ fun CardSelection(controller: CardSelectController) {
             Text(text = "Import Card From Phone")
         }
     } else {
-        ScalingLazyColumn(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(items = cards) { card ->
-                Button(onClick = {
-                    controller.selectCard(card)
-                }) {
-                    Text(text = card.cardName, modifier = Modifier.padding(10.dp))
-                }
+        LoadedCardSelection(cards, onSelect = {
+            onSelect(it)
+        })
+    }
+}
+
+@Composable
+fun LoadedCardSelection(cards: List<CardMetaEntity>, onSelect: (CardMetaEntity)->Unit) {
+    ScalingLazyColumn(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(items = cards) { card ->
+            Button(onClick = {
+                onSelect(card)
+            }) {
+                Text(text = card.cardName, modifier = Modifier.padding(10.dp))
             }
         }
     }
 }
+
+@Preview(
+    device = WearDevices.LARGE_ROUND,
+    showSystemUi = true,
+    backgroundColor = 0xff000000,
+    showBackground = true
+)
+@Composable
+private fun PreviewLoadedCardSelection() {
+    LoadedCardSelection(listOf(
+        CardMetaEntity(
+            cardName = "Card 1",
+            cardId = 0,
+            cardType = CardType.DIM,
+            cardChecksum = 0,
+            franchise = 0,
+            maxAdventureCompletion = null,
+        ),
+        CardMetaEntity(
+            cardName = "Medium Card",
+            cardId = 1,
+            cardType = CardType.DIM,
+            cardChecksum = 0,
+            franchise = 0,
+            maxAdventureCompletion = null,
+        ),
+        CardMetaEntity(
+            cardName = "Card With Long Name",
+            cardId = 2,
+            cardType = CardType.BEM,
+            cardChecksum = 0,
+            franchise = 1,
+            maxAdventureCompletion = null,
+        ),
+    ), onSelect = {})
+}
+
 
 @Preview(
     device = WearDevices.LARGE_ROUND,
@@ -102,7 +145,5 @@ private fun PreviewCardSelection() {
                 ),
             )
         }
-
-        override fun selectCard(card: CardMetaEntity) {}
-    })
+    }, onSelect = {})
 }

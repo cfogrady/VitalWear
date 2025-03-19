@@ -35,7 +35,7 @@ class NewCharacterActivity : ComponentActivity(), CardSelectController {
         cardSpritesIO = (application as VitalWearApp).cardSpriteIO
         cardMetaEntityDao = (application as VitalWearApp).cardMetaEntityDao
         setContent {
-            CardSelection(this)
+            CardSelection(this, onSelect = this::selectCard)
         }
     }
 
@@ -43,7 +43,7 @@ class NewCharacterActivity : ComponentActivity(), CardSelectController {
         return cardMetaEntityDao.getAll()
     }
 
-    override fun selectCard(card: CardMetaEntity) {
+    fun selectCard(card: CardMetaEntity) {
         val intent = Intent()
         intent.putExtra(NEW_CHARACTER_SELECTED_FLAG, true)
         intent.putExtra(CARD_SELECTED, CardMeta.fromCardMetaEntity(card))
