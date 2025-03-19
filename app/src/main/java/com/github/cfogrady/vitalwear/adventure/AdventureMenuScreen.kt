@@ -30,14 +30,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
-import androidx.wear.compose.foundation.lazy.items
-import androidx.wear.compose.material3.Button
 import androidx.wear.compose.material3.Text
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.github.cfogrady.vitalwear.Loading
+import com.github.cfogrady.vitalwear.character.activity.CardSelectController
+import com.github.cfogrady.vitalwear.character.activity.CardSelection
 import com.github.cfogrady.vitalwear.firmware.components.AdventureBitmaps
-import com.github.cfogrady.vitalwear.character.activity.LOADING_TEXT
 import com.github.cfogrady.vitalwear.common.card.CardSpriteLoader
 import com.github.cfogrady.vitalwear.common.card.CardType
 import com.github.cfogrady.vitalwear.common.card.db.AdventureEntity
@@ -50,8 +48,9 @@ import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 enum class AdventureMenuState {
     Loading,
@@ -62,7 +61,7 @@ enum class AdventureMenuState {
     Go,
 }
 
-interface AdventureMenuScreenController: CardSelectionController, ZoneSelectionController, ZoneConfirmController, ReadyController, GoController {
+interface AdventureMenuScreenController: CardSelectController, ZoneSelectionController, ZoneConfirmController, ReadyController, GoController {
     fun loadCardBackgrounds(cardName: String): List<Bitmap>
     fun loadCardIcon(cardName: String): Bitmap
     fun startAdventure(cardName: String, selectedAdventureId: Int)
@@ -136,7 +135,9 @@ private fun AdventureMenuScreenPreview() {
             return CardSpriteLoader.loadTestCardSprite(controllerContext, 0)
         }
         override fun startAdventure(cardName: String, selectedAdventureId: Int) {}
-        override fun loadCardsForActiveCharacterFranchise(): List<CardMetaEntity> {
+        override val cardsImported: StateFlow<Int> = MutableStateFlow(0)
+
+        override fun loadCards(): List<CardMetaEntity> {
             return listOf(
                 CardMetaEntity("Test Card", 0, 0, CardType.DIM, 0, null),
                 CardMetaEntity("Test Card2", 1, 0, CardType.DIM, 0, null),
@@ -170,70 +171,6 @@ private fun AdventureMenuScreenPreview() {
 
     }
     AdventureMenuScreen(controller, {})
-}
-
-interface CardSelectionController {
-    val bitmapScaler: BitmapScaler
-    val vitalBoxFactory: VitalBoxFactory
-    fun loadCardsForActiveCharacterFranchise(): List<CardMetaEntity>
-}
-
-@Composable
-fun CardSelection(controller: CardSelectionController, onCardSelected: (CardMetaEntity) -> Unit) {
-    var loaded by remember { mutableStateOf(false) }
-    var cards by remember { mutableStateOf(ArrayList<CardMetaEntity>() as List<CardMetaEntity>) }
-    LaunchedEffect(true) {
-        loaded = false
-        withContext(Dispatchers.IO) {
-            cards = controller.loadCardsForActiveCharacterFranchise()
-            loaded = true
-        }
-    }
-    if(!loaded) {
-        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = LOADING_TEXT)
-        }
-    } else {
-        ScalingLazyColumn(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(items = cards) { card ->
-                Button(onClick = {
-                    onCardSelected.invoke(card)
-                }) {
-                    Text(text = card.cardName, modifier = Modifier.padding(10.dp))
-                }
-            }
-        }
-    }
-}
-
-@Preview(
-    device = WearDevices.LARGE_ROUND,
-    showSystemUi = true,
-    backgroundColor = 0xff000000,
-    showBackground = true
-)
-@Composable
-private fun CardSelectionPreview() {
-    val imageScaler = ImageScaler.getContextImageScaler(LocalContext.current)
-    val bitmapScaler = BitmapScaler(imageScaler)
-    val vitalBoxFactory = VitalBoxFactory(imageScaler)
-    val controller = object: CardSelectionController {
-        override val vitalBoxFactory = vitalBoxFactory
-        override val bitmapScaler = bitmapScaler
-        override fun loadCardsForActiveCharacterFranchise(): List<CardMetaEntity> {
-            return listOf(
-                CardMetaEntity("Test Card", 0, 0, CardType.DIM, 0, null),
-                CardMetaEntity("Test Card2", 1, 0, CardType.DIM, 0, null),
-                CardMetaEntity("Validation Card", 2, 0, CardType.DIM, 0, null),
-
-            )
-        }
-
-    }
-    CardSelection(controller, {})
 }
 
 interface ZoneSelectionController {

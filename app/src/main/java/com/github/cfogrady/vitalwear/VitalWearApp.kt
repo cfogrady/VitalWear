@@ -15,7 +15,6 @@ import androidx.work.Configuration
 import com.github.cfogrady.vb.dim.card.DimReader
 import com.github.cfogrady.vitalwear.composable.util.ImageScaler
 import com.github.cfogrady.vitalwear.character.PartnerScreenComposable
-import com.github.cfogrady.vitalwear.adventure.AdventureMenuScreenFactory
 import com.github.cfogrady.vitalwear.adventure.AdventureService
 import com.github.cfogrady.vitalwear.background.BackgroundManager
 import com.github.cfogrady.vitalwear.battle.composable.*
@@ -109,7 +108,6 @@ class VitalWearApp : Application(), Configuration.Provider {
     lateinit var transformationScreenFactory: TransformationScreenFactory
     lateinit var complicationRefreshService: ComplicationRefreshService
     lateinit var vitalService: VitalService
-    lateinit var adventureMenuScreenFactory: AdventureMenuScreenFactory
     lateinit var adventureService: AdventureService
     lateinit var cardReceiver: CardReceiver
     lateinit var firmwareReceiver: FirmwareReceiver
@@ -204,7 +202,6 @@ class VitalWearApp : Application(), Configuration.Provider {
         previewCharacterManager = PreviewCharacterManager(database.characterDao(), cardCharacterImageService)
         shutdownReceiver = ShutdownReceiver(shutdownManager)
         applicationBootManager = ApplicationBootManager(characterManager as CharacterManagerImpl, firmwareManager, stepService, vbUpdater, moodService, notificationChannelManager, complicationRefreshService)
-        adventureMenuScreenFactory = AdventureMenuScreenFactory(cardSpriteIO, database.cardMetaEntityDao(), adventureService, vitalBoxFactory, characterSpritesIO, database.speciesEntityDao(), bitmapScaler, backgroundHeight)
         cardReceiver = CardReceiver(cardLoader)
         firmwareReceiver = FirmwareReceiver(firmwareManager, notificationChannelManager)
         settingsComposableFactory = SettingsComposableFactory(backgroundManager, vitalBoxFactory, bitmapScaler, logSettings, saveService)

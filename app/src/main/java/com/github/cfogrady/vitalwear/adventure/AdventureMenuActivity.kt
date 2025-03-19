@@ -18,6 +18,7 @@ import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.settings.CharacterSettings
+import kotlinx.coroutines.flow.StateFlow
 
 class AdventureMenuActivity : ComponentActivity(), AdventureMenuScreenController {
 
@@ -62,7 +63,10 @@ class AdventureMenuActivity : ComponentActivity(), AdventureMenuScreenController
         startForegroundService(foregroundIntent)
     }
 
-    override fun loadCardsForActiveCharacterFranchise(): List<CardMetaEntity> {
+    override val cardsImported: StateFlow<Int>
+        get() = vitalWearApp.cardReceiver.cardsImported
+
+    override fun loadCards(): List<CardMetaEntity> {
         val activeCharacter = vitalWearApp.characterManager.getCurrentCharacter()!!
         val characterSettings = activeCharacter.settings
         val franchise = activeCharacter.getFranchise()
