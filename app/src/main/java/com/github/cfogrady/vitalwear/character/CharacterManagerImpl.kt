@@ -18,7 +18,6 @@ import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.SpeciesEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.SpecificFusionEntityDao
 import com.github.cfogrady.vitalwear.common.card.db.TransformationEntityDao
-import com.github.cfogrady.vitalwear.protos.Character.CharacterStats
 import com.github.cfogrady.vitalwear.settings.CharacterSettings
 import com.github.cfogrady.vitalwear.settings.CharacterSettingsDao
 import kotlinx.coroutines.*
@@ -78,7 +77,7 @@ class CharacterManagerImpl(
     private suspend fun loadActiveCharacter(applicationContext: Context) : VBCharacter? {
         Timber.i("Loading active character")
         // replace this with a table for activePartner and fetch by character id
-        val activeCharacterStats = characterDao.getCharactersByState(CharacterState.SYNCED)
+        val activeCharacterStats = characterDao.getCharactersByState(CharacterState.ACTIVE)
         if(activeCharacterStats.isNotEmpty()) {
             val characterStats = activeCharacterStats[0]
             val settings = CharacterSettings.fromCharacterSettingsEntity(characterSettingsDao.getByCharacterId(characterStats.id))
@@ -292,7 +291,7 @@ class CharacterManagerImpl(
 
     private fun newCharacterEntityFromCard(file: String, slotId: Int, transformationTime: Long) : CharacterEntity {
         return CharacterEntity(0,
-            CharacterState.SYNCED,
+            CharacterState.ACTIVE,
             file,
             slotId,
             LocalDateTime.now(),
@@ -324,32 +323,32 @@ class CharacterManagerImpl(
         transformationHistoryDao.upsert(TransformationHistoryEntity(character.id, phase, character.cardFile, character.slotId))
     }
 
-    override suspend fun swapToCharacter(applicationContext: Context, selectedCharacterPreview : CharacterPreview) {
+    override suspend fun swapToCharacter(applicationContext: Context, swapCharacterIdentifier : CharacterManager.SwapCharacterIdentifier) {
         withContext(Dispatchers.IO) {
-            val cardMeta = CardMeta.fromCardMetaEntity(cardMetaEntityDao.getByName(selectedCharacterPreview.cardName)!!)
-            val settings = CharacterSettings.fromCharacterSettingsEntity(characterSettingsDao.getByCharacterId(selectedCharacterPreview.characterId))
+            val cardMeta = CardMeta.fromCardMetaEntity(cardMetaEntityDao.getByName(swapCharacterIdentifier.cardName)!!)
+            val settings = CharacterSettings.fromCharacterSettingsEntity(characterSettingsDao.getByCharacterId(swapCharacterIdentifier.characterId))
             val selectedCharacter = if(cardMeta.cardType == CardType.BEM)
-                buildBEMCharacter(applicationContext, cardMeta, selectedCharacterPreview.slotId, settings) {
-                    characterDao.getCharacterById(selectedCharacterPreview.characterId)
+                buildBEMCharacter(applicationContext, cardMeta, swapCharacterIdentifier.slotId, settings) {
+                    characterDao.getCharacterById(swapCharacterIdentifier.characterId)
                 }
             else if(settings.assumedFranchise != null) {
-                buildDIMToBEMCharacter(applicationContext, cardMeta, selectedCharacterPreview.slotId, settings) {
-                    characterDao.getCharacterById(selectedCharacterPreview.characterId)
+                buildDIMToBEMCharacter(applicationContext, cardMeta, swapCharacterIdentifier.slotId, settings) {
+                    characterDao.getCharacterById(swapCharacterIdentifier.characterId)
                 }
             }
-            else buildDIMCharacter(applicationContext, cardMeta, selectedCharacterPreview.slotId, settings) {
-                characterDao.getCharacterById(selectedCharacterPreview.characterId)
+            else buildDIMCharacter(applicationContext, cardMeta, swapCharacterIdentifier.slotId, settings) {
+                characterDao.getCharacterById(swapCharacterIdentifier.characterId)
             }
             selectedCharacter.characterStats.lastUpdate = LocalDateTime.now() // don't count down timers for character that was in storage
             val currentCharacter = activeCharacterFlow.value
             if(currentCharacter != null) {
                 currentCharacter.characterStats.state =
-                    if(selectedCharacterPreview.state == CharacterState.SUPPORT) CharacterState.SUPPORT
+                    if(swapCharacterIdentifier.state == CharacterState.SUPPORT) CharacterState.SUPPORT
                     else CharacterState.STORED
                 updateCharacter(currentCharacter.characterStats)
                 vbUpdater.cancel()
             }
-            selectedCharacter.characterStats.state = CharacterState.SYNCED
+            selectedCharacter.characterStats.state = CharacterState.ACTIVE
             updateCharacter(selectedCharacter.characterStats)
             withContext(Dispatchers.Main) {
                 activeCharacterFlow.value = selectedCharacter

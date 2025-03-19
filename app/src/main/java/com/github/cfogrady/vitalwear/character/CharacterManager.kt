@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import com.github.cfogrady.vitalwear.card.CardMeta
 import com.github.cfogrady.vitalwear.character.data.CharacterEntity
 import com.github.cfogrady.vitalwear.character.data.CharacterPreview
+import com.github.cfogrady.vitalwear.character.data.CharacterState
 import com.github.cfogrady.vitalwear.character.data.SupportCharacter
 import com.github.cfogrady.vitalwear.character.transformation.ExpectedTransformation
 import com.github.cfogrady.vitalwear.character.transformation.history.TransformationHistoryEntity
@@ -13,6 +14,25 @@ import com.github.cfogrady.vitalwear.settings.CharacterSettings
 import kotlinx.coroutines.flow.StateFlow
 
 interface CharacterManager {
+
+    interface SwapCharacterIdentifier {
+        val cardName: String
+        val characterId: Int
+        val slotId: Int
+        val state: CharacterState
+
+        companion object {
+            fun buildAnonymous(cardName: String, characterId: Int, slotId: Int, state: CharacterState): SwapCharacterIdentifier {
+                return object: SwapCharacterIdentifier {
+                    override val cardName: String = cardName
+                    override val characterId: Int = characterId
+                    override val slotId: Int = slotId
+                    override val state: CharacterState = state
+
+                }
+            }
+        }
+    }
 
     val initialized: StateFlow<Boolean>
     fun getCurrentCharacter(): VBCharacter?
@@ -24,7 +44,7 @@ interface CharacterManager {
 
     suspend fun createNewCharacter(applicationContext: Context, cardMeta: CardMeta, slotId: Int, characterSettings: CharacterSettings)
 
-    suspend fun swapToCharacter(applicationContext: Context, selectedCharacterPreview : CharacterPreview)
+    suspend fun swapToCharacter(applicationContext: Context, swapCharacterIdentifier : SwapCharacterIdentifier)
 
     suspend fun setToSupport(characterPreview: CharacterPreview)
 

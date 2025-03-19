@@ -1,8 +1,7 @@
 package com.github.cfogrady.vitalwear.character.data
 
 enum class CharacterState {
-    SYNCED,
+    ACTIVE,
     SUPPORT,
-    @Deprecated("Replaced with STORED") BACKUP,
     STORED,
 }
