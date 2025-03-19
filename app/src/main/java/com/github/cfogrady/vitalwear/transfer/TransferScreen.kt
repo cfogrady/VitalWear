@@ -30,15 +30,12 @@ import androidx.wear.tooling.preview.devices.WearDevices
 import com.github.cfogrady.nearby.connections.p2p.wear.ui.DisplayMatchingDevices
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.common.card.CardSpriteLoader
-import com.github.cfogrady.vitalwear.common.card.CardSpritesIO
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.ImageScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.protos.Character
-import com.github.cfogrady.vitalwear.transfer.TransferActivity.SendOrReceive
-import com.github.cfogrady.vitalwear.transfer.TransferActivity.TransferState
 import com.github.cfogrady.vitalwear.transfer.TransferScreenController.ReceiveCharacterSprites
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,6 +46,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+enum class TransferState {
+    ENTRY,
+    FIND_DEVICES,
+    UNKNOWN_CARD,
+    CONNECTED,
+    TRANSFERRED,
+}
+
+enum class SendOrReceive {
+    SEND,
+    RECEIVE
+}
 
 interface TransferScreenController: SendAnimationController, ReceiveAnimationController {
     fun endActivityWithToast(msg: String)

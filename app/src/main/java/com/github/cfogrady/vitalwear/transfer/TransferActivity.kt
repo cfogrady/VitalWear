@@ -1,6 +1,5 @@
 package com.github.cfogrady.vitalwear.transfer
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.widget.Toast
@@ -8,73 +7,27 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateIntAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
-import androidx.wear.compose.material3.CompactButton
-import androidx.wear.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.wear.tooling.preview.devices.WearDevices
 import com.github.cfogrady.nearby.connections.p2p.NearbyP2PConnection
-import com.github.cfogrady.nearby.connections.p2p.wear.ui.DisplayMatchingDevices
 import com.github.cfogrady.vitalwear.VitalWearApp
 import com.github.cfogrady.vitalwear.adventure.AdventureService
 import com.github.cfogrady.vitalwear.character.CharacterManager
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.character.data.CharacterEntity
-import com.github.cfogrady.vitalwear.character.data.CharacterPreview
 import com.github.cfogrady.vitalwear.character.data.CharacterState
 import com.github.cfogrady.vitalwear.character.transformation.history.TransformationHistoryEntity
 import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
-import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.protos.Character
 import com.github.cfogrady.vitalwear.settings.CharacterSettings
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
 class TransferActivity: ComponentActivity(), TransferScreenController {
 
-
-    enum class TransferState {
-        ENTRY,
-        FIND_DEVICES,
-        CONNECTED,
-        TRANSFERRED,
-    }
-
-    enum class SendOrReceive {
-        SEND,
-        RECEIVE
-    }
 
     private val characterManager: CharacterManager
         get() = (application as VitalWearApp).characterManager
