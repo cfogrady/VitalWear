@@ -34,10 +34,10 @@ internal class PartnerScreenControllerImpl(
     override val characterIconBitmaps: CharacterIconBitmaps
         get() = firmwareManager.getFirmware().value!!.characterIconBitmaps
     override val dailyStepCount: StateFlow<Int> = stepSensorService.dailySteps
-    override val emoteBitmaps = combineStates(characterManager.getCharacterFlow(), heartRateService.currentExerciseLevel) { character, exerciseLevel->
-        character?.getEmoteBitmaps(characterIconBitmaps.emoteBitmaps, exerciseLevel)
-            ?: emptyList<Bitmap>()
-    }
+    override val emoteBitmaps
+        get() = combineStates(characterManager.getCharacterFlow(), heartRateService.currentExerciseLevel) { character, exerciseLevel->
+            character?.getEmoteBitmaps(characterIconBitmaps.emoteBitmaps, exerciseLevel) ?: emptyList<Bitmap>()
+        }
     override val vitals = characterManager.getCharacterFlow().mapState {
         if(it == null) {
             return@mapState 0
