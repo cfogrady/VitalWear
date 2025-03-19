@@ -15,6 +15,7 @@ import com.github.cfogrady.vitalwear.Loading
 import com.github.cfogrady.vitalwear.common.communication.ChannelTypes
 import com.github.cfogrady.vitalwear.common.composable.util.KeepScreenOn
 import com.google.android.gms.wearable.Wearable
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -64,7 +65,7 @@ class FirmwareImportActivity : ComponentActivity() {
     private fun importFirmware(uri: Uri) {
         val channelClient = Wearable.getChannelClient(this)
         val nodeListTask = Wearable.getNodeClient(this).connectedNodes
-        lifecycleScope.launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             val nodes = nodeListTask.await()
             lateinit var firmware: ByteArray
             contentResolver.openInputStream(uri).use {
