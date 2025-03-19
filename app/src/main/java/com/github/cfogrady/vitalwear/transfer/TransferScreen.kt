@@ -28,6 +28,7 @@ import androidx.wear.compose.material3.CompactButton
 import androidx.wear.compose.material3.Text
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.github.cfogrady.nearby.connections.p2p.wear.ui.DisplayMatchingDevices
+import com.github.cfogrady.vitalwear.adventure.CardSelection
 import com.github.cfogrady.vitalwear.character.VBCharacter
 import com.github.cfogrady.vitalwear.common.card.CardSpriteLoader
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
@@ -119,6 +120,7 @@ fun TransferScreen(controller: TransferScreenController) {
             }
             state = TransferState.CONNECTED
         }
+        TransferState.UNKNOWN_CARD -> TODO()
         TransferState.CONNECTED -> {
             val connectionStatus by result.collectAsState()
             if(connectionStatus == CharacterTransfer.Result.TRANSFERRING) {
@@ -132,6 +134,13 @@ fun TransferScreen(controller: TransferScreenController) {
         TransferState.TRANSFERRED -> {
             TransferResult(controller, sendOrReceive, result, onComplete = controller::finish)
         }
+    }
+}
+
+@Composable
+fun SelectCardForTransfer() {
+    Column {
+        CardSelection() { }
     }
 }
 
