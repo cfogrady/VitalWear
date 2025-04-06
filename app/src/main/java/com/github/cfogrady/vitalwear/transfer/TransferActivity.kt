@@ -18,12 +18,13 @@ import com.github.cfogrady.vitalwear.character.data.CharacterEntity
 import com.github.cfogrady.vitalwear.character.data.CharacterState
 import com.github.cfogrady.vitalwear.character.transformation.history.TransformationHistoryEntity
 import com.github.cfogrady.vitalwear.common.card.CharacterSpritesIO
+import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntityDao
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.protos.Character
 import com.github.cfogrady.vitalwear.settings.CharacterSettings
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDateTime
 
 class TransferActivity: ComponentActivity(), TransferScreenController {
@@ -104,15 +105,9 @@ class TransferActivity: ComponentActivity(), TransferScreenController {
         characterManager.deleteCurrentCharacter()
     }
 
-    val lastReceiedCharacter = MutableStateFlow<TransferScreenController.ReceiveCharacterSprites?>(null)
+    private lateinit var lastReceivedCharacter: TransferScreenController.ReceiveCharacterSprites
 
-    override suspend fun receiveCharacter(character: Character): Boolean {
-        val cardMetaEntity = cardMetaEntityDao.getByName(character.cardName)
-        if(cardMetaEntity == null || cardMetaEntity.cardId != character.cardId) {
-            // we can't handle this character
-            lastReceiedCharacter.emit(null)
-            return false
-        }
+    override suspend fun receiveCharacter(character: Character, cardMetaEntity: CardMetaEntity) {
         val characterId = characterManager.addCharacter(
             character.cardName,
             character.characterStats.toCharacterEntity(character.cardName),
@@ -123,12 +118,26 @@ class TransferActivity: ComponentActivity(), TransferScreenController {
         val happy = characterManager.getCharacterBitmap(this, character.cardName, character.characterStats.slotId, CharacterSpritesIO.WIN)
         val idle = characterManager.getCharacterBitmap(this, character.cardName, character.characterStats.slotId, CharacterSpritesIO.IDLE1)
         characterManager.swapToCharacter(this, CharacterManager.SwapCharacterIdentifier.buildAnonymous(character.cardName, characterId, character.characterStats.slotId, CharacterState.STORED))
-        lastReceiedCharacter.emit(TransferScreenController.ReceiveCharacterSprites(idle, happy))
-        return true
+        lastReceivedCharacter = TransferScreenController.ReceiveCharacterSprites(idle, happy)
+    }
+
+    override fun hasCard(cardName: String, cardId: Int): CardMetaEntity? {
+        val cardMetaEntity = cardMetaEntityDao.getByName(cardName)
+        if(cardMetaEntity != null && cardMetaEntity.cardId == cardId) {
+            return cardMetaEntity
+        }
+        return null
     }
 
     override fun getLastReceivedCharacterSprites(): TransferScreenController.ReceiveCharacterSprites {
-        return lastReceiedCharacter.value!!
+        return lastReceivedCharacter
+    }
+
+    override val cardsImported: StateFlow<Int>
+        get() = TODO("Not yet implemented")
+
+    override fun loadCards(): List<CardMetaEntity> {
+        TODO("Not yet implemented")
     }
 }
 

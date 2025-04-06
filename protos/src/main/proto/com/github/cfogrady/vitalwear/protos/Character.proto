@@ -48,4 +48,7 @@ message Character {
   repeated TransformationEvent transformation_history = 5;
 
   map<string, int32> max_adventure_completed_by_card = 6;
+
+  map<string, bytes> app_specific_data = 7;
+
 }

@@ -28,9 +28,12 @@ import androidx.wear.compose.material3.CompactButton
 import androidx.wear.compose.material3.Text
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.github.cfogrady.nearby.connections.p2p.wear.ui.DisplayMatchingDevices
-import com.github.cfogrady.vitalwear.adventure.CardSelection
 import com.github.cfogrady.vitalwear.character.VBCharacter
+import com.github.cfogrady.vitalwear.character.activity.CardSelectController
+import com.github.cfogrady.vitalwear.character.activity.CardSelection
 import com.github.cfogrady.vitalwear.common.card.CardSpriteLoader
+import com.github.cfogrady.vitalwear.common.card.CardType
+import com.github.cfogrady.vitalwear.common.card.db.CardMetaEntity
 import com.github.cfogrady.vitalwear.common.character.CharacterSprites
 import com.github.cfogrady.vitalwear.composable.util.BitmapScaler
 import com.github.cfogrady.vitalwear.composable.util.ImageScaler
@@ -38,6 +41,7 @@ import com.github.cfogrady.vitalwear.composable.util.VitalBoxFactory
 import com.github.cfogrady.vitalwear.firmware.Firmware
 import com.github.cfogrady.vitalwear.protos.Character
 import com.github.cfogrady.vitalwear.transfer.TransferScreenController.ReceiveCharacterSprites
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -61,7 +65,7 @@ enum class SendOrReceive {
     RECEIVE
 }
 
-interface TransferScreenController: SendAnimationController, ReceiveAnimationController {
+interface TransferScreenController: SendAnimationController, ReceiveAnimationController, CardSelectController {
     fun endActivityWithToast(msg: String)
 
     suspend fun getActiveCharacterProto(): Character?
@@ -74,7 +78,9 @@ interface TransferScreenController: SendAnimationController, ReceiveAnimationCon
 
     fun finish()
 
-    suspend fun receiveCharacter(character: Character): Boolean
+    suspend fun receiveCharacter(character: Character, cardMetaEntity: CardMetaEntity)
+
+    fun hasCard(cardName: String, cardId: Int): CardMetaEntity?
 
     data class ReceiveCharacterSprites(val idle: Bitmap, val happy: Bitmap)
 }
@@ -88,7 +94,8 @@ fun TransferScreen(controller: TransferScreenController) {
     }
     var state by remember { mutableStateOf(TransferState.ENTRY) }
     var sendOrReceive by remember { mutableStateOf(SendOrReceive.SEND) }
-    var result = remember { MutableStateFlow(CharacterTransfer.Result.TRANSFERRING) }
+    val result = remember { MutableStateFlow(CharacterTransfer.Result.TRANSFERRING) }
+    val cardSelected = remember { CompletableDeferred<CardMetaEntity>() }
     when(state) {
         TransferState.ENTRY -> SelectSendOrReceive(onSelect = {
             sendOrReceive = it
@@ -111,7 +118,17 @@ fun TransferScreen(controller: TransferScreenController) {
                     }
                 }
             } else {
-                val transferResult = characterTransfer.receiveCharacterFrom(it, controller::receiveCharacter)
+                val transferResult = characterTransfer.receiveCharacterFrom(it, receive = { transferCharacter->
+                    val cardMetaForTransfer = controller.hasCard(transferCharacter.cardName, transferCharacter.cardId)
+                    if(cardMetaForTransfer != null) {
+                        controller.receiveCharacter(transferCharacter, cardMetaForTransfer)
+                        return@receiveCharacterFrom true
+                    }
+                    state = TransferState.UNKNOWN_CARD
+                    val selectedCard = cardSelected.await()
+                    controller.receiveCharacter(transferCharacter, selectedCard)
+                    return@receiveCharacterFrom true
+                })
                 coroutineScope.launch {
                     transferResult.collect{ transferResultValue ->
                         result.update { transferResultValue }
@@ -120,7 +137,9 @@ fun TransferScreen(controller: TransferScreenController) {
             }
             state = TransferState.CONNECTED
         }
-        TransferState.UNKNOWN_CARD -> TODO()
+        TransferState.UNKNOWN_CARD -> CardSelection(controller) {
+            cardSelected.complete(it)
+        }
         TransferState.CONNECTED -> {
             val connectionStatus by result.collectAsState()
             if(connectionStatus == CharacterTransfer.Result.TRANSFERRING) {
@@ -134,13 +153,6 @@ fun TransferScreen(controller: TransferScreenController) {
         TransferState.TRANSFERRED -> {
             TransferResult(controller, sendOrReceive, result, onComplete = controller::finish)
         }
-    }
-}
-
-@Composable
-fun SelectCardForTransfer() {
-    Column {
-        CardSelection() { }
     }
 }
 
